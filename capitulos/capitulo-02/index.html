@@ -1019,6 +1019,18 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
     };
     var tabelasDV, rodadaDV;
 
+    function copiaTabelasDV(t) {
+        // copia profunda manual: JSON.stringify converteria Infinity em null
+        var nova = {};
+        Object.keys(t).forEach(function (r) {
+            nova[r] = {};
+            Object.keys(t[r]).forEach(function (d) {
+                nova[r][d] = [t[r][d][0], t[r][d][1]];
+            });
+        });
+        return nova;
+    }
+
     function iniciaDV() {
         tabelasDV = {};
         Object.keys(topologiaDV).forEach(function (r) {
@@ -1032,7 +1044,7 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
     }
 
     function passoDV() {
-        var novas = JSON.parse(JSON.stringify(tabelasDV));
+        var novas = copiaTabelasDV(tabelasDV);
         var mudou = false;
         Object.keys(topologiaDV).forEach(function (roteador) {
             Object.keys(topologiaDV[roteador]).forEach(function (vizinho) {
