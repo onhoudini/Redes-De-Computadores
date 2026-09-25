@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 2 — Construindo uma rede | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: da camada de enlace à camada de rede — pacotes, endereçamento, tabelas de encaminhamento e roteamento por vetor de distância e por estado de enlace.">
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            --accent: #0d6efd;
+            --text: #212529;
+            --muted: #6c757d;
+            --background: #f8f9fa;
+            --datagrama: #0d6efd;
+            --circuito: #6610f2;
+            --dv: #d63384;
+            --ls: #198754;
+            --code-bg: #1e1e2e;
+            --code-fg: #e6e6e6;
+        }
+
+        body {
+            color: var(--text);
+            background: var(--background);
+        }
+
+        .hero {
+            padding: 80px 0 60px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .hero h1 {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .hero .lead {
+            max-width: 760px;
+            color: var(--muted);
+        }
+
+        section.chapter-section {
+            padding: 55px 0;
+            scroll-margin-top: 90px;
+        }
+
+        section.chapter-section:nth-of-type(even) {
+            background: white;
+        }
+
+        h2.section-title {
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+        }
+
+        h2.section-title .kicker {
+            display: block;
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: .4rem;
+        }
+
+        .card-soft {
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .toc {
+            position: sticky;
+            top: 85px;
+        }
+
+        .toc .nav-link {
+            color: var(--muted);
+            padding: .3rem 0;
+            font-size: .9rem;
+        }
+
+        .toc .nav-link.active {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        figure.diagram {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        figure.diagram figcaption {
+            font-size: .85rem;
+            color: var(--muted);
+            margin-top: .5rem;
+            text-align: center;
+        }
+
+        pre.code-block {
+            background: var(--code-bg);
+            color: var(--code-fg);
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            font-size: .85rem;
+            overflow-x: auto;
+            line-height: 1.55;
+        }
+
+        pre.code-block code {
+            color: inherit;
+            white-space: pre;
+        }
+
+        .demo-box {
+            background: #f1f3f5;
+            border: 1px dashed #adb5bd;
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .addr-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 30px;
+            height: 30px;
+            padding: 0 4px;
+            margin: 2px;
+            border-radius: 6px;
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-weight: 600;
+            font-size: .85rem;
+            background: #e7f1ff;
+            color: var(--accent);
+        }
+
+        .addr-chip.match {
+            background: #d1e7dd;
+            color: #198754;
+        }
+
+        .addr-chip.miss {
+            background: #f8d7da;
+            color: #c1121f;
+            opacity: .6;
+        }
+
+        table.tabela-roteamento {
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-size: .85rem;
+        }
+
+        table.tabela-roteamento th {
+            background: #f1f3f5;
+        }
+
+        blockquote.quote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        footer {
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .layer-pill {
+            display: inline-block;
+            padding: .25rem .65rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 600;
+            color: white;
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">
+            Redes de Computadores
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Abrir navegação"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 2</span>
+        <h1 class="display-5 mb-3">Construindo uma rede</h1>
+        <p class="lead mb-4">
+            O Capítulo 1 mostrou como dois hosts conseguem trocar bits de forma confiável através de
+            um único enlace. Mas a Internet conecta bilhões de dispositivos que nunca estão
+            diretamente ligados entre si. Este capítulo explica como pacotes atravessam roteadores,
+            como tabelas de encaminhamento são construídas e como os roteadores descobrem sozinhos
+            os melhores caminhos da rede.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#camada-rede" class="btn btn-primary">Começar a leitura</a>
+            <a
+                href="https://beta.computer-networking.info/syllabus/default/index.html"
+                class="btn btn-outline-secondary"
+                target="_blank" rel="noopener noreferrer"
+            >Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-2">Neste capítulo</p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#camada-rede">1. Por que precisamos da camada de rede?</a>
+                    <a class="nav-link" href="#pacotes">2. Pacotes e endereçamento</a>
+                    <a class="nav-link" href="#organizacao">3. Datagrama vs. circuito virtual</a>
+                    <a class="nav-link" href="#tabelas">4. Tabelas de encaminhamento</a>
+                    <a class="nav-link" href="#vetor-distancia">5. Roteamento por vetor de distância</a>
+                    <a class="nav-link" href="#estado-enlace">6. Roteamento por estado de enlace</a>
+                    <a class="nav-link" href="#comparacao">7. Do conceito à prática</a>
+                    <a class="nav-link" href="#exemplos">8. Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">9. Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- 1. Camada de rede -->
+<section id="camada-rede" class="chapter-section">
+    <span class="kicker">Motivação</span>
+    <h2 class="section-title">Por que precisamos de uma camada de rede?</h2>
+
+    <p>
+        A camada de enlace resolve um problema específico: fazer dois vizinhos diretos — ligados
+        pelo mesmo cabo, pela mesma fibra ou pelo mesmo canal de rádio — conversarem sem erros. Mas
+        isso não é suficiente para conectar um notebook em Porto Alegre a um servidor no Japão:
+        entre os dois existem dezenas de enlaces distintos, cada um com sua própria tecnologia. É
+        exatamente esse é o papel da <strong>camada de rede</strong>: permitir que hosts que não
+        compartilham um enlace direto troquem informação por meio de dispositivos intermediários
+        chamados <strong>roteadores</strong>.
+    </p>
+    <p>
+        A unidade de informação da camada de rede é o <strong>pacote</strong>. Um roteador recebe
+        pacotes por uma de suas interfaces, decide para qual outra interface encaminhá-los e os
+        reenvia — repetindo esse processo até o pacote alcançar o destino final. Essa decisão de
+        "para onde mandar em seguida" é o coração de todo o capítulo.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px">
+            <!-- hosts -->
+            <circle cx="50" cy="110" r="26" fill="#e7f1ff" stroke="#0d6efd" stroke-width="2"/>
+            <text x="50" y="116" text-anchor="middle" font-family="sans-serif" font-weight="700" fill="#0d6efd">A</text>
+
+            <circle cx="710" cy="60" r="26" fill="#e7f1ff" stroke="#0d6efd" stroke-width="2"/>
+            <text x="710" y="66" text-anchor="middle" font-family="sans-serif" font-weight="700" fill="#0d6efd">B</text>
+
+            <circle cx="710" cy="170" r="26" fill="#e7f1ff" stroke="#0d6efd" stroke-width="2"/>
+            <text x="710" y="176" text-anchor="middle" font-family="sans-serif" font-weight="700" fill="#0d6efd">C</text>
+
+            <!-- routers -->
+            <g font-family="sans-serif" font-weight="700" fill="#212529" font-size="13">
+                <rect x="150" y="90" width="46" height="40" rx="6" fill="#fff3cd" stroke="#997404" stroke-width="2"/>
+                <text x="173" y="114" text-anchor="middle">R1</text>
+
+                <rect x="290" y="30" width="46" height="40" rx="6" fill="#fff3cd" stroke="#997404" stroke-width="2"/>
+                <text x="313" y="54" text-anchor="middle">R2</text>
+
+                <rect x="290" y="150" width="46" height="40" rx="6" fill="#fff3cd" stroke="#997404" stroke-width="2"/>
+                <text x="313" y="174" text-anchor="middle">R3</text>
+
+                <rect x="450" y="30" width="46" height="40" rx="6" fill="#fff3cd" stroke="#997404" stroke-width="2"/>
+                <text x="473" y="54" text-anchor="middle">R4</text>
+
+                <rect x="450" y="150" width="46" height="40" rx="6" fill="#fff3cd" stroke="#997404" stroke-width="2"/>
+                <text x="473" y="174" text-anchor="middle">R5</text>
+
+                <rect x="600" y="90" width="46" height="40" rx="6" fill="#fff3cd" stroke="#997404" stroke-width="2"/>
+                <text x="623" y="114" text-anchor="middle">R6</text>
+            </g>
+
+            <!-- links -->
+            <g stroke="#adb5bd" stroke-width="2" fill="none">
+                <line x1="76" y1="110" x2="150" y2="110"/>
+                <line x1="196" y1="100" x2="290" y2="55"/>
+                <line x1="196" y1="120" x2="290" y2="165"/>
+                <line x1="336" y1="50" x2="450" y2="50"/>
+                <line x1="336" y1="170" x2="450" y2="170"/>
+                <line x1="496" y1="55" x2="600" y2="100"/>
+                <line x1="496" y1="165" x2="600" y2="120"/>
+                <line x1="646" y1="102" x2="684" y2="72"/>
+                <line x1="646" y1="118" x2="684" y2="158"/>
+            </g>
+
+            <text x="20" y="205" font-size="12" fill="#6c757d" font-family="sans-serif">Círculos = hosts (origem/destino) · Retângulos = roteadores (encaminham pacotes salto a salto)</text>
+        </svg>
+        <figcaption>Uma pequena inter-rede: para A alcançar B ou C, seus pacotes precisam atravessar vários roteadores.</figcaption>
+    </figure>
+
+    <p>
+        Diferente da camada de enlace, que normalmente lida com apenas dois vizinhos, a camada de
+        rede precisa responder a três perguntas ao mesmo tempo: como identificar de forma única
+        cada host e roteador (endereçamento), como decidir o próximo salto de cada pacote
+        (encaminhamento) e como manter essas decisões corretas mesmo quando links falham ou a rede
+        cresce (roteamento). As próximas seções tratam cada uma dessas perguntas.
+    </p>
+</section>
+
+<!-- 2. Pacotes -->
+<section id="pacotes" class="chapter-section">
+    <span class="kicker">Fundamentos</span>
+    <h2 class="section-title">Pacotes e endereçamento</h2>
+
+    <p>
+        Um pacote é composto por um <strong>cabeçalho</strong> e uma <strong>carga útil</strong>
+        (<em>payload</em>). O cabeçalho carrega as informações de controle que os roteadores
+        precisam para tomar decisões — em especial o endereço do host de origem e o endereço do
+        host de destino. A carga útil é o dado que a aplicação realmente quer transmitir.
+    </p>
+    <p>
+        Para que o encaminhamento funcione, cada dispositivo da rede — host ou roteador — precisa de
+        um <strong>endereço de rede</strong> único, geralmente representado como uma sequência de
+        bits de tamanho fixo. É esse endereço, e não um nome amigável como "servidor-web", que os
+        roteadores usam para decidir o próximo salto.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:170px">
+            <rect x="10" y="35" width="120" height="60" rx="8" fill="#e7f1ff" stroke="#0d6efd"/>
+            <text x="70" y="60" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#0d6efd" font-weight="700">Endereço</text>
+            <text x="70" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#0d6efd">de origem</text>
+
+            <rect x="140" y="35" width="120" height="60" rx="8" fill="#e7f1ff" stroke="#0d6efd"/>
+            <text x="200" y="60" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#0d6efd" font-weight="700">Endereço</text>
+            <text x="200" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#0d6efd">de destino</text>
+
+            <rect x="270" y="35" width="110" height="60" rx="8" fill="#fff3cd" stroke="#997404"/>
+            <text x="325" y="60" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#997404" font-weight="700">TTL /</text>
+            <text x="325" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#997404">outros campos</text>
+
+            <rect x="390" y="35" width="290" height="60" rx="8" fill="#d1e7dd" stroke="#198754"/>
+            <text x="535" y="60" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#198754" font-weight="700">Carga útil (payload)</text>
+            <text x="535" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#198754">os dados da aplicação</text>
+
+            <text x="70" y="118" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="#6c757d">quem enviou</text>
+            <text x="200" y="118" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="#6c757d">para quem</text>
+            <text x="325" y="118" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="#6c757d">controle</text>
+            <text x="535" y="118" text-anchor="middle" font-family="sans-serif" font-size="10.5" fill="#6c757d">dado transportado</text>
+
+            <text x="10" y="20" font-family="sans-serif" font-size="12" fill="#212529" font-weight="700">Anatomia simplificada de um pacote</text>
+        </svg>
+        <figcaption>Todo roteador no caminho lê apenas o cabeçalho — nunca precisa entender a carga útil.</figcaption>
+    </figure>
+
+    <div class="demo-box mb-4">
+        <p class="fw-semibold mb-2">🧪 Experimente: monte um pacote</p>
+        <p class="text-muted small mb-2">Preencha origem, destino e a mensagem para ver como ficaria o cabeçalho do pacote (endereços fictícios de 8 bits, apenas para fins didáticos).</p>
+        <div class="row g-2 mb-3">
+            <div class="col-md-4">
+                <label class="form-label small">Origem</label>
+                <input type="text" id="pktSrc" class="form-control form-control-sm" value="A" maxlength="1">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">Destino</label>
+                <input type="text" id="pktDst" class="form-control form-control-sm" value="J" maxlength="1">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small">Mensagem</label>
+                <input type="text" id="pktMsg" class="form-control form-control-sm" value="oi!" maxlength="16">
+            </div>
+        </div>
+        <div id="pktOutput" class="font-monospace small"></div>
+    </div>
+</section>
+
+<!-- 3. Organização -->
+<section id="organizacao" class="chapter-section">
+    <span class="kicker">Arquitetura</span>
+    <h2 class="section-title">Datagrama vs. circuito virtual</h2>
+
+    <p>
+        Existem duas grandes formas de organizar o plano de encaminhamento de uma rede de pacotes.
+        Elas se diferenciam por uma pergunta simples: <em>o roteador precisa "lembrar" de uma
+        conexão antes de encaminhar os pacotes que fazem parte dela?</em>
+    </p>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <figure class="diagram h-100 mb-0">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                    <text x="10" y="20" font-size="13" font-weight="700" fill="#0d6efd" font-family="sans-serif">Modo datagrama</text>
+                    <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">cada pacote carrega o endereço completo</text>
+                    <g font-family="monospace" font-size="11">
+                        <rect x="10" y="50" width="80" height="24" fill="#e7f1ff" stroke="#0d6efd"/>
+                        <text x="50" y="66" text-anchor="middle">dst=J | dado</text>
+                    </g>
+                    <text x="10" y="92" font-size="11" fill="#6c757d" font-family="sans-serif">roteador consulta a tabela a cada pacote</text>
+                    <text x="10" y="108" font-size="11" fill="#6c757d" font-family="sans-serif">pacotes do mesmo fluxo podem seguir</text>
+                    <text x="10" y="122" font-size="11" fill="#6c757d" font-family="sans-serif">caminhos diferentes</text>
+                    <text x="10" y="148" font-size="11" fill="#6c757d" font-family="sans-serif">✔ não exige configuração prévia</text>
+                    <text x="10" y="166" font-size="11" fill="#6c757d" font-family="sans-serif">✘ busca na tabela é mais cara</text>
+                </svg>
+            </figure>
+        </div>
+        <div class="col-md-6">
+            <figure class="diagram h-100 mb-0">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                    <text x="10" y="20" font-size="13" font-weight="700" fill="#6610f2" font-family="sans-serif">Circuito virtual</text>
+                    <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">um rótulo curto substitui o endereço</text>
+                    <g font-family="monospace" font-size="11">
+                        <rect x="10" y="50" width="80" height="24" fill="#f1e9ff" stroke="#6610f2"/>
+                        <text x="50" y="66" text-anchor="middle">label=2 | dado</text>
+                    </g>
+                    <text x="10" y="92" font-size="11" fill="#6c757d" font-family="sans-serif">um caminho é reservado antes do envio</text>
+                    <text x="10" y="108" font-size="11" fill="#6c757d" font-family="sans-serif">roteadores trocam o rótulo e consultam</text>
+                    <text x="10" y="122" font-size="11" fill="#6c757d" font-family="sans-serif">a tabela em O(1)</text>
+                    <text x="10" y="148" font-size="11" fill="#6c757d" font-family="sans-serif">✔ busca simples e previsível</text>
+                    <text x="10" y="166" font-size="11" fill="#6c757d" font-family="sans-serif">✘ exige sinalização prévia do caminho</text>
+                </svg>
+            </figure>
+        </div>
+    </div>
+
+    <p class="mt-3">
+        O modo datagrama se inspira no correio tradicional: cada envelope carrega o endereço
+        completo do destinatário, e cada agência decide independentemente para onde encaminhá-lo. O
+        circuito virtual se inspira na telefonia clássica: antes da ligação começar, a rede monta um
+        canal fim a fim, e depois disso os "envelopes" (quadros de voz) só precisam de um número de
+        canal, muito mais curto que um endereço completo. A tecnologia <strong>MPLS</strong>
+        (Multiprotocol Label Switching), usada por muitos provedores para dar previsibilidade ao
+        tráfego dentro do seu backbone, é um exemplo moderno de comutação por rótulos.
+    </p>
+</section>
+
+<!-- 4. Tabelas de encaminhamento -->
+<section id="tabelas" class="chapter-section">
+    <span class="kicker">Plano de dados</span>
+    <h2 class="section-title">Tabelas de encaminhamento, buracos negros e loops</h2>
+
+    <p>
+        Uma <strong>tabela de encaminhamento</strong> associa cada destino (ou bloco de destinos) à
+        interface de saída que deve ser usada. Se o cálculo dessa tabela estiver incorreto, dois
+        problemas clássicos podem ocorrer:
+    </p>
+    <ul>
+        <li>
+            <strong>Buraco negro:</strong> um roteador recebe pacotes para um destino que não consta
+            em sua tabela e simplesmente os descarta.
+        </li>
+        <li>
+            <strong>Loop de encaminhamento:</strong> um conjunto de roteadores aponta uns para os
+            outros em círculo, e o pacote nunca chega ao destino — apenas consome banda até ser
+            descartado por outro mecanismo (como um limite de saltos).
+        </li>
+    </ul>
+    <p>
+        Em redes muito grandes, manter uma entrada para cada host individual tornaria as tabelas
+        gigantescas. A solução amplamente usada é o <strong>endereçamento hierárquico</strong>: os
+        bits mais significativos do endereço identificam um bloco maior da rede (por exemplo, o
+        provedor), e os bits menos significativos identificam o host dentro desse bloco — de forma
+        muito parecida com um CEP, que vai do país até o número da casa. Com endereços
+        hierárquicos, o roteador não busca uma correspondência exata: ele procura o
+        <strong>prefixo mais longo</strong> que combina com o endereço de destino, técnica conhecida
+        como <em>longest prefix match</em>.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:150px">
+            <text x="10" y="22" font-size="12" fill="#6c757d" font-family="sans-serif">Endereço de destino: 01001010 10000011</text>
+            <g font-family="monospace" font-size="13">
+                <rect x="10" y="35" width="180" height="30" fill="#d1e7dd" stroke="#198754"/>
+                <text x="100" y="55" text-anchor="middle" fill="#198754">0100101010</text>
+                <text x="15" y="82" font-size="10.5" fill="#198754" font-family="sans-serif">entrada /10 (bloco do provedor)</text>
+
+                <rect x="200" y="35" width="140" height="30" fill="#fff3cd" stroke="#997404"/>
+                <text x="270" y="55" text-anchor="middle" fill="#997404">01001010</text>
+                <text x="205" y="82" font-size="10.5" fill="#997404" font-family="sans-serif">entrada /8 (mais genérica)</text>
+
+                <rect x="360" y="35" width="220" height="30" fill="#e7f1ff" stroke="#0d6efd"/>
+                <text x="470" y="55" text-anchor="middle" fill="#0d6efd">0100101010000011</text>
+                <text x="365" y="82" font-size="10.5" fill="#0d6efd" font-family="sans-serif">entrada /16 (host exato) — vence por ser mais longa</text>
+            </g>
+            <text x="10" y="112" font-size="11" fill="#6c757d" font-family="sans-serif">Quando várias entradas combinam com o endereço, o roteador escolhe sempre a mais específica.</text>
+        </svg>
+        <figcaption>Longest prefix match: a entrada mais específica que ainda combina com o endereço vence.</figcaption>
+    </figure>
+
+    <div class="demo-box mb-4">
+        <p class="fw-semibold mb-2">🧪 Experimente: busca por prefixo mais longo</p>
+        <p class="text-muted small mb-2">
+            A tabela abaixo tem três entradas de prefixo. Digite um endereço de 8 bits (apenas 0 e 1)
+            e veja qual entrada seria escolhida.
+        </p>
+        <table class="table table-sm tabela-roteamento mb-3" id="lpmTable">
+            <thead><tr><th>Prefixo</th><th>Interface</th></tr></thead>
+            <tbody>
+                <tr data-prefix="0*"><td>0*</td><td>Oeste</td></tr>
+                <tr data-prefix="010*"><td>010*</td><td>Norte</td></tr>
+                <tr data-prefix="0101101*"><td>0101101*</td><td>Sul</td></tr>
+            </tbody>
+        </table>
+        <div class="input-group mb-2" style="max-width:340px">
+            <input type="text" id="lpmInput" class="form-control" value="01011010" maxlength="8" placeholder="ex: 01011010">
+            <button class="btn btn-primary" id="lpmBtn" type="button">Buscar</button>
+        </div>
+        <div id="lpmOutput" class="small"></div>
+    </div>
+</section>
+
+<!-- 5. Vetor de distância -->
+<section id="vetor-distancia" class="chapter-section">
+    <span class="kicker">Plano de controle</span>
+    <h2 class="section-title">Roteamento por vetor de distância</h2>
+
+    <p>
+        Calcular tabelas de encaminhamento manualmente só funciona em redes minúsculas. Redes reais
+        usam algoritmos distribuídos — os roteadores trocam mensagens entre si e calculam suas
+        próprias tabelas automaticamente. A família mais simples é o <strong>vetor de
+        distância</strong>, baseado na ideia do algoritmo de Bellman-Ford: cada roteador só precisa
+        saber, para cada destino, qual é o custo total do melhor caminho conhecido e por qual
+        vizinho esse caminho passa.
+    </p>
+    <p>
+        Periodicamente, cada roteador envia a seus vizinhos diretos um resumo da sua própria tabela
+        — o chamado <em>vetor de distância</em>. Ao receber o vetor de um vizinho, o roteador soma o
+        custo do enlace até esse vizinho e compara com o que já conhecia; se o novo caminho for mais
+        curto, a tabela é atualizada. Repetindo esse processo, a rede inteira converge para as rotas
+        mais curtas sem que nenhum roteador precise conhecer a topologia completa.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:220px">
+            <g font-family="sans-serif" font-weight="700" font-size="13" fill="#212529">
+                <circle cx="60" cy="100" r="24" fill="#ffe3f0" stroke="#d63384" stroke-width="2"/>
+                <text x="60" y="105" text-anchor="middle">A</text>
+                <circle cx="240" cy="40" r="24" fill="#ffe3f0" stroke="#d63384" stroke-width="2"/>
+                <text x="240" y="45" text-anchor="middle">B</text>
+                <circle cx="240" cy="160" r="24" fill="#ffe3f0" stroke="#d63384" stroke-width="2"/>
+                <text x="240" y="165" text-anchor="middle">C</text>
+                <circle cx="420" cy="100" r="24" fill="#ffe3f0" stroke="#d63384" stroke-width="2"/>
+                <text x="420" y="105" text-anchor="middle">D</text>
+            </g>
+            <g stroke="#adb5bd" stroke-width="2">
+                <line x1="82" y1="88" x2="218" y2="50"/>
+                <line x1="82" y1="112" x2="218" y2="150"/>
+                <line x1="262" y1="48" x2="398" y2="92"/>
+                <line x1="262" y1="152" x2="398" y2="108"/>
+            </g>
+            <text x="130" y="55" font-size="11" fill="#6c757d" font-family="sans-serif">custo 1</text>
+            <text x="130" y="150" font-size="11" fill="#6c757d" font-family="sans-serif">custo 4</text>
+            <text x="310" y="60" font-size="11" fill="#6c757d" font-family="sans-serif">custo 2</text>
+            <text x="310" y="145" font-size="11" fill="#6c757d" font-family="sans-serif">custo 1</text>
+
+            <text x="480" y="60" font-size="12" fill="#212529" font-family="sans-serif" font-weight="700">Tabela de A após convergir:</text>
+            <text x="480" y="82" font-size="11.5" fill="#212529" font-family="monospace">B: custo 1, via B</text>
+            <text x="480" y="100" font-size="11.5" fill="#212529" font-family="monospace">C: custo 4, via B</text>
+            <text x="480" y="118" font-size="11.5" fill="#212529" font-family="monospace">D: custo 3, via B</text>
+            <text x="480" y="140" font-size="10.5" fill="#6c757d" font-family="sans-serif">(A→B→D custa 1+2=3,</text>
+            <text x="480" y="155" font-size="10.5" fill="#6c757d" font-family="sans-serif">melhor que A→C→D=4+1=5)</text>
+        </svg>
+        <figcaption>Vetor de distância: A escolhe o caminho A→B→D porque a soma dos custos é menor.</figcaption>
+    </figure>
+
+    <p>
+        O vetor de distância tem uma fragilidade conhecida como <strong>contagem ao
+        infinito</strong>: se um enlace falha, dois roteadores vizinhos podem, por um tempo, ficar
+        anunciando um ao outro um caminho que na verdade já não existe mais, incrementando o custo
+        aos poucos até um valor absurdamente alto. Duas técnicas atenuam o problema:
+    </p>
+    <ul>
+        <li>
+            <strong>Split horizon:</strong> um roteador nunca anuncia de volta, para o vizinho X, uma
+            rota que ele aprendeu através do próprio vizinho X.
+        </li>
+        <li>
+            <strong>Split horizon com poison reverse:</strong> além de não reanunciar, o roteador
+            anuncia explicitamente essa rota com custo infinito para o vizinho de quem a aprendeu,
+            deixando a informação ainda mais clara.
+        </li>
+    </ul>
+    <p>
+        O protocolo <strong>RIP</strong> (Routing Information Protocol) é o exemplo histórico mais
+        conhecido de roteamento por vetor de distância, ainda usado hoje em redes pequenas ou como
+        material didático por sua simplicidade.
+    </p>
+</section>
+
+<!-- 6. Estado de enlace -->
+<section id="estado-enlace" class="chapter-section">
+    <span class="kicker">Plano de controle</span>
+    <h2 class="section-title">Roteamento por estado de enlace</h2>
+
+    <p>
+        A segunda grande família de algoritmos de roteamento segue uma filosofia oposta: em vez de
+        cada roteador conhecer apenas o "resumo" que seus vizinhos enviam, todo roteador aprende a
+        <strong>topologia completa</strong> da rede e calcula localmente o melhor caminho até cada
+        destino, tipicamente com o algoritmo de Dijkstra.
+    </p>
+    <p>
+        O processo tem três etapas. Primeiro, cada roteador descobre seus vizinhos diretos trocando
+        mensagens de descoberta (<em>hello</em>). Em seguida, ele empacota a lista de seus vizinhos e
+        o custo de cada enlace num <strong>pacote de estado de enlace</strong> (<em>Link State
+        Packet</em>, LSP) e o distribui para toda a rede por meio de <strong>inundação</strong>
+        (<em>flooding</em>): cada roteador que recebe um LSP novo o retransmite para todas as suas
+        interfaces, exceto aquela por onde ele chegou. Por fim, com uma cópia do LSP de cada
+        roteador da rede em mãos, cada nó monta o grafo completo da topologia e roda Dijkstra a
+        partir de si mesmo.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:210px">
+            <g font-family="sans-serif" font-weight="700" font-size="13" fill="#212529">
+                <circle cx="80" cy="95" r="22" fill="#e6f6ec" stroke="#198754" stroke-width="2"/>
+                <text x="80" y="100" text-anchor="middle">E</text>
+                <circle cx="230" cy="30" r="22" fill="#e6f6ec" stroke="#198754" stroke-width="2"/>
+                <text x="230" y="35" text-anchor="middle">B</text>
+                <circle cx="230" cy="160" r="22" fill="#e6f6ec" stroke="#198754" stroke-width="2"/>
+                <text x="230" y="165" text-anchor="middle">C</text>
+            </g>
+            <g stroke="#198754" stroke-width="2.5" fill="none" marker-end="url(#arrowLS)">
+                <line x1="98" y1="82" x2="212" y2="42"/>
+                <line x1="98" y1="108" x2="212" y2="148"/>
+            </g>
+            <text x="330" y="30" font-family="sans-serif" font-size="12" fill="#212529" font-weight="700">LSP de E chega em B e C</text>
+            <text x="330" y="55" font-family="monospace" font-size="11.5" fill="#212529">E: [B:1, C:1, D:1]</text>
+
+            <text x="330" y="95" font-family="sans-serif" font-size="12" fill="#212529" font-weight="700">B e C reencaminham o LSP</text>
+            <text x="330" y="117" font-family="sans-serif" font-size="11.5" fill="#6c757d">para todos os vizinhos, exceto E —</text>
+            <text x="330" y="135" font-family="sans-serif" font-size="11.5" fill="#6c757d">assim o LSP alcança toda a rede</text>
+
+            <defs>
+                <marker id="arrowLS" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#198754"/>
+                </marker>
+            </defs>
+            <text x="10" y="185" font-size="11" fill="#6c757d" font-family="sans-serif">Inundação (flooding): cada LSP se espalha pela rede seguindo todos os enlaces, exceto o de chegada.</text>
+        </svg>
+        <figcaption>Distribuição de um LSP por inundação — a base para que todo roteador monte o mesmo mapa da rede.</figcaption>
+    </figure>
+
+    <p>
+        Como cada roteador enxerga a topologia inteira, o roteamento por estado de enlace converge
+        mais rápido após uma falha e não sofre do problema de contagem ao infinito. Em compensação,
+        exige mais memória (para guardar o mapa completo) e mais processamento (para rodar Dijkstra).
+        <strong>OSPF</strong> (Open Shortest Path First) e <strong>IS-IS</strong> são os protocolos
+        de estado de enlace mais usados hoje dentro de redes corporativas e de provedores.
+    </p>
+</section>
+
+<!-- 7. Comparação / prática -->
+<section id="comparacao" class="chapter-section">
+    <span class="kicker">Na prática</span>
+    <h2 class="section-title">Do conceito à situação real</h2>
+
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered align-middle bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th></th>
+                    <th>Vetor de distância</th>
+                    <th>Estado de enlace</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-semibold">O que cada roteador conhece</td>
+                    <td>Apenas o custo estimado até cada destino</td>
+                    <td>A topologia completa da rede</td>
+                </tr>
+                <tr>
+                    <td class="fw-semibold">Mensagens trocadas</td>
+                    <td>Vetores periódicos com os vizinhos diretos</td>
+                    <td>LSPs inundados por toda a rede</td>
+                </tr>
+                <tr>
+                    <td class="fw-semibold">Problema clássico</td>
+                    <td>Contagem ao infinito</td>
+                    <td>Maior custo de memória/CPU</td>
+                </tr>
+                <tr>
+                    <td class="fw-semibold">Exemplos reais</td>
+                    <td>RIP</td>
+                    <td>OSPF, IS-IS</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">🌐 BGP entre provedores</h6>
+                <p class="small text-muted mb-0">
+                    Dentro de uma única rede (um "sistema autônomo"), protocolos como OSPF cuidam do
+                    roteamento interno. Entre provedores diferentes, quem manda é o BGP, um
+                    protocolo de vetor de caminho que anuncia a rota completa de sistemas
+                    autônomos, não apenas um custo — assim cada provedor decide sozinho em quem
+                    confiar.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">🏷️ MPLS em backbones</h6>
+                <p class="small text-muted mb-0">
+                    Provedores usam rótulos MPLS justamente para ganhar o encaminhamento em O(1) do
+                    circuito virtual, enquanto ainda deixam o protocolo de roteamento (por exemplo
+                    OSPF) decidir qual caminho os rótulos devem seguir.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">📶 CIDR e blocos de endereço</h6>
+                <p class="small text-muted mb-0">
+                    Quando seu provedor de Internet informa um "bloco /24" para sua casa, ele está
+                    aplicando exatamente o endereçamento hierárquico descrito neste capítulo — um
+                    prefixo comum a todos os endereços daquele bloco.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">🧭 traceroute</h6>
+                <p class="small text-muted mb-0">
+                    A ferramenta <code>traceroute</code> (ou <code>tracert</code>) revela, salto a
+                    salto, exatamente o caminho que a tabela de encaminhamento de cada roteador
+                    escolheu para o seu pacote — é o vetor de distância ou o estado de enlace em
+                    ação, visível na sua própria tela.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 8. Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+
+    <p>
+        Os três trechos abaixo, em Python, implementam os mecanismos centrais deste capítulo: busca
+        por prefixo mais longo em uma tabela de encaminhamento, roteamento por vetor de distância
+        (Bellman-Ford distribuído) e roteamento por estado de enlace (Dijkstra sobre o grafo
+        completo).
+    </p>
+
+    <h5 class="mt-4">1. Busca por prefixo mais longo (longest prefix match)</h5>
+    <pre class="code-block"><code>def longest_prefix_match(endereco: str, tabela: dict[str, str]) -> str | None:
+    """
+    endereco: string de bits, ex. "01011010"
+    tabela: mapa {prefixo: interface}, ex. {"010": "Norte", "0": "Oeste"}
+    Retorna a interface associada ao prefixo mais longo que combina com o endereco.
+    """
+    melhor_prefixo = None
+    for prefixo, interface in tabela.items():
+        if endereco.startswith(prefixo):
+            if melhor_prefixo is None or len(prefixo) > len(melhor_prefixo):
+                melhor_prefixo = prefixo
+    return tabela[melhor_prefixo] if melhor_prefixo is not None else None
+
+tabela = {"0": "Oeste", "010": "Norte", "0101101": "Sul"}
+print(longest_prefix_match("01011010", tabela))  # "Sul" (prefixo mais especifico vence)
+print(longest_prefix_match("01100000", tabela))  # "Oeste" (so o prefixo generico combina)</code></pre>
+
+    <h5 class="mt-4">2. Vetor de distância (Bellman-Ford distribuído)</h5>
+    <pre class="code-block"><code>INFINITO = float("inf")
+
+def inicializa_tabelas(topologia: dict[str, dict[str, int]]) -> dict[str, dict[str, tuple[int, str]]]:
+    """Cada roteador comeca so conhecendo a si mesmo, com custo 0."""
+    tabelas = {}
+    for roteador in topologia:
+        tabelas[roteador] = {roteador: (0, roteador)}
+    return tabelas
+
+def rodada_vetor_distancia(topologia, tabelas):
+    """Uma rodada de troca de vetores entre vizinhos diretos."""
+    mudou = False
+    novas_tabelas = {r: dict(tabelas[r]) for r in tabelas}
+
+    for roteador, vizinhos in topologia.items():
+        for vizinho, custo_enlace in vizinhos.items():
+            for destino, (custo_vizinho, _) in tabelas[vizinho].items():
+                novo_custo = custo_vizinho + custo_enlace
+                custo_atual, _ = novas_tabelas[roteador].get(destino, (INFINITO, None))
+                if novo_custo < custo_atual:
+                    novas_tabelas[roteador][destino] = (novo_custo, vizinho)
+                    mudou = True
+
+    return novas_tabelas, mudou
+
+topologia = {
+    "A": {"B": 1, "C": 4},
+    "B": {"A": 1, "D": 2},
+    "C": {"A": 4, "D": 1},
+    "D": {"B": 2, "C": 1},
+}
+
+tabelas = inicializa_tabelas(topologia)
+for rodada in range(1, 10):
+    tabelas, mudou = rodada_vetor_distancia(topologia, tabelas)
+    if not mudou:
+        print(f"Convergiu na rodada {rodada}")
+        break
+
+print(tabelas["A"])  # {'A': (0,'A'), 'B': (1,'B'), 'C': (4,'C'), 'D': (3,'B')}</code></pre>
+
+    <h5 class="mt-4">3. Estado de enlace (Dijkstra sobre a topologia completa)</h5>
+    <pre class="code-block"><code>import heapq
+
+def dijkstra(grafo: dict[str, dict[str, int]], origem: str) -> dict[str, tuple[int, list[str]]]:
+    """
+    grafo: {no: {vizinho: custo}}
+    Retorna, para cada destino, (custo total, caminho completo).
+    Equivale ao que um roteador faz apos aprender toda a topologia via LSPs.
+    """
+    distancias = {no: INFINITO for no in grafo}
+    caminhos = {no: [] for no in grafo}
+    distancias[origem] = 0
+    caminhos[origem] = [origem]
+
+    fila = [(0, origem)]
+    visitados = set()
+
+    while fila:
+        custo_atual, no_atual = heapq.heappop(fila)
+        if no_atual in visitados:
+            continue
+        visitados.add(no_atual)
+
+        for vizinho, custo_enlace in grafo[no_atual].items():
+            novo_custo = custo_atual + custo_enlace
+            if novo_custo < distancias[vizinho]:
+                distancias[vizinho] = novo_custo
+                caminhos[vizinho] = caminhos[no_atual] + [vizinho]
+                heapq.heappush(fila, (novo_custo, vizinho))
+
+    return {no: (distancias[no], caminhos[no]) for no in grafo}
+
+INFINITO = float("inf")
+grafo = {
+    "E": {"B": 1, "C": 1, "D": 1},
+    "B": {"E": 1, "A": 1, "C": 1},
+    "C": {"E": 1, "B": 1},
+    "D": {"E": 1, "A": 1},
+    "A": {"B": 1, "D": 1},
+}
+
+for destino, (custo, caminho) in dijkstra(grafo, "E").items():
+    print(f"E -> {destino}: custo {custo}, caminho {' -> '.join(caminho)}")</code></pre>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">🧪 Experimente: convergência do vetor de distância</p>
+        <p class="text-muted small mb-2">
+            Usando a mesma topologia do código acima (A–B–C–D), clique para avançar rodada a rodada
+            e observar a tabela do roteador A se atualizando.
+        </p>
+        <button class="btn btn-primary btn-sm mb-3" id="dvStepBtn" type="button">Próxima rodada</button>
+        <button class="btn btn-outline-secondary btn-sm mb-3" id="dvResetBtn" type="button">Reiniciar</button>
+        <div id="dvOutput" class="font-monospace small"></div>
+    </div>
+</section>
+
+<!-- 9. Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>
+            Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>,
+            3ª edição — seção "Building a network".
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a>
+        </li>
+        <li>
+            RFC 1058 — <a href="https://www.rfc-editor.org/rfc/rfc1058" target="_blank" rel="noopener noreferrer">Routing Information Protocol (RIP)</a>
+        </li>
+        <li>
+            RFC 2328 — <a href="https://www.rfc-editor.org/rfc/rfc2328" target="_blank" rel="noopener noreferrer">OSPF Version 2</a>
+        </li>
+        <li>
+            Wikipedia — <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm" target="_blank" rel="noopener noreferrer">Algoritmo de Dijkstra</a>
+        </li>
+        <li>
+            Wikipedia — <a href="https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm" target="_blank" rel="noopener noreferrer">Algoritmo de Bellman-Ford</a>
+        </li>
+    </ul>
+
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<!-- Rodapé -->
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="text-muted">Redes de Computadores — Capítulo 2</span>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">← Voltar aos capítulos</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Demo 1: montar pacote
+    function atualizaPacote() {
+        var src = (document.getElementById("pktSrc").value || "?").toUpperCase();
+        var dst = (document.getElementById("pktDst").value || "?").toUpperCase();
+        var msg = document.getElementById("pktMsg").value || "";
+        var out = document.getElementById("pktOutput");
+        out.innerHTML =
+            '<div class="d-flex flex-wrap gap-2">' +
+            '<span class="addr-chip" style="background:#e7f1ff;color:#0d6efd;min-width:90px">src=' + src + '</span>' +
+            '<span class="addr-chip" style="background:#e7f1ff;color:#0d6efd;min-width:90px">dst=' + dst + '</span>' +
+            '<span class="addr-chip" style="background:#fff3cd;color:#997404;min-width:60px">TTL=64</span>' +
+            '<span class="addr-chip" style="background:#d1e7dd;color:#198754;min-width:160px">payload="' + msg + '"</span>' +
+            '</div>';
+    }
+    ["pktSrc", "pktDst", "pktMsg"].forEach(function (id) {
+        document.getElementById(id).addEventListener("input", atualizaPacote);
+    });
+    atualizaPacote();
+
+    // Demo 2: longest prefix match
+    function buscaLPM() {
+        var endereco = document.getElementById("lpmInput").value.replace(/[^01]/g, "");
+        var linhas = document.querySelectorAll("#lpmTable tbody tr");
+        var melhor = null;
+        var melhorInterface = null;
+
+        linhas.forEach(function (tr) {
+            var prefixo = tr.getAttribute("data-prefix").replace("*", "");
+            tr.classList.remove("table-success", "table-secondary");
+            if (endereco.indexOf(prefixo) === 0) {
+                if (melhor === null || prefixo.length > melhor.length) {
+                    melhor = prefixo;
+                    melhorInterface = tr.children[1].textContent;
+                }
+            }
+        });
+
+        linhas.forEach(function (tr) {
+            var prefixo = tr.getAttribute("data-prefix").replace("*", "");
+            if (prefixo === melhor) {
+                tr.classList.add("table-success");
+            } else if (endereco.indexOf(prefixo) === 0) {
+                tr.classList.add("table-secondary");
+            }
+        });
+
+        var out = document.getElementById("lpmOutput");
+        if (melhor !== null) {
+            out.innerHTML = '<span class="text-success fw-semibold">Prefixo mais longo: ' + melhor + '* → interface ' + melhorInterface + '</span>';
+        } else {
+            out.innerHTML = '<span class="text-danger fw-semibold">Nenhum prefixo combina — buraco negro (pacote descartado)</span>';
+        }
+    }
+    document.getElementById("lpmBtn").addEventListener("click", buscaLPM);
+    buscaLPM();
+
+    // Demo 3: convergência do vetor de distância (topologia A-B-C-D)
+    var INF = Infinity;
+    var topologiaDV = {
+        A: { B: 1, C: 4 },
+        B: { A: 1, D: 2 },
+        C: { A: 4, D: 1 },
+        D: { B: 2, C: 1 },
+    };
+    var tabelasDV, rodadaDV;
+
+    function iniciaDV() {
+        tabelasDV = {};
+        Object.keys(topologiaDV).forEach(function (r) {
+            tabelasDV[r] = {};
+            Object.keys(topologiaDV).forEach(function (d) {
+                tabelasDV[r][d] = (d === r) ? [0, r] : [INF, null];
+            });
+        });
+        rodadaDV = 0;
+        renderDV();
+    }
+
+    function passoDV() {
+        var novas = JSON.parse(JSON.stringify(tabelasDV));
+        var mudou = false;
+        Object.keys(topologiaDV).forEach(function (roteador) {
+            Object.keys(topologiaDV[roteador]).forEach(function (vizinho) {
+                var custoEnlace = topologiaDV[roteador][vizinho];
+                Object.keys(tabelasDV[vizinho]).forEach(function (destino) {
+                    var custoVizinho = tabelasDV[vizinho][destino][0];
+                    if (custoVizinho === INF) { return; }
+                    var novoCusto = custoVizinho + custoEnlace;
+                    if (novoCusto < novas[roteador][destino][0]) {
+                        novas[roteador][destino] = [novoCusto, vizinho];
+                        mudou = true;
+                    }
+                });
+            });
+        });
+        tabelasDV = novas;
+        rodadaDV += 1;
+        renderDV();
+        return mudou;
+    }
+
+    function renderDV() {
+        var out = document.getElementById("dvOutput");
+        var linhas = ['<p class="mb-1"><strong>Rodada ' + rodadaDV + '</strong> — tabela do roteador A:</p>'];
+        linhas.push('<table class="table table-sm table-bordered bg-white mb-0" style="max-width:420px"><thead><tr><th>Destino</th><th>Custo</th><th>Via</th></tr></thead><tbody>');
+        Object.keys(tabelasDV.A).forEach(function (destino) {
+            var par = tabelasDV.A[destino];
+            var custo = (par[0] === INF) ? "∞" : par[0];
+            var via = par[1] || "—";
+            linhas.push('<tr><td>' + destino + '</td><td>' + custo + '</td><td>' + via + '</td></tr>');
+        });
+        linhas.push('</tbody></table>');
+        out.innerHTML = linhas.join("");
+    }
+
+    document.getElementById("dvStepBtn").addEventListener("click", function () {
+        if (rodadaDV >= 8) { return; }
+        var mudou = passoDV();
+        if (!mudou) {
+            document.getElementById("dvOutput").innerHTML += '<p class="text-success small mt-2 mb-0">✔ A tabela convergiu — novas rodadas não trazem mudanças.</p>';
+        }
+    });
+    document.getElementById("dvResetBtn").addEventListener("click", iniciaDV);
+    iniciaDV();
+</script>
+
+</body>
+</html>

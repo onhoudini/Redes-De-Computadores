@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 1 — Conectando dois hosts | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: como dois hosts se conectam, da camada física ao enquadramento e à entrega confiável de quadros.">
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+        :root {
+            --accent: #0d6efd;
+            --text: #212529;
+            --muted: #6c757d;
+            --background: #f8f9fa;
+            --topo: #0d6efd;
+            --queda: #6610f2;
+            --base-c: #d63384;
+            --leito: #198754;
+            --code-bg: #1e1e2e;
+            --code-fg: #e6e6e6;
+        }
+
+        body {
+            color: var(--text);
+            background: var(--background);
+        }
+
+        .hero {
+            padding: 80px 0 60px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .hero h1 {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .hero .lead {
+            max-width: 760px;
+            color: var(--muted);
+        }
+
+        section.chapter-section {
+            padding: 55px 0;
+            scroll-margin-top: 90px;
+        }
+
+        section.chapter-section:nth-of-type(even) {
+            background: white;
+        }
+
+        h2.section-title {
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+        }
+
+        h2.section-title .kicker {
+            display: block;
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: .4rem;
+        }
+
+        .card-soft {
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            background: white;
+        }
+
+        .toc {
+            position: sticky;
+            top: 85px;
+        }
+
+        .toc .nav-link {
+            color: var(--muted);
+            padding: .3rem 0;
+            font-size: .9rem;
+        }
+
+        .toc .nav-link.active {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        figure.diagram {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        figure.diagram figcaption {
+            font-size: .85rem;
+            color: var(--muted);
+            margin-top: .5rem;
+            text-align: center;
+        }
+
+        pre.code-block {
+            background: var(--code-bg);
+            color: var(--code-fg);
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            font-size: .85rem;
+            overflow-x: auto;
+            line-height: 1.55;
+        }
+
+        pre.code-block code {
+            color: inherit;
+            white-space: pre;
+        }
+
+        .demo-box {
+            background: #f1f3f5;
+            border: 1px dashed #adb5bd;
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+
+        .bit-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            margin: 2px;
+            border-radius: 6px;
+            font-family: "SFMono-Regular", Consolas, monospace;
+            font-weight: 600;
+            font-size: .85rem;
+            background: #e7f1ff;
+            color: var(--accent);
+        }
+
+        .bit-chip.stuffed {
+            background: #ffe3e3;
+            color: #c1121f;
+        }
+
+        .badge-step {
+            background: var(--accent);
+        }
+
+        blockquote.quote {
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        footer {
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .layer-pill {
+            display: inline-block;
+            padding: .25rem .65rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 600;
+            color: white;
+        }
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">
+            Redes de Computadores
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Abrir navegação"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 1</span>
+        <h1 class="display-5 mb-3">Conectando dois hosts</h1>
+        <p class="lead mb-4">
+            Como uma sequência de bits sai de um computador, atravessa oceanos, backbones e redes
+            metropolitanas, e chega até o seu dispositivo — e como dois hosts conseguem conversar
+            de forma confiável mesmo quando o meio físico não é perfeito.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#bits" class="btn btn-primary">Começar a leitura</a>
+            <a
+                href="https://beta.computer-networking.info/syllabus/default/index.html"
+                class="btn btn-outline-secondary"
+                target="_blank" rel="noopener noreferrer"
+            >Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-2">Neste capítulo</p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#bits">1. O que é informação?</a>
+                    <a class="nav-link" href="#cachoeira">2. A Cachoeira Perpétua</a>
+                    <a class="nav-link" href="#fisica">3. Camada física</a>
+                    <a class="nav-link" href="#enquadramento">4. Enquadramento</a>
+                    <a class="nav-link" href="#confiavel">5. Entrega confiável</a>
+                    <a class="nav-link" href="#janela">6. Janela deslizante</a>
+                    <a class="nav-link" href="#real">7. Do conceito à prática</a>
+                    <a class="nav-link" href="#exemplos">8. Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">9. Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- 1. Bits -->
+<section id="bits" class="chapter-section">
+    <span class="kicker">Fundamentos</span>
+    <h2 class="section-title">O que é informação, afinal?</h2>
+
+    <p>
+        Vídeos, fotos, músicas e páginas da Web têm algo em comum por baixo do capô: tudo é
+        guardado e movido pela rede como <strong>dados digitais</strong>, isto é, longas sequências
+        do menor tipo de informação que existe — o <strong>bit</strong>, que só pode valer
+        <code>0</code> ou <code>1</code>.
+    </p>
+    <p>
+        Um bit sozinho não diz muita coisa. O interessante acontece quando vários bits são
+        agrupados: 8 bits formam 1 <em>byte</em>, e combinações de bytes conseguem representar
+        letras, números, pixels de uma imagem ou instruções de um programa. A tabela ASCII, por
+        exemplo, define que a letra <strong>"A"</strong> deve ser transmitida como a sequência
+        <code>01000001</code>.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:220px">
+            <text x="20" y="30" font-size="14" fill="#6c757d" font-family="sans-serif">Caractere</text>
+            <rect x="20" y="45" width="60" height="50" rx="8" fill="#e7f1ff" stroke="#0d6efd"/>
+            <text x="50" y="76" font-size="22" text-anchor="middle" font-family="monospace" fill="#0d6efd" font-weight="700">A</text>
+
+            <path d="M90 70 L130 70" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow1)"/>
+
+            <text x="150" y="30" font-size="14" fill="#6c757d" font-family="sans-serif">Codificação ASCII → 8 bits (1 byte)</text>
+            <g font-family="monospace" font-size="16" font-weight="700">
+                <rect x="150" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="167" y="68" text-anchor="middle" fill="#212529">0</text>
+                <rect x="188" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="205" y="68" text-anchor="middle" fill="#212529">1</text>
+                <rect x="226" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="243" y="68" text-anchor="middle" fill="#212529">0</text>
+                <rect x="264" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="281" y="68" text-anchor="middle" fill="#212529">0</text>
+                <rect x="302" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="319" y="68" text-anchor="middle" fill="#212529">0</text>
+                <rect x="340" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="357" y="68" text-anchor="middle" fill="#212529">0</text>
+                <rect x="378" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="395" y="68" text-anchor="middle" fill="#212529">0</text>
+                <rect x="416" y="45" width="34" height="34" rx="6" fill="#f1f3f5" stroke="#ced4da"/>
+                <text x="433" y="68" text-anchor="middle" fill="#212529">1</text>
+            </g>
+
+            <path d="M460 70 L500 70" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow1)"/>
+
+            <text x="520" y="30" font-size="14" fill="#6c757d" font-family="sans-serif">Sinal transmitido</text>
+            <polyline points="520,80 540,60 555,80 575,60 590,80 610,60 625,80 645,60"
+                      fill="none" stroke="#198754" stroke-width="3"/>
+            <text x="520" y="110" font-size="12" fill="#6c757d" font-family="sans-serif">pulsos elétricos / ópticos / rádio</text>
+
+            <defs>
+                <marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#adb5bd"/>
+                </marker>
+            </defs>
+
+            <text x="20" y="150" font-size="13" fill="#6c757d" font-family="sans-serif">Escala aproximada:</text>
+            <text x="20" y="172" font-size="12" fill="#212529" font-family="monospace">1 bit → 0/1   |   8 bits → 1 byte   |   1 KB ≈ 10³ B   |   1 MB ≈ 10⁶ B   |   1 GB ≈ 10⁹ B</text>
+        </svg>
+        <figcaption>Do caractere à sequência de bits transmitida no meio físico.</figcaption>
+    </figure>
+
+    <div class="demo-box mb-4">
+        <p class="fw-semibold mb-2">🧪 Experimente: texto → binário</p>
+        <p class="text-muted small mb-2">Digite algo e veja a codificação ASCII, bit a bit, exatamente como ela sairia pela interface de rede.</p>
+        <input type="text" id="textInput" class="form-control mb-3" maxlength="12" value="Oi" placeholder="Digite até 12 caracteres">
+        <div id="binOutput" class="d-flex flex-wrap"></div>
+    </div>
+
+    <p>
+        O ponto principal não é decorar quantos bits cada tipo de arquivo usa, mas perceber a
+        <strong>escala do problema</strong>: uma comunicação comum pela Internet envolve uma
+        quantidade gigantesca de bits em trânsito, o tempo todo, entre milhões de pares de
+        computadores. Isso leva à pergunta natural: se tudo é bit, como esses bits não
+        "engarrafam" os cabos do mundo inteiro?
+    </p>
+</section>
+
+<!-- 2. Cachoeira -->
+<section id="cachoeira" class="chapter-section">
+    <span class="kicker">Analogia</span>
+    <h2 class="section-title">A Cachoeira Perpétua</h2>
+
+    <p>
+        Para responder a essa pergunta, é útil parar de olhar para um bit isolado e observar a
+        <strong>infraestrutura</strong> que carrega bilhões deles ao mesmo tempo. Uma boa forma de
+        visualizar essa estrutura é imaginar uma cachoeira: a água (os dados) começa concentrada
+        no topo e, à medida que desce, vai se espalhando por caminhos cada vez menores, até chegar
+        calma ao leito do rio — o seu dispositivo.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:420px">
+            <!-- Topo -->
+            <rect x="40" y="10" width="620" height="70" rx="10" fill="#e7f1ff" stroke="#0d6efd"/>
+            <text x="60" y="35" font-size="15" font-weight="700" fill="#0d6efd" font-family="sans-serif">TOPO</text>
+            <text x="60" y="55" font-size="12.5" fill="#212529" font-family="sans-serif">Cabos submarinos de fibra óptica · comunicação intercontinental</text>
+            <text x="60" y="72" font-size="11" fill="#6c757d" font-family="sans-serif">DWDM/WDM: vários comprimentos de onda dividem a mesma fibra</text>
+
+            <path d="M350 82 L350 102" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow2)"/>
+
+            <!-- Queda -->
+            <rect x="70" y="105" width="560" height="70" rx="10" fill="#f1e9ff" stroke="#6610f2"/>
+            <text x="90" y="130" font-size="15" font-weight="700" fill="#6610f2" font-family="sans-serif">QUEDA</text>
+            <text x="90" y="150" font-size="12.5" fill="#212529" font-family="sans-serif">Redes de backbone nacional · fibra óptica de alta capacidade</text>
+            <text x="90" y="167" font-size="11" fill="#6c757d" font-family="sans-serif">roteadores de núcleo encaminham o tráfego entre regiões do país</text>
+
+            <path d="M350 177 L350 197" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow2)"/>
+
+            <!-- Base -->
+            <rect x="110" y="200" width="480" height="70" rx="10" fill="#ffe3f0" stroke="#d63384"/>
+            <text x="130" y="225" font-size="15" font-weight="700" fill="#d63384" font-family="sans-serif">BASE</text>
+            <text x="130" y="245" font-size="12.5" fill="#212529" font-family="sans-serif">Redes metropolitanas (MAN) · agregação regional/cidade</text>
+            <text x="130" y="262" font-size="11" fill="#6c757d" font-family="sans-serif">tráfego é dividido entre bairros e provedores locais</text>
+
+            <path d="M350 272 L350 292" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow2)"/>
+
+            <!-- Leito -->
+            <rect x="150" y="295" width="400" height="70" rx="10" fill="#e6f6ec" stroke="#198754"/>
+            <text x="170" y="320" font-size="15" font-weight="700" fill="#198754" font-family="sans-serif">LEITO</text>
+            <text x="170" y="340" font-size="12.5" fill="#212529" font-family="sans-serif">Rede de acesso · FTTH, cabo, Wi-Fi, 4G/5G</text>
+            <text x="170" y="357" font-size="11" fill="#6c757d" font-family="sans-serif">o ponto onde os bits finalmente chegam ao seu dispositivo</text>
+
+            <defs>
+                <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#adb5bd"/>
+                </marker>
+            </defs>
+        </svg>
+        <figcaption>As quatro etapas da Cachoeira Perpétua: do cabo submarino até o seu roteador Wi-Fi.</figcaption>
+    </figure>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card-soft p-3 h-100">
+                <span class="layer-pill" style="background:var(--topo)">Topo</span>
+                <p class="small mt-2 mb-0">Cabos submarinos ligam continentes usando sinais ópticos e DWDM, multiplicando a capacidade de uma única fibra.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-soft p-3 h-100">
+                <span class="layer-pill" style="background:var(--queda)">Queda</span>
+                <p class="small mt-2 mb-0">Backbones terrestres levam o tráfego por milhares de quilômetros dentro de um país.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-soft p-3 h-100">
+                <span class="layer-pill" style="background:var(--base-c)">Base</span>
+                <p class="small mt-2 mb-0">Redes metropolitanas distribuem o tráfego entre cidades e bairros.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-soft p-3 h-100">
+                <span class="layer-pill" style="background:var(--leito)">Leito</span>
+                <p class="small mt-2 mb-0">A rede de acesso entrega os bits ao dispositivo final do usuário.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. Camada física -->
+<section id="fisica" class="chapter-section">
+    <span class="kicker">Aprofundando</span>
+    <h2 class="section-title">Por dentro da camada física</h2>
+
+    <p>
+        Antes de dois hosts trocarem qualquer coisa, eles precisam de um meio físico compartilhado:
+        cabo elétrico, fibra óptica ou rádio. A camada física é a responsável por transformar bits
+        (0s e 1s) em sinais que realmente viajam por esse meio — tensão elétrica, pulsos de luz ou
+        ondas eletromagnéticas.
+    </p>
+    <p>
+        Um esquema simples ilustra o princípio: para transmitir 1000 bits por segundo em um fio
+        elétrico, os dois hosts podem combinar que <code>+5V</code> durante 1 milissegundo
+        representa o bit <code>1</code>, e <code>-5V</code> representa o bit <code>0</code>. O
+        receptor apenas mede a tensão a cada milissegundo e decodifica o bit correspondente.
+    </p>
+
+    <div class="row g-4 align-items-stretch">
+        <div class="col-md-6">
+            <div class="card-soft p-3 h-100">
+                <h6 class="fw-semibold">⚡ Interferência eletromagnética</h6>
+                <p class="small text-muted mb-0">
+                    Tempestades, cabos vizinhos e antenas próximas podem alterar a tensão medida
+                    pelo receptor. O bit enviado como <code>0</code> pode chegar como <code>1</code>
+                    — daí a necessidade de mecanismos de detecção de erro.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-soft p-3 h-100">
+                <h6 class="fw-semibold">🕓 Desalinhamento de relógios</h6>
+                <p class="small text-muted mb-0">
+                    Emissor e receptor usam relógios independentes. Uma diferença mínima de
+                    frequência entre eles faz bits "sumirem" ou "aparecerem" durante a transmissão,
+                    mesmo sem interferência externa.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <p class="mt-3">
+        Por isso, a camada física é tratada como um serviço <strong>imperfeito</strong>: ela pode
+        alterar o valor de um bit, entregar bits a mais ou entregar bits a menos do que os
+        enviados. Todo o restante da pilha de protocolos existe, em boa parte, para lidar com essas
+        imperfeições.
+    </p>
+</section>
+
+<!-- 4. Enquadramento -->
+<section id="enquadramento" class="chapter-section">
+    <span class="kicker">Camada de enlace</span>
+    <h2 class="section-title">Enquadramento: separando os bits em quadros</h2>
+
+    <p>
+        Aplicações não trabalham com um fluxo contínuo de bits — elas trabalham com blocos
+        completos de dados, chamados <strong>quadros</strong> (<em>frames</em>). O problema do
+        enquadramento é: como o receptor consegue identificar onde um quadro começa e onde termina,
+        dentro de um fluxo de bits que pode ter erros?
+    </p>
+    <p>
+        Uma técnica clássica é a <strong>inserção de bits</strong> (<em>bit stuffing</em>): reserva-se
+        a sequência <code>01111110</code> como marcador de início/fim de quadro. Para garantir que
+        essa sequência nunca apareça "por acidente" dentro dos dados, o transmissor insere um bit
+        <code>0</code> extra sempre que encontra cinco <code>1</code>s consecutivos no quadro. O
+        receptor faz o processo inverso, removendo os bits inseridos.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 800 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:190px">
+            <text x="10" y="24" font-size="13" fill="#6c757d" font-family="sans-serif">Original (17 uns seguidos, mais que os cinco permitidos):</text>
+            <g font-family="monospace" font-size="14" font-weight="700">
+                <text x="10" y="52" fill="#212529">0110111111111111111110010</text>
+            </g>
+
+            <text x="10" y="88" font-size="13" fill="#6c757d" font-family="sans-serif">Transmitido (marcadores em azul, bits de stuffing em vermelho):</text>
+            <g font-family="monospace" font-size="14" font-weight="700">
+                <text x="10" y="116" fill="#0d6efd">01111110</text>
+                <text x="90" y="116" fill="#212529">011011111</text>
+                <text x="200" y="116" fill="#c1121f">0</text>
+                <text x="213" y="116" fill="#212529">11111</text>
+                <text x="255" y="116" fill="#c1121f">0</text>
+                <text x="268" y="116" fill="#212529">11111</text>
+                <text x="310" y="116" fill="#c1121f">0</text>
+                <text x="323" y="116" fill="#212529">110010</text>
+                <text x="400" y="116" fill="#0d6efd">01111110</text>
+            </g>
+            <text x="10" y="150" font-size="11.5" fill="#6c757d" font-family="sans-serif">Azul = marcador de quadro (01111110) · Vermelho = bit 0 inserido a cada cinco 1s consecutivos</text>
+        </svg>
+        <figcaption>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns.</figcaption>
+    </figure>
+
+    <p>
+        Implementações em software costumam preferir manipular <strong>caracteres</strong> em vez de
+        bits isolados: a técnica equivalente é o <em>character stuffing</em>, que usa os caracteres
+        de controle ASCII <code>DLE STX</code> para marcar o início e <code>DLE ETX</code> para
+        marcar o fim de um quadro, duplicando qualquer <code>DLE</code> que apareça nos dados.
+    </p>
+</section>
+
+<!-- 5. Entrega confiável -->
+<section id="confiavel" class="chapter-section">
+    <span class="kicker">Camada de enlace</span>
+    <h2 class="section-title">Entrega confiável sobre um enlace imperfeito</h2>
+
+    <p>
+        Mesmo com enquadramento correto, quadros ainda podem ser corrompidos ou perdidos. A solução
+        mais simples é o <strong>Protocolo do Bit Alternante</strong> (<em>Alternating Bit
+        Protocol</em> — ABP): cada quadro de dados carrega um número de sequência de 1 bit (0 ou 1),
+        e o transmissor só envia o próximo quadro depois de receber a confirmação (ACK) do quadro
+        atual. Um temporizador de retransmissão cobre o caso de perda do quadro ou do ACK.
+    </p>
+
+    <figure class="diagram">
+        <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px">
+            <text x="60" y="24" font-size="13" fill="#212529" font-family="sans-serif" font-weight="700">Host A</text>
+            <text x="600" y="24" font-size="13" fill="#212529" font-family="sans-serif" font-weight="700">Host B</text>
+            <line x1="80" y1="10" x2="80" y2="200" stroke="#ced4da" stroke-width="2"/>
+            <line x1="620" y1="10" x2="620" y2="200" stroke="#ced4da" stroke-width="2"/>
+
+            <line x1="80" y1="45" x2="620" y2="70" stroke="#0d6efd" stroke-width="2" marker-end="url(#arrow3)"/>
+            <text x="300" y="42" font-size="12" fill="#0d6efd" font-family="monospace">D(0, a)</text>
+
+            <line x1="620" y1="90" x2="80" y2="115" stroke="#198754" stroke-width="2" marker-end="url(#arrow3)"/>
+            <text x="300" y="86" font-size="12" fill="#198754" font-family="monospace">C(OK0)</text>
+
+            <line x1="80" y1="130" x2="620" y2="155" stroke="#0d6efd" stroke-width="2" marker-end="url(#arrow3)"/>
+            <text x="300" y="127" font-size="12" fill="#0d6efd" font-family="monospace">D(1, b)</text>
+
+            <line x1="620" y1="175" x2="80" y2="200" stroke="#198754" stroke-width="2" marker-end="url(#arrow3)"/>
+            <text x="300" y="171" font-size="12" fill="#198754" font-family="monospace">C(OK1)</text>
+
+            <defs>
+                <marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#495057"/>
+                </marker>
+            </defs>
+        </svg>
+        <figcaption>ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado.</figcaption>
+    </figure>
+
+    <p>
+        O ABP resolve o problema de confiabilidade, mas é lento: o transmissor fica ocioso à espera
+        de cada ACK. Em um enlace de satélite com 250&nbsp;ms de atraso de propagação, por exemplo,
+        o throughput útil cai para poucos kbps, mesmo em um enlace de 50&nbsp;Kbps.
+    </p>
+</section>
+
+<!-- 6. Janela deslizante -->
+<section id="janela" class="chapter-section">
+    <span class="kicker">Desempenho</span>
+    <h2 class="section-title">Janela deslizante: Go-Back-N e Selective Repeat</h2>
+
+    <p>
+        Para não desperdiçar o enlace esperando ACK a ACK, protocolos modernos usam
+        <strong>pipelining</strong>: o transmissor pode ter até <em>W</em> quadros não confirmados
+        "em voo" ao mesmo tempo — essa faixa de números de sequência permitidos é a
+        <strong>janela deslizante</strong>.
+    </p>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <figure class="diagram h-100 mb-0">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                    <text x="10" y="20" font-size="13" font-weight="700" fill="#0d6efd" font-family="sans-serif">Go-Back-N</text>
+                    <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">quadro 2 se perde:</text>
+                    <g font-family="monospace" font-size="12">
+                        <rect x="10" y="50" width="34" height="26" fill="#d1e7dd" stroke="#198754"/>
+                        <text x="27" y="68" text-anchor="middle">0</text>
+                        <rect x="46" y="50" width="34" height="26" fill="#d1e7dd" stroke="#198754"/>
+                        <text x="63" y="68" text-anchor="middle">1</text>
+                        <rect x="82" y="50" width="34" height="26" fill="#f8d7da" stroke="#c1121f"/>
+                        <text x="99" y="68" text-anchor="middle">2</text>
+                        <rect x="118" y="50" width="34" height="26" fill="#f8d7da" stroke="#c1121f" opacity=".5"/>
+                        <text x="135" y="68" text-anchor="middle">3</text>
+                        <rect x="154" y="50" width="34" height="26" fill="#f8d7da" stroke="#c1121f" opacity=".5"/>
+                        <text x="171" y="68" text-anchor="middle">4</text>
+                    </g>
+                    <text x="10" y="98" font-size="11" fill="#6c757d" font-family="sans-serif">receptor descarta 3 e 4 (fora de ordem)</text>
+                    <text x="10" y="116" font-size="11" fill="#6c757d" font-family="sans-serif">emissor retransmite 2, 3 e 4 inteiros</text>
+                    <g font-family="monospace" font-size="12">
+                        <rect x="10" y="130" width="34" height="26" fill="#fff3cd" stroke="#997404"/>
+                        <text x="27" y="148" text-anchor="middle">2</text>
+                        <rect x="46" y="130" width="34" height="26" fill="#fff3cd" stroke="#997404"/>
+                        <text x="63" y="148" text-anchor="middle">3</text>
+                        <rect x="82" y="130" width="34" height="26" fill="#fff3cd" stroke="#997404"/>
+                        <text x="99" y="148" text-anchor="middle">4</text>
+                    </g>
+                    <text x="10" y="176" font-size="10.5" fill="#6c757d" font-family="sans-serif">simples, porém reenvia mais dados que o necessário</text>
+                </svg>
+            </figure>
+        </div>
+        <div class="col-md-6">
+            <figure class="diagram h-100 mb-0">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                    <text x="10" y="20" font-size="13" font-weight="700" fill="#6610f2" font-family="sans-serif">Selective Repeat</text>
+                    <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">quadro 2 se perde:</text>
+                    <g font-family="monospace" font-size="12">
+                        <rect x="10" y="50" width="34" height="26" fill="#d1e7dd" stroke="#198754"/>
+                        <text x="27" y="68" text-anchor="middle">0</text>
+                        <rect x="46" y="50" width="34" height="26" fill="#d1e7dd" stroke="#198754"/>
+                        <text x="63" y="68" text-anchor="middle">1</text>
+                        <rect x="82" y="50" width="34" height="26" fill="#f8d7da" stroke="#c1121f"/>
+                        <text x="99" y="68" text-anchor="middle">2</text>
+                        <rect x="118" y="50" width="34" height="26" fill="#d1e7dd" stroke="#198754"/>
+                        <text x="135" y="68" text-anchor="middle">3</text>
+                        <rect x="154" y="50" width="34" height="26" fill="#d1e7dd" stroke="#198754"/>
+                        <text x="171" y="68" text-anchor="middle">4</text>
+                    </g>
+                    <text x="10" y="98" font-size="11" fill="#6c757d" font-family="sans-serif">receptor guarda 3 e 4 em buffer (fora de ordem)</text>
+                    <text x="10" y="116" font-size="11" fill="#6c757d" font-family="sans-serif">emissor retransmite apenas o quadro 2</text>
+                    <g font-family="monospace" font-size="12">
+                        <rect x="10" y="130" width="34" height="26" fill="#fff3cd" stroke="#997404"/>
+                        <text x="27" y="148" text-anchor="middle">2</text>
+                    </g>
+                    <text x="10" y="176" font-size="10.5" fill="#6c757d" font-family="sans-serif">mais eficiente, exige buffer e ACKs seletivos</text>
+                </svg>
+            </figure>
+        </div>
+    </div>
+
+    <p class="mt-3">
+        Em ambos os casos, o tamanho máximo da janela é limitado pelo número de bits usados para o
+        número de sequência: com <em>n</em> bits, Go-Back-N pode usar no máximo
+        <code>2ⁿ − 1</code> quadros na janela, e Selective Repeat, no máximo <code>2ⁿ⁻¹</code> — do
+        contrário o receptor pode confundir um quadro novo com uma retransmissão antiga.
+    </p>
+</section>
+
+<!-- 7. Aplicações reais -->
+<section id="real" class="chapter-section">
+    <span class="kicker">Na prática</span>
+    <h2 class="section-title">Do conceito à situação real</h2>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">🌊 Cabos submarinos de verdade</h6>
+                <p class="small text-muted">
+                    Sistemas como o cabo <em>2Africa</em> ou o <em>EllaLink</em> (que liga Brasil e
+                    Europa) usam DWDM para transportar dezenas de terabits por segundo em um único
+                    par de fibras — a mesma ideia da seção "Topo", em escala real.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">📶 A "última milha" no seu bairro</h6>
+                <p class="small text-muted">
+                    FTTH, HFC (cabo) e redes móveis 4G/5G são implementações diferentes da mesma
+                    ideia: o "Leito" da cachoeira, onde a rede do provedor finalmente encontra o
+                    seu roteador.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">🧮 CRC no dia a dia</h6>
+                <p class="small text-muted">
+                    Toda vez que um quadro Ethernet chega a uma placa de rede, ou que um arquivo
+                    <code>.zip</code> ou <code>.png</code> é aberto, um CRC é recalculado para
+                    garantir que os bits não foram corrompidos no caminho.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-soft p-4 h-100">
+                <h6 class="fw-semibold">🔁 Janela deslizante no TCP</h6>
+                <p class="small text-muted">
+                    O TCP, usado por praticamente toda a Web, é uma versão sofisticada de
+                    Selective Repeat: ele numera bytes (não quadros) e usa ACKs para controlar
+                    quanto dado pode estar "em voo" entre os dois hosts.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 8. Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+
+    <p>
+        Os trechos abaixo implementam, em Python, os principais mecanismos discutidos neste
+        capítulo: detecção de erro por paridade, enquadramento por <em>bit stuffing</em> e uma
+        simulação simplificada do Protocolo do Bit Alternante sobre um canal com perdas.
+    </p>
+
+    <h5 class="mt-4">1. Bit de paridade (detecção simples de erro)</h5>
+    <pre class="code-block"><code>def paridade_par(bits: str) -> str:
+    """Recebe uma string de bits e devolve a string com 1 bit de paridade par ao final."""
+    uns = bits.count("1")
+    bit_extra = "0" if uns % 2 == 0 else "1"
+    return bits + bit_extra
+
+def verifica_paridade(bits_com_paridade: str) -> bool:
+    """Retorna True se o número total de 1s for par (nenhum erro detectado)."""
+    return bits_com_paridade.count("1") % 2 == 0
+
+# Exemplo
+quadro = "1001"
+codificado = paridade_par(quadro)
+print(codificado)                    # 10010
+print(verifica_paridade(codificado)) # True
+
+# Simulando um erro de transmissão em 1 bit
+com_erro = "10011"
+print(verifica_paridade(com_erro))   # False -> erro detectado</code></pre>
+
+    <h5 class="mt-4">2. Enquadramento por bit stuffing</h5>
+    <pre class="code-block"><code>MARCADOR = "01111110"
+
+def bit_stuffing(dados: str) -> str:
+    """Insere um 0 após cada sequência de cinco 1s consecutivos."""
+    saida = []
+    contador_uns = 0
+    for bit in dados:
+        saida.append(bit)
+        if bit == "1":
+            contador_uns += 1
+            if contador_uns == 5:
+                saida.append("0")   # bit inserido (stuffing)
+                contador_uns = 0
+        else:
+            contador_uns = 0
+    return MARCADOR + "".join(saida) + MARCADOR
+
+def remove_stuffing(quadro: str) -> str:
+    """Remove o marcador e os bits inseridos, recuperando os dados originais."""
+    corpo = quadro[len(MARCADOR):-len(MARCADOR)]
+    saida = []
+    contador_uns = 0
+    i = 0
+    while i < len(corpo):
+        bit = corpo[i]
+        saida.append(bit)
+        if bit == "1":
+            contador_uns += 1
+            if contador_uns == 5:
+                i += 1  # pula o bit inserido pelo transmissor
+                contador_uns = 0
+        else:
+            contador_uns = 0
+        i += 1
+    return "".join(saida)
+
+dados = "0110111111111111111110010"
+quadro = bit_stuffing(dados)
+print(quadro)
+print(remove_stuffing(quadro) == dados)  # True</code></pre>
+
+    <h5 class="mt-4">3. Simulação do Protocolo do Bit Alternante (ABP)</h5>
+    <pre class="code-block"><code>import random
+
+def canal_com_perdas(prob_perda: float = 0.3) -> bool:
+    """Simula um canal não confiável: retorna False se o quadro/ACK deve ser perdido."""
+    return random.random() >= prob_perda
+
+def alternating_bit_protocol(mensagens: list[str], prob_perda: float = 0.3):
+    seq = 0
+    for msg in mensagens:
+        confirmado = False
+        tentativa = 0
+        while not confirmado:
+            tentativa += 1
+            print(f"[Host A] envia D({seq}, '{msg}')  (tentativa {tentativa})")
+
+            if canal_com_perdas(prob_perda):
+                print(f"[Host B] recebe D({seq}, '{msg}') -> entrega à aplicação, envia C(OK{seq})")
+                if canal_com_perdas(prob_perda):
+                    print(f"[Host A] recebe C(OK{seq}) -> quadro confirmado")
+                    confirmado = True
+                else:
+                    print("[Host A] ACK perdido -> timer expira, retransmite")
+            else:
+                print("[Host A] quadro perdido no canal -> timer expira, retransmite")
+
+        seq = 1 - seq  # alterna entre 0 e 1
+
+alternating_bit_protocol(["a", "b", "c"])</code></pre>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">🧪 Experimente: simulador de bit stuffing</p>
+        <p class="text-muted small mb-2">Digite uma sequência de bits (apenas 0 e 1) e veja onde o algoritmo insere bits extras.</p>
+        <div class="input-group mb-3" style="max-width:420px">
+            <input type="text" id="bitsInput" class="form-control" value="0110111111111111111110010" pattern="[01]*">
+            <button class="btn btn-primary" id="stuffBtn" type="button">Aplicar stuffing</button>
+        </div>
+        <div id="stuffOutput"></div>
+    </div>
+</section>
+
+<!-- 9. Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>
+            Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>,
+            3ª edição — seção "Connecting two hosts".
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a>
+        </li>
+        <li>
+            Khan Academy — <a href="https://www.khanacademy.org/computing/computers-and-internet/xcae6f4a7ff015e7d:digital-information/xcae6f4a7ff015e7d:bits-and-bytes/v/khan-academy-and-codeorg-binary-data" target="_blank" rel="noopener noreferrer">Binary &amp; Data</a>
+        </li>
+        <li>
+            IT Crowd EN — <a href="https://www.youtube.com/watch?v=x3c1ih2NJEg" target="_blank" rel="noopener noreferrer">How does the INTERNET work? | ICT #2</a>
+        </li>
+        <li>
+            Ben Eater — <a href="https://www.youtube.com/watch?v=wgbV6DLVezo" target="_blank" rel="noopener noreferrer">How exactly does binary code work?</a>
+        </li>
+    </ul>
+
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<!-- Rodapé -->
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="text-muted">Redes de Computadores — Capítulo 1</span>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">← Voltar aos capítulos</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Demo 1: texto -> binário
+    function textoParaBits(texto) {
+        return texto.split("").map(function (ch) {
+            return ch.charCodeAt(0).toString(2).padStart(8, "0");
+        });
+    }
+
+    function atualizaBinOutput() {
+        var texto = document.getElementById("textInput").value || "";
+        var container = document.getElementById("binOutput");
+        container.innerHTML = "";
+        textoParaBits(texto).forEach(function (byte, idx) {
+            var wrap = document.createElement("div");
+            wrap.className = "me-3 mb-2 text-center";
+
+            var label = document.createElement("div");
+            label.className = "small text-muted";
+            label.textContent = texto[idx];
+            wrap.appendChild(label);
+
+            var chips = document.createElement("div");
+            byte.split("").forEach(function (bit) {
+                var chip = document.createElement("span");
+                chip.className = "bit-chip";
+                chip.textContent = bit;
+                chips.appendChild(chip);
+            });
+            wrap.appendChild(chips);
+            container.appendChild(wrap);
+        });
+    }
+    document.getElementById("textInput").addEventListener("input", atualizaBinOutput);
+    atualizaBinOutput();
+
+    // Demo 2: bit stuffing
+    var MARCADOR = "01111110";
+
+    function bitStuffing(dados) {
+        var saida = [];
+        var flags = []; // marca quais posições foram inseridas
+        var contadorUns = 0;
+        for (var i = 0; i < dados.length; i++) {
+            var bit = dados[i];
+            saida.push(bit);
+            flags.push(false);
+            if (bit === "1") {
+                contadorUns++;
+                if (contadorUns === 5) {
+                    saida.push("0");
+                    flags.push(true);
+                    contadorUns = 0;
+                }
+            } else {
+                contadorUns = 0;
+            }
+        }
+        return { bits: saida, flags: flags };
+    }
+
+    function renderStuffing() {
+        var input = document.getElementById("bitsInput").value.replace(/[^01]/g, "");
+        var resultado = bitStuffing(input);
+        var container = document.getElementById("stuffOutput");
+        container.innerHTML = "";
+
+        var linha = document.createElement("div");
+        linha.className = "mb-2";
+
+        MARCADOR.split("").forEach(function (bit) {
+            var chip = document.createElement("span");
+            chip.className = "bit-chip";
+            chip.style.background = "#d1e7dd";
+            chip.style.color = "#198754";
+            chip.textContent = bit;
+            linha.appendChild(chip);
+        });
+
+        resultado.bits.forEach(function (bit, idx) {
+            var chip = document.createElement("span");
+            chip.className = "bit-chip" + (resultado.flags[idx] ? " stuffed" : "");
+            chip.textContent = bit;
+            linha.appendChild(chip);
+        });
+
+        MARCADOR.split("").forEach(function (bit) {
+            var chip = document.createElement("span");
+            chip.className = "bit-chip";
+            chip.style.background = "#d1e7dd";
+            chip.style.color = "#198754";
+            chip.textContent = bit;
+            linha.appendChild(chip);
+        });
+
+        container.appendChild(linha);
+
+        var legenda = document.createElement("p");
+        legenda.className = "small text-muted mt-2 mb-0";
+        legenda.textContent = "Verde = marcador de quadro · Vermelho = bit inserido pelo stuffing";
+        container.appendChild(legenda);
+    }
+
+    document.getElementById("stuffBtn").addEventListener("click", renderStuffing);
+    renderStuffing();
+</script>
+
+</body>
+</html>
