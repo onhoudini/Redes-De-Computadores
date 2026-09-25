@@ -341,6 +341,18 @@
     <span class="kicker">Analogia</span>
     <h2 class="section-title">A Cachoeira Perpétua</h2>
 
+    <div class="alert alert-primary border-0" role="note">
+        <strong>Uma analogia, não uma arquitetura formal.</strong>
+        <span>
+            A “Cachoeira Perpétua” é uma representação didática para visualizar como o tráfego
+            pode atravessar diferentes escalas da infraestrutura de rede. Os termos
+            <strong>Topo</strong>, <strong>Queda</strong>, <strong>Base</strong> e
+            <strong>Leito</strong> não são camadas oficiais da Internet nem descrevem uma
+            topologia obrigatória. Na prática, os caminhos dos dados variam conforme a
+            tecnologia, o provedor e a topologia da rede.
+        </span>
+    </div>
+
     <p>
         Para responder a essa pergunta, é útil parar de olhar para um bit isolado e observar a
         <strong>infraestrutura</strong> que carrega bilhões deles ao mesmo tempo. Uma boa forma de
@@ -348,6 +360,7 @@
         no topo e, à medida que desce, vai se espalhando por caminhos cada vez menores, até chegar
         calma ao leito do rio — o seu dispositivo.
     </p>
+
 
     <figure class="diagram">
         <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:420px">
@@ -473,11 +486,12 @@
     <h2 class="section-title">Enquadramento: separando os bits em quadros</h2>
 
     <p>
-        Aplicações não trabalham com um fluxo contínuo de bits — elas trabalham com blocos
-        completos de dados, chamados <strong>quadros</strong> (<em>frames</em>). O problema do
-        enquadramento é: como o receptor consegue identificar onde um quadro começa e onde termina,
-        dentro de um fluxo de bits que pode ter erros?
-    </p>
+    As camadas de rede não trabalham todas com a mesma unidade de dados. Na camada de
+    enlace, os dados são organizados em blocos chamados <strong>quadros</strong>
+    (<em>frames</em>). O problema do enquadramento é: como o receptor consegue identificar
+    onde um quadro começa e onde termina dentro do fluxo de bits?
+</p>
+
     <p>
         Uma técnica clássica é a <strong>inserção de bits</strong> (<em>bit stuffing</em>): reserva-se
         a sequência <code>01111110</code> como marcador de início/fim de quadro. Para garantir que
