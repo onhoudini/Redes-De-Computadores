@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Capítulo 1 — Conectando dois hosts | Redes de Computadores</title>
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
     <meta name="description" content="Material didático complementar: como dois hosts se conectam, da camada física ao enquadramento e à entrega confiável de quadros.">
 
     <!-- Bootstrap -->
@@ -205,6 +207,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a>
                 </li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
             </ul>
         </div>
     </div>
@@ -274,7 +277,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:220px">
+            <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Codificação ASCII do caractere A em bits" style="width:100%;height:auto;max-height:220px"><title>O caractere A é representado pelo byte ASCII 01000001.</title>
             <text x="20" y="30" font-size="14" fill="#6c757d" font-family="sans-serif">Caractere</text>
             <rect x="20" y="45" width="60" height="50" rx="8" fill="#e7f1ff" stroke="#0d6efd"/>
             <text x="50" y="76" font-size="22" text-anchor="middle" font-family="monospace" fill="#0d6efd" font-weight="700">A</text>
@@ -322,7 +325,7 @@
 
     <div class="demo-box mb-4">
         <p class="fw-semibold mb-2">🧪 Experimente: texto → binário</p>
-        <p class="text-muted small mb-2">Digite algo e veja a codificação ASCII, bit a bit, exatamente como ela sairia pela interface de rede.</p>
+        <p class="text-muted small mb-2">Digite algo e veja os bytes UTF-8 usados para codificar o texto. ASCII representa apenas 128 caracteres; UTF-8 mantém esses mesmos bytes para eles e usa de 2 a 4 bytes para outros caracteres.</p>
         <input type="text" id="textInput" class="form-control mb-3" maxlength="12" value="Oi" placeholder="Digite até 12 caracteres">
         <div id="binOutput" class="d-flex flex-wrap"></div>
     </div>
@@ -363,7 +366,7 @@
 
 
     <figure class="diagram">
-        <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:420px">
+        <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:420px" role="img" aria-label="As quatro etapas da Cachoeira Perpétua: do cabo submarino até o seu roteador Wi-Fi."><title>As quatro etapas da Cachoeira Perpétua: do cabo submarino até o seu roteador Wi-Fi.</title>
             <!-- Topo -->
             <rect x="40" y="10" width="620" height="70" rx="10" fill="#e7f1ff" stroke="#0d6efd"/>
             <text x="60" y="35" font-size="15" font-weight="700" fill="#0d6efd" font-family="sans-serif">TOPO</text>
@@ -501,7 +504,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 800 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:190px">
+        <svg viewBox="0 0 800 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:190px" role="img" aria-label="Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns."><title>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns.</title>
             <text x="10" y="24" font-size="13" fill="#6c757d" font-family="sans-serif">Original (17 uns seguidos, mais que os cinco permitidos):</text>
             <g font-family="monospace" font-size="14" font-weight="700">
                 <text x="10" y="52" fill="#212529">0110111111111111111110010</text>
@@ -546,7 +549,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px">
+        <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px" role="img" aria-label="ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado."><title>ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado.</title>
             <text x="60" y="24" font-size="13" fill="#212529" font-family="sans-serif" font-weight="700">Host A</text>
             <text x="600" y="24" font-size="13" fill="#212529" font-family="sans-serif" font-weight="700">Host B</text>
             <line x1="80" y1="10" x2="80" y2="200" stroke="#ced4da" stroke-width="2"/>
@@ -575,8 +578,12 @@
 
     <p>
         O ABP resolve o problema de confiabilidade, mas é lento: o transmissor fica ocioso à espera
-        de cada ACK. Em um enlace de satélite com 250&nbsp;ms de atraso de propagação, por exemplo,
-        o throughput útil cai para poucos kbps, mesmo em um enlace de 50&nbsp;Kbps.
+        de cada ACK. Considere, para estimar a eficiência, quadros de 1.000 bits, enlace de
+        50&nbsp;kbps, atraso de propagação de 250&nbsp;ms em cada sentido e ACKs curtos. O tempo
+        de transmissão de um quadro é <code>L/R = 1.000/50.000 = 0,02 s</code>; como o RTT é
+        aproximadamente <code>0,5 s</code>, a eficiência do ABP sem perdas é
+        <code>(L/R)/(L/R + RTT) = 0,02/0,52 ≈ 3,85%</code>, ou cerca de
+        <code>1,92 kbps</code> de vazão útil. A conta ignora o tamanho do ACK, cabeçalhos e perdas.
     </p>
 </section>
 
@@ -595,7 +602,7 @@
     <div class="row g-4">
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#0d6efd" font-family="sans-serif">Go-Back-N</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">quadro 2 se perde:</text>
                     <g font-family="monospace" font-size="12">
@@ -626,7 +633,7 @@
         </div>
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#6610f2" font-family="sans-serif">Selective Repeat</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">quadro 2 se perde:</text>
                     <g font-family="monospace" font-size="12">
@@ -656,9 +663,67 @@
     <p class="mt-3">
         Em ambos os casos, o tamanho máximo da janela é limitado pelo número de bits usados para o
         número de sequência: com <em>n</em> bits, Go-Back-N pode usar no máximo
-        <code>2ⁿ − 1</code> quadros na janela, e Selective Repeat, no máximo <code>2ⁿ⁻¹</code> — do
-        contrário o receptor pode confundir um quadro novo com uma retransmissão antiga.
+        <code>2ⁿ − 1</code> quadros na janela para Go-Back-N, e no máximo <code>2ⁿ⁻¹</code> para
+        Selective Repeat — do contrário o receptor pode confundir um quadro novo com uma
+        retransmissão antiga.
     </p>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">🧪 Simulação rápida de janela (modelo didático)</p>
+        <p class="text-muted small">Configure o número de bits de sequência, a janela e a perda. Cada execução simula o envio de 12 quadros e estima retransmissões e aproveitamento de transmissões, sem substituir uma simulação completa de temporizadores/ACKs. No ABP, cada tentativa modela a entrega do dado e de seu ACK.</p>
+        <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2"><label class="form-label small" for="windowProtocol">Protocolo</label><select id="windowProtocol" class="form-select form-select-sm" aria-label="Protocolo de janela"><option value="abp">ABP</option><option value="gbn">Go-Back-N</option><option value="sr">Selective Repeat</option></select></div>
+            <div class="col-6 col-md-2"><label class="form-label small" for="windowBits">Bits de sequência</label><input id="windowBits" class="form-control form-control-sm" type="number" min="1" max="5" value="3" aria-label="Número de bits do número de sequência"></div>
+            <div class="col-6 col-md-2"><label class="form-label small" for="windowSize">Janela W</label><input id="windowSize" class="form-control form-control-sm" type="number" min="1" max="32" value="4" aria-label="Tamanho da janela"></div>
+            <div class="col-6 col-md-2"><label class="form-label small" for="windowLoss">Probabilidade de perda</label><input id="windowLoss" class="form-control form-control-sm" type="number" min="0" max="0.9" step="0.1" value="0.1" aria-label="Probabilidade de perda de quadros"></div>
+            <div class="col-6 col-md-2"><label class="form-label small" for="windowSeed">Semente</label><input id="windowSeed" class="form-control form-control-sm" type="number" value="42" aria-label="Semente aleatória para repetir a simulação"></div>
+            <div class="col-6 col-md-2"><button id="runWindowSimulation" type="button" class="btn btn-primary btn-sm w-100">Simular</button></div>
+        </div>
+        <div id="windowSimulationOutput" class="small mt-3" aria-live="polite"></div>
+    </div>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">Calculadora de eficiência stop-and-wait</p>
+        <p class="small text-muted">Modelo idealizado: U = (L/R) / (L/R + RTT). Valores de predefinição são aproximações didáticas; RTT e taxa reais variam com a rede.</p>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3"><label class="form-label small" for="effPreset">Cenário</label><select id="effPreset" class="form-select form-select-sm"><option value="custom">Personalizado</option><option value="wifi">Wi-Fi (1 ms, 100 Mbps)</option><option value="fiber">Fibra (10 ms, 1 Gbps)</option><option value="geo">Satélite geoestacionário (600 ms, 50 Mbps)</option><option value="leo">Satélite LEO (40 ms, 50 Mbps)</option></select></div>
+            <div class="col-md-3"><label class="form-label small" for="effFrame">Quadro L (bits)</label><input id="effFrame" type="number" min="1" value="1000" class="form-control form-control-sm"></div>
+            <div class="col-md-3"><label class="form-label small" for="effRate">Taxa R (bit/s)</label><input id="effRate" type="number" min="1" value="50000" class="form-control form-control-sm"></div>
+            <div class="col-md-3"><label class="form-label small" for="effRtt">RTT (ms)</label><input id="effRtt" type="number" min="0" value="500" class="form-control form-control-sm"></div>
+        </div>
+        <p id="effResult" class="small fw-semibold mt-3 mb-0" aria-live="polite"></p>
+    </div>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">Receptor: character stuffing</p>
+        <label class="form-label small" for="characterStuffInput">Texto com delimitadores DLE STX / DLE ETX (DLE nos dados é duplicado)</label>
+        <input id="characterStuffInput" class="form-control form-control-sm" value="DLE STX ola DLE DLE teste DLE ETX">
+        <p id="characterStuffOutput" class="small font-monospace mt-2 mb-0" aria-live="polite"></p>
+    </div>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">Codificação de linha (exemplo didático)</p>
+        <label class="form-label small" for="lineCodeBits">Bits de entrada</label>
+        <input id="lineCodeBits" class="form-control form-control-sm" value="10110010" pattern="[01]+" aria-label="Bits para visualizar codificação NRZ, NRZI e Manchester">
+        <label class="form-label small mt-2" for="clockDrift">Desvio visual do relógio</label>
+        <input id="clockDrift" type="range" class="form-range" min="0" max="45" value="0" aria-label="Desvio visual do relógio">
+        <div id="lineCodeOutput" class="font-monospace small" aria-live="polite"></div>
+    </div>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">Canal ruidoso: paridade e CRC</p>
+        <label class="form-label small" for="noiseRate">Probabilidade de inversão por bit</label>
+        <input id="noiseRate" type="number" class="form-control form-control-sm" min="0" max="0.5" step="0.01" value="0.05" aria-label="Probabilidade de inversão por bit">
+        <button id="runNoise" type="button" class="btn btn-primary btn-sm mt-2">Enviar 1000 quadros</button>
+        <p id="noiseOutput" class="small mt-2 mb-0" aria-live="polite"></p>
+    </div>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">Autoavaliação rápida</p>
+        <label class="form-label small" for="quizParity">A paridade par detecta sempre duas inversões de bits?</label>
+        <select id="quizParity" class="form-select form-select-sm" aria-label="Resposta sobre a detecção de dois erros pela paridade"><option value="">Escolha uma resposta</option><option value="yes">Sim</option><option value="no">Não</option></select>
+        <p id="quizParityFeedback" class="small mt-2 mb-0" aria-live="polite"></p>
+    </div>
 </section>
 
 <!-- 7. Aplicações reais -->
@@ -673,7 +738,12 @@
                 <p class="small text-muted">
                     Sistemas como o cabo <em>2Africa</em> ou o <em>EllaLink</em> (que liga Brasil e
                     Europa) usam DWDM para transportar dezenas de terabits por segundo em um único
-                    par de fibras — a mesma ideia da seção "Topo", em escala real.
+                    par de fibras — a mesma ideia da seção "Topo", em escala real. Consulte o
+                    <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener noreferrer">Submarine Cable Map</a>
+                    para explorar rotas e pontos de chegada. Parte significativa do tráfego local
+                    pode permanecer no país por meio de IXPs, como o
+                    <a href="https://ix.br/" target="_blank" rel="noopener noreferrer">IX.br</a>,
+                    e de caches/CDNs próximos, sem cruzar um cabo submarino.
                 </p>
             </div>
         </div>
@@ -691,9 +761,10 @@
             <div class="card-soft p-4 h-100">
                 <h6 class="fw-semibold">🧮 CRC no dia a dia</h6>
                 <p class="small text-muted">
-                    Toda vez que um quadro Ethernet chega a uma placa de rede, ou que um arquivo
-                    <code>.zip</code> ou <code>.png</code> é aberto, um CRC é recalculado para
-                    garantir que os bits não foram corrompidos no caminho.
+                    Quadros Ethernet carregam um FCS calculado com CRC-32, que a interface de rede
+                    verifica ao receber o quadro. Formatos como ZIP e PNG também definem verificações
+                    CRC para seus dados; isso detecta muitas corrupções acidentais, mas não é uma
+                    garantia de autenticidade nem de detecção de todo erro possível.
                 </p>
             </div>
         </div>
@@ -701,12 +772,18 @@
             <div class="card-soft p-4 h-100">
                 <h6 class="fw-semibold">🔁 Janela deslizante no TCP</h6>
                 <p class="small text-muted">
-                    O TCP, usado por praticamente toda a Web, é uma versão sofisticada de
-                    Selective Repeat: ele numera bytes (não quadros) e usa ACKs para controlar
-                    quanto dado pode estar "em voo" entre os dois hosts.
+                    O TCP não é simplesmente Selective Repeat nem Go-Back-N. Ele numera bytes,
+                    normalmente confirma cumulativamente os bytes recebidos em ordem e pode
+                    armazenar dados fora de ordem; a opção SACK permite informar blocos recebidos
+                    fora de ordem. Por isso, sua recuperação combina características desses modelos.
                 </p>
             </div>
         </div>
+    </div>
+
+    <div class="card-soft p-4 mt-4">
+        <h3 class="h6">Como a IA foi usada e o que foi conferido</h3>
+        <p class="small text-muted mb-0">Ferramentas de IA podem auxiliar na revisão e na elaboração de exemplos, mas não substituem fontes primárias. As explicações de paridade, checksum, CRC e TCP foram revistas durante esta implementação com referência ao livro CNP3, às RFCs 1071 e 9293 e à especificação IEEE 802.3; números do exemplo de eficiência foram recalculados explicitamente. A revisão técnica completa do capítulo ainda está pendente.</p>
     </div>
 </section>
 
@@ -721,7 +798,26 @@
         simulação simplificada do Protocolo do Bit Alternante sobre um canal com perdas.
     </p>
 
-    <h5 class="mt-4">1. Bit de paridade (detecção simples de erro)</h5>
+    <h5 class="mt-4">1. Detecção de erros: paridade, checksum e CRC</h5>
+    <p>
+        A detecção de erros acrescenta redundância ao quadro para que o receptor possa verificar
+        se os bits recebidos são consistentes. A <strong>paridade</strong> escolhe um bit extra
+        para que a quantidade de bits 1 seja par (ou ímpar): detecta qualquer quantidade ímpar de
+        inversões, mas não detecta necessariamente uma quantidade par. Um <strong>checksum</strong>
+        soma palavras de dados usando aritmética definida pelo protocolo e transmite o complemento
+        da soma; é usado, por exemplo, no cabeçalho IPv4 e nos segmentos TCP/UDP (incluindo o
+        pseudo cabeçalho definido por esses protocolos). Um <strong>CRC</strong>
+        interpreta os bits como um polinômio sobre GF(2) e transmite o resto da divisão pelo
+        polinômio gerador. CRCs detectam várias classes de erros em rajada, mas, como os demais,
+        não corrigem erros nem garantem detectar toda corrupção possível. Ethernet usa CRC-32 no FCS.
+    </p>
+    <p class="small text-muted">
+        Referências para conferência: Bonaventure, <em>Computer Networking: Principles,
+        Protocols and Practice</em>, capítulo de enlace; RFC 1071 (checksum IP); RFC 9293
+        (TCP); IEEE 802.3 (FCS Ethernet).
+    </p>
+
+    <h6 class="mt-3">Bit de paridade (exemplo)</h6>
     <pre class="code-block"><code>def paridade_par(bits: str) -> str:
     """Recebe uma string de bits e devolve a string com 1 bit de paridade par ao final."""
     uns = bits.count("1")
@@ -816,9 +912,9 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 
     <div class="demo-box mt-4">
         <p class="fw-semibold mb-2">🧪 Experimente: simulador de bit stuffing</p>
-        <p class="text-muted small mb-2">Digite uma sequência de bits (apenas 0 e 1) e veja onde o algoritmo insere bits extras.</p>
+        <p class="text-muted small mb-2">Digite uma sequência de bits (apenas 0 e 1). Caracteres inválidos serão informados, não descartados. O receptor remove os bits inseridos.</p>
         <div class="input-group mb-3" style="max-width:420px">
-            <input type="text" id="bitsInput" class="form-control" value="0110111111111111111110010" pattern="[01]*">
+            <input type="text" id="bitsInput" class="form-control" value="0110111111111111111110010" pattern="[01]*" aria-label="Sequência de bits para bit stuffing">
             <button class="btn btn-primary" id="stuffBtn" type="button">Aplicar stuffing</button>
         </div>
         <div id="stuffOutput"></div>
@@ -854,6 +950,15 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 
 </section>
 
+<section id="exercicios" class="chapter-section">
+    <span class="kicker">Pratique</span><h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li><strong>Aquecimento:</strong> quantos bits são necessários para numerar 16 quadros distintos? <details><summary>Ver solução</summary><p>Quatro bits, pois 2⁴ = 16 valores possíveis. Note que o tamanho máximo da janela também depende do protocolo.</p></details></li>
+        <li><strong>Intermediário:</strong> um quadro de 1.000 bits é enviado a 50 kbps, RTT=500 ms. Calcule a eficiência stop-and-wait. <details><summary>Ver solução</summary><p>L/R=0,02 s; U=0,02/(0,02+0,5)≈3,85%.</p></details></li>
+        <li><strong>Desafio:</strong> complete o editor de paridade para testar quadro com dois bits invertidos e explique o resultado. <details><summary>Ver roteiro</summary><p>Modifique <code>com_erro</code> no código executável acima e compare a quantidade total de bits 1 com a paridade par esperada.</p></details></li>
+    </ol>
+</section>
+
         </div><!-- /col conteúdo -->
     </div><!-- /row -->
 </div><!-- /container -->
@@ -874,8 +979,8 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 <script>
     // Demo 1: texto -> binário
     function textoParaBits(texto) {
-        return texto.split("").map(function (ch) {
-            return ch.charCodeAt(0).toString(2).padStart(8, "0");
+        return Array.from(new TextEncoder().encode(texto), function (byte) {
+            return byte.toString(2).padStart(8, "0");
         });
     }
 
@@ -889,7 +994,7 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 
             var label = document.createElement("div");
             label.className = "small text-muted";
-            label.textContent = texto[idx];
+            label.textContent = "byte " + (idx + 1);
             wrap.appendChild(label);
 
             var chips = document.createElement("div");
@@ -932,10 +1037,18 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
     }
 
     function renderStuffing() {
-        var input = document.getElementById("bitsInput").value.replace(/[^01]/g, "");
+        var input = document.getElementById("bitsInput").value;
         var resultado = bitStuffing(input);
         var container = document.getElementById("stuffOutput");
         container.innerHTML = "";
+
+        if (!/^[01]*$/.test(input)) {
+            var aviso = document.createElement("p");
+            aviso.className = "small text-danger";
+            aviso.textContent = "Entrada inválida: use somente 0 e 1. Nenhum caractere foi removido.";
+            container.appendChild(aviso);
+            return;
+        }
 
         var linha = document.createElement("div");
         linha.className = "mb-2";
@@ -967,15 +1080,210 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 
         container.appendChild(linha);
 
+        var receptor = document.createElement("p");
+        receptor.className = "small mt-2 mb-0 font-monospace";
+        receptor.textContent = "Receptor (após remover os bits inseridos): " + removeBitStuffing(resultado.bits.join(""));
+        container.appendChild(receptor);
+
         var legenda = document.createElement("p");
         legenda.className = "small text-muted mt-2 mb-0";
         legenda.textContent = "Verde = marcador de quadro · Vermelho = bit inserido pelo stuffing";
         container.appendChild(legenda);
     }
 
+    function removeBitStuffing(corpo) {
+        var saida = "";
+        var unsConsecutivos = 0;
+        for (var i = 0; i < corpo.length; i++) {
+            var bit = corpo[i];
+            saida += bit;
+            if (bit === "1") {
+                unsConsecutivos++;
+                if (unsConsecutivos === 5) {
+                    if (corpo[i + 1] !== "0") {
+                        throw new Error("Quadro inválido: esperado bit 0 de stuffing após cinco bits 1.");
+                    }
+                    i++;
+                    unsConsecutivos = 0;
+                }
+            } else {
+                unsConsecutivos = 0;
+            }
+        }
+        return saida;
+    }
+
+    // Simulação didática simplificada de eficiência e retransmissões por janela.
+    document.getElementById("runWindowSimulation").addEventListener("click", function () {
+        var protocolo = document.getElementById("windowProtocol").value;
+        var bits = Number(document.getElementById("windowBits").value);
+        var janela = Number(document.getElementById("windowSize").value);
+        var perda = Number(document.getElementById("windowLoss").value);
+        var semente = Number(document.getElementById("windowSeed").value) || 0;
+        var maxJanela = protocolo === "gbn" ? Math.pow(2, bits) - 1 : Math.pow(2, bits - 1);
+        var output = document.getElementById("windowSimulationOutput");
+
+        if (bits < 1 || bits > 5 || janela < 1 || janela > 32 || perda < 0 || perda > 0.9) {
+            output.textContent = "Use 1–5 bits, janela de 1–32 e perda entre 0 e 0,9.";
+            return;
+        }
+        if (protocolo !== "abp" && janela > maxJanela) {
+            output.textContent = "Janela inválida para " + (protocolo === "gbn" ? "Go-Back-N" : "Selective Repeat") + ": com " + bits + " bits, máximo = " + maxJanela + ".";
+            return;
+        }
+
+        var estado = (semente >>> 0) || 1;
+        function aleatorio() { estado = (1664525 * estado + 1013904223) >>> 0; return estado / 4294967296; }
+        var total = 12;
+        var retransmissoes = 0;
+        var enviados = 0;
+        var limite = 10000;
+        if (protocolo === "abp") {
+            for (var frame = 0; frame < total; frame++) {
+                var confirmado = false;
+                while (!confirmado && limite-- > 0) {
+                    enviados++;
+                    var dadoChegou = aleatorio() >= perda;
+                    confirmado = dadoChegou && aleatorio() >= perda;
+                    if (!confirmado) retransmissoes++;
+                }
+            }
+        } else if (protocolo === "gbn") {
+            var base = 0;
+            while (base < total && limite-- > 0) {
+                var loteGbn = Math.min(janela, total - base);
+                var primeiroPerdido = -1;
+                for (var g = 0; g < loteGbn; g++) {
+                    enviados++;
+                    if (aleatorio() < perda && primeiroPerdido < 0) primeiroPerdido = g;
+                }
+                if (primeiroPerdido < 0) base += loteGbn;
+                else {
+                    base += primeiroPerdido;
+                    retransmissoes += loteGbn - primeiroPerdido;
+                    enviados += loteGbn - primeiroPerdido;
+                }
+            }
+        } else {
+            var confirmados = new Array(total).fill(false);
+            while (confirmados.some(function (ok) { return !ok; }) && limite-- > 0) {
+                var pendentes = [];
+                for (var s = 0; s < total && pendentes.length < janela; s++) if (!confirmados[s]) pendentes.push(s);
+                pendentes.forEach(function (frameIndex) {
+                    enviados++;
+                    if (aleatorio() >= perda) confirmados[frameIndex] = true;
+                    else retransmissoes++;
+                });
+            }
+        }
+        if (limite <= 0) { output.textContent = "A simula??o atingiu o limite de tentativas; reduza a perda."; return; }
+        var aproveitamento = enviados ? (total / enviados * 100).toFixed(1) : "0.0";
+        output.textContent = "Quadros entregues: " + total + " · transmissões totais: " + enviados + " · retransmissões: " + retransmissoes + " · aproveitamento didático: " + aproveitamento + "% (semente " + semente + ").";
+    });
+
+    var efficiencyPresets = {
+        wifi: { rtt: 1, rate: 100000000 },
+        fiber: { rtt: 10, rate: 1000000000 },
+        geo: { rtt: 600, rate: 50000000 },
+        leo: { rtt: 40, rate: 50000000 }
+    };
+    function updateEfficiency() {
+        var length = Number(document.getElementById("effFrame").value);
+        var rate = Number(document.getElementById("effRate").value);
+        var rtt = Number(document.getElementById("effRtt").value) / 1000;
+        var result = document.getElementById("effResult");
+        if (!(length > 0) || !(rate > 0) || rtt < 0) { result.textContent = "Informe L e R positivos e RTT não negativo."; return; }
+        var tx = length / rate;
+        var utilization = tx / (tx + rtt);
+        result.textContent = "L/R = " + tx.toPrecision(4) + " s · eficiência U = " + (utilization * 100).toFixed(2) + "% · vazão útil aproximada = " + (rate * utilization / 1000).toFixed(2) + " kbps.";
+    }
+    document.getElementById("effPreset").addEventListener("change", function (event) {
+        var preset = efficiencyPresets[event.target.value];
+        if (preset) { document.getElementById("effRtt").value = preset.rtt; document.getElementById("effRate").value = preset.rate; }
+        updateEfficiency();
+    });
+    ["effFrame", "effRate", "effRtt"].forEach(function (id) { document.getElementById(id).addEventListener("input", updateEfficiency); });
+    updateEfficiency();
+
+    function removeCharacterStuffing(frame) {
+        var start = "DLE STX", end = "DLE ETX";
+        if (frame.indexOf(start) !== 0 || frame.lastIndexOf(end) !== frame.length - end.length) return null;
+        var body = frame.slice(start.length, -end.length);
+        return body.replace(/DLE DLE/g, "DLE");
+    }
+    function updateCharacterStuffing() {
+        var frame = document.getElementById("characterStuffInput").value;
+        var body = removeCharacterStuffing(frame);
+        document.getElementById("characterStuffOutput").textContent = body === null ? "Quadro malformado: verifique os delimitadores e os DLE duplicados." : "Dados recuperados: " + body;
+    }
+    document.getElementById("characterStuffInput").addEventListener("input", updateCharacterStuffing);
+    updateCharacterStuffing();
+
+    function desenharCodificacaoLinha() {
+        var bits = document.getElementById("lineCodeBits").value;
+        var drift = Number(document.getElementById("clockDrift").value);
+        var output = document.getElementById("lineCodeOutput");
+        output.replaceChildren();
+        if (!/^[01]+$/.test(bits)) { output.textContent = "Use somente 0 e 1."; return; }
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 700 220"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Formas de onda NRZ, NRZI e Manchester"); svg.classList.add("w-100");
+        var title = document.createElementNS(svg.namespaceURI, "title"); title.textContent = "Comparação didática das codificações de linha"; svg.appendChild(title);
+        var labels = ["NRZ-L", "NRZI", "Manchester"];
+        var rows = [];
+        labels.forEach(function (name, row) {
+            var label = document.createElementNS(svg.namespaceURI, "text"); label.setAttribute("x", "4"); label.setAttribute("y", String(45 + row * 60)); label.textContent = name; svg.appendChild(label);
+            var path = document.createElementNS(svg.namespaceURI, "path"); var x0 = 82, width = 600 / bits.length, high = 28 + row * 60, low = 50 + row * 60;
+            var d = "M " + x0 + " " + low; var level = 0;
+            bits.split("").forEach(function (bit, idx) {
+                var x = x0 + idx * width;
+                if (name === "NRZ-L") level = bit === "1" ? 1 : 0;
+                if (name === "NRZI" && bit === "1") level = 1 - level;
+                if (name === "Manchester") {
+                    var first = bit === "1" ? 1 : 0; var second = 1 - first;
+                    d += " L " + x + " " + (first ? high : low) + " L " + (x + width / 2) + " " + (first ? high : low) + " L " + (x + width / 2) + " " + (second ? high : low) + " L " + (x + width) + " " + (second ? high : low);
+                } else {
+                    var y = level ? high : low; d += " L " + x + " " + y + " L " + (x + width) + " " + y;
+                }
+                var bitLabel = document.createElementNS(svg.namespaceURI, "text"); bitLabel.setAttribute("x", String(x + width / 2)); bitLabel.setAttribute("y", "215"); bitLabel.setAttribute("text-anchor", "middle"); bitLabel.textContent = bit; svg.appendChild(bitLabel);
+            });
+            path.setAttribute("d", d); path.setAttribute("fill", "none"); path.setAttribute("stroke", ["#0d6efd", "#198754", "#6610f2"][row]); path.setAttribute("stroke-width", "2.5"); svg.appendChild(path); rows.push({ name: name, drift: drift });
+        });
+        if (drift) {
+            var warning = document.createElement("p"); warning.className = "small text-warning mb-0";
+            warning.textContent = "Desvio ilustrativo de " + drift + "%: bordas de amostragem aproximadas deslocadas; bits muito curtos podem ser interpretados incorretamente. Não é uma simulação física do receptor.";
+            output.append(svg, warning);
+        } else output.appendChild(svg);
+    }
+    ["lineCodeBits", "clockDrift"].forEach(function (id) { document.getElementById(id).addEventListener("input", desenharCodificacaoLinha); });
+    desenharCodificacaoLinha();
+
+    document.getElementById("runNoise").addEventListener("click", function () {
+        var rate = Number(document.getElementById("noiseRate").value);
+        var output = document.getElementById("noiseOutput");
+        if (rate < 0 || rate > 0.5) { output.textContent = "Use uma probabilidade entre 0 e 0,5."; return; }
+        var state = 2026;
+        function rand() { state = (1664525 * state + 1013904223) >>> 0; return state / 4294967296; }
+        var parityMiss = 0, crcMiss = 0, errorFrames = 0, sampleBits = 64;
+        for (var frame = 0; frame < 1000; frame++) {
+            var errors = 0;
+            for (var bit = 0; bit < sampleBits; bit++) if (rand() < rate) errors++;
+            if (errors) errorFrames++;
+            if (errors > 0 && errors % 2 === 0) parityMiss++;
+            // Aproximação pedagógica: CRC-32 tem probabilidade residual ~2^-32 para erro aleatório.
+            if (errors && rand() < Math.pow(2, -32)) crcMiss++;
+        }
+        output.textContent = "Em 1000 quadros de 64 bits: " + errorFrames + " tiveram pelo menos um bit invertido; paridade detectou " + (errorFrames - parityMiss) + " e não detectou " + parityMiss + " quadros com quantidade par de erros. O modelo CRC detectou " + (errorFrames - crcMiss) + " e não detectou " + crcMiss + ". CRC-32 não é infalível: aqui a chance residual é aproximada por 2⁻³²; não se calcula um polinômio/FCS real.";
+    });
+
+    document.getElementById("quizParity").addEventListener("change", function (event) {
+        document.getElementById("quizParityFeedback").textContent = event.target.value === "no" ? "Correto: duas inversões mantêm a paridade e podem passar despercebidas." : event.target.value === "yes" ? "Ainda não: duas inversões alteram a quantidade de bits 1 por um número par." : "";
+    });
+
     document.getElementById("stuffBtn").addEventListener("click", renderStuffing);
     renderStuffing();
 </script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
 
 </body>
 </html>

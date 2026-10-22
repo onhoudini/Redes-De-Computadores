@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Capítulo 2 — Construindo uma rede | Redes de Computadores</title>
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
     <meta name="description" content="Material didático complementar: da camada de enlace à camada de rede — pacotes, endereçamento, tabelas de encaminhamento e roteamento por vetor de distância e por estado de enlace.">
 
     <!-- Bootstrap -->
@@ -217,6 +219,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a>
                 </li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
             </ul>
         </div>
     </div>
@@ -259,8 +262,13 @@
                     <a class="nav-link" href="#vetor-distancia">5. Roteamento por vetor de distância</a>
                     <a class="nav-link" href="#estado-enlace">6. Roteamento por estado de enlace</a>
                     <a class="nav-link" href="#comparacao">7. Do conceito à prática</a>
-                    <a class="nav-link" href="#exemplos">8. Exemplos de código</a>
-                    <a class="nav-link" href="#referencias">9. Referências</a>
+                    <a class="nav-link" href="#grafo-editavel">8. Simulador de roteamento</a>
+                    <a class="nav-link" href="#traceroute-colavel">9. Interpretar traceroute</a>
+                    <a class="nav-link" href="#rede-laboratorio">10. Prefixos, TTL e LSP</a>
+                    <a class="nav-link" href="#exercicios-cap2">11. Exercícios</a>
+                    <a class="nav-link" href="#autoavaliacao-cap2">12. Autoavaliação</a>
+                    <a class="nav-link" href="#exemplos">13. Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">14. Referências</a>
                 </nav>
             </div>
         </div>
@@ -278,7 +286,7 @@
         pelo mesmo cabo, pela mesma fibra ou pelo mesmo canal de rádio — conversarem sem erros. Mas
         isso não é suficiente para conectar um notebook em Porto Alegre a um servidor no Japão:
         entre os dois existem dezenas de enlaces distintos, cada um com sua própria tecnologia. É
-        exatamente esse é o papel da <strong>camada de rede</strong>: permitir que hosts que não
+        É exatamente esse o papel da <strong>camada de rede</strong>: permitir que hosts que não
         compartilham um enlace direto troquem informação por meio de dispositivos intermediários
         chamados <strong>roteadores</strong>.
     </p>
@@ -290,7 +298,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px">
+        <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px" role="img" aria-label="Uma pequena inter-rede: para A alcançar B ou C, seus pacotes precisam atravessar vários roteadores."><title>Uma pequena inter-rede: para A alcançar B ou C, seus pacotes precisam atravessar vários roteadores.</title>
             <!-- hosts -->
             <circle cx="50" cy="110" r="26" fill="#e7f1ff" stroke="#0d6efd" stroke-width="2"/>
             <text x="50" y="116" text-anchor="middle" font-family="sans-serif" font-weight="700" fill="#0d6efd">A</text>
@@ -368,7 +376,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:170px">
+        <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:170px" role="img" aria-label="Todo roteador no caminho lê apenas o cabeçalho — nunca precisa entender a carga útil."><title>Todo roteador no caminho lê apenas o cabeçalho — nunca precisa entender a carga útil.</title>
             <rect x="10" y="35" width="120" height="60" rx="8" fill="#e7f1ff" stroke="#0d6efd"/>
             <text x="70" y="60" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#0d6efd" font-weight="700">Endereço</text>
             <text x="70" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#0d6efd">de origem</text>
@@ -397,22 +405,22 @@
 
     <div class="demo-box mb-4">
         <p class="fw-semibold mb-2">🧪 Experimente: monte um pacote</p>
-        <p class="text-muted small mb-2">Preencha origem, destino e a mensagem para ver como ficaria o cabeçalho do pacote (endereços fictícios de 8 bits, apenas para fins didáticos).</p>
+        <p class="text-muted small mb-2">Preencha endereços numéricos de 0 a 255 e uma mensagem. Os endereços são exemplos didáticos de 8 bits, não endereços IP reais.</p>
         <div class="row g-2 mb-3">
             <div class="col-md-4">
                 <label class="form-label small">Origem</label>
-                <input type="text" id="pktSrc" class="form-control form-control-sm" value="A" maxlength="1">
+                <input type="number" id="pktSrc" class="form-control form-control-sm" value="1" min="0" max="255" step="1" aria-label="Endereço de origem, de 0 a 255">
             </div>
             <div class="col-md-4">
                 <label class="form-label small">Destino</label>
-                <input type="text" id="pktDst" class="form-control form-control-sm" value="J" maxlength="1">
+                <input type="number" id="pktDst" class="form-control form-control-sm" value="10" min="0" max="255" step="1" aria-label="Endereço de destino, de 0 a 255">
             </div>
             <div class="col-md-4">
                 <label class="form-label small">Mensagem</label>
                 <input type="text" id="pktMsg" class="form-control form-control-sm" value="oi!" maxlength="16">
             </div>
         </div>
-        <div id="pktOutput" class="font-monospace small"></div>
+        <div id="pktOutput" class="font-monospace small" aria-live="polite"></div>
     </div>
 </section>
 
@@ -430,7 +438,7 @@
     <div class="row g-4">
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#0d6efd" font-family="sans-serif">Modo datagrama</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">cada pacote carrega o endereço completo</text>
                     <g font-family="monospace" font-size="11">
@@ -447,7 +455,7 @@
         </div>
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#6610f2" font-family="sans-serif">Circuito virtual</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">um rótulo curto substitui o endereço</text>
                     <g font-family="monospace" font-size="11">
@@ -511,7 +519,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:150px">
+        <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:150px" role="img" aria-label="Longest prefix match: a entrada mais específica que ainda combina com o endereço vence. (Em IPv4 real, de 32 bits, uma rota para um único host seria /32, não /16 — aqui usamos 16 bits só por causa do espaço na figura.)"><title>Longest prefix match: a entrada mais específica que ainda combina com o endereço vence. (Em IPv4 real, de 32 bits, uma rota para um único host seria /32, não /16 — aqui usamos 16 bits só por causa do espaço na figura.)</title>
             <text x="10" y="22" font-size="12" fill="#6c757d" font-family="sans-serif">Endereço de destino (exemplo fictício de 16 bits): 01001010 10000011</text>
             <g font-family="monospace" font-size="13">
                 <rect x="10" y="35" width="180" height="30" fill="#d1e7dd" stroke="#198754"/>
@@ -575,7 +583,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:220px">
+        <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:220px" role="img" aria-label="Vetor de distância: A escolhe A→B→D para D; para C, o custo direto 4 empata com A→B→D→C (1+2+1), e o simulador preserva a rota direta em empates."><title>Vetor de distância: A escolhe A→B→D para D; para C, o custo direto 4 empata com A→B→D→C (1+2+1), e o simulador preserva a rota direta em empates.</title>
             <g font-family="sans-serif" font-weight="700" font-size="13" fill="#212529">
                 <circle cx="60" cy="100" r="24" fill="#ffe3f0" stroke="#d63384" stroke-width="2"/>
                 <text x="60" y="105" text-anchor="middle">A</text>
@@ -599,12 +607,12 @@
 
             <text x="480" y="60" font-size="12" fill="#212529" font-family="sans-serif" font-weight="700">Tabela de A após convergir:</text>
             <text x="480" y="82" font-size="11.5" fill="#212529" font-family="monospace">B: custo 1, via B</text>
-            <text x="480" y="100" font-size="11.5" fill="#212529" font-family="monospace">C: custo 4, via B</text>
+            <text x="480" y="100" font-size="11.5" fill="#212529" font-family="monospace">C: custo 4, via C (empate)</text>
             <text x="480" y="118" font-size="11.5" fill="#212529" font-family="monospace">D: custo 3, via B</text>
             <text x="480" y="140" font-size="10.5" fill="#6c757d" font-family="sans-serif">(A→B→D custa 1+2=3,</text>
             <text x="480" y="155" font-size="10.5" fill="#6c757d" font-family="sans-serif">melhor que A→C→D=4+1=5)</text>
         </svg>
-        <figcaption>Vetor de distância: A escolhe o caminho A→B→D porque a soma dos custos é menor.</figcaption>
+        <figcaption>Vetor de distância: A escolhe A→B→D para D; para C, o custo direto 4 empata com A→B→D→C (1+2+1), e o simulador preserva a rota direta em empates.</figcaption>
     </figure>
 
     <p>
@@ -654,7 +662,7 @@
     </p>
 
     <figure class="diagram">
-        <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:210px">
+        <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:210px" role="img" aria-label="Distribuição de um LSP por inundação — a base para que todo roteador monte o mesmo mapa da rede."><title>Distribuição de um LSP por inundação — a base para que todo roteador monte o mesmo mapa da rede.</title>
             <g font-family="sans-serif" font-weight="700" font-size="13" fill="#212529">
                 <circle cx="80" cy="95" r="22" fill="#e6f6ec" stroke="#198754" stroke-width="2"/>
                 <text x="80" y="100" text-anchor="middle">E</text>
@@ -742,6 +750,10 @@
                     protocolo de vetor de caminho que anuncia a rota completa de sistemas
                     autônomos, não apenas um custo — assim cada provedor decide sozinho em quem
                     confiar.
+                    Para consultar informações públicas de roteamento, veja o
+                    <a href="https://bgp.he.net/" target="_blank" rel="noopener noreferrer">BGP Toolkit</a>
+                    ou o <a href="https://stat.ripe.net/" target="_blank" rel="noopener noreferrer">RIPEstat</a>;
+                    as rotas e atributos observados dependem do ponto de coleta e do momento.
                 </p>
             </div>
         </div>
@@ -759,27 +771,129 @@
             <div class="card-soft p-4 h-100">
                 <h6 class="fw-semibold">📶 CIDR e blocos de endereço</h6>
                 <p class="small text-muted mb-0">
-                    Quando seu provedor de Internet informa um "bloco /24" para sua casa, ele está
-                    aplicando exatamente o endereçamento hierárquico descrito neste capítulo — um
-                    prefixo comum a todos os endereços daquele bloco.
+                    Em uma conexão residencial, é comum receber um único endereço IPv4 público —
+                    que pode estar compartilhado por CGNAT — e, quando há IPv6, um prefixo como
+                    /56 ou /64, conforme o provedor. Um /24 contém 256 endereços IPv4 e costuma ser
+                    um bloco de rede, não a alocação típica para uma residência.
                 </p>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card-soft p-4 h-100">
                 <h6 class="fw-semibold">🧭 traceroute</h6>
-                <p class="small text-muted mb-0">
-                    A ferramenta <code>traceroute</code> (ou <code>tracert</code>) revela, salto a
-                    salto, exatamente o caminho que a tabela de encaminhamento de cada roteador
-                    escolheu para o seu pacote — é o vetor de distância ou o estado de enlace em
-                    ação, visível na sua própria tela.
+                    A ferramenta <code>traceroute</code> (ou <code>tracert</code>) estima, salto a
+                    salto, o caminho de encaminhamento observado a partir da origem. Ela não é um
+                    protocolo de roteamento nem identifica, sozinha, qual algoritmo calculou cada
+                    rota. Dentro de um sistema autônomo, protocolos como OSPF podem contribuir para
+                    as rotas; entre sistemas autônomos, o BGP troca informações de alcançabilidade
+                    e políticas influenciam a escolha. Resultados podem variar por caminho de volta,
+                    balanceamento e filtros de ICMP.
                 </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- 8. Exemplos de código -->
+<!-- 8. Simulador de roteamento -->
+<section id="grafo-editavel" class="chapter-section">
+    <span class="kicker">Laboratório interativo</span>
+    <h2 class="section-title">Vetor de distância e Dijkstra no mesmo grafo</h2>
+    <p>Edite custos ou derrube enlaces e compare as rotas. O vetor de distância usa um limite didático de métrica 16; split horizon e poison reverse alteram os anúncios enviados ao vizinho. Arraste os nós no desenho para reorganizar a visualização. Em uma topologia com rota alternativa, desligar essas proteções pode produzir aumento iterativo da métrica (contagem ao infinito).</p>
+    <div class="row g-4">
+        <div class="col-lg-5">
+                <svg viewBox="0 0 460 200" role="img" aria-label="Grafo editável de quatro roteadores e enlaces ponderados" class="w-100 border rounded bg-white">
+                <title>Grafo editável: arraste os roteadores; altere custos ou derrube enlaces nos controles abaixo.</title>
+            </svg>
+            <h3 class="h6 mt-3">Enlaces</h3>
+            <div id="routingEdgeControls"></div>
+            <div class="input-group input-group-sm mt-2">
+                <label class="input-group-text" for="addRoutingLink">Novo enlace</label>
+                <select id="addRoutingLink" class="form-select" aria-label="Extremidade inicial do enlace novo"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+                <select id="addRoutingLinkTo" class="form-select" aria-label="Extremidade final do enlace novo"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+                <input id="addRoutingCost" type="number" min="1" max="99" value="1" class="form-control" aria-label="Custo do novo enlace">
+                <button id="addRoutingLinkButton" type="button" class="btn btn-outline-primary">Adicionar</button>
+            </div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="routingSplitHorizon"><label class="form-check-label small" for="routingSplitHorizon">Split horizon</label></div>
+            <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="routingPoisonReverse"><label class="form-check-label small" for="routingPoisonReverse">Poison reverse</label></div>
+            <button type="button" class="btn btn-primary btn-sm" id="runEditableRouting">Recalcular rotas</button>
+        </div>
+        <div class="col-lg-7">
+            <h3 class="h6">Tabelas de todos os roteadores — vetor de distância</h3>
+            <p id="routingDVStatus" class="small text-muted" aria-live="polite"></p>
+            <div id="routingDVOutput" class="table-responsive small"></div>
+            <details class="small mt-2"><summary>Rodadas de vetor de distância</summary><ol id="routingDVRounds"></ol></details>
+            <h3 class="h6 mt-4">Dijkstra a partir de A</h3>
+            <div id="routingDijkstraOutput"></div>
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="routingDijkstraStep">Próximo passo de Dijkstra</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="routingDijkstraReset">Reiniciar Dijkstra</button>
+            <p id="routingDijkstraQueue" class="small font-monospace mt-2 mb-0" aria-live="polite"></p>
+        </div>
+    </div>
+</section>
+
+<section id="traceroute-colavel" class="chapter-section">
+    <span class="kicker">Diagnóstico de rede</span>
+    <h2 class="section-title">Interprete seu próprio traceroute</h2>
+    <p>Cole a saída de <code>traceroute</code> (Linux/macOS) ou <code>tracert</code> (Windows). A página extrai saltos e tempos em ms; a visualização é local e não envia o texto para um servidor.</p>
+    <label class="form-label" for="tracerouteInput">Saída do comando</label>
+    <textarea id="tracerouteInput" class="form-control font-monospace" rows="7" aria-label="Cole aqui a saída do traceroute ou tracert" placeholder="1  192.168.1.1  1.23 ms  1.10 ms  1.08 ms"></textarea>
+    <button type="button" class="btn btn-primary btn-sm mt-2" id="parseTraceroute">Interpretar saltos</button>
+    <div id="tracerouteOutput" class="mt-3" aria-live="polite"></div>
+</section>
+
+<section id="rede-laboratorio" class="chapter-section">
+    <span class="kicker">Visualizações</span><h2 class="section-title">Prefixos, TTL e inundação de LSP</h2>
+    <div class="demo-box mb-4">
+        <h3 class="h6">Longest-prefix match com IPv4/CIDR</h3>
+        <label class="form-label small" for="ipv4Destination">Endereço de destino</label>
+        <input id="ipv4Destination" class="form-control form-control-sm" value="200.18.4.7" aria-label="Endereço IPv4 para consultar">
+        <div id="ipv4PrefixOutput" class="small mt-2" aria-live="polite"></div>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-6 demo-box">
+            <h3 class="h6">Loop de encaminhamento e TTL</h3>
+            <p class="small">Um pacote circula A→B→C→A até TTL chegar a zero.</p>
+            <button id="runTtlLoop" type="button" class="btn btn-primary btn-sm">Avançar pacote</button>
+            <button id="resetTtlLoop" type="button" class="btn btn-outline-secondary btn-sm">Reiniciar</button>
+            <p id="ttlOutput" class="small mt-2" aria-live="polite"></p>
+        </div>
+        <div class="col-md-6 demo-box">
+            <h3 class="h6">Inundação de LSP e descarte de duplicatas</h3>
+            <button id="stepLspFlood" type="button" class="btn btn-primary btn-sm">Próximo LSP</button>
+            <button id="resetLspFlood" type="button" class="btn btn-outline-secondary btn-sm">Reiniciar</button>
+            <p id="lspOutput" class="small mt-2" aria-live="polite"></p>
+        </div>
+    </div>
+    <div class="demo-box mt-4">
+        <h3 class="h6">Datagrama e circuito virtual: encaminhamento ilustrativo</h3>
+        <p class="small">No exemplo, cada datagrama pode seguir uma rota distinta; o circuito virtual sinaliza um caminho e usa rótulos. A topologia mostrada é didática.</p>
+        <button id="animateForwarding" type="button" class="btn btn-primary btn-sm">Enviar sequência de pacotes</button>
+        <p id="forwardingOutput" class="small mt-2" aria-live="polite"></p>
+    </div>
+</section>
+
+<section id="exercicios-cap2" class="chapter-section">
+    <span class="kicker">Pratique</span><h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li><strong>Aquecimento:</strong> qual prefixo vence entre 200.18.0.0/16 e 200.18.4.0/22 para 200.18.4.7? <details><summary>Ver solução</summary><p>200.18.4.0/22, por ser o prefixo correspondente mais longo.</p></details></li>
+        <li><strong>Intermediário:</strong> execute o grafo e identifique o próximo salto de A para D. <details><summary>Ver solução</summary><p>A→B→D custa 3, menor que A→C→D (5); o primeiro salto é B.</p></details></li>
+        <li><strong>Desafio:</strong> derrube B–D e compare a tabela de vetor de distância com Dijkstra. <details><summary>Ver roteiro</summary><p>Use o botão do enlace no grafo. Dijkstra calcula a rota após a alteração da topologia; vetor de distância propaga os novos custos por rodadas.</p></details></li>
+    </ol>
+</section>
+
+<section id="autoavaliacao-cap2" class="chapter-section">
+    <span class="kicker">Confira seu entendimento</span><h2 class="section-title">Autoavaliação rápida</h2>
+    <label class="form-label" for="lpmQuiz">Ao encaminhar um pacote, qual rota é escolhida entre vários prefixos que correspondem?</label>
+    <select id="lpmQuiz" class="form-select form-select-sm" aria-label="Regra para escolha de rota entre prefixos correspondentes"><option value="">Escolha uma resposta</option><option value="short">O prefixo mais curto</option><option value="if3">O prefixo mais longo</option><option value="first">A primeira entrada da tabela sempre</option></select>
+    <p id="lpmQuizFeedback" class="small mt-2" aria-live="polite"></p>
+</section>
+
+<section id="ia-cap2" class="chapter-section">
+    <span class="kicker">Transparência</span><h2 class="section-title">Como a IA foi usada</h2>
+    <p>Ferramentas de IA podem ajudar a revisar a clareza e propor exemplos, mas não são fonte técnica. Nesta implementação, os enunciados de roteamento, CIDR, TCP e detecção de erros foram revisados manualmente e confrontados com o CNP3 e referências normativas indicadas no conteúdo. Uma auditoria linha a linha de todas as afirmações deste capítulo ainda é necessária.</p>
+</section>
+
+<!-- 9. Exemplos de código -->
 <section id="exemplos" class="chapter-section">
     <span class="kicker">Mão na massa</span>
     <h2 class="section-title">Exemplos de código</h2>
@@ -898,8 +1012,9 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
     <div class="demo-box mt-4">
         <p class="fw-semibold mb-2">🧪 Experimente: convergência do vetor de distância</p>
         <p class="text-muted small mb-2">
-            Usando a mesma topologia do código acima (A–B–C–D), clique para avançar rodada a rodada
-            e observar a tabela do roteador A se atualizando.
+        Usando a mesma topologia do código acima (A–B–C–D), clique para avançar rodada a rodada
+            e observar a tabela do roteador A se atualizando. Em custos iguais, a primeira rota
+            encontrada é mantida; assim, o enlace direto A–C permanece como próximo salto para C.
         </p>
         <button class="btn btn-primary btn-sm mb-3" id="dvStepBtn" type="button">Próxima rodada</button>
         <button class="btn btn-outline-secondary btn-sm mb-3" id="dvResetBtn" type="button">Reiniciar</button>
@@ -958,17 +1073,38 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
 <script>
     // Demo 1: montar pacote
     function atualizaPacote() {
-        var src = (document.getElementById("pktSrc").value || "?").toUpperCase();
-        var dst = (document.getElementById("pktDst").value || "?").toUpperCase();
+        var srcInput = document.getElementById("pktSrc");
+        var dstInput = document.getElementById("pktDst");
+        var src = Number(srcInput.value);
+        var dst = Number(dstInput.value);
         var msg = document.getElementById("pktMsg").value || "";
         var out = document.getElementById("pktOutput");
-        out.innerHTML =
-            '<div class="d-flex flex-wrap gap-2">' +
-            '<span class="addr-chip" style="background:#e7f1ff;color:#0d6efd;min-width:90px">src=' + src + '</span>' +
-            '<span class="addr-chip" style="background:#e7f1ff;color:#0d6efd;min-width:90px">dst=' + dst + '</span>' +
-            '<span class="addr-chip" style="background:#fff3cd;color:#997404;min-width:60px">TTL=64</span>' +
-            '<span class="addr-chip" style="background:#d1e7dd;color:#198754;min-width:160px">payload="' + msg + '"</span>' +
-            '</div>';
+        out.replaceChildren();
+
+        if (srcInput.value.trim() === "" || dstInput.value.trim() === "" ||
+            !Number.isInteger(src) || src < 0 || src > 255 || !Number.isInteger(dst) || dst < 0 || dst > 255) {
+            out.textContent = "Informe endereços inteiros entre 0 e 255.";
+            return;
+        }
+
+        var campos = document.createElement("div");
+        campos.className = "d-flex flex-wrap gap-2";
+        function adicionaCampo(rotulo, valor, corFundo, corTexto) {
+            var chip = document.createElement("span");
+            chip.className = "addr-chip";
+            chip.style.background = corFundo;
+            chip.style.color = corTexto;
+            chip.style.minWidth = "90px";
+            chip.textContent = rotulo + "=" + valor;
+            campos.appendChild(chip);
+        }
+        adicionaCampo("src", src, "#e7f1ff", "#0d6efd");
+        adicionaCampo("src bin", src.toString(2).padStart(8, "0"), "#e7f1ff", "#0d6efd");
+        adicionaCampo("dst", dst, "#e7f1ff", "#0d6efd");
+        adicionaCampo("dst bin", dst.toString(2).padStart(8, "0"), "#e7f1ff", "#0d6efd");
+        adicionaCampo("TTL", "64", "#fff3cd", "#997404");
+        adicionaCampo("payload", '"' + msg + '"', "#d1e7dd", "#198754");
+        out.appendChild(campos);
     }
     ["pktSrc", "pktDst", "pktMsg"].forEach(function (id) {
         document.getElementById(id).addEventListener("input", atualizaPacote);
@@ -1039,7 +1175,14 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
         Object.keys(topologiaDV).forEach(function (r) {
             tabelasDV[r] = {};
             Object.keys(topologiaDV).forEach(function (d) {
-                tabelasDV[r][d] = (d === r) ? [0, r] : [INF, null];
+                if (d === r) {
+                    tabelasDV[r][d] = [0, r];
+                } else if (Object.prototype.hasOwnProperty.call(topologiaDV[r], d)) {
+                    // Cada roteador conhece inicialmente o custo dos enlaces diretamente conectados.
+                    tabelasDV[r][d] = [topologiaDV[r][d], d];
+                } else {
+                    tabelasDV[r][d] = [INF, null];
+                }
             });
         });
         rodadaDV = 0;
@@ -1056,6 +1199,7 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
                     var custoVizinho = tabelasDV[vizinho][destino][0];
                     if (custoVizinho === INF) { return; }
                     var novoCusto = custoVizinho + custoEnlace;
+                    // Em empate, preserva a primeira rota encontrada (a direta é inicializada primeiro).
                     if (novoCusto < novas[roteador][destino][0]) {
                         novas[roteador][destino] = [novoCusto, vizinho];
                         mudou = true;
@@ -1092,6 +1236,21 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
     });
     document.getElementById("dvResetBtn").addEventListener("click", iniciaDV);
     iniciaDV();
+</script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/simulacoes.js"></script>
+<script src="../../assets/livro.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var input = document.getElementById("lpmInput");
+        var quiz = document.getElementById("lpmQuiz");
+        if (!quiz) return;
+        var feedback = document.getElementById("lpmQuizFeedback");
+        quiz.addEventListener("change", function () {
+            if (quiz.value === "") { feedback.textContent = ""; return; }
+            feedback.textContent = quiz.value === "if3" ? "Correto: entre prefixos correspondentes, vence o de maior comprimento." : "Revise a regra: entre prefixos correspondentes, vence o de maior comprimento.";
+        });
+    });
 </script>
 
 </body>
