@@ -1085,18 +1085,30 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
         receptor.textContent = "Receptor (após remover os bits inseridos): " + removeBitStuffing(resultado.bits.join(""));
         container.appendChild(receptor);
 
+        var linhaReceptor = document.createElement("div");
+        linhaReceptor.className = "mt-2";
+        linhaReceptor.setAttribute("aria-hidden", "true");
+        marcarBitStuffing(resultado.bits.join("")).forEach(function (item) {
+            var chip = document.createElement("span");
+            chip.className = "bit-chip" + (item.removido ? " stuffed" : "");
+            if (item.removido) chip.style.textDecoration = "line-through";
+            chip.textContent = item.bit;
+            linhaReceptor.appendChild(chip);
+        });
+        container.appendChild(linhaReceptor);
+
         var legenda = document.createElement("p");
         legenda.className = "small text-muted mt-2 mb-0";
-        legenda.textContent = "Verde = marcador de quadro · Vermelho = bit inserido pelo stuffing";
+        legenda.textContent = "Verde = marcador de quadro · Vermelho = bit inserido pelo stuffing · No receptor, o vermelho riscado é o bit inserido que foi removido";
         container.appendChild(legenda);
     }
 
-    function removeBitStuffing(corpo) {
-        var saida = "";
+    function marcarBitStuffing(corpo) {
+        var bits = [];
         var unsConsecutivos = 0;
         for (var i = 0; i < corpo.length; i++) {
             var bit = corpo[i];
-            saida += bit;
+            bits.push({ bit: bit, removido: false });
             if (bit === "1") {
                 unsConsecutivos++;
                 if (unsConsecutivos === 5) {
@@ -1104,13 +1116,18 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
                         throw new Error("Quadro inválido: esperado bit 0 de stuffing após cinco bits 1.");
                     }
                     i++;
+                    bits.push({ bit: "0", removido: true });
                     unsConsecutivos = 0;
                 }
             } else {
                 unsConsecutivos = 0;
             }
         }
-        return saida;
+        return bits;
+    }
+
+    function removeBitStuffing(corpo) {
+        return marcarBitStuffing(corpo).filter(function (item) { return !item.removido; }).map(function (item) { return item.bit; }).join("");
     }
 
     // Simulação didática simplificada de eficiência e retransmissões por janela.
