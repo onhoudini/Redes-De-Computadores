@@ -337,6 +337,9 @@
         computadores. Isso leva à pergunta natural: se tudo é bit, como esses bits não
         "engarrafam" os cabos do mundo inteiro?
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="1 byte|2 bytes|4 bytes" data-answer="1" data-explain="O “ç” está fora do ASCII (128 caracteres), então usa 2 bytes: 11000011 10100111." data-hint="Digite ç no experimento acima e conte os bytes.">
+        <p class="fw-semibold mb-2">Autoavaliação: Quantos bytes UTF-8 ocupa o caractere “ç”?</p>
+    </div>
 </section>
 
 <!-- 2. Cachoeira -->
@@ -432,6 +435,9 @@
             </div>
         </div>
     </div>
+    <div class="demo-box mini-quiz mt-4" data-options="Sim, são as quatro camadas do modelo TCP/IP|Não, são só uma analogia didática|Sim, mas só em redes com cabos submarinos" data-answer="1" data-explain="É uma analogia para visualizar a escala da infraestrutura, não uma arquitetura formal." data-hint="Releia o aviso no início da seção.">
+        <p class="fw-semibold mb-2">Autoavaliação: Topo, Queda, Base e Leito são camadas oficiais da Internet?</p>
+    </div>
 </section>
 
 <!-- 3. Camada física -->
@@ -481,6 +487,9 @@
         enviados. Todo o restante da pilha de protocolos existe, em boa parte, para lidar com essas
         imperfeições.
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="Troca do endereço de destino|Inversão de bits causada por uma tempestade|Desalinhamento de relógios, que faz bits sumirem ou aparecerem" data-answer="2" data-explain="Emissor e receptor têm relógios independentes; uma pequena diferença de frequência já basta." data-hint="Pense no que acontece quando os relógios não têm a mesma frequência.">
+        <p class="fw-semibold mb-2">Autoavaliação: Qual destes problemas pode ocorrer mesmo sem interferência externa?</p>
+    </div>
 </section>
 
 <!-- 4. Enquadramento -->
@@ -533,6 +542,9 @@
         de controle ASCII <code>DLE STX</code> para marcar o início e <code>DLE ETX</code> para
         marcar o fim de um quadro, duplicando qualquer <code>DLE</code> que apareça nos dados.
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="Depois de cada byte de dados|Depois de cinco bits 1 consecutivos nos dados|Antes de cada marcador de quadro" data-answer="1" data-explain="Assim a sequência de seis 1s do marcador nunca aparece por acidente nos dados." data-hint="O marcador tem seis 1s seguidos; o stuffing precisa quebrar sequências antes disso.">
+        <p class="fw-semibold mb-2">Autoavaliação: No bit stuffing com marcador 01111110, quando o transmissor insere um bit 0?</p>
+    </div>
 </section>
 
 <!-- 5. Entrega confiável -->
@@ -585,6 +597,9 @@
         <code>(L/R)/(L/R + RTT) = 0,02/0,52 ≈ 3,85%</code>, ou cerca de
         <code>1,92 kbps</code> de vazão útil. A conta ignora o tamanho do ACK, cabeçalhos e perdas.
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="≈ 3,85%|≈ 50%|≈ 96%" data-answer="0" data-explain="U = 0,02 / (0,02 + 0,5) ≈ 3,85%: o transmissor passa quase todo o tempo esperando o ACK." data-hint="Calcule L/R primeiro e depois divida por L/R + RTT.">
+        <p class="fw-semibold mb-2">Autoavaliação: Com quadros de 1.000 bits, enlace de 50 kbps e RTT ≈ 0,5 s, qual é a eficiência aproximada do ABP?</p>
+    </div>
 </section>
 
 <!-- 6. Janela deslizante -->
@@ -705,9 +720,9 @@
         <p class="fw-semibold mb-2">Codificação de linha (exemplo didático)</p>
         <label class="form-label small" for="lineCodeBits">Bits de entrada</label>
         <input id="lineCodeBits" class="form-control form-control-sm" value="10110010" pattern="[01]+" aria-label="Bits para visualizar codificação NRZ, NRZI e Manchester">
-        <label class="form-label small mt-2" for="clockDrift">Desvio visual do relógio</label>
-        <input id="clockDrift" type="range" class="form-range" min="0" max="45" value="0" aria-label="Desvio visual do relógio">
-        <div id="lineCodeOutput" class="font-monospace small" aria-live="polite"></div>
+        <label class="form-label small mt-2" for="clockDrift">Atraso do relógio do receptor: <span id="clockDriftValue">0</span>%</label>
+        <input id="clockDrift" type="range" class="form-range" min="0" max="45" value="0" aria-label="Atraso do relógio do receptor, em porcentagem do tempo de um bit">
+        <div id="lineCodeOutput" class="font-monospace small"></div>
     </div>
 
     <div class="demo-box mt-4">
@@ -723,6 +738,9 @@
         <label class="form-label small" for="quizParity">A paridade par detecta sempre duas inversões de bits?</label>
         <select id="quizParity" class="form-select form-select-sm" aria-label="Resposta sobre a detecção de dois erros pela paridade"><option value="">Escolha uma resposta</option><option value="yes">Sim</option><option value="no">Não</option></select>
         <p id="quizParityFeedback" class="small mt-2 mb-0" aria-live="polite"></p>
+    </div>
+    <div class="demo-box mini-quiz mt-4" data-options="2ⁿ − 1|2ⁿ⁻¹|2ⁿ" data-answer="1" data-explain="Go-Back-N admite até 2ⁿ − 1; Selective Repeat, até 2ⁿ⁻¹. Acima disso o receptor confunde quadro novo com retransmissão." data-hint="Selective Repeat é mais restritivo que Go-Back-N.">
+        <p class="fw-semibold mb-2">Autoavaliação: Com n bits de número de sequência, qual é a janela máxima do Selective Repeat?</p>
     </div>
 </section>
 
@@ -781,9 +799,34 @@
         </div>
     </div>
 
-    <div class="card-soft p-4 mt-4">
+    <div class="card-soft p-4 mt-4" id="ia-cap1">
         <h3 class="h6">Como a IA foi usada e o que foi conferido</h3>
-        <p class="small text-muted mb-0">Ferramentas de IA podem auxiliar na revisão e na elaboração de exemplos, mas não substituem fontes primárias. As explicações de paridade, checksum, CRC e TCP foram revistas durante esta implementação com referência ao livro CNP3, às RFCs 1071 e 9293 e à especificação IEEE 802.3; números do exemplo de eficiência foram recalculados explicitamente. A revisão técnica completa do capítulo ainda está pendente.</p>
+        <p class="small text-muted">Ferramentas de IA ajudaram na redação, na revisão e na elaboração de exemplos, mas não são fonte técnica. Este material complementa o livro-texto (Bonaventure, CNP3) e não o substitui.</p>
+        <h4 class="h6 mt-3">Registro de prompts</h4>
+        <ul class="small">
+            <li><strong>Revisão do site publicado:</strong> a análise dos capítulos 1 e 2 gerou o roteiro <code>sugestoes.txt</code>, que listou dez defeitos de conteúdo e as melhorias que orientaram o trabalho seguinte.</li>
+            <li><strong>Rodada de fechamento:</strong> “verificar quais sugestões ainda faltam e resolver as de menor esforço”. Resultado: questões rápidas em todas as seções, desafios de código com resposta, Dijkstra colorido, operação AND bit a bit e animação do TTL.</li>
+        </ul>
+        <!-- Para completar o registro: acrescente aqui os prompts originais das rodadas anteriores (redação do texto, correção dos dez defeitos, implementação dos simuladores). -->
+        <h4 class="h6 mt-3">Afirmações verificáveis</h4>
+        <div class="table-responsive">
+        <table class="table table-sm small align-middle">
+            <thead><tr><th scope="col">Afirmação</th><th scope="col">Como foi verificada</th><th scope="col">Situação</th></tr></thead>
+            <tbody>
+                <tr><td>Eficiência do ABP ≈ 3,85% e vazão ≈ 1,92 kbps (1.000 bits, 50 kbps, RTT 0,5 s)</td><td>Recálculo: 0,02 / 0,52 e 50 kbps × 0,0385</td><td>✔ Recalculado</td></tr>
+                <tr><td>“ç” em UTF-8 vale 11000011 10100111</td><td>Codificação do caractere em UTF-8 conferida por execução</td><td>✔ Conferido por execução</td></tr>
+                <tr><td>Bit stuffing: insere 0 após cinco bits 1</td><td>Código do capítulo: o receptor recupera os dados originais (ida e volta)</td><td>✔ Conferido por execução</td></tr>
+                <tr><td>A paridade detecta toda inversão única e nenhum par de inversões</td><td>Teste exaustivo em um quadro de 5 bits: 5 de 5 e 0 de 10</td><td>✔ Conferido por execução</td></tr>
+                <tr><td>Janela máxima: 2ⁿ − 1 (Go-Back-N) e 2ⁿ⁻¹ (Selective Repeat)</td><td>Bonaventure, CNP3, seção sobre janela deslizante</td><td>A conferir na fonte</td></tr>
+                <tr><td>TCP: ACK cumulativo, dados fora de ordem guardados, SACK opcional</td><td>RFC 9293 e RFC 2018</td><td>A conferir na fonte</td></tr>
+                <tr><td>O FCS do Ethernet usa CRC-32</td><td>IEEE 802.3</td><td>A conferir na fonte</td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="small text-muted mb-0">A auditoria completa, afirmação por afirmação, contra o livro de referência e as RFCs ainda não foi concluída; as linhas “a conferir” indicam a fonte que deve ser consultada.</p>
+    </div>
+    <div class="demo-box mini-quiz mt-4" data-options="Sim, é Selective Repeat puro|Não: confirma cumulativamente, guarda dados fora de ordem e pode usar SACK|Não, é Go-Back-N puro" data-answer="1" data-explain="Por isso a recuperação do TCP combina características dos dois modelos." data-hint="Releia o cartão sobre janela deslizante no TCP.">
+        <p class="fw-semibold mb-2">Autoavaliação: O TCP é simplesmente uma implementação de Selective Repeat?</p>
     </div>
 </section>
 
@@ -918,6 +961,9 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
             <button class="btn btn-primary" id="stuffBtn" type="button">Aplicar stuffing</button>
         </div>
         <div id="stuffOutput"></div>
+    </div>
+    <div class="demo-box mini-quiz mt-4" data-options="0|1|Nenhum" data-answer="1" data-explain="Há três bits 1 (ímpar); o bit extra 1 torna a quantidade par: 11011." data-hint="Conte quantos bits 1 existem no quadro.">
+        <p class="fw-semibold mb-2">Autoavaliação: Em paridade_par("1101"), qual bit de paridade é acrescentado?</p>
     </div>
 </section>
 
@@ -1236,43 +1282,99 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
     document.getElementById("characterStuffInput").addEventListener("input", updateCharacterStuffing);
     updateCharacterStuffing();
 
-    function desenharCodificacaoLinha() {
+    var linhaEstado = { bits: "", svg: null, camada: null, status: null };
+
+    // Monta as três formas de onda uma única vez por sequência de bits (o slider não recria o SVG).
+    function construirOndas() {
         var bits = document.getElementById("lineCodeBits").value;
-        var drift = Number(document.getElementById("clockDrift").value);
         var output = document.getElementById("lineCodeOutput");
         output.replaceChildren();
+        linhaEstado = { bits: "", svg: null, camada: null, status: null };
         if (!/^[01]+$/.test(bits)) { output.textContent = "Use somente 0 e 1."; return; }
-        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("viewBox", "0 0 700 220"); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Formas de onda NRZ, NRZI e Manchester"); svg.classList.add("w-100");
-        var title = document.createElementNS(svg.namespaceURI, "title"); title.textContent = "Comparação didática das codificações de linha"; svg.appendChild(title);
-        var labels = ["NRZ-L", "NRZI", "Manchester"];
-        var rows = [];
-        labels.forEach(function (name, row) {
-            var label = document.createElementNS(svg.namespaceURI, "text"); label.setAttribute("x", "4"); label.setAttribute("y", String(45 + row * 60)); label.textContent = name; svg.appendChild(label);
-            var path = document.createElementNS(svg.namespaceURI, "path"); var x0 = 82, width = 600 / bits.length, high = 28 + row * 60, low = 50 + row * 60;
-            var d = "M " + x0 + " " + low; var level = 0;
+        var ns = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("viewBox", "0 0 700 220"); svg.setAttribute("role", "img");
+        svg.setAttribute("aria-label", "Formas de onda NRZ-L, NRZI e Manchester para os bits informados, com as amostras do relógio do receptor sobrepostas");
+        svg.classList.add("w-100");
+        var title = document.createElementNS(ns, "title"); title.textContent = "Comparação didática das codificações de linha"; svg.appendChild(title);
+        var nomes = ["NRZ-L", "NRZI", "Manchester"];
+        var x0 = 82, largura = 600 / bits.length;
+        nomes.forEach(function (nome, row) {
+            var rotulo = document.createElementNS(ns, "text");
+            rotulo.setAttribute("x", "4"); rotulo.setAttribute("y", String(45 + row * 60)); rotulo.setAttribute("fill", "currentColor");
+            rotulo.textContent = nome; svg.appendChild(rotulo);
+            var alto = 28 + row * 60, baixo = 50 + row * 60, nivel = 0;
+            var d = "M " + x0 + " " + baixo;
             bits.split("").forEach(function (bit, idx) {
-                var x = x0 + idx * width;
-                if (name === "NRZ-L") level = bit === "1" ? 1 : 0;
-                if (name === "NRZI" && bit === "1") level = 1 - level;
-                if (name === "Manchester") {
-                    var first = bit === "1" ? 1 : 0; var second = 1 - first;
-                    d += " L " + x + " " + (first ? high : low) + " L " + (x + width / 2) + " " + (first ? high : low) + " L " + (x + width / 2) + " " + (second ? high : low) + " L " + (x + width) + " " + (second ? high : low);
+                var x = x0 + idx * largura;
+                if (nome === "NRZ-L") nivel = bit === "1" ? 1 : 0;
+                if (nome === "NRZI" && bit === "1") nivel = 1 - nivel;
+                if (nome === "Manchester") {
+                    var primeira = bit === "1" ? 1 : 0, segunda = 1 - primeira;
+                    d += " L " + x + " " + (primeira ? alto : baixo) + " L " + (x + largura / 2) + " " + (primeira ? alto : baixo) +
+                         " L " + (x + largura / 2) + " " + (segunda ? alto : baixo) + " L " + (x + largura) + " " + (segunda ? alto : baixo);
                 } else {
-                    var y = level ? high : low; d += " L " + x + " " + y + " L " + (x + width) + " " + y;
+                    var y = nivel ? alto : baixo; d += " L " + x + " " + y + " L " + (x + largura) + " " + y;
                 }
-                var bitLabel = document.createElementNS(svg.namespaceURI, "text"); bitLabel.setAttribute("x", String(x + width / 2)); bitLabel.setAttribute("y", "215"); bitLabel.setAttribute("text-anchor", "middle"); bitLabel.textContent = bit; svg.appendChild(bitLabel);
+                if (row === 0) {
+                    var numero = document.createElementNS(ns, "text");
+                    numero.setAttribute("x", String(x + largura / 2)); numero.setAttribute("y", "215");
+                    numero.setAttribute("text-anchor", "middle"); numero.setAttribute("fill", "currentColor");
+                    numero.textContent = bit; svg.appendChild(numero);
+                }
             });
-            path.setAttribute("d", d); path.setAttribute("fill", "none"); path.setAttribute("stroke", ["#0d6efd", "#198754", "#6610f2"][row]); path.setAttribute("stroke-width", "2.5"); svg.appendChild(path); rows.push({ name: name, drift: drift });
+            var caminho = document.createElementNS(ns, "path");
+            caminho.setAttribute("d", d); caminho.setAttribute("fill", "none");
+            caminho.setAttribute("stroke", ["#0d6efd", "#198754", "#6610f2"][row]); caminho.setAttribute("stroke-width", "2.5");
+            svg.appendChild(caminho);
         });
-        if (drift) {
-            var warning = document.createElement("p"); warning.className = "small text-warning mb-0";
-            warning.textContent = "Desvio ilustrativo de " + drift + "%: bordas de amostragem aproximadas deslocadas; bits muito curtos podem ser interpretados incorretamente. Não é uma simulação física do receptor.";
-            output.append(svg, warning);
-        } else output.appendChild(svg);
+        var camada = document.createElementNS(ns, "g"); camada.setAttribute("aria-hidden", "true"); svg.appendChild(camada);
+        var status = document.createElement("p");
+        status.className = "small mb-0 mt-2"; status.style.minHeight = "6.5em"; status.setAttribute("aria-live", "polite");
+        output.append(svg, status);
+        linhaEstado = { bits: bits, svg: svg, camada: camada, status: status };
     }
-    ["lineCodeBits", "clockDrift"].forEach(function (id) { document.getElementById(id).addEventListener("input", desenharCodificacaoLinha); });
-    desenharCodificacaoLinha();
+
+    // O receptor amostra com um relógio mais lento que o do transmissor. Só a camada de amostras é redesenhada.
+    function atualizarDesvio() {
+        var estado = linhaEstado;
+        var controle = document.getElementById("clockDrift");
+        document.getElementById("clockDriftValue").textContent = controle.value;
+        if (!estado.svg) return;
+        var ns = "http://www.w3.org/2000/svg";
+        var n = estado.bits.length, atraso = Number(controle.value) / 100;
+        var x0 = 82, largura = 600 / n;
+        estado.camada.replaceChildren();
+        var lidos = [], erros = 0;
+        for (var k = 0; k < n; k++) {
+            var t = x0 + (k + 0.5) * largura * (1 + atraso);
+            var indice = Math.floor((t - x0) / largura);
+            var lido = indice < n ? estado.bits[indice] : "?";
+            if (lido !== estado.bits[k]) erros++;
+            lidos.push(lido);
+            if (indice < n) {
+                var marca = document.createElementNS(ns, "line");
+                marca.setAttribute("x1", String(t)); marca.setAttribute("x2", String(t));
+                marca.setAttribute("y1", "12"); marca.setAttribute("y2", "198");
+                marca.setAttribute("stroke", "#fd7e14"); marca.setAttribute("stroke-width", "1.5"); marca.setAttribute("stroke-dasharray", "3 3");
+                estado.camada.appendChild(marca);
+                var ponto = document.createElementNS(ns, "circle");
+                ponto.setAttribute("cx", String(t)); ponto.setAttribute("cy", lido === "1" ? "28" : "50"); ponto.setAttribute("r", "4.5");
+                ponto.setAttribute("fill", lido === estado.bits[k] ? "#198754" : "#dc3545");
+                estado.camada.appendChild(ponto);
+            }
+        }
+        estado.status.textContent = atraso === 0
+            ? "Relógio do receptor sincronizado: cada amostra (linha laranja) cai no meio de um bit. Lido no NRZ-L: " + lidos.join("") + "."
+            : "Receptor " + controle.value + "% mais lento: as amostras (linhas laranja) vão se atrasando em relação aos bits. Enviado: " + estado.bits +
+              ". Lido no NRZ-L: " + lidos.join("") + " (" + erros + " bit(s) diferente(s); ? = amostra depois do fim do quadro; pontos vermelhos = leitura errada). " +
+              "Sequências de bits iguais escondem o erro, porque o NRZ-L não tem transição para ressincronizar; o Manchester tem uma transição no meio de cada bit e permite recuperar o relógio.";
+    }
+
+    document.getElementById("lineCodeBits").addEventListener("input", function () { construirOndas(); atualizarDesvio(); });
+    document.getElementById("clockDrift").addEventListener("input", atualizarDesvio);
+    construirOndas();
+    atualizarDesvio();
 
     document.getElementById("runNoise").addEventListener("click", function () {
         var rate = Number(document.getElementById("noiseRate").value);

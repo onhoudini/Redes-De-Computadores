@@ -18,6 +18,8 @@
         var pos = { A: [70, 75], B: [230, 45], C: [230, 145], D: [390, 95] };
         var dragging = null;
         var estadoDijkstra = null;
+        var destinoCaminho = document.getElementById("routingDijkstraDest");
+        var textoCaminhoEl = document.getElementById("routingDijkstraPath");
 
         function tabelaArestas() {
             campos.replaceChildren();
@@ -38,6 +40,7 @@
                     var value = Number(custo.value);
                     if (Number.isInteger(value) && value > 0 && value <= 99) edge[2] = value;
                     else custo.value = String(edge[2]);
+                    invalidarDijkstra();
                     desenharGrafo();
                 });
                 var derrubar = document.createElement("button");
@@ -47,6 +50,7 @@
                 derrubar.setAttribute("aria-label", (edge[3] ? "Ativar" : "Derrubar") + " enlace " + edge[0] + "–" + edge[1]);
                 derrubar.addEventListener("click", function () {
                     edge[3] = !edge[3];
+                    invalidarDijkstra();
                     derrubar.textContent = edge[3] ? "Ativar" : "Derrubar";
                     derrubar.setAttribute("aria-label", (edge[3] ? "Ativar" : "Derrubar") + " enlace " + edge[0] + "–" + edge[1]);
                     desenharGrafo();
@@ -71,6 +75,20 @@
         function desenharGrafo() {
             var graph = grafoAtivo();
             var svg = host;
+            var arvore = {}, caminhoFinal = {};
+            if (estadoDijkstra) {
+                nos.forEach(function (n) {
+                    if (estadoDijkstra.visitados[n] && estadoDijkstra.via[n]) arvore[[n, estadoDijkstra.via[n]].sort().join("-")] = true;
+                });
+                var destino = destinoCaminho ? destinoCaminho.value : "D";
+                if (estadoDijkstra.visitados[destino]) {
+                    var atualNo = destino;
+                    while (estadoDijkstra.via[atualNo]) {
+                        caminhoFinal[[atualNo, estadoDijkstra.via[atualNo]].sort().join("-")] = true;
+                        atualNo = estadoDijkstra.via[atualNo];
+                    }
+                }
+            }
             while (svg.firstChild) svg.removeChild(svg.firstChild);
             var ns = "http://www.w3.org/2000/svg";
             var title = document.createElementNS(ns, "title");
@@ -80,8 +98,10 @@
                 var line = document.createElementNS(ns, "line");
                 line.setAttribute("x1", pos[edge[0]][0]); line.setAttribute("y1", pos[edge[0]][1]);
                 line.setAttribute("x2", pos[edge[1]][0]); line.setAttribute("y2", pos[edge[1]][1]);
-                line.setAttribute("stroke", edge[3] ? "#dc3545" : "#6c757d");
-                line.setAttribute("stroke-width", edge[3] ? "2" : "3");
+                var chaveAresta = [edge[0], edge[1]].sort().join("-");
+                var estiloAresta = edge[3] ? ["#dc3545", "2"] : caminhoFinal[chaveAresta] ? ["#198754", "7"] : arvore[chaveAresta] ? ["#20c997", "4"] : ["#6c757d", "3"];
+                line.setAttribute("stroke", estiloAresta[0]);
+                line.setAttribute("stroke-width", estiloAresta[1]);
                 if (edge[3]) line.setAttribute("stroke-dasharray", "6 5");
                 svg.appendChild(line);
                 var label = document.createElementNS(ns, "text");
@@ -93,13 +113,21 @@
             nos.forEach(function (node) {
                 var circle = document.createElementNS(ns, "circle");
                 circle.setAttribute("cx", pos[node][0]); circle.setAttribute("cy", pos[node][1]);
-                circle.setAttribute("r", "20"); circle.setAttribute("class", "graph-node");
+                circle.setAttribute("r", "20");
+                circle.setAttribute("class", "graph-node" + (estadoDijkstra && estadoDijkstra.atual === node ? " graph-node-current" : estadoDijkstra && estadoDijkstra.visitados[node] ? " graph-node-visited" : ""));
                 circle.setAttribute("data-node", node); circle.setAttribute("tabindex", "0");
                 circle.setAttribute("aria-label", "Roteador " + node + ", arraste para mover"); svg.appendChild(circle);
                 var label = document.createElementNS(ns, "text");
-                label.setAttribute("x", pos[node][0]); label.setAttribute("y", pos[node][1] + 5);
+                label.setAttribute("x", pos[node][0]); label.setAttribute("y", pos[node][1] + (estadoDijkstra ? 0 : 5));
                 label.setAttribute("text-anchor", "middle"); label.setAttribute("class", "graph-label");
                 label.textContent = node; svg.appendChild(label);
+                if (estadoDijkstra) {
+                    var distTexto = document.createElementNS(ns, "text");
+                    distTexto.setAttribute("x", pos[node][0]); distTexto.setAttribute("y", pos[node][1] + 14);
+                    distTexto.setAttribute("text-anchor", "middle"); distTexto.setAttribute("class", "graph-dist");
+                    distTexto.textContent = "d=" + (estadoDijkstra.dist[node] === Infinity ? "∞" : estadoDijkstra.dist[node]);
+                    svg.appendChild(distTexto);
+                }
             });
         }
 
@@ -185,7 +213,10 @@
             nos.forEach(function (n) { estadoDijkstra.dist[n] = Infinity; estadoDijkstra.via[n] = null; });
             estadoDijkstra.dist.A = 0;
             estadoDijkstra.fila.push([0, "A"]);
+            estadoDijkstra.atual = null;
+            estadoDijkstra.concluido = false;
             document.getElementById("routingDijkstraQueue").textContent = "Fila inicial: (0, A). Clique em ‘Próximo passo de Dijkstra’ para extrair o menor custo.";
+            desenharGrafo(); atualizarCaminho();
         }
 
         function avancarDijkstra() {
@@ -198,13 +229,38 @@
                 if (!estadoDijkstra.visitados[candidato[1]] && candidato[0] === estadoDijkstra.dist[candidato[1]]) { atual = candidato; break; }
             }
             var statusEl = document.getElementById("routingDijkstraQueue");
-            if (!atual) { statusEl.textContent = "Fila vazia: algoritmo concluído. Distâncias: " + nos.map(function (n) { return n + "=" + (estadoDijkstra.dist[n] === Infinity ? "∞" : estadoDijkstra.dist[n]); }).join(", "); return; }
-            var node = atual[1]; estadoDijkstra.visitados[node] = true;
+            if (!atual) { statusEl.textContent = "Fila vazia: algoritmo concluído. Distâncias: " + nos.map(function (n) { return n + "=" + (estadoDijkstra.dist[n] === Infinity ? "∞" : estadoDijkstra.dist[n]); }).join(", "); estadoDijkstra.atual = null; estadoDijkstra.concluido = true; desenharGrafo(); atualizarCaminho(); return; }
+            var node = atual[1]; estadoDijkstra.visitados[node] = true; estadoDijkstra.atual = node;
             Object.keys(estadoDijkstra.graph[node]).forEach(function (neighbor) {
                 var cost = estadoDijkstra.dist[node] + estadoDijkstra.graph[node][neighbor];
                 if (cost < estadoDijkstra.dist[neighbor]) { estadoDijkstra.dist[neighbor] = cost; estadoDijkstra.via[neighbor] = node; fila.push([cost, neighbor]); }
             });
             statusEl.textContent = "Visitado: " + node + " (distância " + atual[0] + "). Fila de prioridade: " + (fila.length ? fila.map(function (item) { return "(" + item[0] + ", " + item[1] + ")"; }).join(" → ") : "vazia") + ". Distâncias provisórias: " + nos.map(function (n) { return n + "=" + (estadoDijkstra.dist[n] === Infinity ? "∞" : estadoDijkstra.dist[n]); }).join(", ");
+            desenharGrafo(); atualizarCaminho();
+        }
+
+        function invalidarDijkstra() {
+            if (!estadoDijkstra) return;
+            estadoDijkstra = null;
+            var status = document.getElementById("routingDijkstraQueue");
+            if (status) status.textContent = "Topologia alterada: clique em ‘Recalcular rotas’ ou ‘Reiniciar Dijkstra’ para recomeçar.";
+            atualizarCaminho();
+        }
+
+        function atualizarCaminho() {
+            if (!textoCaminhoEl) return;
+            if (!estadoDijkstra) { textoCaminhoEl.textContent = ""; return; }
+            var dest = destinoCaminho ? destinoCaminho.value : "D";
+            if (dest === "A") { textoCaminhoEl.textContent = "A é a origem (custo 0)."; return; }
+            if (!estadoDijkstra.visitados[dest]) {
+                textoCaminhoEl.textContent = estadoDijkstra.concluido
+                    ? dest + " é inalcançável com os enlaces ativos."
+                    : "Caminho até " + dest + ": ainda não é definitivo (nó não visitado). Avance o Dijkstra.";
+                return;
+            }
+            var caminho = [], cursor = dest;
+            while (cursor) { caminho.unshift(cursor); cursor = estadoDijkstra.via[cursor]; }
+            textoCaminhoEl.textContent = "Caminho final até " + dest + ": " + caminho.join(" → ") + " (custo " + estadoDijkstra.dist[dest] + ").";
         }
 
         function coordenadaSvg(event) {
@@ -245,6 +301,7 @@
         });
         document.getElementById("routingDijkstraStep").addEventListener("click", avancarDijkstra);
         document.getElementById("routingDijkstraReset").addEventListener("click", iniciarDijkstra);
+        if (destinoCaminho) destinoCaminho.addEventListener("change", function () { desenharGrafo(); atualizarCaminho(); });
 
         document.getElementById("addRoutingLinkButton").addEventListener("click", function () {
             var from = document.getElementById("addRoutingLink").value;
@@ -318,13 +375,26 @@
         var ttlOut = document.getElementById("ttlOutput");
         var advance = document.getElementById("runTtlLoop");
         var reset = document.getElementById("resetTtlLoop");
+        var ttlPacote = document.getElementById("ttlPacket");
+        var ttlCorpo = document.getElementById("ttlPacketBody");
+        var ttlTexto = document.getElementById("ttlPacketText");
+        var ttlPos = { A: [60, 135], B: [180, 55], C: [300, 135] };
+        function desenharTtl(descartado) {
+            if (!ttlPacote) return;
+            ttlPacote.style.transform = "translate(" + ttlPos[router][0] + "px, " + ttlPos[router][1] + "px)";
+            ttlTexto.textContent = descartado ? "✕" : String(ttl);
+            ttlCorpo.setAttribute("class", descartado ? "ttl-packet ttl-packet-dead" : "ttl-packet");
+        }
         if (advance && ttlOut) {
             advance.addEventListener("click", function () {
-                if (ttl <= 0) { ttlOut.textContent = "O pacote já foi descartado."; return; }
+                if (ttl <= 0) { ttlOut.textContent = "O pacote já foi descartado. Clique em Reiniciar para enviar outro."; return; }
                 var current = router; router = router === "A" ? "B" : router === "B" ? "C" : "A"; ttl--;
-                ttlOut.textContent = ttl === 0 ? "Roteador " + current + " encaminhou para " + router + "; TTL chegou a 0 e o pacote foi descartado (sem próximo salto)." : "Pacote em " + current + " → " + router + "; TTL restante: " + ttl + ".";
+                ttlOut.textContent = ttl === 0
+                    ? "Roteador " + current + " encaminhou o pacote para " + router + "; o TTL chegou a 0 e " + router + " o descartou. Na prática, costuma avisar a origem com uma mensagem ICMP “Time Exceeded”."
+                    : "Pacote em " + current + " → " + router + "; TTL restante: " + ttl + ".";
+                desenharTtl(ttl === 0);
             });
-            reset.addEventListener("click", function () { ttl = 8; router = "A"; ttlOut.textContent = "Pacote em A; TTL inicial 8."; });
+            reset.addEventListener("click", function () { ttl = 8; router = "A"; ttlOut.textContent = "Pacote em A; TTL inicial 8."; desenharTtl(false); });
             reset.click();
         }
 
@@ -364,14 +434,65 @@
             for (var i = 0; i < 4; i++) { if (!/^\d+$/.test(parts[i]) || Number(parts[i]) > 255) return null; value = value * 256 + Number(parts[i]); }
             return value >>> 0;
         }
+        function bitsDe(valor) { return (valor >>> 0).toString(2).padStart(32, "0"); }
+        function mascaraDe(comprimento) { return comprimento === 0 ? 0 : (0xffffffff << (32 - comprimento)) >>> 0; }
+        function linhaBits(rotulo, valor, comprimento, referencia) {
+            var linha = document.createElement("div");
+            linha.className = "bit-row";
+            var nome = document.createElement("span");
+            nome.className = "bit-row-label"; nome.textContent = rotulo;
+            linha.appendChild(nome);
+            var bits = bitsDe(valor), ref = referencia === null ? null : bitsDe(referencia);
+            for (var i = 0; i < 32; i++) {
+                var bit = document.createElement("span");
+                var classe = "bit " + (i < comprimento ? "bit-mask" : "bit-free");
+                if (ref !== null && i < comprimento && bits[i] !== ref[i]) classe += " bit-bad";
+                bit.className = classe; bit.textContent = bits[i];
+                linha.appendChild(bit);
+                if (i % 8 === 7 && i < 31) {
+                    var ponto = document.createElement("span");
+                    ponto.className = "bit-dot"; ponto.textContent = ".";
+                    linha.appendChild(ponto);
+                }
+            }
+            return linha;
+        }
         function findPrefix() {
             if (!destination || !prefixOutput) return;
-            var target = ipv4Number(destination.value);
-            if (target === null) { prefixOutput.textContent = "IPv4 inválido."; return; }
+            var target = ipv4Number(destination.value.trim());
+            prefixOutput.replaceChildren();
+            if (target === null) { prefixOutput.textContent = "IPv4 inválido. Use quatro números de 0 a 255 separados por ponto."; return; }
             var routes = [{ network: "200.18.0.0", length: 16, iface: "if0" }, { network: "200.18.4.0", length: 22, iface: "if3" }];
-            var binary = target.toString(2).padStart(32, "0");
-            var matches = routes.filter(function (route) { var mask = route.length === 0 ? 0 : (0xffffffff << (32 - route.length)) >>> 0; return ((ipv4Number(route.network) & mask) >>> 0) === ((target & mask) >>> 0); }).sort(function (a, b) { return b.length - a.length; });
-            prefixOutput.textContent = "Destino bits: " + binary + ". " + (matches.length ? "Prefixo mais longo: " + matches[0].network + "/" + matches[0].length + " → " + matches[0].iface + "; máscara bits: " + ("1".repeat(matches[0].length) + "0".repeat(32 - matches[0].length)) : "Nenhuma rota correspondente.");
+            var vencedora = null;
+            var blocos = routes.map(function (route) {
+                var rede = (ipv4Number(route.network) & mascaraDe(route.length)) >>> 0;
+                var mascara = mascaraDe(route.length);
+                var resultado = (target & mascara) >>> 0;
+                var combina = resultado === rede;
+                if (combina && (!vencedora || route.length > vencedora.length)) vencedora = route;
+                var bloco = document.createElement("div");
+                bloco.className = "ip-route mb-3";
+                var titulo = document.createElement("p");
+                titulo.className = "fw-semibold mb-1";
+                titulo.textContent = route.network + "/" + route.length + " → " + route.iface + ": " + (combina ? "combina" : "não combina");
+                bloco.appendChild(titulo);
+                bloco.appendChild(linhaBits("Destino", target, route.length, null));
+                bloco.appendChild(linhaBits("Máscara /" + route.length, mascara, route.length, null));
+                bloco.appendChild(linhaBits("Destino AND máscara", resultado, route.length, rede));
+                bloco.appendChild(linhaBits("Rede da rota", rede, route.length, null));
+                return bloco;
+            });
+            var resumo = document.createElement("p");
+            resumo.className = "mb-2";
+            resumo.textContent = vencedora
+                ? "Prefixo mais longo: " + vencedora.network + "/" + vencedora.length + " → " + vencedora.iface + "."
+                : "Nenhuma rota correspondente.";
+            prefixOutput.appendChild(resumo);
+            blocos.forEach(function (bloco) { prefixOutput.appendChild(bloco); });
+            var legenda = document.createElement("p");
+            legenda.className = "text-muted mb-0";
+            legenda.textContent = "Azul: bits do prefixo, os únicos comparados. Cinza: bits ignorados pela máscara. Vermelho: bit do destino que difere da rede da rota (a rota não combina).";
+            prefixOutput.appendChild(legenda);
         }
         if (destination) { destination.addEventListener("input", findPrefix); findPrefix(); }
 

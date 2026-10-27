@@ -55,3 +55,44 @@ html[data-theme="dark"] .form-text {
 
 html[data-theme="dark"] .graph-node { fill: #22344a; stroke: #6ea8fe; }
 html[data-theme="dark"] .graph-label, html[data-theme="dark"] .graph-cost { fill: #e9ecef; }
+
+
+/* Questões rápidas por seção */
+.mini-quiz .btn { white-space: normal; }
+.quiz-ok { color: #146c43; }
+.quiz-no { color: #b02a37; }
+html[data-theme="dark"] .quiz-ok { color: #75b798; }
+html[data-theme="dark"] .quiz-no { color: #ea868f; }
+
+/* Dijkstra: estados do grafo */
+.graph-node-visited { fill: #d1e7dd; stroke: #198754; }
+.graph-node-current { fill: #ffe69c; stroke: #cc8a00; stroke-width: 4; }
+.graph-dist { font: 10px sans-serif; fill: #495057; pointer-events: none; }
+html[data-theme="dark"] .graph-node-visited { fill: #1e3d2f; stroke: #75b798; }
+html[data-theme="dark"] .graph-node-current { fill: #5c4400; stroke: #ffda6a; stroke-width: 4; }
+html[data-theme="dark"] .graph-dist { fill: #e9ecef; }
+html[data-theme="dark"] svg.bg-white { background-color: #24282c !important; }
+
+/* Máscara de rede bit a bit */
+.bit-row { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; overflow-x: auto; }
+.bit-row-label { display: inline-block; width: 12.5rem; font-family: inherit; }
+.bit-mask { color: #0d6efd; font-weight: 700; }
+.bit-free { color: #6c757d; }
+.bit-bad { color: #b02a37; background: #f8d7da; }
+.bit-dot { color: #6c757d; }
+html[data-theme="dark"] .bit-mask { color: #6ea8fe; }
+html[data-theme="dark"] .bit-free, html[data-theme="dark"] .bit-dot { color: #adb5bd; }
+html[data-theme="dark"] .bit-bad { color: #ea868f; background: #58151c; }
+
+/* Loop de TTL */
+#ttlPacket { transition: transform 0.6s ease; }
+.ttl-router { fill: #e7f1ff; stroke: #0d6efd; stroke-width: 2; }
+.ttl-router-label { font: bold 14px sans-serif; fill: #0d6efd; }
+.ttl-packet { fill: #ffc107; stroke: #997404; stroke-width: 2; }
+.ttl-packet-dead { fill: #dc3545; stroke: #842029; }
+.ttl-packet-text { font: bold 13px sans-serif; fill: #212529; pointer-events: none; }
+.ttl-link { stroke: #6c757d; stroke-width: 2; }
+html[data-theme="dark"] .ttl-router { fill: #22344a; stroke: #6ea8fe; }
+html[data-theme="dark"] .ttl-router-label { fill: #e9ecef; }
+html[data-theme="dark"] .ttl-link { stroke: #adb5bd; }
+html[data-theme="dark"] #ttlArrowHead { fill: #adb5bd; }

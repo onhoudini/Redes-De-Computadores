@@ -355,6 +355,9 @@
         (encaminhamento) e como manter essas decisões corretas mesmo quando links falham ou a rede
         cresce (roteamento). As próximas seções tratam cada uma dessas perguntas.
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="Quadro|Pacote|Bit" data-answer="1" data-explain="Quadro é a unidade da camada de enlace; na camada de rede, roteadores encaminham pacotes." data-hint="Releia o segundo parágrafo da seção.">
+        <p class="fw-semibold mb-2">Autoavaliação: Qual é a unidade de informação da camada de rede?</p>
+    </div>
 </section>
 
 <!-- 2. Pacotes -->
@@ -422,6 +425,9 @@
         </div>
         <div id="pktOutput" class="font-monospace small" aria-live="polite"></div>
     </div>
+    <div class="demo-box mini-quiz mt-4" data-options="O nome amigável do servidor|O endereço de destino no cabeçalho|O conteúdo da carga útil" data-answer="1" data-explain="Roteadores leem só o cabeçalho; a carga útil não precisa ser entendida." data-hint="Pense no que está no cabeçalho do pacote.">
+        <p class="fw-semibold mb-2">Autoavaliação: O que os roteadores usam para decidir o próximo salto?</p>
+    </div>
 </section>
 
 <!-- 3. Organização -->
@@ -481,6 +487,9 @@
         (Multiprotocol Label Switching), usada por muitos provedores para dar previsibilidade ao
         tráfego dentro do seu backbone, é um exemplo moderno de comutação por rótulos.
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="Um número de circuito (rótulo)|Nada, o roteador adivinha o destino|O endereço de origem apenas" data-answer="0" data-explain="O caminho é sinalizado antes; depois, os pacotes levam só um número de canal, bem mais curto." data-hint="Lembre da analogia com a telefonia.">
+        <p class="fw-semibold mb-2">Autoavaliação: No circuito virtual, o que os pacotes de dados carregam em vez do endereço completo de destino?</p>
+    </div>
 </section>
 
 <!-- 4. Tabelas de encaminhamento -->
@@ -558,6 +567,9 @@
             <button class="btn btn-primary" id="lpmBtn" type="button">Buscar</button>
         </div>
         <div id="lpmOutput" class="small"></div>
+    </div>
+    <div class="demo-box mini-quiz mt-4" data-options="Loop de encaminhamento|Buraco negro|Contagem ao infinito" data-answer="1" data-explain="No loop, os pacotes circulam; no buraco negro, são descartados por falta de rota." data-hint="Um dos problemas descarta; o outro faz o pacote circular.">
+        <p class="fw-semibold mb-2">Autoavaliação: Como se chama o problema em que o roteador descarta pacotes porque o destino não está na tabela?</p>
     </div>
 </section>
 
@@ -637,6 +649,9 @@
         conhecido de roteamento por vetor de distância, ainda usado hoje em redes pequenas ou como
         material didático por sua simplicidade.
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="Que o roteador calcule o custo dos enlaces|Que um roteador anuncie a um vizinho uma rota aprendida através desse mesmo vizinho|Que vizinhos troquem vetores de distância" data-answer="1" data-explain="Isso atenua a contagem ao infinito, em que dois vizinhos se anunciam rotas que já não existem." data-hint="Pense em quem seria enganado ao receber a própria rota de volta.">
+        <p class="fw-semibold mb-2">Autoavaliação: O que a técnica split horizon impede?</p>
+    </div>
 </section>
 
 <!-- 6. Estado de enlace -->
@@ -699,6 +714,9 @@
         <strong>OSPF</strong> (Open Shortest Path First) e <strong>IS-IS</strong> são os protocolos
         de estado de enlace mais usados hoje dentro de redes corporativas e de provedores.
     </p>
+    <div class="demo-box mini-quiz mt-4" data-options="Só para o vizinho de menor custo|Para todas as interfaces, exceto aquela por onde ele chegou|Somente de volta ao roteador de origem" data-answer="1" data-explain="Assim todo roteador recebe o LSP e monta o mesmo mapa da rede." data-hint="O objetivo é que todos os roteadores recebam o LSP.">
+        <p class="fw-semibold mb-2">Autoavaliação: Na inundação de LSPs, para onde um roteador retransmite um LSP novo?</p>
+    </div>
 </section>
 
 <!-- 7. Comparação / prática -->
@@ -781,6 +799,7 @@
         <div class="col-md-6">
             <div class="card-soft p-4 h-100">
                 <h6 class="fw-semibold">🧭 traceroute</h6>
+                <p class="small text-muted mb-0">
                     A ferramenta <code>traceroute</code> (ou <code>tracert</code>) estima, salto a
                     salto, o caminho de encaminhamento observado a partir da origem. Ela não é um
                     protocolo de roteamento nem identifica, sozinha, qual algoritmo calculou cada
@@ -792,6 +811,9 @@
             </div>
         </div>
     </div>
+    <div class="demo-box mini-quiz mt-4" data-options="RIP|OSPF|BGP" data-answer="2" data-explain="O BGP é um protocolo de vetor de caminho que anuncia a rota completa de sistemas autônomos." data-hint="RIP e OSPF atuam dentro de uma mesma rede.">
+        <p class="fw-semibold mb-2">Autoavaliação: Qual protocolo cuida do roteamento entre provedores (sistemas autônomos)?</p>
+    </div>
 </section>
 
 <!-- 8. Simulador de roteamento -->
@@ -801,7 +823,7 @@
     <p>Edite custos ou derrube enlaces e compare as rotas. O vetor de distância usa um limite didático de métrica 16; split horizon e poison reverse alteram os anúncios enviados ao vizinho. Arraste os nós no desenho para reorganizar a visualização. Em uma topologia com rota alternativa, desligar essas proteções pode produzir aumento iterativo da métrica (contagem ao infinito).</p>
     <div class="row g-4">
         <div class="col-lg-5">
-                <svg viewBox="0 0 460 200" role="img" aria-label="Grafo editável de quatro roteadores e enlaces ponderados" class="w-100 border rounded bg-white">
+                <svg id="editableRoutingGraph" viewBox="0 0 460 200" role="img" aria-label="Grafo editável de quatro roteadores e enlaces ponderados" class="w-100 border rounded bg-white">
                 <title>Grafo editável: arraste os roteadores; altere custos ou derrube enlaces nos controles abaixo.</title>
             </svg>
             <h3 class="h6 mt-3">Enlaces</h3>
@@ -826,8 +848,14 @@
             <div id="routingDijkstraOutput"></div>
             <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="routingDijkstraStep">Próximo passo de Dijkstra</button>
             <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="routingDijkstraReset">Reiniciar Dijkstra</button>
+            <div class="input-group input-group-sm mt-2" style="max-width:260px"><label class="input-group-text" for="routingDijkstraDest">Destino do caminho</label><select id="routingDijkstraDest" class="form-select"><option>A</option><option>B</option><option>C</option><option selected>D</option></select></div>
             <p id="routingDijkstraQueue" class="small font-monospace mt-2 mb-0" aria-live="polite"></p>
+            <p id="routingDijkstraPath" class="small mt-1 mb-1" aria-live="polite"></p>
+            <p class="small text-muted mb-0">Verde claro: nó visitado. Amarelo: nó extraído da fila agora. Traço verde-água: árvore de menores caminhos já definida. Traço verde grosso: caminho final até o destino escolhido. O “d” dentro do nó é a distância provisória.</p>
         </div>
+    </div>
+    <div class="demo-box mini-quiz mt-4" data-options="B|C|D" data-answer="0" data-explain="A→B→D custa 3; A→C→D custa 5. D não é vizinho direto de A." data-hint="Compare os custos totais dos dois caminhos.">
+        <p class="fw-semibold mb-2">Autoavaliação: Na topologia inicial (A–B 1, A–C 4, B–D 2, C–D 1), qual é o próximo salto de A para D?</p>
     </div>
 </section>
 
@@ -839,6 +867,9 @@
     <textarea id="tracerouteInput" class="form-control font-monospace" rows="7" aria-label="Cole aqui a saída do traceroute ou tracert" placeholder="1  192.168.1.1  1.23 ms  1.10 ms  1.08 ms"></textarea>
     <button type="button" class="btn btn-primary btn-sm mt-2" id="parseTraceroute">Interpretar saltos</button>
     <div id="tracerouteOutput" class="mt-3" aria-live="polite"></div>
+    <div class="demo-box mini-quiz mt-4" data-options="O caminho de encaminhamento observado, salto a salto|Qual algoritmo (RIP, OSPF, BGP) calculou cada rota|A tabela BGP completa do provedor" data-answer="0" data-explain="Ele mostra o caminho resultante, mas sozinho não revela qual protocolo o calculou." data-hint="Ele observa o caminho; não enxerga as tabelas dos roteadores.">
+        <p class="fw-semibold mb-2">Autoavaliação: O que o traceroute mostra?</p>
+    </div>
 </section>
 
 <section id="rede-laboratorio" class="chapter-section">
@@ -847,12 +878,24 @@
         <h3 class="h6">Longest-prefix match com IPv4/CIDR</h3>
         <label class="form-label small" for="ipv4Destination">Endereço de destino</label>
         <input id="ipv4Destination" class="form-control form-control-sm" value="200.18.4.7" aria-label="Endereço IPv4 para consultar">
+        <p class="small text-muted mt-2 mb-2">Para cada rota, o roteador aplica a máscara ao destino (operação AND, bit a bit) e compara o resultado com a rede da rota. Se forem iguais nos bits do prefixo, a rota combina; entre as que combinam, vence o prefixo mais longo.</p>
         <div id="ipv4PrefixOutput" class="small mt-2" aria-live="polite"></div>
     </div>
     <div class="row g-4">
         <div class="col-md-6 demo-box">
             <h3 class="h6">Loop de encaminhamento e TTL</h3>
             <p class="small">Um pacote circula A→B→C→A até TTL chegar a zero.</p>
+            <svg viewBox="0 0 360 170" class="w-100" style="max-height:200px" role="img" aria-label="Três roteadores A, B e C ligados em círculo; um pacote amarelo percorre A, B, C e A de novo, com o TTL diminuindo a cada salto até ser descartado.">
+                <title>Loop de encaminhamento A, B, C: o número no pacote é o TTL restante; ao chegar a zero o pacote fica vermelho e é descartado.</title>
+                <defs><marker id="ttlArrowMarker" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path id="ttlArrowHead" d="M 0 0 L 10 5 L 0 10 z" fill="#6c757d"/></marker></defs>
+                <line class="ttl-link" x1="90" y1="115" x2="150" y2="75" marker-end="url(#ttlArrowMarker)"/>
+                <line class="ttl-link" x1="210" y1="75" x2="270" y2="115" marker-end="url(#ttlArrowMarker)"/>
+                <line class="ttl-link" x1="268" y1="135" x2="92" y2="135" marker-end="url(#ttlArrowMarker)"/>
+                <rect class="ttl-router" x="32" y="119" width="56" height="32" rx="6"/><text class="ttl-router-label" x="60" y="140" text-anchor="middle">A</text>
+                <rect class="ttl-router" x="152" y="39" width="56" height="32" rx="6"/><text class="ttl-router-label" x="180" y="60" text-anchor="middle">B</text>
+                <rect class="ttl-router" x="272" y="119" width="56" height="32" rx="6"/><text class="ttl-router-label" x="300" y="140" text-anchor="middle">C</text>
+                <g id="ttlPacket" style="transform: translate(60px, 135px)"><circle id="ttlPacketBody" class="ttl-packet" cx="0" cy="-36" r="14"/><text id="ttlPacketText" class="ttl-packet-text" x="0" y="-31" text-anchor="middle">8</text></g>
+            </svg>
             <button id="runTtlLoop" type="button" class="btn btn-primary btn-sm">Avançar pacote</button>
             <button id="resetTtlLoop" type="button" class="btn btn-outline-secondary btn-sm">Reiniciar</button>
             <p id="ttlOutput" class="small mt-2" aria-live="polite"></p>
@@ -869,6 +912,9 @@
         <p class="small">No exemplo, cada datagrama pode seguir uma rota distinta; o circuito virtual sinaliza um caminho e usa rótulos. A topologia mostrada é didática.</p>
         <button id="animateForwarding" type="button" class="btn btn-primary btn-sm">Enviar sequência de pacotes</button>
         <p id="forwardingOutput" class="small mt-2" aria-live="polite"></p>
+    </div>
+    <div class="demo-box mini-quiz mt-4" data-options="O pacote é entregue normalmente|O TTL reinicia em 255|O roteador descarta o pacote" data-answer="2" data-explain="É o mecanismo que impede um pacote de circular para sempre em um loop de encaminhamento." data-hint="Para que serve um limite de saltos?">
+        <p class="fw-semibold mb-2">Autoavaliação: O que acontece quando o TTL de um pacote chega a 0?</p>
     </div>
 </section>
 
@@ -890,7 +936,28 @@
 
 <section id="ia-cap2" class="chapter-section">
     <span class="kicker">Transparência</span><h2 class="section-title">Como a IA foi usada</h2>
-    <p>Ferramentas de IA podem ajudar a revisar a clareza e propor exemplos, mas não são fonte técnica. Nesta implementação, os enunciados de roteamento, CIDR, TCP e detecção de erros foram revisados manualmente e confrontados com o CNP3 e referências normativas indicadas no conteúdo. Uma auditoria linha a linha de todas as afirmações deste capítulo ainda é necessária.</p>
+    <p>Ferramentas de IA ajudaram a revisar a clareza e a propor exemplos, mas não são fonte técnica. Os enunciados de roteamento, CIDR, TCP e detecção de erros foram revisados e confrontados com o CNP3 e com referências normativas indicadas no conteúdo.</p>
+    <h3 class="h6">Registro de prompts</h3>
+    <ul class="small">
+        <li><strong>Revisão do site publicado:</strong> a análise dos capítulos 1 e 2 gerou o roteiro <code>sugestoes.txt</code>, que orientou as correções e os simuladores.</li>
+        <li><strong>Rodada de fechamento:</strong> “verificar quais sugestões ainda faltam e resolver as de menor esforço”. Resultado neste capítulo: questões rápidas por seção, Dijkstra com nós coloridos e caminho final, AND bit a bit no prefixo mais longo, animação do loop de TTL e desafios de código com resposta.</li>
+    </ul>
+    <!-- Para completar o registro: acrescente aqui os prompts originais das rodadas anteriores. -->
+    <h3 class="h6 mt-3">Afirmações verificáveis</h3>
+        <div class="table-responsive">
+        <table class="table table-sm small align-middle">
+            <thead><tr><th scope="col">Afirmação</th><th scope="col">Como foi verificada</th><th scope="col">Situação</th></tr></thead>
+            <tbody>
+                <tr><td>De A para D o melhor caminho é A→B→D, com custo 3</td><td>Vetor de distância e Dijkstra com os custos iniciais do grafo (A–B 1, A–C 4, B–D 2, C–D 1)</td><td>✔ Conferido por execução</td></tr>
+                <tr><td>200.18.4.7 combina com 200.18.0.0/16 e com 200.18.4.0/22; vence o /22</td><td>AND bit a bit na seção de visualizações</td><td>✔ Conferido por execução</td></tr>
+                <tr><td>O código de vetor de distância imprime “Convergiu na rodada 3” na topologia do capítulo</td><td>Execução do código</td><td>✔ Conferido por execução</td></tr>
+                <tr><td>O traceroute mostra o caminho de encaminhamento observado, não o algoritmo que o calculou</td><td>RFC 792 (ICMP) e manual do traceroute</td><td>A conferir na fonte</td></tr>
+                <tr><td>O BGP é um protocolo de vetor de caminho entre sistemas autônomos</td><td>RFC 4271</td><td>A conferir na fonte</td></tr>
+                <tr><td>Uma residência costuma receber um único IPv4 público (ou CGNAT) e, com IPv6, um prefixo /56 ou /64</td><td>RFC 6598 (CGNAT) e política do provedor</td><td>A conferir na fonte</td></tr>
+            </tbody>
+        </table>
+        </div>
+    <p class="small text-muted">Uma auditoria linha a linha de todas as afirmações deste capítulo ainda é necessária; as linhas “a conferir” indicam a fonte a consultar.</p>
 </section>
 
 <!-- 9. Exemplos de código -->

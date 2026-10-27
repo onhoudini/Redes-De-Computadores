@@ -4,22 +4,113 @@
     var pyodidePromise = null;
     var codemirrorPromise = null;
 
+    // Três desafios por bloco (aquecimento, intermediário, desafio); as respostas foram conferidas executando o código.
     var desafios = {
-        capitulo1: [
-            "Desafio: altere o quadro e provoque erros em um ou em dois bits. O que a paridade detecta?",
-            "Desafio: experimente sequências com cinco ou mais bits 1 consecutivos e confira o receptor.",
-            "Desafio: mude prob_perda para 0.8 e compare a quantidade de retransmissões usando a mesma semente.",
-            "Aquecimento: execute e altere os bits para verificar quais erros de 1 bit a paridade detecta.",
-            "Intermediário: experimente um quadro com seis bits 1 consecutivos e verifique a recuperação.",
-            "Desafio: compare duas execuções ABP com sementes diferentes e depois repita a mesma semente."
+        "capitulo1": [
+            [
+                {
+                    "nivel": "Aquecimento",
+                    "texto": "Troque quadro por \"1101\" e preveja o bit de paridade antes de executar.",
+                    "resposta": "Há três bits 1 (quantidade ímpar), então o bit de paridade é 1 e o quadro codificado fica 11011."
+                },
+                {
+                    "nivel": "Intermediário",
+                    "texto": "Inverta dois bits quaisquer de codificado (em com_erro) e chame verifica_paridade. O erro é detectado?",
+                    "resposta": "Não: duas inversões mantêm a paridade da quantidade de bits 1, então verifica_paridade devolve True e o erro passa despercebido."
+                },
+                {
+                    "nivel": "Desafio",
+                    "texto": "Escreva um laço que inverta cada posição de codificado, uma por vez, e conte quantas inversões verifica_paridade detecta. Depois repita para todos os pares de posições (itertools.combinations).",
+                    "resposta": "Para um quadro codificado de 5 bits: 5 de 5 inversões únicas são detectadas e 0 dos 10 pares de inversões."
+                }
+            ],
+            [
+                {
+                    "nivel": "Aquecimento",
+                    "texto": "Use dados = \"11111\" e preveja o corpo do quadro antes de executar.",
+                    "resposta": "Depois de cinco bits 1 o transmissor insere um 0: o corpo é 111110, entre dois marcadores 01111110."
+                },
+                {
+                    "nivel": "Intermediário",
+                    "texto": "Apague a linha contador_uns = 0 dentro do if contador_uns == 5 de bit_stuffing e use dados = \"1\" * 12. Qual é a maior sequência de 1s no corpo do quadro?",
+                    "resposta": "Com o código correto, no máximo 5 (corpo 11111011111011). Sem a linha, o contador não volta a zero, só um 0 é inserido e surgem 7 uns seguidos, o bastante para formar o marcador 01111110 por acidente."
+                },
+                {
+                    "nivel": "Desafio",
+                    "texto": "Use dados = \"01111110\" (o próprio marcador) e verifique que quadro[len(MARCADOR):-len(MARCADOR)].find(MARCADOR) devolve -1.",
+                    "resposta": "O corpo vira 011111010: o 0 inserido quebra a sequência de cinco 1s, o marcador não aparece nos dados e find devolve -1. remove_stuffing recupera os dados originais."
+                }
+            ],
+            [
+                {
+                    "nivel": "Aquecimento",
+                    "texto": "Mude prob_perda para 0.0. Quantas linhas começando com \"[Host A] envia\" aparecem para as três mensagens?",
+                    "resposta": "Três: sem perdas cada mensagem é enviada uma única vez (tentativa 1) e confirmada."
+                },
+                {
+                    "nivel": "Intermediário",
+                    "texto": "Use prob_perda = 0.8 e compare a quantidade de linhas \"[Host A] envia\" com a de prob_perda = 0.3, mantendo a mesma semente.",
+                    "resposta": "Com 0.8 há bem mais retransmissões: a chance de o quadro e o ACK chegarem é (1 − p)² = 0,04 por tentativa, contra 0,49 com p = 0,3. Em média, cerca de 25 tentativas por mensagem contra cerca de 2."
+                },
+                {
+                    "nivel": "Desafio",
+                    "texto": "Quando só o ACK se perde, o Host B entrega a mesma mensagem outra vez à aplicação. Acrescente uma variável esperado no receptor: se o número de sequência recebido for diferente de esperado, descarte a duplicata e apenas reenvie o ACK.",
+                    "resposta": "O receptor começa com esperado = 0. Ao receber D(seq): se seq == esperado, entrega e faz esperado = 1 - esperado; caso contrário descarta. Nos dois casos envia C(OK seq). Assim cada mensagem é entregue exatamente uma vez."
+                }
+            ]
         ],
-        capitulo2: [
-            "Desafio: altere os prefixos e encontre um destino que corresponda a mais de uma entrada.",
-            "Desafio: acrescente um enlace E–D de custo 1 e rode o vetor de distância novamente.",
-            "Desafio: acrescente um enlace E–D de custo 1 e rode Dijkstra novamente.",
-            "Aquecimento: modifique a tabela para inserir outro prefixo e examine qual entrada é mais específica.",
-            "Intermediário: adicione uma ligação bidirecional ao grafo e observe os novos custos mínimos.",
-            "Desafio: acrescente um enlace E–D de custo 1 e compare os caminhos calculados."
+        "capitulo2": [
+            [
+                {
+                    "nivel": "Aquecimento",
+                    "texto": "Preveja a interface do endereço \"01011011\" e depois execute com ele.",
+                    "resposta": "Sul: o endereço começa com 0101101, o prefixo mais longo da tabela."
+                },
+                {
+                    "nivel": "Intermediário",
+                    "texto": "Acrescente \"01011\": \"Leste\" à tabela. Qual interface atende \"01011100\"? E \"01011010\"?",
+                    "resposta": "\"01011100\" vai para Leste (01011 é o prefixo mais longo que combina). \"01011010\" continua em Sul, pois 0101101 é ainda mais longo."
+                },
+                {
+                    "nivel": "Desafio",
+                    "texto": "Acrescente a rota padrão \"\": \"Padrão\" (prefixo vazio). O que muda para \"11111111\" e para \"01100000\"?",
+                    "resposta": "O prefixo vazio combina com qualquer endereço, mas só vence quando nada mais combina: \"11111111\" passa de None para Padrão e \"01100000\" continua em Oeste."
+                }
+            ],
+            [
+                {
+                    "nivel": "Aquecimento",
+                    "texto": "Troque range(1, 10) por range(1, 2) e imprima tabelas[\"A\"]. O que A ainda não conhece?",
+                    "resposta": "Depois de uma rodada, A só conhece B (custo 1) e C (custo 4). O destino D ainda não aparece e só entra na rodada 2."
+                },
+                {
+                    "nivel": "Intermediário",
+                    "texto": "Troque o custo B–D para 10 nos dois sentidos (topologia[\"B\"] e topologia[\"D\"]). Qual é a nova rota de A para D e em que rodada o programa converge?",
+                    "resposta": "A passa a usar C, com custo 5 (A→C→D = 4 + 1). O programa imprime “Convergiu na rodada 4”."
+                },
+                {
+                    "nivel": "Desafio",
+                    "texto": "Acrescente o roteador E ligado a D com custo 1 (\"E\": {\"D\": 1} e \"E\": 1 em topologia[\"D\"]). Qual é o custo de A até E e por qual vizinho?",
+                    "resposta": "Custo 4, via B (A→B→D→E = 1 + 2 + 1). Via C seria 6."
+                }
+            ],
+            [
+                {
+                    "nivel": "Aquecimento",
+                    "texto": "Troque a origem de \"E\" para \"A\" e preveja os custos antes de executar.",
+                    "resposta": "A→B 1, A→D 1, A→C 2 (via B) e A→E 2. Há empate entre A→B→E e A→D→E, e o código mantém o primeiro caminho encontrado (via B)."
+                },
+                {
+                    "nivel": "Intermediário",
+                    "texto": "Remova o enlace E–D nos dois sentidos e rode a partir de E. Qual é o novo caminho até D?",
+                    "resposta": "E → B → A → D, com custo 3."
+                },
+                {
+                    "nivel": "Desafio",
+                    "texto": "Use caminhos[destino][1] para imprimir a tabela de encaminhamento de E (destino → próximo salto), como um roteador faria. Ignore o próprio E.",
+                    "resposta": "B → B, C → C, D → D e A → B. O próximo salto é o segundo elemento do caminho completo."
+                }
+            ]
         ]
     };
 
@@ -108,12 +199,35 @@
 
         painel.appendChild(controles);
 
-        var desafio = (desafios[grupo] || [])[indice];
-        if (desafio) {
-            var dica = document.createElement("p");
-            dica.className = "small text-primary mt-3 mb-1";
-            dica.textContent = desafio;
-            painel.appendChild(dica);
+        var desafiosDoBloco = (desafios[grupo] || [])[indice];
+        if (desafiosDoBloco && desafiosDoBloco.length) {
+            var caixa = document.createElement("div");
+            caixa.className = "small mt-3";
+            var tituloDesafios = document.createElement("p");
+            tituloDesafios.className = "fw-semibold mb-1";
+            tituloDesafios.textContent = "Desafios para este código";
+            caixa.appendChild(tituloDesafios);
+            var lista = document.createElement("ol");
+            lista.className = "mb-1";
+            desafiosDoBloco.forEach(function (item) {
+                var li = document.createElement("li");
+                var nivel = document.createElement("strong");
+                nivel.textContent = item.nivel + ": ";
+                li.appendChild(nivel);
+                li.appendChild(document.createTextNode(item.texto));
+                var detalhes = document.createElement("details");
+                var resumo = document.createElement("summary");
+                resumo.textContent = "Conferir resposta";
+                var resposta = document.createElement("p");
+                resposta.className = "mb-1 mt-1";
+                resposta.textContent = item.resposta;
+                detalhes.appendChild(resumo);
+                detalhes.appendChild(resposta);
+                li.appendChild(detalhes);
+                lista.appendChild(li);
+            });
+            caixa.appendChild(lista);
+            painel.appendChild(caixa);
         }
 
         var saida = document.createElement("pre");
