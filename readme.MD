@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-O objetivo deste repositório é complementar o conteúdo do livro *Computer Networking : Principles, Protocols and Practice*.
+O objetivo deste repositório é tornar o conteúdo do livro *Computer Networking : Principles, Protocols and Practice* mais interativo, facilitando o estudo.
 
 ## Visualização
 
