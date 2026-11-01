@@ -20,10 +20,6 @@
             --text: #212529;
             --muted: #6c757d;
             --background: #f8f9fa;
-            --topo: #0d6efd;
-            --queda: #6610f2;
-            --base-c: #d63384;
-            --leito: #198754;
             --code-bg: #1e1e2e;
             --code-fg: #e6e6e6;
         }
@@ -168,15 +164,7 @@
             background: white;
         }
 
-        .layer-pill {
-            display: inline-block;
-            padding: .25rem .65rem;
-            border-radius: 999px;
-            font-size: .75rem;
-            font-weight: 600;
-            color: white;
-        }
-    </style>
+        </style>
 </head>
 <body data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
@@ -242,14 +230,13 @@
                 <p class="text-uppercase small text-muted fw-semibold mb-2">Neste capítulo</p>
                 <nav id="toc-nav" class="nav flex-column">
                     <a class="nav-link" href="#bits">1. O que é informação?</a>
-                    <a class="nav-link" href="#cachoeira">2. A Cachoeira Perpétua</a>
-                    <a class="nav-link" href="#fisica">3. Camada física</a>
-                    <a class="nav-link" href="#enquadramento">4. Enquadramento</a>
-                    <a class="nav-link" href="#confiavel">5. Entrega confiável</a>
-                    <a class="nav-link" href="#janela">6. Janela deslizante</a>
-                    <a class="nav-link" href="#real">7. Do conceito à prática</a>
-                    <a class="nav-link" href="#exemplos">8. Exemplos de código</a>
-                    <a class="nav-link" href="#referencias">9. Referências</a>
+                    <a class="nav-link" href="#fisica">2. Camada física</a>
+                    <a class="nav-link" href="#enquadramento">3. Enquadramento</a>
+                    <a class="nav-link" href="#confiavel">4. Entrega confiável</a>
+                    <a class="nav-link" href="#janela">5. Janela deslizante</a>
+                    <a class="nav-link" href="#real">6. Do conceito à prática</a>
+                    <a class="nav-link" href="#exemplos">7. Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">8. Referências</a>
                 </nav>
             </div>
         </div>
@@ -342,105 +329,7 @@
     </div>
 </section>
 
-<!-- 2. Cachoeira -->
-<section id="cachoeira" class="chapter-section">
-    <span class="kicker">Analogia</span>
-    <h2 class="section-title">A Cachoeira Perpétua</h2>
-
-    <div class="alert alert-primary border-0" role="note">
-        <strong>Uma analogia, não uma arquitetura formal.</strong>
-        <span>
-            A “Cachoeira Perpétua” é uma representação didática para visualizar como o tráfego
-            pode atravessar diferentes escalas da infraestrutura de rede. Os termos
-            <strong>Topo</strong>, <strong>Queda</strong>, <strong>Base</strong> e
-            <strong>Leito</strong> não são camadas oficiais da Internet nem descrevem uma
-            topologia obrigatória. Na prática, os caminhos dos dados variam conforme a
-            tecnologia, o provedor e a topologia da rede.
-        </span>
-    </div>
-
-    <p>
-        Para responder a essa pergunta, é útil parar de olhar para um bit isolado e observar a
-        <strong>infraestrutura</strong> que carrega bilhões deles ao mesmo tempo. Uma boa forma de
-        visualizar essa estrutura é imaginar uma cachoeira: a água (os dados) começa concentrada
-        no topo e, à medida que desce, vai se espalhando por caminhos cada vez menores, até chegar
-        calma ao leito do rio — o seu dispositivo.
-    </p>
-
-
-    <figure class="diagram">
-        <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:420px" role="img" aria-label="As quatro etapas da Cachoeira Perpétua: do cabo submarino até o seu roteador Wi-Fi."><title>As quatro etapas da Cachoeira Perpétua: do cabo submarino até o seu roteador Wi-Fi.</title>
-            <!-- Topo -->
-            <rect x="40" y="10" width="620" height="70" rx="10" fill="#e7f1ff" stroke="#0d6efd"/>
-            <text x="60" y="35" font-size="15" font-weight="700" fill="#0d6efd" font-family="sans-serif">TOPO</text>
-            <text x="60" y="55" font-size="12.5" fill="#212529" font-family="sans-serif">Cabos submarinos de fibra óptica · comunicação intercontinental</text>
-            <text x="60" y="72" font-size="11" fill="#6c757d" font-family="sans-serif">DWDM/WDM: vários comprimentos de onda dividem a mesma fibra</text>
-
-            <path d="M350 82 L350 102" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow2)"/>
-
-            <!-- Queda -->
-            <rect x="70" y="105" width="560" height="70" rx="10" fill="#f1e9ff" stroke="#6610f2"/>
-            <text x="90" y="130" font-size="15" font-weight="700" fill="#6610f2" font-family="sans-serif">QUEDA</text>
-            <text x="90" y="150" font-size="12.5" fill="#212529" font-family="sans-serif">Redes de backbone nacional · fibra óptica de alta capacidade</text>
-            <text x="90" y="167" font-size="11" fill="#6c757d" font-family="sans-serif">roteadores de núcleo encaminham o tráfego entre regiões do país</text>
-
-            <path d="M350 177 L350 197" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow2)"/>
-
-            <!-- Base -->
-            <rect x="110" y="200" width="480" height="70" rx="10" fill="#ffe3f0" stroke="#d63384"/>
-            <text x="130" y="225" font-size="15" font-weight="700" fill="#d63384" font-family="sans-serif">BASE</text>
-            <text x="130" y="245" font-size="12.5" fill="#212529" font-family="sans-serif">Redes metropolitanas (MAN) · agregação regional/cidade</text>
-            <text x="130" y="262" font-size="11" fill="#6c757d" font-family="sans-serif">tráfego é dividido entre bairros e provedores locais</text>
-
-            <path d="M350 272 L350 292" stroke="#adb5bd" stroke-width="2" marker-end="url(#arrow2)"/>
-
-            <!-- Leito -->
-            <rect x="150" y="295" width="400" height="70" rx="10" fill="#e6f6ec" stroke="#198754"/>
-            <text x="170" y="320" font-size="15" font-weight="700" fill="#198754" font-family="sans-serif">LEITO</text>
-            <text x="170" y="340" font-size="12.5" fill="#212529" font-family="sans-serif">Rede de acesso · FTTH, cabo, Wi-Fi, 4G/5G</text>
-            <text x="170" y="357" font-size="11" fill="#6c757d" font-family="sans-serif">o ponto onde os bits finalmente chegam ao seu dispositivo</text>
-
-            <defs>
-                <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-                    <path d="M0,0 L8,4 L0,8 z" fill="#adb5bd"/>
-                </marker>
-            </defs>
-        </svg>
-        <figcaption>As quatro etapas da Cachoeira Perpétua: do cabo submarino até o seu roteador Wi-Fi.</figcaption>
-    </figure>
-
-    <div class="row g-3">
-        <div class="col-md-3">
-            <div class="card-soft p-3 h-100">
-                <span class="layer-pill" style="background:var(--topo)">Topo</span>
-                <p class="small mt-2 mb-0">Cabos submarinos ligam continentes usando sinais ópticos e DWDM, multiplicando a capacidade de uma única fibra.</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-soft p-3 h-100">
-                <span class="layer-pill" style="background:var(--queda)">Queda</span>
-                <p class="small mt-2 mb-0">Backbones terrestres levam o tráfego por milhares de quilômetros dentro de um país.</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-soft p-3 h-100">
-                <span class="layer-pill" style="background:var(--base-c)">Base</span>
-                <p class="small mt-2 mb-0">Redes metropolitanas distribuem o tráfego entre cidades e bairros.</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card-soft p-3 h-100">
-                <span class="layer-pill" style="background:var(--leito)">Leito</span>
-                <p class="small mt-2 mb-0">A rede de acesso entrega os bits ao dispositivo final do usuário.</p>
-            </div>
-        </div>
-    </div>
-    <div class="demo-box mini-quiz mt-4" data-options="Sim, são as quatro camadas do modelo TCP/IP|Não, são só uma analogia didática|Sim, mas só em redes com cabos submarinos" data-answer="1" data-explain="É uma analogia para visualizar a escala da infraestrutura, não uma arquitetura formal." data-hint="Releia o aviso no início da seção.">
-        <p class="fw-semibold mb-2">Autoavaliação: Topo, Queda, Base e Leito são camadas oficiais da Internet?</p>
-    </div>
-</section>
-
-<!-- 3. Camada física -->
+<!-- 2. Camada física -->
 <section id="fisica" class="chapter-section">
     <span class="kicker">Aprofundando</span>
     <h2 class="section-title">Por dentro da camada física</h2>
@@ -492,7 +381,7 @@
     </div>
 </section>
 
-<!-- 4. Enquadramento -->
+<!-- 3. Enquadramento -->
 <section id="enquadramento" class="chapter-section">
     <span class="kicker">Camada de enlace</span>
     <h2 class="section-title">Enquadramento: separando os bits em quadros</h2>
@@ -547,7 +436,7 @@
     </div>
 </section>
 
-<!-- 5. Entrega confiável -->
+<!-- 4. Entrega confiável -->
 <section id="confiavel" class="chapter-section">
     <span class="kicker">Camada de enlace</span>
     <h2 class="section-title">Entrega confiável sobre um enlace imperfeito</h2>
@@ -602,7 +491,7 @@
     </div>
 </section>
 
-<!-- 6. Janela deslizante -->
+<!-- 5. Janela deslizante -->
 <section id="janela" class="chapter-section">
     <span class="kicker">Desempenho</span>
     <h2 class="section-title">Janela deslizante: Go-Back-N e Selective Repeat</h2>
@@ -744,7 +633,7 @@
     </div>
 </section>
 
-<!-- 7. Aplicações reais -->
+<!-- 6. Aplicações reais -->
 <section id="real" class="chapter-section">
     <span class="kicker">Na prática</span>
     <h2 class="section-title">Do conceito à situação real</h2>
@@ -756,7 +645,7 @@
                 <p class="small text-muted">
                     Sistemas como o cabo <em>2Africa</em> ou o <em>EllaLink</em> (que liga Brasil e
                     Europa) usam DWDM para transportar dezenas de terabits por segundo em um único
-                    par de fibras — a mesma ideia da seção "Topo", em escala real. Consulte o
+                    par de fibras — a mesma ideia apresentada aqui, em escala real. Consulte o
                     <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener noreferrer">Submarine Cable Map</a>
                     para explorar rotas e pontos de chegada. Parte significativa do tráfego local
                     pode permanecer no país por meio de IXPs, como o
@@ -770,7 +659,7 @@
                 <h6 class="fw-semibold">📶 A "última milha" no seu bairro</h6>
                 <p class="small text-muted">
                     FTTH, HFC (cabo) e redes móveis 4G/5G são implementações diferentes da mesma
-                    ideia: o "Leito" da cachoeira, onde a rede do provedor finalmente encontra o
+                    ideia: a rede de acesso, onde a rede do provedor finalmente encontra o
                     seu roteador.
                 </p>
             </div>
@@ -830,7 +719,7 @@
     </div>
 </section>
 
-<!-- 8. Exemplos de código -->
+<!-- 7. Exemplos de código -->
 <section id="exemplos" class="chapter-section">
     <span class="kicker">Mão na massa</span>
     <h2 class="section-title">Exemplos de código</h2>
@@ -967,7 +856,7 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
     </div>
 </section>
 
-<!-- 9. Referências -->
+<!-- 8. Referências -->
 <section id="referencias" class="chapter-section">
     <span class="kicker">Fontes</span>
     <h2 class="section-title">Referências</h2>
