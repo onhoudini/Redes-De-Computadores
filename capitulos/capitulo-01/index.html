@@ -267,7 +267,7 @@
         <code>01000001</code>.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
             <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Codificação ASCII do caractere A em bits" style="width:100%;height:auto;max-height:220px"><title>O caractere A é representado pelo byte ASCII 01000001.</title>
             <text x="20" y="30" font-size="14" fill="#6c757d" font-family="sans-serif">Caractere</text>
@@ -357,7 +357,7 @@
         receptor apenas mede a tensão a cada milissegundo e decodifica o bit correspondente.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="row g-4 align-items-stretch">
         <div class="col-md-6">
             <div class="card-soft p-3 h-100">
@@ -420,30 +420,38 @@
         receptor faz o processo inverso, removendo os bits inseridos.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
-    <figure class="diagram">
-        <svg viewBox="0 0 800 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:190px" role="img" aria-label="Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns."><title>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns.</title>
-            <text x="10" y="24" font-size="13" fill="#6c757d" font-family="sans-serif">Original (17 uns seguidos, mais que os cinco permitidos):</text>
-            <g font-family="monospace" font-size="14" font-weight="700">
-                <text x="10" y="52" fill="#212529">0110111111111111111110010</text>
-            </g>
+<h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+<figure class="diagram">
+    <svg viewBox="0 0 800 170" xmlns="http://w3.org" style="width:100%;height:auto;max-height:190px" role="img" aria-label="Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns.">
+        <title>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns.</title>
+        
+        <text x="10" y="24" font-size="13" fill="#8a939b" font-family="sans-serif">Original (17 uns seguidos, mais que os cinco permitidos):</text>
+        
+        <g font-family="monospace" font-size="14" font-weight="700">
+            <text x="10" y="52" fill="currentColor">0110111111111111111110010</text>
+        </g>
 
-            <text x="10" y="88" font-size="13" fill="#6c757d" font-family="sans-serif">Transmitido (marcadores em azul, bits de stuffing em vermelho):</text>
-            <g font-family="monospace" font-size="14" font-weight="700">
-                <text x="10" y="116" fill="#0d6efd">01111110</text>
-                <text x="90" y="116" fill="#212529">011011111</text>
-                <text x="200" y="116" fill="#c1121f">0</text>
-                <text x="213" y="116" fill="#212529">11111</text>
-                <text x="255" y="116" fill="#c1121f">0</text>
-                <text x="268" y="116" fill="#212529">11111</text>
-                <text x="310" y="116" fill="#c1121f">0</text>
-                <text x="323" y="116" fill="#212529">110010</text>
-                <text x="400" y="116" fill="#0d6efd">01111110</text>
-            </g>
-            <text x="10" y="150" font-size="11.5" fill="#6c757d" font-family="sans-serif">Azul = marcador de quadro (01111110) · Vermelho = bit 0 inserido a cada cinco 1s consecutivos</text>
-        </svg>
-        <figcaption>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns.</figcaption>
-    </figure>
+        <text x="10" y="88" font-size="13" fill="#8a939b" font-family="sans-serif">Transmitido (marcadores em azul, bits de stuffing em vermelho):</text>
+        
+        <g font-family="monospace" font-size="14" font-weight="700">
+            <text x="10" y="116" fill="#0d6efd">01111110</text>
+            <text x="400" y="116" fill="#0d6efd">01111110</text>
+
+            <text x="90" y="116" fill="currentColor">011011111</text>
+            <text x="213" y="116" fill="currentColor">11111</text>
+            <text x="268" y="116" fill="currentColor">11111</text>
+            <text x="323" y="116" fill="currentColor">110010</text>
+
+            <text x="200" y="116" fill="#c1121f">0</text>
+            <text x="255" y="116" fill="#c1121f">0</text>
+            <text x="310" y="116" fill="#c1121f">0</text>
+        </g>
+        
+        <text x="10" y="150" font-size="11.5" fill="#8a939b" font-family="sans-serif">Azul = marcador de quadro (01111110) · Vermelho = bit 0 inserido a cada cinco 1s consecutivos</text>
+    </svg>
+<figcaption>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar</figcaption>
+</figure>
+
 
     <p>
         Implementações em software costumam preferir manipular <strong>caracteres</strong> em vez de
@@ -504,7 +512,7 @@
         <figcaption>ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado.</figcaption>
     </figure>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p>
         O ABP resolve o problema de confiabilidade, mas é lento: o transmissor fica ocioso à espera
         de cada ACK. Considere, para estimar a eficiência, quadros de 1.000 bits, enlace de
@@ -540,7 +548,7 @@
         <strong>janela deslizante</strong>.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="row g-4">
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">

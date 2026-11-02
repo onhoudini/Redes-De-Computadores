@@ -934,31 +934,6 @@
     <p id="lpmQuizFeedback" class="small mt-2" aria-live="polite"></p>
 </section>
 
-<section id="ia-cap2" class="chapter-section">
-    <span class="kicker">Transparência</span><h2 class="section-title">Como a IA foi usada</h2>
-    <p>Ferramentas de IA ajudaram a revisar a clareza e a propor exemplos, mas não são fonte técnica. Os enunciados de roteamento, CIDR, TCP e detecção de erros foram revisados e confrontados com o CNP3 e com referências normativas indicadas no conteúdo.</p>
-    <h3 class="h6">Registro de prompts</h3>
-    <ul class="small">
-        <li><strong>Revisão do site publicado:</strong> a análise dos capítulos 1 e 2 gerou o roteiro <code>sugestoes.txt</code>, que orientou as correções e os simuladores.</li>
-        <li><strong>Rodada de fechamento:</strong> “verificar quais sugestões ainda faltam e resolver as de menor esforço”. Resultado neste capítulo: questões rápidas por seção, Dijkstra com nós coloridos e caminho final, AND bit a bit no prefixo mais longo, animação do loop de TTL e desafios de código com resposta.</li>
-    </ul>
-    <!-- Para completar o registro: acrescente aqui os prompts originais das rodadas anteriores. -->
-    <h3 class="h6 mt-3">Afirmações verificáveis</h3>
-        <div class="table-responsive">
-        <table class="table table-sm small align-middle">
-            <thead><tr><th scope="col">Afirmação</th><th scope="col">Como foi verificada</th><th scope="col">Situação</th></tr></thead>
-            <tbody>
-                <tr><td>De A para D o melhor caminho é A→B→D, com custo 3</td><td>Vetor de distância e Dijkstra com os custos iniciais do grafo (A–B 1, A–C 4, B–D 2, C–D 1)</td><td>✔ Conferido por execução</td></tr>
-                <tr><td>200.18.4.7 combina com 200.18.0.0/16 e com 200.18.4.0/22; vence o /22</td><td>AND bit a bit na seção de visualizações</td><td>✔ Conferido por execução</td></tr>
-                <tr><td>O código de vetor de distância imprime “Convergiu na rodada 3” na topologia do capítulo</td><td>Execução do código</td><td>✔ Conferido por execução</td></tr>
-                <tr><td>O traceroute mostra o caminho de encaminhamento observado, não o algoritmo que o calculou</td><td>RFC 792 (ICMP) e manual do traceroute</td><td>A conferir na fonte</td></tr>
-                <tr><td>O BGP é um protocolo de vetor de caminho entre sistemas autônomos</td><td>RFC 4271</td><td>A conferir na fonte</td></tr>
-                <tr><td>Uma residência costuma receber um único IPv4 público (ou CGNAT) e, com IPv6, um prefixo /56 ou /64</td><td>RFC 6598 (CGNAT) e política do provedor</td><td>A conferir na fonte</td></tr>
-            </tbody>
-        </table>
-        </div>
-    <p class="small text-muted">Uma auditoria linha a linha de todas as afirmações deste capítulo ainda é necessária; as linhas “a conferir” indicam a fonte a consultar.</p>
-</section>
 
 <!-- 9. Exemplos de código -->
 <section id="exemplos" class="chapter-section">
