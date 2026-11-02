@@ -207,9 +207,10 @@
         <span class="badge text-bg-primary mb-3">Capítulo 1</span>
         <h1 class="display-5 mb-3">Conectando dois hosts</h1>
         <p class="lead mb-4">
-            Como uma sequência de bits sai de um computador, atravessa oceanos, backbones e redes
-            metropolitanas, e chega até o seu dispositivo — e como dois hosts conseguem conversar
-            de forma confiável mesmo quando o meio físico não é perfeito.
+            "O primeiro passo para construir uma rede,
+            até mesmo uma rede mundial como a Internet, é conectar dois dispositivos (hosts) entre si."
+            <br/>
+            Nesse capítulo, é apresentado os primeiros mecanismos para que a informação saia de um computador e chegue até outro.
         </p>
         <div class="d-flex gap-2 flex-wrap">
             <a href="#bits" class="btn btn-primary">Começar a leitura</a>
@@ -249,12 +250,15 @@
     <span class="kicker">Fundamentos</span>
     <h2 class="section-title">O que é informação, afinal?</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
     <p>
         Vídeos, fotos, músicas e páginas da Web têm algo em comum por baixo do capô: tudo é
         guardado e movido pela rede como <strong>dados digitais</strong>, isto é, longas sequências
         do menor tipo de informação que existe — o <strong>bit</strong>, que só pode valer
         <code>0</code> ou <code>1</code>.
     </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Um bit sozinho não diz muita coisa. O interessante acontece quando vários bits são
         agrupados: 8 bits formam 1 <em>byte</em>, e combinações de bytes conseguem representar
@@ -263,6 +267,7 @@
         <code>01000001</code>.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
     <figure class="diagram">
             <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Codificação ASCII do caractere A em bits" style="width:100%;height:auto;max-height:220px"><title>O caractere A é representado pelo byte ASCII 01000001.</title>
             <text x="20" y="30" font-size="14" fill="#6c757d" font-family="sans-serif">Caractere</text>
@@ -310,6 +315,7 @@
         <figcaption>Do caractere à sequência de bits transmitida no meio físico.</figcaption>
     </figure>
 
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mb-4">
         <p class="fw-semibold mb-2">🧪 Experimente: texto → binário</p>
         <p class="text-muted small mb-2">Digite algo e veja os bytes UTF-8 usados para codificar o texto. ASCII representa apenas 128 caracteres; UTF-8 mantém esses mesmos bytes para eles e usa de 2 a 4 bytes para outros caracteres.</p>
@@ -317,6 +323,7 @@
         <div id="binOutput" class="d-flex flex-wrap"></div>
     </div>
 
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
     <p>
         O ponto principal não é decorar quantos bits cada tipo de arquivo usa, mas perceber a
         <strong>escala do problema</strong>: uma comunicação comum pela Internet envolve uma
@@ -334,12 +341,15 @@
     <span class="kicker">Aprofundando</span>
     <h2 class="section-title">Por dentro da camada física</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
     <p>
         Antes de dois hosts trocarem qualquer coisa, eles precisam de um meio físico compartilhado:
         cabo elétrico, fibra óptica ou rádio. A camada física é a responsável por transformar bits
         (0s e 1s) em sinais que realmente viajam por esse meio — tensão elétrica, pulsos de luz ou
         ondas eletromagnéticas.
     </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Um esquema simples ilustra o princípio: para transmitir 1000 bits por segundo em um fio
         elétrico, os dois hosts podem combinar que <code>+5V</code> durante 1 milissegundo
@@ -347,6 +357,7 @@
         receptor apenas mede a tensão a cada milissegundo e decodifica o bit correspondente.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
     <div class="row g-4 align-items-stretch">
         <div class="col-md-6">
             <div class="card-soft p-3 h-100">
@@ -376,9 +387,15 @@
         enviados. Todo o restante da pilha de protocolos existe, em boa parte, para lidar com essas
         imperfeições.
     </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <p>Use o cenário de ruído e relógios descrito acima para identificar qual falha pode surgir mesmo sem interferência.</p>
     <div class="demo-box mini-quiz mt-4" data-options="Troca do endereço de destino|Inversão de bits causada por uma tempestade|Desalinhamento de relógios, que faz bits sumirem ou aparecerem" data-answer="2" data-explain="Emissor e receptor têm relógios independentes; uma pequena diferença de frequência já basta." data-hint="Pense no que acontece quando os relógios não têm a mesma frequência.">
         <p class="fw-semibold mb-2">Autoavaliação: Qual destes problemas pode ocorrer mesmo sem interferência externa?</p>
     </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>Na camada física, bits são codificados em sinais; ruído e diferenças de relógio podem corromper, acrescentar ou eliminar bits.</p>
 </section>
 
 <!-- 3. Enquadramento -->
@@ -386,6 +403,7 @@
     <span class="kicker">Camada de enlace</span>
     <h2 class="section-title">Enquadramento: separando os bits em quadros</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
     <p>
     As camadas de rede não trabalham todas com a mesma unidade de dados. Na camada de
     enlace, os dados são organizados em blocos chamados <strong>quadros</strong>
@@ -393,6 +411,7 @@
     onde um quadro começa e onde termina dentro do fluxo de bits?
 </p>
 
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Uma técnica clássica é a <strong>inserção de bits</strong> (<em>bit stuffing</em>): reserva-se
         a sequência <code>01111110</code> como marcador de início/fim de quadro. Para garantir que
@@ -401,6 +420,7 @@
         receptor faz o processo inverso, removendo os bits inseridos.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
     <figure class="diagram">
         <svg viewBox="0 0 800 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:190px" role="img" aria-label="Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns."><title>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns.</title>
             <text x="10" y="24" font-size="13" fill="#6c757d" font-family="sans-serif">Original (17 uns seguidos, mais que os cinco permitidos):</text>
@@ -431,9 +451,14 @@
         de controle ASCII <code>DLE STX</code> para marcar o início e <code>DLE ETX</code> para
         marcar o fim de um quadro, duplicando qualquer <code>DLE</code> que apareça nos dados.
     </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="Depois de cada byte de dados|Depois de cinco bits 1 consecutivos nos dados|Antes de cada marcador de quadro" data-answer="1" data-explain="Assim a sequência de seis 1s do marcador nunca aparece por acidente nos dados." data-hint="O marcador tem seis 1s seguidos; o stuffing precisa quebrar sequências antes disso.">
         <p class="fw-semibold mb-2">Autoavaliação: No bit stuffing com marcador 01111110, quando o transmissor insere um bit 0?</p>
     </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>Quadros delimitam os dados no enlace; no bit stuffing, inserir um zero após cinco uns consecutivos impede que os dados imitem o marcador de quadro.</p>
 </section>
 
 <!-- 4. Entrega confiável -->
@@ -441,6 +466,7 @@
     <span class="kicker">Camada de enlace</span>
     <h2 class="section-title">Entrega confiável sobre um enlace imperfeito</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
     <p>
         Mesmo com enquadramento correto, quadros ainda podem ser corrompidos ou perdidos. A solução
         mais simples é o <strong>Protocolo do Bit Alternante</strong> (<em>Alternating Bit
@@ -449,6 +475,7 @@
         atual. Um temporizador de retransmissão cobre o caso de perda do quadro ou do ACK.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <figure class="diagram">
         <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px" role="img" aria-label="ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado."><title>ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado.</title>
             <text x="60" y="24" font-size="13" fill="#212529" font-family="sans-serif" font-weight="700">Host A</text>
@@ -477,6 +504,7 @@
         <figcaption>ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado.</figcaption>
     </figure>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
     <p>
         O ABP resolve o problema de confiabilidade, mas é lento: o transmissor fica ocioso à espera
         de cada ACK. Considere, para estimar a eficiência, quadros de 1.000 bits, enlace de
@@ -486,9 +514,14 @@
         <code>(L/R)/(L/R + RTT) = 0,02/0,52 ≈ 3,85%</code>, ou cerca de
         <code>1,92 kbps</code> de vazão útil. A conta ignora o tamanho do ACK, cabeçalhos e perdas.
     </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="≈ 3,85%|≈ 50%|≈ 96%" data-answer="0" data-explain="U = 0,02 / (0,02 + 0,5) ≈ 3,85%: o transmissor passa quase todo o tempo esperando o ACK." data-hint="Calcule L/R primeiro e depois divida por L/R + RTT.">
         <p class="fw-semibold mb-2">Autoavaliação: Com quadros de 1.000 bits, enlace de 50 kbps e RTT ≈ 0,5 s, qual é a eficiência aproximada do ABP?</p>
     </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>O ABP alterna números de sequência, confirma cada quadro e retransmite após timeout; a confiabilidade tem custo de eficiência, pois o emissor espera pelo ACK.</p>
 </section>
 
 <!-- 5. Janela deslizante -->
@@ -496,6 +529,10 @@
     <span class="kicker">Desempenho</span>
     <h2 class="section-title">Janela deslizante: Go-Back-N e Selective Repeat</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>Quando há muito atraso entre o envio de um quadro e a chegada do ACK, esperar por cada confirmação deixa o enlace ocioso. Como aproveitar esse tempo?</p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Para não desperdiçar o enlace esperando ACK a ACK, protocolos modernos usam
         <strong>pipelining</strong>: o transmissor pode ter até <em>W</em> quadros não confirmados
@@ -503,6 +540,7 @@
         <strong>janela deslizante</strong>.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
     <div class="row g-4">
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
@@ -572,6 +610,7 @@
         retransmissão antiga.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mt-4">
         <p class="fw-semibold mb-2">🧪 Simulação rápida de janela (modelo didático)</p>
         <p class="text-muted small">Configure o número de bits de sequência, a janela e a perda. Cada execução simula o envio de 12 quadros e estima retransmissões e aproveitamento de transmissões, sem substituir uma simulação completa de temporizadores/ACKs. No ABP, cada tentativa modela a entrega do dado e de seu ACK.</p>
@@ -584,6 +623,62 @@
             <div class="col-6 col-md-2"><button id="runWindowSimulation" type="button" class="btn btn-primary btn-sm w-100">Simular</button></div>
         </div>
         <div id="windowSimulationOutput" class="small mt-3" aria-live="polite"></div>
+    </div>
+
+    <div class="demo-box mt-4">
+        <p class="fw-semibold mb-2">🎞️ Linha do tempo: protocolos de janela</p>
+        <p class="text-muted small">
+            Observe dados e confirmações viajando entre os hosts. Clique em um quadro azul antes
+            de iniciar para perdê-lo deliberadamente. A opção “janela grande demais” mostra por
+            que o limite do espaço de números de sequência é necessário.
+        </p>
+        <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-3">
+                <label class="form-label small" for="timelineProtocol">Protocolo</label>
+                <select id="timelineProtocol" class="form-select form-select-sm" aria-label="Protocolo da linha do tempo">
+                    <option value="abp">ABP</option>
+                    <option value="gbn">Go-Back-N</option>
+                    <option value="sr">Selective Repeat</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small" for="timelineWindow">Janela W</label>
+                <input id="timelineWindow" class="form-control form-control-sm" type="number" min="1" max="8" value="4" aria-label="Tamanho da janela da linha do tempo">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small" for="timelineRtt">RTT (ms)</label>
+                <input id="timelineRtt" class="form-control form-control-sm" type="number" min="200" max="2000" step="100" value="800" aria-label="RTT da linha do tempo">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small" for="timelineBits">Bits de sequência</label>
+                <input id="timelineBits" class="form-control form-control-sm" type="number" min="1" max="4" value="3" aria-label="Bits de sequência da linha do tempo">
+            </div>
+            <div class="col-6 col-md-3 d-flex gap-2">
+                <button id="timelinePlay" type="button" class="btn btn-primary btn-sm flex-fill">Iniciar</button>
+                <button id="timelineReset" type="button" class="btn btn-outline-secondary btn-sm flex-fill">Limpar</button>
+            </div>
+        </div>
+        <div class="form-check mt-2">
+            <input id="timelineTooLarge" class="form-check-input" type="checkbox">
+            <label class="form-check-label small" for="timelineTooLarge">Demonstrar “janela grande demais”</label>
+        </div>
+        <div id="timelineOutput" class="small mt-3" aria-live="polite"></div>
+        <svg id="protocolTimeline" class="w-100 mt-2" viewBox="0 0 760 300" role="img" aria-label="Linha do tempo animada entre Host A e Host B" style="min-height:220px">
+            <title>Quadros e confirmações viajando entre Host A e Host B</title>
+            <defs>
+                <marker id="timelineArrowData" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#0d6efd"></path>
+                </marker>
+                <marker id="timelineArrowAck" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 z" fill="#198754"></path>
+                </marker>
+            </defs>
+            <line x1="120" y1="45" x2="120" y2="270" stroke="#adb5bd" stroke-width="2"></line>
+            <line x1="640" y1="45" x2="640" y2="270" stroke="#adb5bd" stroke-width="2"></line>
+            <text x="120" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">Host A</text>
+            <text x="640" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">Host B</text>
+            <g id="timelinePackets"></g>
+        </svg>
     </div>
 
     <div class="demo-box mt-4">
@@ -628,6 +723,9 @@
         <select id="quizParity" class="form-select form-select-sm" aria-label="Resposta sobre a detecção de dois erros pela paridade"><option value="">Escolha uma resposta</option><option value="yes">Sim</option><option value="no">Não</option></select>
         <p id="quizParityFeedback" class="small mt-2 mb-0" aria-live="polite"></p>
     </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>Go-Back-N retransmite o quadro perdido e os seguintes; Selective Repeat guarda quadros recebidos fora de ordem e retransmite apenas o que falta. O tamanho da janela depende do espaço de números de sequência.</p>
     <div class="demo-box mini-quiz mt-4" data-options="2ⁿ − 1|2ⁿ⁻¹|2ⁿ" data-answer="1" data-explain="Go-Back-N admite até 2ⁿ − 1; Selective Repeat, até 2ⁿ⁻¹. Acima disso o receptor confunde quadro novo com retransmissão." data-hint="Selective Repeat é mais restritivo que Go-Back-N.">
         <p class="fw-semibold mb-2">Autoavaliação: Com n bits de número de sequência, qual é a janela máxima do Selective Repeat?</p>
     </div>
@@ -688,36 +786,6 @@
         </div>
     </div>
 
-    <div class="card-soft p-4 mt-4" id="ia-cap1">
-        <h3 class="h6">Como a IA foi usada e o que foi conferido</h3>
-        <p class="small text-muted">Ferramentas de IA ajudaram na redação, na revisão e na elaboração de exemplos, mas não são fonte técnica. Este material complementa o livro-texto (Bonaventure, CNP3) e não o substitui.</p>
-        <h4 class="h6 mt-3">Registro de prompts</h4>
-        <ul class="small">
-            <li><strong>Revisão do site publicado:</strong> a análise dos capítulos 1 e 2 gerou o roteiro <code>sugestoes.txt</code>, que listou dez defeitos de conteúdo e as melhorias que orientaram o trabalho seguinte.</li>
-            <li><strong>Rodada de fechamento:</strong> “verificar quais sugestões ainda faltam e resolver as de menor esforço”. Resultado: questões rápidas em todas as seções, desafios de código com resposta, Dijkstra colorido, operação AND bit a bit e animação do TTL.</li>
-        </ul>
-        <!-- Para completar o registro: acrescente aqui os prompts originais das rodadas anteriores (redação do texto, correção dos dez defeitos, implementação dos simuladores). -->
-        <h4 class="h6 mt-3">Afirmações verificáveis</h4>
-        <div class="table-responsive">
-        <table class="table table-sm small align-middle">
-            <thead><tr><th scope="col">Afirmação</th><th scope="col">Como foi verificada</th><th scope="col">Situação</th></tr></thead>
-            <tbody>
-                <tr><td>Eficiência do ABP ≈ 3,85% e vazão ≈ 1,92 kbps (1.000 bits, 50 kbps, RTT 0,5 s)</td><td>Recálculo: 0,02 / 0,52 e 50 kbps × 0,0385</td><td>✔ Recalculado</td></tr>
-                <tr><td>“ç” em UTF-8 vale 11000011 10100111</td><td>Codificação do caractere em UTF-8 conferida por execução</td><td>✔ Conferido por execução</td></tr>
-                <tr><td>Bit stuffing: insere 0 após cinco bits 1</td><td>Código do capítulo: o receptor recupera os dados originais (ida e volta)</td><td>✔ Conferido por execução</td></tr>
-                <tr><td>A paridade detecta toda inversão única e nenhum par de inversões</td><td>Teste exaustivo em um quadro de 5 bits: 5 de 5 e 0 de 10</td><td>✔ Conferido por execução</td></tr>
-                <tr><td>Janela máxima: 2ⁿ − 1 (Go-Back-N) e 2ⁿ⁻¹ (Selective Repeat)</td><td>Bonaventure, CNP3, seção sobre janela deslizante</td><td>A conferir na fonte</td></tr>
-                <tr><td>TCP: ACK cumulativo, dados fora de ordem guardados, SACK opcional</td><td>RFC 9293 e RFC 2018</td><td>A conferir na fonte</td></tr>
-                <tr><td>O FCS do Ethernet usa CRC-32</td><td>IEEE 802.3</td><td>A conferir na fonte</td></tr>
-            </tbody>
-        </table>
-        </div>
-        <p class="small text-muted mb-0">A auditoria completa, afirmação por afirmação, contra o livro de referência e as RFCs ainda não foi concluída; as linhas “a conferir” indicam a fonte que deve ser consultada.</p>
-    </div>
-    <div class="demo-box mini-quiz mt-4" data-options="Sim, é Selective Repeat puro|Não: confirma cumulativamente, guarda dados fora de ordem e pode usar SACK|Não, é Go-Back-N puro" data-answer="1" data-explain="Por isso a recuperação do TCP combina características dos dois modelos." data-hint="Releia o cartão sobre janela deslizante no TCP.">
-        <p class="fw-semibold mb-2">Autoavaliação: O TCP é simplesmente uma implementação de Selective Repeat?</p>
-    </div>
-</section>
 
 <!-- 7. Exemplos de código -->
 <section id="exemplos" class="chapter-section">
@@ -873,7 +941,7 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
             IT Crowd EN — <a href="https://www.youtube.com/watch?v=x3c1ih2NJEg" target="_blank" rel="noopener noreferrer">How does the INTERNET work? | ICT #2</a>
         </li>
         <li>
-            Ben Eater — <a href="https://www.youtube.com/watch?v=wgbV6DLVezo" target="_blank" rel="noopener noreferrer">How exactly does binary code work?</a>
+            TED-Ed (José Américo N. L. F. de Freitas) — <a href="https://www.youtube.com/watch?v=wgbV6DLVezo" target="_blank" rel="noopener noreferrer">How exactly does binary code work?</a>
         </li>
     </ul>
 
@@ -885,14 +953,7 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 
 </section>
 
-<section id="exercicios" class="chapter-section">
-    <span class="kicker">Pratique</span><h2 class="section-title">Exercícios graduados</h2>
-    <ol>
-        <li><strong>Aquecimento:</strong> quantos bits são necessários para numerar 16 quadros distintos? <details><summary>Ver solução</summary><p>Quatro bits, pois 2⁴ = 16 valores possíveis. Note que o tamanho máximo da janela também depende do protocolo.</p></details></li>
-        <li><strong>Intermediário:</strong> um quadro de 1.000 bits é enviado a 50 kbps, RTT=500 ms. Calcule a eficiência stop-and-wait. <details><summary>Ver solução</summary><p>L/R=0,02 s; U=0,02/(0,02+0,5)≈3,85%.</p></details></li>
-        <li><strong>Desafio:</strong> complete o editor de paridade para testar quadro com dois bits invertidos e explique o resultado. <details><summary>Ver roteiro</summary><p>Modifique <code>com_erro</code> no código executável acima e compare a quantidade total de bits 1 com a paridade par esperada.</p></details></li>
-    </ol>
-</section>
+
 
         </div><!-- /col conteúdo -->
     </div><!-- /row -->
@@ -1289,6 +1350,151 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 
     document.getElementById("stuffBtn").addEventListener("click", renderStuffing);
     renderStuffing();
+
+    // Linha do tempo visual dos protocolos de janela.
+    (function () {
+        var svg = document.getElementById("protocolTimeline");
+        var camada = document.getElementById("timelinePackets");
+        var play = document.getElementById("timelinePlay");
+        var reset = document.getElementById("timelineReset");
+        var output = document.getElementById("timelineOutput");
+        var timers = [];
+        var selectedLoss = new Set();
+        var frames = [];
+        var running = false;
+        var ns = "http://www.w3.org/2000/svg";
+
+        function limpar() {
+            timers.forEach(clearTimeout);
+            timers = [];
+            frames = [];
+            running = false;
+            play.disabled = false;
+            play.textContent = "Iniciar";
+            camada.replaceChildren();
+            output.textContent = "Selecione um quadro azul para simular sua perda.";
+        }
+
+        function textoProtocolo(protocol) {
+            return protocol === "abp" ? "ABP (stop-and-wait)" : protocol === "gbn" ? "Go-Back-N" : "Selective Repeat";
+        }
+
+        function quadro(numero, y, perdido, protocol) {
+            var grupo = document.createElementNS(ns, "g");
+            grupo.setAttribute("transform", "translate(0 " + y + ")");
+            grupo.style.cursor = running ? "default" : "pointer";
+            var linha = document.createElementNS(ns, "line");
+            linha.setAttribute("x1", "130"); linha.setAttribute("y1", "0");
+            linha.setAttribute("x2", "630"); linha.setAttribute("y2", "0");
+            linha.setAttribute("stroke", "#0d6efd"); linha.setAttribute("stroke-width", "2");
+            linha.setAttribute("marker-end", "url(#timelineArrowData)");
+            var pacote = document.createElementNS(ns, "circle");
+            pacote.setAttribute("cx", "130"); pacote.setAttribute("cy", "0");
+            pacote.setAttribute("r", "6"); pacote.setAttribute("fill", perdido ? "#dc3545" : "#0d6efd");
+            pacote.style.transition = "cx " + Math.max(0.35, Number(document.getElementById("timelineRtt").value) / 2000) + "s linear";
+            var rotulo = document.createElementNS(ns, "text");
+            rotulo.setAttribute("x", "380"); rotulo.setAttribute("y", "-6");
+            rotulo.setAttribute("text-anchor", "middle"); rotulo.setAttribute("font-size", "12");
+            rotulo.setAttribute("fill", perdido ? "#dc3545" : "#0d6efd");
+            rotulo.textContent = "D(" + (numero % Math.pow(2, Number(document.getElementById("timelineBits").value))) + ")" + (perdido ? " — perdido" : "");
+            grupo.append(linha, pacote, rotulo);
+            setTimeout(function () {
+                pacote.setAttribute("cx", perdido ? "390" : "630");
+            }, 20);
+            if (!running) grupo.addEventListener("click", function () {
+                if (selectedLoss.has(numero)) selectedLoss.delete(numero); else selectedLoss.add(numero);
+                desenhar();
+            });
+            return grupo;
+        }
+
+        function ack(numero, y, seletivo) {
+            var grupo = document.createElementNS(ns, "g");
+            var linha = document.createElementNS(ns, "line");
+            linha.setAttribute("x1", "630"); linha.setAttribute("y1", String(y));
+            linha.setAttribute("x2", "130"); linha.setAttribute("y2", String(y + 24));
+            linha.setAttribute("stroke", "#198754"); linha.setAttribute("stroke-width", "2");
+            linha.setAttribute("marker-end", "url(#timelineArrowAck)");
+            var pacote = document.createElementNS(ns, "circle");
+            pacote.setAttribute("cx", "630"); pacote.setAttribute("cy", String(y));
+            pacote.setAttribute("r", "5"); pacote.setAttribute("fill", "#198754");
+            pacote.style.transition = "cx " + Math.max(0.35, Number(document.getElementById("timelineRtt").value) / 2000) + "s linear";
+            var rotulo = document.createElementNS(ns, "text");
+            rotulo.setAttribute("x", "380"); rotulo.setAttribute("y", String(y + 15));
+            rotulo.setAttribute("text-anchor", "middle"); rotulo.setAttribute("font-size", "11");
+            rotulo.setAttribute("fill", "#198754");
+            rotulo.textContent = seletivo ? "SACK(" + numero + ")" : "ACK(" + numero + ")";
+            grupo.append(linha, pacote, rotulo);
+            setTimeout(function () { pacote.setAttribute("cx", "130"); }, 20);
+            return grupo;
+        }
+
+        function desenhar() {
+            camada.replaceChildren();
+            var protocol = document.getElementById("timelineProtocol").value;
+            var total = protocol === "abp" ? 4 : 6;
+            for (var i = 0; i < total; i++) camada.appendChild(quadro(i, 55 + i * 32, selectedLoss.has(i), protocol));
+            output.textContent = selectedLoss.size
+                ? "Perdas marcadas: " + Array.from(selectedLoss).sort(function (a, b) { return a - b; }).join(", ") + ". Clique em Iniciar."
+                : "Selecione um quadro azul para simular sua perda.";
+        }
+
+        function iniciar() {
+            limpar();
+            running = true;
+            play.disabled = true;
+            var protocol = document.getElementById("timelineProtocol").value;
+            var windowSize = Number(document.getElementById("timelineWindow").value);
+            var bits = Number(document.getElementById("timelineBits").value);
+            var rtt = Number(document.getElementById("timelineRtt").value);
+            var limite = protocol === "gbn" ? Math.pow(2, bits) - 1 : protocol === "sr" ? Math.pow(2, bits - 1) : 1;
+            var grande = document.getElementById("timelineTooLarge").checked;
+            if (windowSize < 1 || windowSize > 8 || bits < 1 || bits > 4 || rtt < 200) {
+                output.textContent = "Use W entre 1 e 8, 1–4 bits e RTT a partir de 200 ms.";
+                limpar();
+                return;
+            }
+            if (grande || windowSize > limite) {
+                output.textContent = textoProtocolo(protocol) + ": W=" + windowSize + " excede o limite de " + limite +
+                    " com " + bits + " bit(s). O mesmo número de sequência pode ser confundido com uma retransmissão antiga.";
+                for (var n = 0; n < 6; n++) camada.appendChild(quadro(n, 55 + n * 32, false, protocol));
+                running = false;
+                play.disabled = false;
+                return;
+            }
+            var total = protocol === "abp" ? 4 : 6;
+            for (var i = 0; i < total; i++) {
+                (function (numero) {
+                    var atraso = numero * Math.max(100, rtt / 3);
+                    timers.push(setTimeout(function () {
+                        camada.appendChild(quadro(numero, 55 + numero * 32, selectedLoss.has(numero), protocol));
+                        if (!selectedLoss.has(numero)) {
+                            camada.appendChild(ack(numero, 70 + numero * 32, protocol === "sr"));
+                        } else if (protocol === "gbn") {
+                            output.textContent = "Quadro " + numero + " perdido: Go-Back-N retransmitirá este e os seguintes da janela.";
+                        } else if (protocol === "sr") {
+                            output.textContent = "Quadro " + numero + " perdido: Selective Repeat retransmitirá apenas esse quadro.";
+                        } else {
+                            output.textContent = "Quadro " + numero + " perdido: o ABP aguardará o timeout e retransmitirá.";
+                        }
+                    }, atraso));
+                }(i));
+            }
+            timers.push(setTimeout(function () {
+                output.textContent = textoProtocolo(protocol) + " concluído: ACKs verdes confirmam os quadros recebidos.";
+                running = false;
+                play.disabled = false;
+            }, Math.max(900, total * Math.max(100, rtt / 3) + 300)));
+        }
+
+        play.addEventListener("click", iniciar);
+        reset.addEventListener("click", function () { selectedLoss.clear(); limpar(); desenhar(); });
+        ["timelineProtocol", "timelineWindow", "timelineBits"].forEach(function (id) {
+            document.getElementById(id).addEventListener("change", function () { if (!running) desenhar(); });
+        });
+        limpar();
+        desenhar();
+    }());
 </script>
 <script src="../../assets/playground.js"></script>
 <script src="../../assets/livro.js"></script>
