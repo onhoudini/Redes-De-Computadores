@@ -281,6 +281,11 @@
     <span class="kicker">Motivação</span>
     <h2 class="section-title">Por que precisamos de uma camada de rede?</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Imagine enviar uma mensagem de Porto Alegre para um servidor no Japão. Não existe um cabo ligando os dois. Como a informação chega lá?
+    </p>
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         A camada de enlace resolve um problema específico: fazer dois vizinhos diretos — ligados
         pelo mesmo cabo, pela mesma fibra ou pelo mesmo canal de rádio — conversarem sem erros. Mas
@@ -297,6 +302,7 @@
         "para onde mandar em seguida" é o coração de todo o capítulo.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
         <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:240px" role="img" aria-label="Uma pequena inter-rede: para A alcançar B ou C, seus pacotes precisam atravessar vários roteadores."><title>Uma pequena inter-rede: para A alcançar B ou C, seus pacotes precisam atravessar vários roteadores.</title>
             <!-- hosts -->
@@ -355,9 +361,14 @@
         (encaminhamento) e como manter essas decisões corretas mesmo quando links falham ou a rede
         cresce (roteamento). As próximas seções tratam cada uma dessas perguntas.
     </p>
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="Quadro|Pacote|Bit" data-answer="1" data-explain="Quadro é a unidade da camada de enlace; na camada de rede, roteadores encaminham pacotes." data-hint="Releia o segundo parágrafo da seção.">
         <p class="fw-semibold mb-2">Autoavaliação: Qual é a unidade de informação da camada de rede?</p>
     </div>
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>
+        A camada de rede permite que hosts sem enlace direto se comuniquem por meio de roteadores, que encaminham pacotes salto a salto. Para isso, ela precisa resolver endereçamento, encaminhamento e roteamento.
+    </p>
 </section>
 
 <!-- 2. Pacotes -->
@@ -365,6 +376,11 @@
     <span class="kicker">Fundamentos</span>
     <h2 class="section-title">Pacotes e endereçamento</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Um roteador recebe muitos pacotes por segundo. Como ele sabe, olhando para cada pacote, para onde encaminhá-lo?
+    </p>
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Um pacote é composto por um <strong>cabeçalho</strong> e uma <strong>carga útil</strong>
         (<em>payload</em>). O cabeçalho carrega as informações de controle que os roteadores
@@ -378,6 +394,7 @@
         roteadores usam para decidir o próximo salto.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
         <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:170px" role="img" aria-label="Todo roteador no caminho lê apenas o cabeçalho — nunca precisa entender a carga útil."><title>Todo roteador no caminho lê apenas o cabeçalho — nunca precisa entender a carga útil.</title>
             <rect x="10" y="35" width="120" height="60" rx="8" fill="#e7f1ff" stroke="#0d6efd"/>
@@ -406,6 +423,7 @@
         <figcaption>Todo roteador no caminho lê apenas o cabeçalho — nunca precisa entender a carga útil.</figcaption>
     </figure>
 
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mb-4">
         <p class="fw-semibold mb-2">🧪 Experimente: monte um pacote</p>
         <p class="text-muted small mb-2">Preencha endereços numéricos de 0 a 255 e uma mensagem. Os endereços são exemplos didáticos de 8 bits, não endereços IP reais.</p>
@@ -428,6 +446,10 @@
     <div class="demo-box mini-quiz mt-4" data-options="O nome amigável do servidor|O endereço de destino no cabeçalho|O conteúdo da carga útil" data-answer="1" data-explain="Roteadores leem só o cabeçalho; a carga útil não precisa ser entendida." data-hint="Pense no que está no cabeçalho do pacote.">
         <p class="fw-semibold mb-2">Autoavaliação: O que os roteadores usam para decidir o próximo salto?</p>
     </div>
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>
+        O pacote tem cabeçalho e carga útil. O roteador decide o próximo salto pelo endereço de destino do cabeçalho e não precisa entender a carga útil.
+    </p>
 </section>
 
 <!-- 3. Organização -->
@@ -435,12 +457,18 @@
     <span class="kicker">Arquitetura</span>
     <h2 class="section-title">Datagrama vs. circuito virtual</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Quando um roteador recebe um pacote, ele precisa decidir para onde enviá-lo. Deve tratar cada pacote de forma independente ou manter uma conexão preparada antes?
+    </p>
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Existem duas grandes formas de organizar o plano de encaminhamento de uma rede de pacotes.
         Elas se diferenciam por uma pergunta simples: <em>o roteador precisa "lembrar" de uma
         conexão antes de encaminhar os pacotes que fazem parte dela?</em>
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="row g-4">
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
@@ -487,9 +515,14 @@
         (Multiprotocol Label Switching), usada por muitos provedores para dar previsibilidade ao
         tráfego dentro do seu backbone, é um exemplo moderno de comutação por rótulos.
     </p>
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="Um número de circuito (rótulo)|Nada, o roteador adivinha o destino|O endereço de origem apenas" data-answer="0" data-explain="O caminho é sinalizado antes; depois, os pacotes levam só um número de canal, bem mais curto." data-hint="Lembre da analogia com a telefonia.">
         <p class="fw-semibold mb-2">Autoavaliação: No circuito virtual, o que os pacotes de dados carregam em vez do endereço completo de destino?</p>
     </div>
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>
+        No datagrama, cada pacote carrega o endereço completo; no circuito virtual, o caminho é sinalizado antes e os pacotes levam um rótulo curto. O MPLS é um exemplo de comutação por rótulos.
+    </p>
 </section>
 
 <!-- 4. Tabelas de encaminhamento -->
@@ -497,6 +530,11 @@
     <span class="kicker">Plano de dados</span>
     <h2 class="section-title">Tabelas de encaminhamento, buracos negros e loops</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Quando um roteador olha sua tabela e não encontra o destino, o que acontece com o pacote? E se a tabela estiver errada?
+    </p>
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Uma <strong>tabela de encaminhamento</strong> associa cada destino (ou bloco de destinos) à
         interface de saída que deve ser usada. Se o cálculo dessa tabela estiver incorreto, dois
@@ -527,6 +565,7 @@
         blocos típicos da Internet real.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
         <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:150px" role="img" aria-label="Longest prefix match: a entrada mais específica que ainda combina com o endereço vence. (Em IPv4 real, de 32 bits, uma rota para um único host seria /32, não /16 — aqui usamos 16 bits só por causa do espaço na figura.)"><title>Longest prefix match: a entrada mais específica que ainda combina com o endereço vence. (Em IPv4 real, de 32 bits, uma rota para um único host seria /32, não /16 — aqui usamos 16 bits só por causa do espaço na figura.)</title>
             <text x="10" y="22" font-size="12" fill="#6c757d" font-family="sans-serif">Endereço de destino (exemplo fictício de 16 bits): 01001010 10000011</text>
@@ -548,6 +587,7 @@
         <figcaption>Longest prefix match: a entrada mais específica que ainda combina com o endereço vence. (Em IPv4 real, de 32 bits, uma rota para um único host seria /32, não /16 — aqui usamos 16 bits só por causa do espaço na figura.)</figcaption>
     </figure>
 
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mb-4">
         <p class="fw-semibold mb-2">🧪 Experimente: busca por prefixo mais longo</p>
         <p class="text-muted small mb-2">
@@ -571,6 +611,10 @@
     <div class="demo-box mini-quiz mt-4" data-options="Loop de encaminhamento|Buraco negro|Contagem ao infinito" data-answer="1" data-explain="No loop, os pacotes circulam; no buraco negro, são descartados por falta de rota." data-hint="Um dos problemas descarta; o outro faz o pacote circular.">
         <p class="fw-semibold mb-2">Autoavaliação: Como se chama o problema em que o roteador descarta pacotes porque o destino não está na tabela?</p>
     </div>
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>
+        Erros na tabela geram buracos negros (pacotes descartados) ou loops (pacotes circulando até o TTL expirar). Com endereçamento hierárquico, vale o prefixo mais longo que combina com o endereço.
+    </p>
 </section>
 
 <!-- 5. Vetor de distância -->
@@ -578,6 +622,11 @@
     <span class="kicker">Plano de controle</span>
     <h2 class="section-title">Roteamento por vetor de distância</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Calcular tabelas à mão só funciona em redes pequenas. Como os roteadores descobrem as rotas sozinhos, sem conhecer a rede inteira?
+    </p>
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         Calcular tabelas de encaminhamento manualmente só funciona em redes minúsculas. Redes reais
         usam algoritmos distribuídos — os roteadores trocam mensagens entre si e calculam suas
@@ -594,6 +643,7 @@
         mais curtas sem que nenhum roteador precise conhecer a topologia completa.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
         <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:220px" role="img" aria-label="Vetor de distância: A escolhe A→B→D para D; para C, o custo direto 4 empata com A→B→D→C (1+2+1), e o simulador preserva a rota direta em empates."><title>Vetor de distância: A escolhe A→B→D para D; para C, o custo direto 4 empata com A→B→D→C (1+2+1), e o simulador preserva a rota direta em empates.</title>
             <g font-family="sans-serif" font-weight="700" font-size="13" fill="#212529">
@@ -649,9 +699,14 @@
         conhecido de roteamento por vetor de distância, ainda usado hoje em redes pequenas ou como
         material didático por sua simplicidade.
     </p>
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="Que o roteador calcule o custo dos enlaces|Que um roteador anuncie a um vizinho uma rota aprendida através desse mesmo vizinho|Que vizinhos troquem vetores de distância" data-answer="1" data-explain="Isso atenua a contagem ao infinito, em que dois vizinhos se anunciam rotas que já não existem." data-hint="Pense em quem seria enganado ao receber a própria rota de volta.">
         <p class="fw-semibold mb-2">Autoavaliação: O que a técnica split horizon impede?</p>
     </div>
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>
+        No vetor de distância, cada roteador conhece apenas o custo e o vizinho de cada rota, e a rede converge trocando vetores. Split horizon e poison reverse atenuam a contagem ao infinito.
+    </p>
 </section>
 
 <!-- 6. Estado de enlace -->
@@ -659,6 +714,11 @@
     <span class="kicker">Plano de controle</span>
     <h2 class="section-title">Roteamento por estado de enlace</h2>
 
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O vetor de distância conhece apenas resumos dos vizinhos. E se cada roteador conhecesse o mapa completo da rede?
+    </p>
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         A segunda grande família de algoritmos de roteamento segue uma filosofia oposta: em vez de
         cada roteador conhecer apenas o "resumo" que seus vizinhos enviam, todo roteador aprende a
@@ -676,6 +736,7 @@
         partir de si mesmo.
     </p>
 
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
         <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-height:210px" role="img" aria-label="Distribuição de um LSP por inundação — a base para que todo roteador monte o mesmo mapa da rede."><title>Distribuição de um LSP por inundação — a base para que todo roteador monte o mesmo mapa da rede.</title>
             <g font-family="sans-serif" font-weight="700" font-size="13" fill="#212529">
@@ -714,9 +775,14 @@
         <strong>OSPF</strong> (Open Shortest Path First) e <strong>IS-IS</strong> são os protocolos
         de estado de enlace mais usados hoje dentro de redes corporativas e de provedores.
     </p>
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="Só para o vizinho de menor custo|Para todas as interfaces, exceto aquela por onde ele chegou|Somente de volta ao roteador de origem" data-answer="1" data-explain="Assim todo roteador recebe o LSP e monta o mesmo mapa da rede." data-hint="O objetivo é que todos os roteadores recebam o LSP.">
         <p class="fw-semibold mb-2">Autoavaliação: Na inundação de LSPs, para onde um roteador retransmite um LSP novo?</p>
     </div>
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <p>
+        No estado de enlace, cada roteador conhece a topologia completa, recebida por LSPs inundados, e calcula as rotas com Dijkstra. Converge mais rápido, mas exige mais memória e processamento.
+    </p>
 </section>
 
 <!-- 7. Comparação / prática -->
