@@ -30,6 +30,23 @@ html[data-theme="dark"] .python-playground {
     border-color: #495057 !important;
 }
 
+html[data-theme="dark"] .navbar .navbar-brand,
+html[data-theme="dark"] .navbar .nav-link {
+    color: #e9ecef !important;
+}
+html[data-theme="dark"] .navbar .nav-link:hover,
+html[data-theme="dark"] .navbar .nav-link:focus {
+    color: #9ec5fe !important;
+}
+html[data-theme="dark"] .navbar { border-color: #495057 !important; }
+html[data-theme="dark"] .hero { background: #1d2024 !important; border-color: #495057 !important; }
+/* Botões contornados legíveis no tema escuro (incluindo os dos mini-quizzes). */
+html[data-theme="dark"] .btn-outline-secondary { color: #dee2e6; border-color: #6c757d; }
+html[data-theme="dark"] .btn-outline-secondary:hover { color: #17191c; background-color: #ced4da; border-color: #ced4da; }
+html[data-theme="dark"] .btn-outline-primary { color: #9ec5fe; border-color: #6ea8fe; }
+html[data-theme="dark"] .btn-outline-primary:hover { color: #17191c; background-color: #6ea8fe; }
+html[data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+
 html[data-theme="dark"] .text-muted,
 html[data-theme="dark"] .form-text {
     color: #adb5bd !important;

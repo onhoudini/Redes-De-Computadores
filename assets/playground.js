@@ -111,6 +111,45 @@
                     "resposta": "B → B, C → C, D → D e A → B. O próximo salto é o segundo elemento do caminho completo."
                 }
             ]
+        ],
+        "capitulo3": [
+            [
+                { "nivel": "Aquecimento", "texto": "Antes de executar, acrescente \"PASS Abc123\\r\\n\" à lista linhas e preveja a classificação.", "resposta": "passwordcommand (password='Abc123'): \"PASS\" casa com \"pass\" sem diferenciar maiúsculas e a senha começa com letra." },
+                { "nivel": "Intermediário", "texto": "Mude a regra para aceitar usernames de até 12 letras. O que acontece com \"user alexandre\\r\\n\"?", "resposta": "Basta trocar {1,8} por {1,12}. \"alexandre\" tem 9 letras e passa a ser um usercommand válido." },
+                { "nivel": "Desafio", "texto": "Crie QUITCOMMAND para a regra quitcommand = \"quit\" CRLF e teste \"quit\\r\\n\", \"QUIT\\r\\n\" e \"quit now\\r\\n\".", "resposta": "QUITCOMMAND = re.compile(r\"(?i:quit)\\r\\n\"). As duas primeiras são válidas; \"quit now\\r\\n\" não, porque a regra não admite argumento." }
+            ],
+            [
+                { "nivel": "Aquecimento", "texto": "Troque todos os I por H (16 bits) nos formatos de pack/unpack e use valor = 0x0102. Preveja as duas linhas de bytes.", "resposta": "big-endian: 01 02; little-endian: 02 01. Sem conversão, o receptor lê 0x201 (513) em vez de 0x102 (258)." },
+                { "nivel": "Intermediário", "texto": "Com o código original, use valor = 1. O que aparece em \"Lido sem conversão\"?", "resposta": "0x1000000, ou seja, 16 777 216: o byte 01 foi parar na posição mais significativa." },
+                { "nivel": "Desafio", "texto": "Escreva ntohl(x) e confirme que ntohl(htonl(v)) == v para alguns valores.", "resposta": "def ntohl(x): return int.from_bytes(x.to_bytes(4, \"big\"), sys.byteorder). A conversão é simétrica, então aplicar as duas devolve o valor original." }
+            ],
+            [
+                { "nivel": "Aquecimento", "texto": "Execute print(desempacota(bytes.fromhex(\"01f4810001002a7f\"))) e confira o desafio da simulação.", "resposta": "(500, 'AH', 256, 42, 127): campo de 16 bits 500, flags A e H, campo de 24 bits 256, bytes 42 e 127." },
+                { "nivel": "Intermediário", "texto": "Chame empacota(1, \"\", 2**24, 0, 0). O que acontece e por quê?", "resposta": "OverflowError: int too big to convert. 2^24 precisa de 25 bits e não cabe no campo de 24 bits (3 bytes)." },
+                { "nivel": "Desafio", "texto": "Reescreva empacota usando struct. Que parte não dá para fazer só com struct?", "resposta": "struct.pack(\"!HB\", f16, bits_flags) + f24.to_bytes(3, \"big\") + struct.pack(\"!BB\", b1, b2). O struct não tem formato de 24 bits, então esse campo continua com to_bytes." }
+            ]
+        ],
+        "capitulo4": [
+            [
+                { "nivel": "Aquecimento", "texto": "Troque random.Random(7) por random.Random(1). A quantidade de DATA.ind muda? E as mensagens completas?", "resposta": "Passam a ser 12 pedaços em vez de 14, mas as quatro mensagens completas são as mesmas: USER alice, PASS 1234, LIST e QUIT. O delimitador independe de como o fluxo foi cortado." },
+                { "nivel": "Intermediário", "texto": "Use Receptor(\"\\n\") em vez do delimitador padrão. O que muda nas mensagens?", "resposta": "Cada mensagem fica com um \"\\r\" sobrando no fim (por exemplo, 'USER alice\\r'), porque só o LF passa a ser tratado como delimitador." },
+                { "nivel": "Desafio", "texto": "Faça transmite_fluxo simular o modo mensagem: um DATA.ind por SDU. O receptor continua funcionando?", "resposta": "Basta devolver list(sdus). Funciona: cada DATA.ind traz exatamente uma mensagem completa, e o delimitador apenas confirma a fronteira." }
+            ],
+            [
+                { "nivel": "Aquecimento", "texto": "Antes de executar, liste os números de sequência dos segmentos gerados por segmenta.", "resposta": "1000, 1005, 1010, 1015 e 1020. O último carrega só 1 byte (b'S'). Cada seq é a posição do primeiro byte do segmento." },
+                { "nivel": "Intermediário", "texto": "Use isn=0 e mss=8. Quantos segmentos são gerados e qual é o seq do último?", "resposta": "3 segmentos; o último é seq=16 com b'DORES' (bytes 16 a 20)." },
+                { "nivel": "Desafio", "texto": "Faça recebe imprimir também os intervalos de bytes que ainda faltam.", "resposta": "Percorra sorted(self.fora_de_ordem) a partir de self.esperado: cada salto entre o fim de um bloco e o início do seguinte é uma lacuna. Na execução padrão, depois de seq=1010 falta o intervalo 1005–1009." }
+            ],
+            [
+                { "nivel": "Aquecimento", "texto": "Antes de executar, preveja os três segmentos da abertura normal.", "resposta": "('CR', 100, None), ('CA', 500, 100) e ('CA', 100, 500): cada lado tira seu número do próprio relógio e confirma o do outro." },
+                { "nivel": "Intermediário", "texto": "Simule um CA duplicado: chame A.conectar() sem entregar o resultado (CR perdido) e depois envia(\"rede\", A, (\"CA\", 77, 99)).", "resposta": "A responde ('REJECT', None, 77): ack=99 não corresponde a nenhum CR que A tenha enviado, então o CA antigo é recusado." },
+                { "nivel": "Desafio", "texto": "Crie uma subclasse em que proximo_seq sempre devolve self.relogio, sem incrementar (relógio parado). Com o CR de A perdido, entregue o CA antigo (\"CA\", 499, 100) de uma conexão anterior.", "resposta": "A estabelece uma conexão fantasma: com o relógio parado, o ack antigo (100) confere com o seq atual. Por isso o relógio de transporte precisa avançar sempre, inclusive após reinicializações." }
+            ],
+            [
+                { "nivel": "Aquecimento", "texto": "Qual é a vazão máxima com números de sequência de 32 bits e MSL de 120 s?", "resposta": "2^32 × 8 / 120 ≈ 286,3 Mbit/s." },
+                { "nivel": "Intermediário", "texto": "Qual é o menor número de bits que permite usar com segurança um enlace de 100 Gbit/s com MSL de 120 s?", "resposta": "41 bits: é preciso 2^n ≥ 10^11 × 120 / 8 = 1,5 × 10^12, e log2 disso ≈ 40,4." },
+                { "nivel": "Desafio", "texto": "Refaça os cálculos com MSL = 30 s. Com 32 bits, um enlace de 10 Gbit/s fica seguro?", "resposta": "O limite sobe para ≈ 1145 Mbit/s, ainda abaixo de 10 Gbit/s: o espaço acaba em 3,44 s, menos que os 30 s do MSL. É por isso que o TCP usa extensões como os timestamps (PAWS) em enlaces rápidos." }
+            ]
         ]
     };
 
@@ -319,7 +358,8 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        var grupo = /capitulo-01/.test(window.location.pathname) ? "capitulo1" : "capitulo2";
+        var numero = /capitulo-0*(\d+)/.exec(window.location.pathname);
+        var grupo = "capitulo" + (numero ? Number(numero[1]) : 1);
         document.querySelectorAll("pre.code-block").forEach(function (pre, indice) {
             criarEditor(pre, indice, grupo);
         });

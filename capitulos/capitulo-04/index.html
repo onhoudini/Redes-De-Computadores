@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 4 — A camada de transporte | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: serviços de transporte, primitivas, modo mensagem e modo fluxo, portas, three-way handshake, números de sequência, janelas dinâmicas e liberação de conexões.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="4" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 4</span>
+        <h1 class="display-5 mb-3">A camada de transporte</h1>
+        <p class="lead mb-4">
+            A camada de rede leva pacotes de host a host, mas sem garantias: eles podem se perder,
+            chegar corrompidos, duplicados ou fora de ordem. As aplicações do Capítulo 3, por outro
+            lado, querem conversar de forma organizada. A camada de transporte faz essa ponte:
+            transforma um serviço imperfeito em algo que as aplicações conseguem usar.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#sem-conexao">1. Serviço sem conexão</a>
+                    <a class="nav-link" href="#orientado-conexao">2. Serviço orientado a conexão</a>
+                    <a class="nav-link" href="#modos">3. Mensagem vs. fluxo</a>
+                    <a class="nav-link" href="#liberacao">4. Liberação e requisição-resposta</a>
+                    <a class="nav-link" href="#portas">5. Segmentos e portas</a>
+                    <a class="nav-link" href="#handshake">6. Three-way handshake</a>
+                    <a class="nav-link" href="#transferencia">7. Transferência de dados</a>
+                    <a class="nav-link" href="#liberacao-protocolo">8. Liberação no protocolo</a>
+                    <a class="nav-link" href="#exercicios-cap4">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Entre a rede e as aplicações</h2>
+    <p>
+        A camada de rede entrega pacotes salto a salto, através de nós intermediários, e oferece esse
+        serviço à camada de cima, que normalmente é a <strong>camada de transporte</strong>. A camada de
+        transporte <em>melhora</em> o serviço da rede para que as aplicações possam usá-lo.
+    </p>
+    <figure class="diagram">
+        <svg viewBox="0 0 640 210" class="sim-svg w-100" style="max-height:230px" role="img" aria-label="Pilhas de camadas de dois hosts e um roteador no meio; as entidades de transporte dos hosts trocam segmentos.">
+            <title>A camada de transporte só existe nos hosts. O roteador do meio vai até a camada de rede; as entidades de transporte dos dois hosts trocam segmentos diretamente.</title>
+            <g font-size="12" text-anchor="middle">
+                <rect class="camada" x="20" y="20" width="130" height="34" rx="5"/><text x="85" y="42">Transporte</text>
+                <rect class="camada" x="20" y="60" width="130" height="34" rx="5"/><text x="85" y="82">Rede</text>
+                <rect class="camada" x="20" y="100" width="130" height="34" rx="5"/><text x="85" y="122">Enlace</text>
+                <rect class="camada" x="20" y="140" width="130" height="34" rx="5"/><text x="85" y="162">Física</text>
+                <rect class="camada" x="255" y="60" width="130" height="34" rx="5"/><text x="320" y="82">Rede</text>
+                <rect class="camada" x="255" y="100" width="130" height="34" rx="5"/><text x="320" y="122">Enlace</text>
+                <rect class="camada" x="255" y="140" width="130" height="34" rx="5"/><text x="320" y="162">Física</text>
+                <rect class="camada" x="490" y="20" width="130" height="34" rx="5"/><text x="555" y="42">Transporte</text>
+                <rect class="camada" x="490" y="60" width="130" height="34" rx="5"/><text x="555" y="82">Rede</text>
+                <rect class="camada" x="490" y="100" width="130" height="34" rx="5"/><text x="555" y="122">Enlace</text>
+                <rect class="camada" x="490" y="140" width="130" height="34" rx="5"/><text x="555" y="162">Física</text>
+                <line class="linha-ativa" x1="150" y1="37" x2="490" y2="37" stroke-dasharray="7 4"/>
+                <text x="320" y="31" font-weight="600">Segmentos</text>
+                <line class="linha" x1="150" y1="190" x2="490" y2="190"/>
+                <text x="85" y="200">Host A</text><text x="320" y="200">Roteador</text><text x="555" y="200">Host B</text>
+            </g>
+        </svg>
+        <figcaption>A camada de transporte (baseado na Fig. 39 do livro).</figcaption>
+    </figure>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Listar as imperfeições do serviço sem conexão da camada de rede.</li>
+                <li>Descrever os serviços <strong>sem conexão</strong>, <strong>orientado a conexão</strong> e <strong>requisição-resposta</strong>, com suas primitivas.</li>
+                <li>Diferenciar <strong>modo mensagem</strong> de <strong>modo fluxo</strong> e liberação <strong>abrupta</strong> de <strong>graciosa</strong>.</li>
+                <li>Explicar a multiplexação por <strong>portas</strong> e o uso de checksums.</li>
+                <li>Mostrar como o <strong>three-way handshake</strong> e o relógio de transporte evitam conexões duplicadas.</li>
+                <li>Explicar números de sequência por byte, <strong>janelas dinâmicas</strong>, timer de persistência e MSL.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Este capítulo reaproveita a janela deslizante, o Go-Back-N e o Selective Repeat do
+                <a href="../capitulo-01/index.html#janela">Capítulo 1</a>, e o encapsulamento em
+                pacotes do <a href="../capitulo-02/index.html">Capítulo 2</a>. Os diagramas de
+                sequência temporal são lidos de cima para baixo: o tempo passa para baixo.
+            </p>
+        </div>
+    </div>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Sem conexão -->
+<section id="sem-conexao" class="chapter-section" data-conceito="sem-conexao" data-titulo="Serviço sem conexão">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">O serviço sem conexão e suas imperfeições</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A maioria das redes usa a organização por datagramas (Capítulo 2) e oferece um serviço simples,
+        o <strong>serviço sem conexão</strong>. O usuário de endereço S emite uma primitiva
+        <span class="mono">DATA.request</span> com uma SDU (<em>Service Data Unit</em>) M para o destino
+        D, e o provedor entrega <span class="mono">DATA.indication</span> do outro lado.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Um serviço sem conexão <strong>confiável</strong> garantiria que toda SDU fosse entregue. Isso
+        seria ótimo, mas é difícil na prática; por isso a camada de rede costuma oferecer um serviço
+        <strong>não confiável</strong>, com estas características:
+    </p>
+    <ul>
+        <li>só transfere SDUs de <strong>tamanho limitado</strong>;</li>
+        <li>pode <strong>descartar</strong> SDUs;</li>
+        <li>pode <strong>corromper</strong> SDUs (entregar “xyz” quando “abc” foi enviado);</li>
+        <li>pode <strong>atrasar</strong>, <strong>reordenar</strong> ou até <strong>duplicar</strong> SDUs.</li>
+    </ul>
+    <p>
+        A principal causa de perdas são os <strong>buffers</strong> dos nós da rede: quando o buffer de
+        um nó enche, todo pacote que chega é descartado, e isso acontece com frequência. Erros de
+        transmissão também ocorrem em enlaces sem técnicas de confiabilidade ou na memória dos nós.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Ajuste a probabilidade de cada imperfeição e envie SDUs. Depois, faça o diagnóstico de transmissões misteriosas.</p>
+    <div class="demo-box" data-sim="servico-sem-conexao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Erros de bits nos cabos|Buffers cheios nos nós da rede|Roteadores que mudam o endereço de destino" data-answer="1" data-explain="Quando um buffer enche, os pacotes que chegam são descartados; isso é frequente na prática." data-hint="Releia o último parágrafo da explicação.">
+        <p class="fw-semibold mb-2">Segundo o livro, qual é a principal causa de perdas de pacotes?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Serviço da rede: sem conexão e <strong>não confiável</strong>.</li>
+        <li>Imperfeições: perda, corrupção, atraso, reordenação, duplicação e tamanho limitado.</li>
+        <li>Quem usa esse serviço precisa saber se recuperar de qualquer uma delas.</li>
+    </ul>
+</section>
+
+<!-- 2. Orientado a conexão -->
+<section id="orientado-conexao" class="chapter-section" data-conceito="orientado-conexao" data-titulo="Serviço orientado a conexão">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Serviços de transporte e primitivas de conexão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Para conversar, duas aplicações precisam resolver dois problemas: <em>como representar</em> a
+        informação (o assunto do Capítulo 3) e <em>como interagir com a rede</em>. Do ponto de vista da
+        aplicação, a rede aparece como o <strong>serviço da camada de transporte</strong>, que pode ser
+        de três tipos.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered small">
+            <thead><tr><th>Serviço</th><th>Ideia</th><th>Quando usar</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Sem conexão</strong></td><td>Cada SDU é independente.</td><td>Trocas de SDUs pequenas.</td></tr>
+                <tr><td><strong>Orientado a conexão</strong></td><td>Três fases: estabelecimento, transferência e liberação.</td><td>SDUs grandes ou numerosas, trocas estruturadas.</td></tr>
+                <tr><td><strong>Requisição-resposta</strong></td><td>Uma pergunta curta associada à sua resposta.</td><td>Chamadas de procedimento remoto (veja o conceito 4).</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        Uma <strong>conexão</strong> é uma associação temporária entre dois usuários por meio de um
+        provedor de serviço; podem existir várias ao mesmo tempo entre o mesmo par de usuários. O
+        estabelecimento usa quatro primitivas:
+    </p>
+    <ol>
+        <li><span class="mono">CONNECT.request</span>: o iniciador pede a conexão; o parâmetro principal é o endereço do destino.</li>
+        <li><span class="mono">CONNECT.indication</span>: o provedor avisa o destino da tentativa.</li>
+        <li><span class="mono">CONNECT.response</span>: o destino aceita. Para ele, a conexão já está estabelecida.</li>
+        <li><span class="mono">CONNECT.confirm</span>: o provedor confirma ao iniciador e a fase de estabelecimento termina.</li>
+    </ol>
+    <p>
+        Nem toda tentativa dá certo: o destino pode recusar com <span class="mono">DISCONNECT.request</span>,
+        por política ou desempenho, ou o provedor pode não alcançá-lo e responder ele mesmo com
+        <span class="mono">DISCONNECT.indication</span>, com o motivo como parâmetro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="primitivas-conexao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="CONNECT.confirm|DISCONNECT.indication|CONNECT.response" data-answer="1" data-explain="Quando o destino recusa ou é inalcançável, o iniciador recebe DISCONNECT.indication com o motivo." data-hint="Pense no que o iniciador recebe quando a tentativa falha.">
+        <p class="fw-semibold mb-2">O destino está desligado da rede. Qual primitiva o iniciador recebe?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>request (quem pede) → indication (quem recebe) → response (quem aceita) → confirm (quem pediu).</li>
+        <li>Recusa ou destino inalcançável terminam em <span class="mono">DISCONNECT.indication</span>.</li>
+    </ul>
+</section>
+
+<!-- 3. Modos -->
+<section id="modos" class="chapter-section" data-conceito="modos" data-titulo="Mensagem vs. fluxo">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Modo mensagem e modo fluxo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Depois de estabelecida, a conexão oferece dois fluxos de dados, um em cada sentido. Se A envia
+        três SDUs (“A”, “BCD” e “EF”), quantos <span class="mono">DATA.indication</span> B recebe? A
+        resposta depende de como os fluxos são organizados.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>Modo mensagem:</strong> para cada <span class="mono">DATA.request</span>, exatamente um <span class="mono">DATA.indication</span>. O destinatário recebe as SDUs exatamente como foram enviadas e pode processar cada comando assim que ele chega.</li>
+        <li><strong>Modo fluxo</strong> (<em>stream</em>): o provedor oferece um <strong>fluxo de bytes</strong>. Todos os bytes chegam corretos e na mesma ordem, mas as <strong>fronteiras entre SDUs não são preservadas</strong>; não há relação entre o número de requests e de indications.</li>
+    </ul>
+    <p>
+        Na Internet, o serviço orientado a conexão mais popular usa o <strong>modo fluxo</strong>. Por
+        isso, aplicações que trocam mensagens estruturadas precisam separá-las por conta própria, muitas
+        vezes com <strong>delimitadores</strong> como o fim de linha (CR LF) do Capítulo 3.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="mensagem-vs-fluxo"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Exatamente 3|Exatamente 6, um por byte|Qualquer quantidade entre 1 e 6, com os bytes em ordem" data-answer="2" data-explain="No modo fluxo só a ordem e a integridade dos bytes são garantidas; as fronteiras se perdem." data-hint="O modo fluxo preserva as fronteiras entre SDUs?">
+        <p class="fw-semibold mb-2">A envia “A”, “BCD” e “EF” em modo fluxo. Quantos DATA.indication B pode receber?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Modo mensagem preserva fronteiras; modo fluxo preserva só bytes e ordem.</li>
+        <li>Sobre um fluxo, a aplicação delimita suas mensagens (por exemplo, com CR LF).</li>
+    </ul>
+</section>
+
+<!-- 4. Liberação e requisição-resposta -->
+<section id="liberacao" class="chapter-section" data-conceito="liberacao" data-titulo="Liberação e requisição-resposta">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Liberando a conexão e o serviço requisição-resposta</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Uma conexão envolve três partes: os dois usuários e o provedor. Qualquer um deles pode pedir o
+        fim da conexão. O que acontece com os dados que ainda estão a caminho?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>Liberação abrupta pelo provedor:</strong> por falta de recursos ou porque um usuário ficou inalcançável, o provedor entrega <span class="mono">DISCONNECT.indication</span> aos dois lados, sem garantir que as SDUs enviadas foram entregues.</li>
+        <li><strong>Liberação abrupta por um usuário:</strong> <span class="mono">DISCONNECT.request</span> com pedido de liberação abrupta. O provedor para os dois fluxos imediatamente, e SDUs podem se perder.</li>
+        <li><strong>Liberação graciosa:</strong> os dois fluxos são tratados como independentes. Quem terminou de enviar libera o seu sentido; o provedor só entrega o <span class="mono">DISCONNECT.indication</span> depois de todos os <span class="mono">DATA.indication</span> pendentes, e o outro lado ainda pode continuar enviando.</li>
+    </ul>
+    <p class="nota-livro small">
+        <strong>Confiabilidade do serviço orientado a conexão.</strong> Ele só garante a entrega de todas
+        as SDUs se a conexão for liberada <strong>graciosamente</strong>. Enquanto a conexão está ativa,
+        não há garantia, porque ela pode precisar ser liberada abruptamente a qualquer momento.
+    </p>
+    <p>
+        O <strong>serviço requisição-resposta</strong> é um meio-termo. Muitas aplicações enviam pouca
+        informação e recebem pouca de volta, como uma chamada de procedimento em outro host
+        (<em>Remote Procedure Call</em>). O serviço sem conexão obrigaria a aplicação a tratar todos os
+        erros; o orientado a conexão exige estabelecer uma conexão antes, um custo alto para trocas
+        pequenas. O requisição-resposta troca pequenas quantidades de informação de forma eficiente e
+        associa cada requisição à sua resposta.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="liberacao-conexao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Abrupta, pedida pelo usuário que terminou|Graciosa, liberando cada sentido separadamente|Abrupta, forçada pelo provedor" data-answer="1" data-explain="Só a liberação graciosa garante que todas as SDUs foram entregues." data-hint="Qual tipo de liberação garante a entrega de todas as SDUs?">
+        <p class="fw-semibold mb-2">Uma transferência bancária não pode perder dados. Que liberação deve ser usada?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Um serviço orientado a conexão, pela confiabilidade|O serviço requisição-resposta|Nenhum: a aplicação deve tratar a rede diretamente" data-answer="1" data-explain="Ele evita o custo de abrir uma conexão sem jogar todo o tratamento de erros sobre a aplicação." data-hint="Pense no custo de estabelecer uma conexão para trocar dois números.">
+        <p class="fw-semibold mb-2">Uma aplicação chama uma função remota que recebe dois números e devolve a soma. Qual serviço é o mais adequado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Abrupta (pelo usuário ou pelo provedor) pode perder SDUs; graciosa não.</li>
+        <li>Requisição-resposta: ideal para RPC, que troca pouca informação.</li>
+    </ul>
+</section>
+
+<!-- 5. Portas -->
+<section id="portas" class="chapter-section" data-conceito="portas" data-titulo="Segmentos e portas">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Transporte sem conexão: segmentos, checksums e portas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Um endereço de rede identifica um <em>host</em>. Mas um servidor pode rodar um servidor web, um
+        de nomes e um de chat ao mesmo tempo. Quando um pacote chega, para qual programa ele vai?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O serviço de transporte mais simples é o sem conexão. Comparado ao serviço da rede, ele
+        acrescenta duas coisas:
+    </p>
+    <ol>
+        <li><strong>Detecção de erros:</strong> um checksum ou CRC, como na camada de enlace, calculado sobre o segmento.</li>
+        <li><strong>Multiplexação:</strong> várias aplicações em um host trocam informação com várias aplicações em outros hosts.</li>
+    </ol>
+    <p>
+        A unidade de transferência da camada de transporte é o <strong>segmento</strong>: um cabeçalho
+        com informação de controle mais a carga útil que veio da aplicação. O segmento é encapsulado em
+        um pacote, que é encapsulado em um quadro.
+    </p>
+    <figure class="diagram">
+        <svg viewBox="0 0 640 150" class="sim-svg w-100" style="max-height:170px" role="img" aria-label="Encapsulamento: o segmento fica dentro do pacote, que fica dentro do quadro.">
+            <title>Encapsulamento: um quadro contém cabeçalho de enlace, um pacote e um CRC; o pacote contém cabeçalho de rede e o segmento; o segmento contém cabeçalho de transporte (portas e checksum) e os dados da aplicação.</title>
+            <g font-size="12" text-anchor="middle">
+                <rect x="10" y="20" width="620" height="110" rx="8" class="camada"/>
+                <text x="320" y="38" font-weight="600">Quadro (enlace)</text>
+                <rect x="20" y="48" width="80" height="70" rx="5" class="no"/><text x="60" y="88">cab. enlace</text>
+                <rect x="550" y="48" width="70" height="70" rx="5" class="no"/><text x="585" y="88">CRC</text>
+                <rect x="110" y="48" width="430" height="70" rx="6" class="camada"/>
+                <text x="325" y="64" font-weight="600">Pacote (rede)</text>
+                <rect x="118" y="72" width="80" height="40" rx="5" class="no"/><text x="158" y="96">cab. rede</text>
+                <rect x="206" y="72" width="326" height="40" rx="5" class="no-ativo no"/>
+                <text x="285" y="90">cab. transporte</text><text x="285" y="104" font-size="10">portas · checksum</text>
+                <line x1="365" y1="72" x2="365" y2="112" class="linha"/>
+                <text x="448" y="96">dados da aplicação</text>
+            </g>
+        </svg>
+        <figcaption>O segmento (em amarelo) viaja dentro do pacote, que viaja dentro do quadro.</figcaption>
+    </figure>
+    <p>
+        As <strong>portas</strong> são o endereçamento extra. Ao ser iniciada, uma aplicação servidora
+        <strong>registra um número de porta</strong>, que os clientes usam para contatá-la. No exemplo
+        do livro, o cliente usa a porta 1234 e o servidor, a 5678: a requisição vai da porta 1234 do
+        cliente para a 5678 do servidor, e a resposta faz o caminho inverso, da 5678 para a 1234.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="multiplexacao-portas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Origem 1234, destino 5678|Origem 5678, destino 1234|Origem 5678, destino 5678" data-answer="1" data-explain="Na resposta as portas se invertem: sai da porta do servidor para a porta do cliente." data-hint="A resposta faz o caminho inverso da requisição.">
+        <p class="fw-semibold mb-2">O cliente (porta 1234) envia uma requisição ao servidor (porta 5678). Quais portas vão na resposta?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Segmento = cabeçalho + carga útil; viaja dentro de pacotes.</li>
+        <li>Endereço de rede identifica o host; a porta identifica a aplicação.</li>
+        <li>Checksum inválido → segmento descartado.</li>
+    </ul>
+</section>
+
+<!-- 6. Handshake -->
+<section id="handshake" class="chapter-section" data-conceito="handshake" data-titulo="Three-way handshake">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">Estabelecendo conexões: o three-way handshake</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Imagine uma conexão curta para uma única transferência importante, como uma transferência
+        bancária. Se segmentos de uma conexão <em>antiga</em> ficarem atrasados na rede e chegarem
+        depois, a transferência pode ser executada duas vezes. Duplicar SDUs é inaceitável.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A abordagem mais simples usa dois segmentos de controle: <strong>CR</strong> (<em>Connection
+        Request</em>) e <strong>CA</strong> (<em>Connection Acknowledgment</em>). Como a rede é
+        imperfeita, eles precisam de checksum, e o CR precisa de um timer de retransmissão. Mesmo assim,
+        um CR e dados atrasados de uma conexão passada podem ser aceitos como válidos.
+    </p>
+    <p>A solução tem três ingredientes:</p>
+    <ol>
+        <li><strong>MSL</strong> (<em>Maximum Segment Lifetime</em>): a rede garante que nenhum segmento fica nela por mais de MSL segundos. Na Internet, espera-se 2 minutos.</li>
+        <li><strong>Relógio de transporte:</strong> um contador de <em>k</em> bits incrementado a cada ciclo e a cada conexão estabelecida, com 2<sup>k</sup> × ciclo muito maior que o MSL. Ele continua avançando mesmo se a entidade parar ou reiniciar, e não precisa estar sincronizado com o relógio real.</li>
+        <li><strong>Three-way handshake:</strong>
+            <ol type="a">
+                <li>A envia CR(seq=x), com x tirado do relógio de transporte.</li>
+                <li>B cria estado para a tentativa (ainda sem saber se é nova ou duplicata) e responde CA(seq=y, ack=x), com y do próprio relógio.</li>
+                <li>A recebe o CA; ack=x confirma o seu CR. A conexão está estabelecida para A, que confirma o CA de B antes de enviar dados.</li>
+                <li>B recebe a confirmação de y e só então considera a conexão estabelecida.</li>
+            </ol>
+        </li>
+    </ol>
+    <p>
+        Se chega a um host um segmento que não corresponde a nenhuma tentativa atual, ele responde com
+        <strong>REJECT</strong>, cancelando a tentativa espúria. Explore os três cenários de duplicatas
+        do livro abaixo.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="three-way-handshake"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="B consegue reconhecer CRs antigos pela data|B guarda todas as conexões passadas|O ack de A só pode conferir com o y que B acabou de tirar do relógio|O MSL impede que CRs antigos existam" data-answer="2" data-explain="Um CR antigo leva B a responder com um y novo; só o A verdadeiro confirmaria esse y, e o A atual não tem tentativa correspondente." data-hint="Como B descobre que a tentativa é legítima sem lembrar do passado?">
+        <p class="fw-semibold mb-2">Por que um CR antigo não consegue abrir uma conexão fantasma?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>MSL limita a vida dos segmentos; o relógio de transporte gera números que não se repetem dentro desse prazo.</li>
+        <li>Três segmentos: CR(x) → CA(y, ack=x) → confirmação de y.</li>
+        <li>Segmento sem tentativa correspondente → REJECT.</li>
+    </ul>
+</section>
+
+<!-- 7. Transferência -->
+<section id="transferencia" class="chapter-section" data-conceito="transferencia" data-titulo="Transferência de dados">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Transferência confiável de dados no transporte</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No Capítulo 1, o enlace confiável usava janelas deslizantes, timers e Go-Back-N ou Selective
+        Repeat. Dá para reaproveitar tudo isso? Quase: entre dois hosts do outro lado do mundo, a rede
+        é bem menos previsível que um cabo.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>Diferenças em relação à camada de enlace:</p>
+    <ul>
+        <li><strong>Atrasos muito variáveis:</strong> pacotes seguem caminhos diferentes e esperam em filas de roteadores carregados.</li>
+        <li><strong>Reordenação e duplicação:</strong> a rede não entrega necessariamente em ordem.</li>
+        <li><strong>SDUs grandes:</strong> a aplicação pode gerar SDUs maiores que o tamanho máximo de um pacote; o transporte fragmenta e remonta.</li>
+    </ul>
+    <p>Como o transporte se adapta:</p>
+    <ul>
+        <li><strong>Checksum/CRC</strong> calculado sobre o segmento inteiro (cabeçalho e carga útil); segmentos inválidos são descartados.</li>
+        <li><strong>Números de sequência contam bytes:</strong> o seq no cabeçalho é a posição do primeiro byte da carga útil no fluxo. Isso detecta perdas, permite reordenar e facilita a fragmentação.</li>
+        <li><strong>Números grandes:</strong> 32 ou 64 bits, contra 8 bits em alguns enlaces, porque um segmento consome milhares de números e porque segmentos atrasados precisam ser detectados.</li>
+        <li><strong>Selective Repeat:</strong> como a rede reordena, o receptor deve guardar os segmentos fora de ordem.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração — números de sequência por byte</h3>
+    <div class="demo-box" data-sim="numeracao-bytes"></div>
+
+    <h3 class="h5 mt-4 mb-3">Janelas dinâmicas</h3>
+    <p>
+        Uma entidade de transporte fica no núcleo do sistema operacional e atende centenas ou milhares
+        de conexões, que compartilham um mesmo conjunto de buffers. Por isso o tamanho da janela muda
+        durante a vida da conexão. O receptor <strong>anuncia sua janela de recepção</strong> em cada
+        confirmação. O emissor mantém <span class="mono">swin</span> (sua janela de envio) e
+        <span class="mono">rwin</span> (a janela anunciada), e nunca tem mais de
+        <span class="mono">min(swin, rwin)</span> segmentos sem confirmação.
+    </p>
+    <p>
+        Se a aplicação receptora não lê rápido o suficiente, o buffer enche e a janela anunciada cai a
+        <strong>0</strong>; o emissor fica bloqueado até receber uma confirmação com janela positiva. Se
+        essa confirmação se perde, ocorre um <strong>deadlock</strong>: o emissor espera a confirmação e
+        o receptor espera dados. A solução é o <strong>timer de persistência</strong>: quando o emissor
+        recebe rwin = 0, arma o timer e, ao expirar, retransmite um segmento antigo para forçar uma nova
+        confirmação com a janela atual.
+    </p>
+    <div class="demo-box" data-sim="janela-dinamica"></div>
+
+    <h3 class="h5 mt-4 mb-3">MSL e o tamanho do espaço de sequência</h3>
+    <p>
+        Como os números de sequência são reutilizados, um segmento muito atrasado poderia ser aceito
+        como se fosse novo. Os protocolos combinam duas defesas: números de 32 bits ou mais e o MSL
+        imposto pela rede (2 minutos na Internet, RFC 793). Isso limita a vazão: com <em>n</em> bits, não
+        se pode passar por mais de 2<sup>n</sup> números de sequência a cada MSL.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz "2<sup>n</sup> segmentos a cada MSL". Como os números de sequência contam bytes, a
+        calculadora abaixo usa 2<sup>n</sup> <em>bytes</em> por MSL.
+    </p>
+    <div class="demo-box" data-sim="limite-msl"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="1101|1100|1001" data-answer="0" data-explain="O seq é a posição do primeiro byte: 1001 + 100 = 1101." data-hint="Some o tamanho do primeiro segmento ao seu número de sequência.">
+        <p class="fw-semibold mb-2">Um segmento tem seq=1001 e carrega 100 bytes. Qual é o seq do próximo segmento?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Aumentar a janela do emissor|Usar o timer de persistência|Diminuir o MSL para zero" data-answer="1" data-explain="Ao expirar, o emissor retransmite um segmento antigo e força o receptor a anunciar a janela atual." data-hint="É um timer armado quando a janela anunciada é 0.">
+        <p class="fw-semibold mb-2">O que resolve o deadlock causado pela perda da confirmação que reabriria a janela?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>seq = posição do primeiro byte; o receptor reordena e remonta pelo seq.</li>
+        <li>Emissor envia no máximo min(swin, rwin); rwin = 0 exige o timer de persistência.</li>
+        <li>n bits de sequência + MSL ⇒ limite de 2<sup>n</sup> números por MSL.</li>
+    </ul>
+</section>
+
+<!-- 8. Liberação no protocolo -->
+<section id="liberacao-protocolo" class="chapter-section" data-conceito="liberacao-protocolo" data-titulo="Liberação no protocolo">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">Liberação da conexão no protocolo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No conceito 4 vimos a liberação do ponto de vista do <em>serviço</em> (primitivas). Como as
+        entidades de transporte implementam isso com segmentos?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>Abrupta:</strong> um segmento de controle <strong>DR</strong> (<em>Disconnection Request</em>); a conexão é considerada liberada assim que ele é enviado ou recebido. Quem envia o DR não sabe se o outro lado já enviou tudo, então SDUs podem se perder.</li>
+        <li><strong>Graciosa:</strong> cada sentido é liberado independentemente. Quem terminou envia um DR com o <strong>próximo número de sequência</strong>; o <span class="mono">DISCONNECT.ind</span> só é entregue depois de todos os <span class="mono">DATA.ind</span> anteriores; o outro lado confirma o DR com uma confirmação (ACK).</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="liberacao-dr"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Para que o receptor saiba até qual byte precisa entregar antes de encerrar aquele sentido|Para cifrar a conexão|Para reiniciar o relógio de transporte" data-answer="0" data-explain="Assim o DISCONNECT.ind só é entregue depois de todos os dados anteriores." data-hint="Pense no que garante que nenhum dado anterior fique para trás.">
+        <p class="fw-semibold mb-2">Por que, na liberação graciosa, o DR carrega o próximo número de sequência?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>DR abrupto: rápido, mas pode perder dados.</li>
+        <li>DR por sentido + ACK: liberação graciosa, sem perdas.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap4" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> desenhe o diagrama de sequência de uma conexão recusada pelo destino.
+            <details><summary>Ver solução</summary><p class="mb-0">A: CONNECT.req → B: CONNECT.ind; B: DISCONNECT.req(motivo) → A: DISCONNECT.ind(motivo).</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> uma SDU de 2500 bytes é enviada em segmentos de no máximo 1000 bytes, começando em seq=5000. Quais são os números de sequência?
+            <details><summary>Ver solução</summary><p class="mb-0">5000 (1000 bytes), 6000 (1000 bytes) e 7000 (500 bytes).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> por que, no three-way handshake, B não considera a conexão estabelecida ao receber o CR?
+            <details><summary>Ver solução</summary><p class="mb-0">Porque o CR pode ser uma duplicata antiga. Só quando A confirma o y que B acabou de tirar do relógio de transporte B tem certeza de que a tentativa é atual.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> swin = 8 e o último ACK anunciou rwin = 3. Quantos segmentos sem confirmação o emissor pode ter?
+            <details><summary>Ver solução</summary><p class="mb-0">min(8, 3) = 3.</p></details></li>
+        <li><strong>Desafio:</strong> com números de sequência de 32 bits e MSL de 120 s, qual a vazão máxima? Um enlace de 1 Gbit/s é seguro?
+            <details><summary>Ver solução</summary><p class="mb-0">2<sup>32</sup> × 8 / 120 ≈ 286 Mbit/s. A 1 Gbit/s o espaço acaba em ≈ 34 s, menos que o MSL, então não é seguro sem mecanismos adicionais.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Quatro trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Separando mensagens em um fluxo de bytes</h3>
+    <pre class="code-block"><code>import random
+
+def transmite_fluxo(sdus, rnd):
+    """Modo fluxo: junta os bytes e os entrega em pedaços de tamanho aleatório."""
+    fluxo = "".join(sdus)
+    pedacos, i = [], 0
+    while i &lt; len(fluxo):
+        n = rnd.randint(1, 5)
+        pedacos.append(fluxo[i:i + n])
+        i += n
+    return pedacos
+
+class Receptor:
+    def __init__(self, delimitador="\r\n"):
+        self.buffer = ""
+        self.delimitador = delimitador
+
+    def recebe(self, pedaco):
+        """Guarda o pedaço e devolve as mensagens que ficaram completas."""
+        self.buffer += pedaco
+        mensagens = []
+        while self.delimitador in self.buffer:
+            msg, self.buffer = self.buffer.split(self.delimitador, 1)
+            mensagens.append(msg)
+        return mensagens
+
+rnd = random.Random(7)
+comandos = ["USER alice\r\n", "PASS 1234\r\n", "LIST\r\n", "QUIT\r\n"]
+rx = Receptor()
+for pedaco in transmite_fluxo(comandos, rnd):
+    prontas = rx.recebe(pedaco)
+    print(f"DATA.ind({pedaco!r:10}) -> completas: {prontas}")
+print("Sobrou no buffer:", repr(rx.buffer))</code></pre>
+
+    <h3 class="h6 mt-4">2. Remontagem por número de sequência de byte</h3>
+    <pre class="code-block"><code>import random
+
+def segmenta(dados: bytes, isn: int, mss: int):
+    """Corta a SDU em segmentos; seq = número do primeiro byte do segmento."""
+    return [(isn + i, dados[i:i + mss]) for i in range(0, len(dados), mss)]
+
+class ReceptorTransporte:
+    def __init__(self, isn: int):
+        self.esperado = isn        # próximo byte que ainda falta entregar
+        self.fora_de_ordem = {}    # seq -> dados que chegaram adiantados
+        self.entregue = b""
+
+    def recebe(self, seq: int, dados: bytes):
+        if seq &lt; self.esperado:
+            print(f"seq={seq}: duplicata de bytes já entregues, descartada")
+            return
+        self.fora_de_ordem[seq] = dados
+        while self.esperado in self.fora_de_ordem:
+            bloco = self.fora_de_ordem.pop(self.esperado)
+            self.entregue += bloco
+            self.esperado += len(bloco)
+        print(f"seq={seq}: entregue = {self.entregue!r}; próximo esperado = {self.esperado}")
+
+segmentos = segmenta(b"REDES DE COMPUTADORES", isn=1000, mss=5)
+rede = segmentos + [segmentos[1]]      # a rede duplica um segmento...
+random.Random(3).shuffle(rede)         # ...e embaralha a ordem
+rx = ReceptorTransporte(isn=1000)
+for seq, dados in rede:
+    rx.recebe(seq, dados)</code></pre>
+
+    <h3 class="h6 mt-4">3. Three-way handshake com relógio de transporte</h3>
+    <pre class="code-block"><code>class Entidade:
+    """Entidade de transporte simplificada com relógio de transporte."""
+    def __init__(self, nome: str, relogio: int):
+        self.nome = nome
+        self.relogio = relogio     # contador que nunca volta atrás
+        self.pendentes = {}        # seq que propusemos -> situação
+
+    def proximo_seq(self) -> int:
+        valor = self.relogio
+        self.relogio += 1
+        return valor
+
+    def conectar(self):
+        x = self.proximo_seq()
+        self.pendentes[x] = "CR enviado"
+        return ("CR", x, None)
+
+    def recebe(self, seg):
+        tipo, seq, ack = seg
+        if tipo == "CR":                       # não dá para saber se é antigo
+            y = self.proximo_seq()
+            self.pendentes[y] = "CA enviado"
+            return ("CA", y, seq)
+        if tipo == "CA":
+            situacao = self.pendentes.pop(ack, None)
+            if situacao == "CR enviado":
+                print(f"  {self.nome}: conexão estabelecida")
+                return ("CA", ack, seq)        # confirma o seq do outro lado
+            if situacao == "CA enviado":
+                print(f"  {self.nome}: conexão estabelecida")
+                return None
+            print(f"  {self.nome}: ack={ack} não confere com nada -> REJECT")
+            return ("REJECT", None, seq)
+        if tipo == "REJECT":
+            self.pendentes.pop(ack, None)
+            print(f"  {self.nome}: tentativa {ack} cancelada")
+            return None
+
+def envia(de: str, para: Entidade, seg):
+    print(f"{de} -> {para.nome}: {seg}")
+    return para.recebe(seg) if seg else None
+
+A = Entidade("A", relogio=100)
+B = Entidade("B", relogio=500)
+
+print("--- Abertura normal")
+r = envia("A", B, A.conectar())
+r = envia("B", A, r)
+envia("A", B, r)
+
+print("--- CR antigo (seq=42), atrasado na rede, chega a B")
+r = envia("rede", B, ("CR", 42, None))
+r = envia("B", A, r)
+envia("A", B, r)</code></pre>
+
+    <h3 class="h6 mt-4">4. Quanto o MSL limita a vazão?</h3>
+    <pre class="code-block"><code>MSL = 120  # segundos, valor assumido na Internet (RFC 793)
+
+for n in (16, 32, 64):
+    espaco = 2 ** n                   # bytes numerados antes de repetir um número
+    limite = espaco * 8 / MSL         # bit/s
+    print(f"{n:2} bits: {espaco:>26,} bytes por MSL -> no máximo {limite / 1e6:,.3f} Mbit/s")
+
+enlace = 10e9                         # 10 Gbit/s
+tempo = 2 ** 32 * 8 / enlace
+print(f"A 10 Gbit/s, os 2^32 números acabam em {tempo:.2f} s (MSL = {MSL} s)")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 2.4, "The transport layer".
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 793 — <a href="https://www.rfc-editor.org/rfc/rfc793" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a> (MSL de 2 minutos)</li>
+        <li>RFC 7323 — <a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">TCP Extensions for High Performance</a> (PAWS, citado em um desafio)</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-03/index.html" class="text-muted text-decoration-none">← Capítulo 3</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 4</span>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">Todos os capítulos</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap4.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

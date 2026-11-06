@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Capítulo 1 — Conectando dois hosts | Redes de Computadores</title>
-    <link rel="stylesheet" href="../../assets/playground.css">
-    <link rel="stylesheet" href="../../assets/livro.css">
     <meta name="description" content="Material didático complementar: como dois hosts se conectam, da camada física ao enquadramento e à entrega confiável de quadros.">
 
     <!-- Bootstrap -->
@@ -14,120 +12,10 @@
         rel="stylesheet"
     >
 
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
     <style>
-        :root {
-            --accent: #0d6efd;
-            --text: #212529;
-            --muted: #6c757d;
-            --background: #f8f9fa;
-            --code-bg: #1e1e2e;
-            --code-fg: #e6e6e6;
-        }
-
-        body {
-            color: var(--text);
-            background: var(--background);
-        }
-
-        .hero {
-            padding: 80px 0 60px;
-            background: white;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .hero h1 {
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .hero .lead {
-            max-width: 760px;
-            color: var(--muted);
-        }
-
-        section.chapter-section {
-            padding: 55px 0;
-            scroll-margin-top: 90px;
-        }
-
-        section.chapter-section:nth-of-type(even) {
-            background: white;
-        }
-
-        h2.section-title {
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-        }
-
-        h2.section-title .kicker {
-            display: block;
-            font-size: .8rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--accent);
-            font-weight: 600;
-            margin-bottom: .4rem;
-        }
-
-        .card-soft {
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            background: white;
-        }
-
-        .toc {
-            position: sticky;
-            top: 85px;
-        }
-
-        .toc .nav-link {
-            color: var(--muted);
-            padding: .3rem 0;
-            font-size: .9rem;
-        }
-
-        .toc .nav-link.active {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        figure.diagram {
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
-        }
-
-        figure.diagram figcaption {
-            font-size: .85rem;
-            color: var(--muted);
-            margin-top: .5rem;
-            text-align: center;
-        }
-
-        pre.code-block {
-            background: var(--code-bg);
-            color: var(--code-fg);
-            border-radius: 10px;
-            padding: 1.1rem 1.25rem;
-            font-size: .85rem;
-            overflow-x: auto;
-            line-height: 1.55;
-        }
-
-        pre.code-block code {
-            color: inherit;
-            white-space: pre;
-        }
-
-        .demo-box {
-            background: #f1f3f5;
-            border: 1px dashed #adb5bd;
-            border-radius: 10px;
-            padding: 1.25rem;
-        }
-
         .bit-chip {
             display: inline-flex;
             align-items: center;
@@ -148,25 +36,13 @@
             color: #c1121f;
         }
 
-        .badge-step {
-            background: var(--accent);
-        }
-
-        blockquote.quote {
-            border-left: 4px solid var(--accent);
-            padding-left: 1rem;
-            color: var(--muted);
-            font-style: italic;
-        }
-
-        footer {
-            border-top: 1px solid #dee2e6;
-            background: white;
-        }
-
-        </style>
+        html[data-theme="dark"] .bit-chip { background: #22344a; color: #9ec5fe; }
+        html[data-theme="dark"] .bit-chip.stuffed { background: #58151c; color: #ea868f; }
+        /* As figuras aprovadas usam cores fixas; no tema escuro elas ficam sobre um cartão claro. */
+        html[data-theme="dark"] figure.diagram svg { background: #f8f9fa; border-radius: 8px; color: #212529; }
+    </style>
 </head>
-<body data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+<body data-capitulo="1" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
 <!-- Navegação -->
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
@@ -194,6 +70,12 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a>
                 </li>
                 <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
             </ul>
@@ -228,8 +110,10 @@
         <!-- TOC lateral -->
         <div class="col-lg-3 d-none d-lg-block">
             <div class="toc py-5">
-                <p class="text-uppercase small text-muted fw-semibold mb-2">Neste capítulo</p>
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
                 <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
                     <a class="nav-link" href="#bits">1. O que é informação?</a>
                     <a class="nav-link" href="#fisica">2. Camada física</a>
                     <a class="nav-link" href="#enquadramento">3. Enquadramento</a>
@@ -245,8 +129,35 @@
         <!-- Conteúdo -->
         <div class="col-lg-9">
 
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Do fio ao quadro confiável</h2>
+    <p>Este capítulo segue a seção 2.1 do livro, “Connecting two hosts”: o primeiro passo para construir uma rede é ligar dois hosts e fazer os bits, e depois os quadros, chegarem corretamente de um lado ao outro.</p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar como a camada física transmite bits e por que ela é um serviço imperfeito (interferência e relógios desalinhados).</li>
+                <li>Delimitar quadros com <strong>bit stuffing</strong> e <strong>character stuffing</strong>.</li>
+                <li>Detectar erros com <strong>paridade</strong>, <strong>checksum</strong> e <strong>CRC</strong>.</li>
+                <li>Descrever como o <strong>Protocolo do Bit Alternante</strong> recupera perdas com números de sequência, confirmações e temporizador.</li>
+                <li>Comparar <strong>Go-Back-N</strong> e <strong>Selective Repeat</strong> e calcular a janela máxima para n bits de sequência.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Como funciona a pontuação</h3>
+            <p class="small mb-0">
+                Cada conceito tem perguntas e desafios interativos. Acertos somam pontos, e completar
+                tudo de um conceito rende uma medalha. O progresso fica salvo neste navegador.
+            </p>
+        </div>
+    </div>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
 <!-- 1. Bits -->
-<section id="bits" class="chapter-section">
+<section id="bits" class="chapter-section" data-conceito="bits" data-titulo="Informação e bits">
     <span class="kicker">Fundamentos</span>
     <h2 class="section-title">O que é informação, afinal?</h2>
 
@@ -265,6 +176,11 @@
         letras, números, pixels de uma imagem ou instruções de um programa. A tabela ASCII, por
         exemplo, define que a letra <strong>"A"</strong> deve ser transmitida como a sequência
         <code>01000001</code>.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        A edição do livro (pág. 14 do PDF) lista <code>A : 1000011b</code>, mas 1000011 é o código de
+        <code>C</code>. O código correto de <code>A</code> (65) é <code>1000001</code>, como acima.
     </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
@@ -309,8 +225,9 @@
                 </marker>
             </defs>
 
-            <text x="20" y="150" font-size="13" fill="#6c757d" font-family="sans-serif">Escala aproximada:</text>
-            <text x="20" y="172" font-size="12" fill="#212529" font-family="monospace">1 bit → 0/1   |   8 bits → 1 byte   |   1 KB ≈ 10³ B   |   1 MB ≈ 10⁶ B   |   1 GB ≈ 10⁹ B</text>
+            <text x="20" y="146" font-size="13" fill="#6c757d" font-family="sans-serif">Escala (nota “Bit rate” do livro):</text>
+            <text x="20" y="168" font-size="12" fill="#212529" font-family="monospace">8 bits = 1 byte   |   taxas: 1 Kbps = 10³ bit/s · 1 Mbps = 10⁶ bit/s · 1 Gbps = 10⁹ bit/s</text>
+            <text x="20" y="188" font-size="12" fill="#212529" font-family="monospace">memória: 1 KByte = 1024 bytes · 1 MByte = 1 048 576 bytes</text>
         </svg>
         <figcaption>Do caractere à sequência de bits transmitida no meio físico.</figcaption>
     </figure>
@@ -337,7 +254,7 @@
 </section>
 
 <!-- 2. Camada física -->
-<section id="fisica" class="chapter-section">
+<section id="fisica" class="chapter-section" data-conceito="fisica" data-titulo="Camada física">
     <span class="kicker">Aprofundando</span>
     <h2 class="section-title">Por dentro da camada física</h2>
 
@@ -399,7 +316,7 @@
 </section>
 
 <!-- 3. Enquadramento -->
-<section id="enquadramento" class="chapter-section">
+<section id="enquadramento" class="chapter-section" data-conceito="enquadramento" data-titulo="Enquadramento">
     <span class="kicker">Camada de enlace</span>
     <h2 class="section-title">Enquadramento: separando os bits em quadros</h2>
 
@@ -449,7 +366,7 @@
         
         <text x="10" y="150" font-size="11.5" fill="#8a939b" font-family="sans-serif">Azul = marcador de quadro (01111110) · Vermelho = bit 0 inserido a cada cinco 1s consecutivos</text>
     </svg>
-<figcaption>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar</figcaption>
+<figcaption>Bit stuffing aplicado ao mesmo exemplo usado no código Python mais abaixo: três bits 0 são inseridos para quebrar a sequência de 17 uns. (Exemplo da tabela de bit stuffing do livro.)</figcaption>
 </figure>
 
 
@@ -470,7 +387,7 @@
 </section>
 
 <!-- 4. Entrega confiável -->
-<section id="confiavel" class="chapter-section">
+<section id="confiavel" class="chapter-section" data-conceito="confiavel" data-titulo="Entrega confiável">
     <span class="kicker">Camada de enlace</span>
     <h2 class="section-title">Entrega confiável sobre um enlace imperfeito</h2>
 
@@ -509,7 +426,7 @@
                 </marker>
             </defs>
         </svg>
-        <figcaption>ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado.</figcaption>
+        <figcaption>ABP em funcionamento normal: o número de sequência alterna entre 0 e 1 a cada quadro confirmado. (Baseado na figura de operação do ABP, seção 2.1 do livro.)</figcaption>
     </figure>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
@@ -533,7 +450,7 @@
 </section>
 
 <!-- 5. Janela deslizante -->
-<section id="janela" class="chapter-section">
+<section id="janela" class="chapter-section" data-conceito="janela" data-titulo="Janela deslizante">
     <span class="kicker">Desempenho</span>
     <h2 class="section-title">Janela deslizante: Go-Back-N e Selective Repeat</h2>
 
@@ -552,7 +469,7 @@
     <div class="row g-4">
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Go-Back-N: com o quadro 2 perdido, o receptor descarta 3 e 4 e o emissor retransmite 2, 3 e 4."><title>Go-Back-N: com o quadro 2 perdido, o receptor descarta 3 e 4 e o emissor retransmite 2, 3 e 4.</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#0d6efd" font-family="sans-serif">Go-Back-N</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">quadro 2 se perde:</text>
                     <g font-family="monospace" font-size="12">
@@ -583,7 +500,7 @@
         </div>
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Selective Repeat: com o quadro 2 perdido, o receptor guarda 3 e 4 e o emissor retransmite só o 2."><title>Selective Repeat: com o quadro 2 perdido, o receptor guarda 3 e 4 e o emissor retransmite só o 2.</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#6610f2" font-family="sans-serif">Selective Repeat</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">quadro 2 se perde:</text>
                     <g font-family="monospace" font-size="12">
@@ -613,7 +530,7 @@
     <p class="mt-3">
         Em ambos os casos, o tamanho máximo da janela é limitado pelo número de bits usados para o
         número de sequência: com <em>n</em> bits, Go-Back-N pode usar no máximo
-        <code>2ⁿ − 1</code> quadros na janela para Go-Back-N, e no máximo <code>2ⁿ⁻¹</code> para
+        <code>2ⁿ − 1</code> quadros na janela, e no máximo <code>2ⁿ⁻¹</code> para
         Selective Repeat — do contrário o receptor pode confundir um quadro novo com uma
         retransmissão antiga.
     </p>
@@ -751,7 +668,7 @@
                 <p class="small text-muted">
                     Sistemas como o cabo <em>2Africa</em> ou o <em>EllaLink</em> (que liga Brasil e
                     Europa) usam DWDM para transportar dezenas de terabits por segundo em um único
-                    par de fibras — a mesma ideia apresentada aqui, em escala real. Consulte o
+                    par de fibras. Consulte o
                     <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener noreferrer">Submarine Cable Map</a>
                     para explorar rotas e pontos de chegada. Parte significativa do tráfego local
                     pode permanecer no país por meio de IXPs, como o
@@ -793,10 +710,10 @@
             </div>
         </div>
     </div>
-
+</section>
 
 <!-- 7. Exemplos de código -->
-<section id="exemplos" class="chapter-section">
+<section id="exemplos" class="chapter-section" data-conceito="exemplos" data-titulo="Exemplos de código">
     <span class="kicker">Mão na massa</span>
     <h2 class="section-title">Exemplos de código</h2>
 
@@ -821,8 +738,9 @@
     </p>
     <p class="small text-muted">
         Referências para conferência: Bonaventure, <em>Computer Networking: Principles,
-        Protocols and Practice</em>, capítulo de enlace; RFC 1071 (checksum IP); RFC 9293
-        (TCP); IEEE 802.3 (FCS Ethernet).
+        Protocols and Practice</em>, seção 2.1 (livro.pdf, pág. 18–20);
+        <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">RFC 1071</a> (checksum IP);
+        <a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank" rel="noopener noreferrer">RFC 9293</a> (TCP).
     </p>
 
     <h6 class="mt-3">Bit de paridade (exemplo)</h6>
@@ -973,6 +891,7 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span class="text-muted">Redes de Computadores — Capítulo 1</span>
             <a href="../../index.html#capitulos" class="text-muted text-decoration-none">← Voltar aos capítulos</a>
+            <a href="../capitulo-02/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 2 →</a>
         </div>
     </div>
 </footer>
@@ -1197,7 +1116,7 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
                 });
             }
         }
-        if (limite <= 0) { output.textContent = "A simula??o atingiu o limite de tentativas; reduza a perda."; return; }
+        if (limite <= 0) { output.textContent = "A simulação atingiu o limite de tentativas; reduza a perda."; return; }
         var aproveitamento = enviados ? (total / enviados * 100).toFixed(1) : "0.0";
         output.textContent = "Quadros entregues: " + total + " · transmissões totais: " + enviados + " · retransmissões: " + retransmissoes + " · aproveitamento didático: " + aproveitamento + "% (semente " + semente + ").";
     });
@@ -1504,6 +1423,9 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
         desenhar();
     }());
 </script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/desafios-cap1.js"></script>
 <script src="../../assets/playground.js"></script>
 <script src="../../assets/livro.js"></script>
 

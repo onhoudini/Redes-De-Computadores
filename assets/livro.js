@@ -58,22 +58,30 @@
             var feedback = document.createElement("p");
             feedback.className = "small mt-2 mb-0";
             feedback.setAttribute("aria-live", "polite");
+            var tentativas = 0;
+            function avisa(correto) {
+                // Evento consumido pela gamificação (capítulos 3+); sem ouvintes, não tem efeito.
+                quiz.dispatchEvent(new CustomEvent("redes:quiz", { bubbles: true, detail: { quiz: quiz, correto: correto, tentativas: tentativas } }));
+            }
             var botoes = opcoes.map(function (texto, i) {
                 var botao = document.createElement("button");
                 botao.type = "button";
                 botao.className = "btn btn-outline-secondary btn-sm text-start";
                 botao.textContent = texto;
                 botao.addEventListener("click", function () {
+                    tentativas++;
                     if (i === certa) {
                         botoes.forEach(function (outro) { outro.disabled = true; });
                         botao.className = "btn btn-success btn-sm text-start";
                         feedback.className = "small mt-2 mb-0 quiz-ok";
                         feedback.textContent = "✔ Correto. " + (quiz.getAttribute("data-explain") || "");
+                        avisa(true);
                     } else {
                         botao.disabled = true;
                         botao.className = "btn btn-outline-danger btn-sm text-start";
                         feedback.className = "small mt-2 mb-0 quiz-no";
                         feedback.textContent = "✘ Ainda não. " + (quiz.getAttribute("data-hint") || "Tente outra opção.");
+                        avisa(false);
                     }
                 });
                 grupo.appendChild(botao);

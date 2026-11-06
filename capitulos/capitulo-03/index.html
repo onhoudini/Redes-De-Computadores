@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 3 — Aplicações | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: modelo cliente-servidor, protocolos de aplicação, codificação ASCII, gramáticas ABNF, ordem dos bytes, formatos de mensagem binária e peer-to-peer.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="3" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 3</span>
+        <h1 class="display-5 mb-3">Aplicações</h1>
+        <p class="lead mb-4">
+            Os capítulos anteriores levaram bits de um host a outro, primeiro por um único enlace e
+            depois através de roteadores. Mas ninguém liga um computador para trocar bits: queremos
+            abrir páginas, mandar e-mails, imprimir documentos. Este capítulo olha para o topo da
+            pilha, ou seja, como as aplicações se organizam e como combinam o formato e a ordem das
+            mensagens que trocam.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#cliente-servidor">1. Modelo cliente-servidor</a>
+                    <a class="nav-link" href="#protocolo">2. Protocolos de aplicação</a>
+                    <a class="nav-link" href="#ascii">3. Caracteres e ASCII</a>
+                    <a class="nav-link" href="#abnf">4. Gramáticas ABNF</a>
+                    <a class="nav-link" href="#ordem-bytes">5. Ordem dos bytes</a>
+                    <a class="nav-link" href="#formato">6. Mensagens binárias</a>
+                    <a class="nav-link" href="#p2p">7. Peer-to-peer</a>
+                    <a class="nav-link" href="#exercicios-cap3">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Do bit à conversa entre programas</h2>
+    <p>
+        Quando você abre um site, seu navegador e um programa em outro continente trocam mensagens.
+        Para que isso funcione, os dois precisam concordar sobre <em>quem fala primeiro</em>,
+        <em>o que cada mensagem significa</em> e <em>como ela é escrita em bits</em>. Essas regras
+        formam um <strong>protocolo de aplicação</strong>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Distinguir os modelos <strong>cliente-servidor</strong> e <strong>peer-to-peer</strong>.</li>
+                <li>Explicar as duas partes de um protocolo de aplicação: <strong>sintaxe</strong> e <strong>organização do fluxo</strong>.</li>
+                <li>Codificar texto em <strong>ASCII</strong>, incluindo os caracteres de controle CR e LF.</li>
+                <li>Ler e aplicar uma gramática <strong>ABNF</strong>.</li>
+                <li>Explicar a <strong>ordem de rede</strong> (big-endian) e por que ela existe.</li>
+                <li>Interpretar o diagrama de 32 bits usado para descrever <strong>mensagens binárias</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Como funciona a pontuação</h3>
+            <p class="small mb-0">
+                Cada conceito tem perguntas e desafios interativos. Acertos somam pontos, e completar
+                tudo de um conceito rende uma medalha. O progresso fica salvo neste navegador.
+            </p>
+        </div>
+    </div>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Cliente-servidor -->
+<section id="cliente-servidor" class="chapter-section" data-conceito="cliente-servidor" data-titulo="Cliente-servidor">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">O modelo cliente-servidor</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Até os anos 1980, os únicos computadores em rede eram <em>mainframes</em> e
+        <em>minicomputadores</em>, máquinas multiusuário usadas por dezenas de pessoas ao mesmo tempo.
+        Cada pessoa usava um <strong>terminal</strong>: uma tela e um teclado ligados por cabo ao
+        computador central. Um lado só pedia; o outro fazia todo o trabalho. Esse arranjo inspirou o
+        primeiro modelo de aplicação em rede.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        No <strong>modelo cliente-servidor</strong>, um <strong>servidor</strong> oferece um serviço e
+        <strong>clientes</strong> trocam informação com ele. O modelo é fortemente
+        <strong>assimétrico</strong>: clientes enviam <em>requisições</em>, e servidores executam ações
+        e devolvem <em>respostas</em>.
+    </p>
+    <ul>
+        <li>Um <strong>servidor web</strong> devolve informação em resposta à requisição do cliente.</li>
+        <li>Um <strong>servidor de impressão</strong> imprime os documentos enviados pelos clientes.</li>
+        <li>Um <strong>servidor de e-mail</strong> encaminha as mensagens recebidas até o destinatário.</li>
+        <li>Um <strong>servidor de música</strong> entrega a música pedida.</li>
+    </ul>
+    <p>
+        Do ponto de vista de quem programa a aplicação, cliente e servidor trocam mensagens
+        <em>diretamente</em> (setas horizontais). Na prática, essas mensagens descem pelas camadas
+        inferiores, atravessam a rede e sobem do outro lado (setas verticais). Neste capítulo o foco
+        está nas trocas horizontais; a camada de transporte, que torna isso possível, é o tema do
+        <a href="../capitulo-04/index.html">Capítulo 4</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Escolha um servidor e envie uma requisição. Depois ligue as camadas inferiores para ver o caminho real.</p>
+    <div class="demo-box" data-sim="cliente-servidor"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O servidor envia requisições e os clientes respondem|Os clientes enviam requisições; o servidor executa ações e responde|Clientes e servidor têm exatamente o mesmo papel" data-answer="1" data-explain="Essa assimetria é a marca do modelo cliente-servidor." data-hint="Pense no terminal ligado ao minicomputador: quem pede e quem trabalha?">
+        <p class="fw-semibold mb-2">Qual frase descreve o modelo cliente-servidor?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cliente pede, servidor responde: um modelo <strong>assimétrico</strong>.</li>
+        <li>A aplicação enxerga uma troca horizontal; as camadas de baixo fazem a entrega de verdade.</li>
+    </ul>
+</section>
+
+<!-- 2. Protocolo -->
+<section id="protocolo" class="chapter-section" data-conceito="protocolo" data-titulo="Protocolos de aplicação">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Protocolos de aplicação: sintaxe e fluxo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>Alice quer saber as horas, mas está sem relógio. Bob passa perto e a conversa acontece assim:</p>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="chat">
+                <div class="chat-msg chat-esq">Alice: Olá</div>
+                <div class="chat-msg chat-dir">Bob: Olá</div>
+                <div class="chat-msg chat-esq">Alice: Que horas são?</div>
+                <div class="chat-msg chat-dir">Bob: 11:55</div>
+                <div class="chat-msg chat-esq">Alice: Obrigada</div>
+                <div class="chat-msg chat-dir">Bob: De nada</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <p class="small">
+                A conversa funciona porque os dois falam a mesma língua. Se Alice encontrasse Tchang,
+                que só fala chinês, não conseguiria perguntar as horas. E Alice não pergunta as horas
+                <em>antes</em> de cumprimentar: há uma ordem esperada.
+            </p>
+            <p class="small mb-0">
+                Agora imagine Bob como segurança de uma sala restrita: ele pergunta a senha; Trudy
+                responde "1234" e entra; Alice responde "3.1415" e é barrada.
+            </p>
+        </div>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Computadores se parecem mais com soldados do que com amigos conversando: precisam de regras
+        bem definidas. Um <strong>protocolo de aplicação</strong> é o conjunto de regras sintáticas e
+        semânticas que cliente e servidor seguem. Ele define dois tipos de regra:
+    </p>
+    <ol>
+        <li><strong>Regras sintáticas:</strong> o formato exato das mensagens. Como computadores só processam bits, a sintaxe especifica como a informação vira cadeias de bits.</li>
+        <li><strong>Organização do fluxo de informação:</strong> a ordem das mensagens e as relações de precedência entre elas. Por exemplo, um servidor só aceita comandos mais complexos depois de receber um nome de usuário e uma senha válida.</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Você é o cliente. Envie mensagens em qualquer ordem e veja como o outro lado reage.</p>
+    <div class="demo-box" data-sim="conversa-protocolo"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Sintaxe: o formato da mensagem está errado|Organização do fluxo: a mensagem chegou fora da ordem esperada|Nenhuma regra: o servidor está com defeito" data-answer="1" data-explain="O comando LIST é válido; o problema é que ele veio antes da autenticação." data-hint="O comando LIST está bem escrito. O que deu errado foi o momento em que ele foi enviado.">
+        <p class="fw-semibold mb-2">O cliente envia LIST antes de USER e PASS e recebe “Autentique-se primeiro”. Que tipo de regra foi violada?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Protocolo de aplicação = <strong>sintaxe</strong> (formato) + <strong>fluxo</strong> (ordem).</li>
+        <li>Sem sintaxe comum, não há conversa; sem ordem combinada, o servidor rejeita a mensagem.</li>
+    </ul>
+</section>
+
+<!-- 3. ASCII -->
+<section id="ascii" class="chapter-section" data-conceito="ascii" data-titulo="Caracteres e ASCII">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Mensagens de texto: ASCII, CR e LF</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Protocolos como os de correio eletrônico trocam <strong>linhas de texto</strong>. A camada de
+        transporte só entrega bytes. Então os dois lados precisam concordar sobre qual byte representa
+        cada caractere e como uma linha termina.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O método mais simples e antigo é a tabela <strong>ASCII</strong>, publicada para a Internet na
+        RFC 20. Alguns exemplos:
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered mono small" style="max-width:520px">
+            <thead><tr><th>Caractere</th><th>7 bits</th><th>Tipo</th></tr></thead>
+            <tbody>
+                <tr><td>A</td><td>1000001</td><td>imprimível</td></tr>
+                <tr><td>0</td><td>0110000</td><td>imprimível</td></tr>
+                <tr><td>z</td><td>1111010</td><td>imprimível</td></tr>
+                <tr><td>@</td><td>1000000</td><td>imprimível</td></tr>
+                <tr><td>espaço</td><td>0100000</td><td>imprimível</td></tr>
+                <tr><td>CR (carriage return)</td><td>0001101</td><td>controle</td></tr>
+                <tr><td>LF (line feed)</td><td>0001010</td><td>controle</td></tr>
+                <tr><td>Bell</td><td>0000111</td><td>controle</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        A edição do livro lista <span class="mono">A : 1000011b</span>, mas 1000011 é o código de
+        <span class="mono">C</span>. O código correto de <span class="mono">A</span> (65) é
+        <span class="mono">1000001</span>, como na tabela acima.
+    </p>
+    <p>
+        Além dos imprimíveis, a tabela define <strong>caracteres de controle</strong>, criados para
+        comandar impressoras e terminais. <strong>CR</strong> e <strong>LF</strong> terminam uma linha;
+        <strong>Bell</strong> faz o terminal apitar. Cada caractere ASCII é um campo de
+        <strong>7 bits</strong>, transmitido como um <strong>byte de 8 bits</strong> com o bit mais alto
+        normalmente em 0. Os bytes são sempre enviados a partir do bit <strong>mais significativo</strong>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Digite um comando e veja os bytes que vão para a rede. O Capítulo 1 mostra a codificação UTF-8, usada para caracteres fora do ASCII.</p>
+    <div class="demo-box" data-sim="ascii-linha"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="10 bytes|12 bytes|80 bits de dados e nada mais" data-answer="1" data-explain="10 caracteres de “USER alice” + CR + LF = 12 bytes." data-hint="Conte os caracteres, incluindo o espaço, e lembre do fim de linha.">
+        <p class="fw-semibold mb-2">Quantos bytes ocupa a linha “USER alice” terminada com CR LF?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>ASCII: 7 bits por caractere, enviados em um byte com o bit mais alto em 0.</li>
+        <li>CR LF marca o fim de linha nos protocolos de texto da Internet.</li>
+        <li>Bytes saem do bit mais significativo para o menos significativo.</li>
+    </ul>
+</section>
+
+<!-- 4. ABNF -->
+<section id="abnf" class="chapter-section" data-conceito="abnf" data-titulo="Gramáticas ABNF">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Descrevendo mensagens com gramáticas ABNF</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Como dizer, sem ambiguidade, quais linhas de texto um servidor aceita? "O nome de usuário é
+        curto" não basta: quantas letras? Pode ter dígitos? Maiúsculas importam?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A solução comum é escrever uma <strong>gramática</strong> na forma de Backus-Naur (BNF),
+        como a <strong>Augmented BNF</strong> da RFC 5234. Uma gramática é um conjunto de
+        <strong>regras de produção</strong> que geram todas as cadeias válidas. O livro usa um exemplo
+        com dois comandos, um para o nome de usuário e outro para a senha:
+    </p>
+    <figure class="diagram">
+        <pre class="mono small mb-0" style="white-space:pre;overflow-x:auto">ALPHA           =  %x41-5A / %x61-7A   ; A-Z / a-z
+CR              =  %x0D                 ; carriage return
+LF              =  %x0A                 ; line feed
+CRLF            =  CR LF                ; fim de linha padrão da Internet
+DIGIT           =  %x30-39              ; 0-9
+SP              =  %x20                 ; espaço
+
+usercommand     =  "user" SP username CRLF
+username        =  1*8ALPHA
+passwordcommand =  "pass" SP password CRLF
+password        =  ALPHA *(ALPHA / DIGIT)</pre>
+        <figcaption>Especificação ABNF simples (baseada na Fig. 37 do livro).</figcaption>
+    </figure>
+    <ul>
+        <li><span class="mono">%x41</span> é o código ASCII 41 em hexadecimal, isto é, a letra A maiúscula.</li>
+        <li>Texto entre aspas, como <span class="mono">"user"</span>, <strong>não diferencia maiúsculas</strong>: user, USER e uSeR servem.</li>
+        <li><span class="mono">1*8ALPHA</span> significa de 1 a 8 letras. O nome de usuário <strong>diferencia</strong> maiúsculas, porque não está entre aspas.</li>
+        <li><span class="mono">ALPHA *(ALPHA / DIGIT)</span>: a senha começa com letra e segue com quantas letras ou dígitos quiser. Espaços e caracteres de controle não são permitidos.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Digite uma linha e veja, regra por regra, onde ela é aceita ou recusada.</p>
+    <div class="demo-box" data-sim="validador-abnf"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="pass 2fast4u␍␊|PASS abc␍␊|pass a␠b␍␊" data-answer="1" data-explain="“PASS” casa com \"pass\" sem diferenciar maiúsculas, e “abc” começa com letra." data-hint="A senha precisa começar com letra e não pode conter espaço.">
+        <p class="fw-semibold mb-2">Qual destas linhas é um passwordcommand válido?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Uma gramática ABNF diz exatamente quais cadeias são válidas.</li>
+        <li>Literais entre aspas não diferenciam maiúsculas; regras como ALPHA, sim.</li>
+        <li><span class="mono">n*m</span> limita repetições; <span class="mono">/</span> indica alternativas.</li>
+    </ul>
+</section>
+
+<!-- 5. Ordem dos bytes -->
+<section id="ordem-bytes" class="chapter-section" data-conceito="ordem-bytes" data-titulo="Ordem dos bytes">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Inteiros na rede: big-endian e ordem de rede</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nem tudo é texto: muitas aplicações trocam inteiros de 16 ou 32 bits. A ideia ingênua é enviar
+        o número exatamente como ele está na memória. O problema é que processadores diferentes guardam
+        o mesmo número de formas diferentes.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Alguns processadores guardam o byte <strong>mais significativo</strong> no primeiro endereço;
+        outros guardam ali o <strong>menos significativo</strong>. Ao transferir um campo de 16 bits,
+        há então duas opções: enviar primeiro o byte mais significativo (<strong>big-endian</strong>) ou
+        o menos significativo (<strong>little-endian</strong>). Os nomes vêm de uma nota de Cohen
+        (1980), e a discussão entre fabricantes virou quase uma questão religiosa.
+    </p>
+    <p>
+        A Internet escolheu <strong>big-endian</strong>: campos de vários bytes são sempre transmitidos
+        com o byte mais significativo primeiro. A RFC 791 chama isso de <strong>ordem de rede</strong>
+        (<em>network byte order</em>). Bibliotecas oferecem funções de conversão, como
+        <span class="mono">htonl(3)</span> (host → rede) e <span class="mono">ntohl(3)</span>
+        (rede → host) da biblioteca C.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Desligue a conversão e veja o que o receptor entende.</p>
+    <div class="demo-box" data-sim="ordem-bytes"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="12 34|34 12|Depende do processador do receptor" data-answer="0" data-explain="Na ordem de rede o byte mais significativo (0x12) vai primeiro, seja qual for o processador." data-hint="A ordem de rede é sempre a mesma: big-endian.">
+        <p class="fw-semibold mb-2">Em ordem de rede, quais bytes são transmitidos, e em que ordem, para o valor de 16 bits 0x1234?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Ordem de rede = big-endian = byte mais significativo primeiro.</li>
+        <li>Converta sempre com <span class="mono">htons/htonl</span> ao enviar e <span class="mono">ntohs/ntohl</span> ao receber.</li>
+    </ul>
+</section>
+
+<!-- 6. Formato binário -->
+<section id="formato" class="chapter-section" data-conceito="formato" data-titulo="Mensagens binárias">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">Formatos de mensagem binária</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Algumas mensagens misturam campos de tamanhos variados: um campo de 16 bits, oito
+        <em>flags</em> de 1 bit, um campo de 24 bits e dois bytes. Como especificar isso de forma que
+        dois programadores, em empresas diferentes, produzam exatamente os mesmos bits?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        As especificações da Internet usam um desenho em ASCII: <strong>cada linha tem 32 bits</strong>,
+        barras verticais delimitam os campos e os números no topo indicam a posição de cada bit, com o
+        bit mais alto na posição 0. A mensagem é transmitida a partir da linha de cima, em ordem de rede.
+    </p>
+    <figure class="diagram">
+        <pre class="mono small mb-0" style="white-space:pre;overflow-x:auto"> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Campo de 16 bits        |A|B|C|D|E|F|G|H| Campo 24 bits |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  (dois bytes baixos do 24)    |    Byte 1     |    Byte 2     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</pre>
+        <figcaption>Formato de mensagem (baseado na Fig. 38 do livro): o byte mais alto do campo de 24 bits fica na primeira linha e os dois mais baixos na segunda.</figcaption>
+    </figure>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Altere os campos e veja cada bit na grade de 32 colunas e a sequência de bytes transmitida.</p>
+    <div class="demo-box" data-sim="formato-mensagem"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Na posição 0 da primeira linha|Na posição 16 da primeira linha|Na posição 31 da primeira linha" data-answer="1" data-explain="Os 16 primeiros bits (0–15) são do primeiro campo; a flag A ocupa o bit 16." data-hint="Conte quantos bits o primeiro campo ocupa.">
+        <p class="fw-semibold mb-2">Em que posição de bit fica a flag A?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Linhas de 32 bits, bit 0 à esquerda (o mais significativo).</li>
+        <li>Campos podem atravessar linhas; a transmissão segue linha a linha, em ordem de rede.</li>
+    </ul>
+</section>
+
+<!-- 7. P2P -->
+<section id="p2p" class="chapter-section" data-conceito="p2p" data-titulo="Peer-to-peer">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">O modelo peer-to-peer</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No cliente-servidor, um único servidor atende muitos clientes. O que acontece quando milhares
+        de pessoas querem o mesmo arquivo ao mesmo tempo?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        No modelo <strong>peer-to-peer</strong> (P2P), todos os hosts atuam <strong>ao mesmo tempo como
+        clientes e como servidores</strong>. O modelo foi usado em telefonia pela Internet,
+        compartilhamento de arquivos e sistemas de arquivos distribuídos pela Internet.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="p2p-vs-cs"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Só cliente|Só servidor|Cliente e servidor ao mesmo tempo" data-answer="2" data-explain="Essa é a diferença central em relação ao modelo cliente-servidor." data-hint="Releia a definição: todos os hosts desempenham…">
+        <p class="fw-semibold mb-2">Em uma aplicação peer-to-peer, qual é o papel de cada host?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cliente-servidor: papéis fixos e assimétricos.</li>
+        <li>Peer-to-peer: cada host é cliente e servidor, o que distribui a carga.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap3" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> escreva em binário os bytes da linha “QUIT” terminada com CRLF.
+            <details><summary>Ver solução</summary><p class="mb-0 mono small">01010001 01010101 01001001 01010100 00001101 00001010 (Q, U, I, T, CR, LF).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> estenda a gramática ABNF com um comando <span class="mono">quit</span> sem argumentos.
+            <details><summary>Ver solução</summary><p class="mb-0 mono small">quitcommand = "quit" CRLF</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> um host little-endian envia o inteiro de 32 bits 1 sem converter. Que valor um receptor que segue a ordem de rede lê?
+            <details><summary>Ver solução</summary><p class="mb-0">Os bytes saem como 01 00 00 00; em big-endian isso vale 0x01000000 = 16 777 216.</p></details></li>
+        <li><strong>Desafio:</strong> desenhe, no formato de 32 bits por linha, uma mensagem com um campo de 8 bits “versão”, um campo de 8 bits “tipo”, um campo de 16 bits “comprimento” e um campo de 32 bits “identificador”.
+            <details><summary>Ver solução</summary><p class="mb-0">Linha 1: versão (bits 0–7), tipo (8–15), comprimento (16–31). Linha 2: identificador ocupando os 32 bits. Total: 8 bytes, enviados em ordem de rede.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>
+        Os três trechos em Python abaixo rodam no navegador. Edite, execute e resolva os desafios
+        de cada bloco.
+    </p>
+
+    <h3 class="h6 mt-4">1. Validando comandos com a gramática ABNF</h3>
+    <pre class="code-block"><code>import re
+
+# Gramática da Fig. 37 traduzida para expressões regulares.
+# (?i:user) aceita user, USER, uSeR...; o username diferencia maiúsculas.
+USERCOMMAND = re.compile(r"(?i:user) ([A-Za-z]{1,8})\r\n")
+PASSWORDCOMMAND = re.compile(r"(?i:pass) ([A-Za-z][A-Za-z0-9]*)\r\n")
+
+def classifica(linha: str) -> str:
+    if m := USERCOMMAND.fullmatch(linha):
+        return f"usercommand (username={m.group(1)!r})"
+    if m := PASSWORDCOMMAND.fullmatch(linha):
+        return f"passwordcommand (password={m.group(1)!r})"
+    return "inválida"
+
+linhas = ["user alice\r\n", "USER Bob\r\n", "user alexandre\r\n",
+          "pass s3gr3d0\r\n", "pass 3.1415\r\n", "user bob"]
+for linha in linhas:
+    print(f"{linha!r:20} -> {classifica(linha)}")</code></pre>
+
+    <h3 class="h6 mt-4">2. Ordem dos bytes com struct</h3>
+    <pre class="code-block"><code>import struct, sys
+
+valor = 0x12345678
+print("Ordem nativa desta máquina:", sys.byteorder)
+
+big = struct.pack(">I", valor)     # ordem de rede (big-endian)
+little = struct.pack("&lt;I", valor)  # little-endian
+print("big-endian:   ", big.hex(" "))
+print("little-endian:", little.hex(" "))
+
+# O receptor sempre interpreta em ordem de rede ("!" = network = big-endian).
+print("Lido corretamente: ", hex(struct.unpack("!I", big)[0]))
+print("Lido sem conversão:", hex(struct.unpack("!I", little)[0]))
+
+def htonl(x: int) -> int:
+    """Converte da ordem do host para a ordem de rede, como htonl(3) em C."""
+    return int.from_bytes(x.to_bytes(4, sys.byteorder), "big")
+
+print("htonl(0x12345678) =", hex(htonl(valor)))</code></pre>
+
+    <h3 class="h6 mt-4">3. Empacotando a mensagem da Fig. 38</h3>
+    <pre class="code-block"><code>LETRAS = "ABCDEFGH"
+
+def empacota(f16: int, flags: str, f24: int, b1: int, b2: int) -> bytes:
+    """Monta a mensagem da Fig. 38. flags: letras ligadas, ex. "AH"."""
+    bits_flags = 0
+    for i, letra in enumerate(LETRAS):
+        if letra in flags:
+            bits_flags |= 1 &lt;&lt; (7 - i)      # A é o bit mais alto
+    return (f16.to_bytes(2, "big") + bytes([bits_flags])
+            + f24.to_bytes(3, "big") + bytes([b1, b2]))
+
+def desempacota(msg: bytes):
+    f16 = int.from_bytes(msg[0:2], "big")
+    flags = "".join(l for i, l in enumerate(LETRAS) if msg[2] & (1 &lt;&lt; (7 - i)))
+    f24 = int.from_bytes(msg[3:6], "big")
+    return f16, flags, f24, msg[6], msg[7]
+
+msg = empacota(1500, "AH", 70000, 7, 255)
+print("Bytes:", msg.hex(" "))
+for linha in range(2):
+    palavra = msg[linha * 4:(linha + 1) * 4]
+    print(f"palavra {linha + 1}:", " ".join(f"{b:08b}" for b in palavra))
+print("Desempacotado:", desempacota(msg))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 2.3, "Applications".
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 20 — <a href="https://www.rfc-editor.org/rfc/rfc20" target="_blank" rel="noopener noreferrer">ASCII format for Network Interchange</a></li>
+        <li>RFC 5234 — <a href="https://www.rfc-editor.org/rfc/rfc5234" target="_blank" rel="noopener noreferrer">Augmented BNF for Syntax Specifications: ABNF</a></li>
+        <li>RFC 791 — <a href="https://www.rfc-editor.org/rfc/rfc791" target="_blank" rel="noopener noreferrer">Internet Protocol</a> (apêndice B, ordem de transmissão)</li>
+        <li>Cohen, D. — <a href="https://www.rfc-editor.org/ien/ien137.txt" target="_blank" rel="noopener noreferrer"><em>On Holy Wars and a Plea for Peace</em></a>, IEN 137, 1980.</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="text-muted">Redes de Computadores — Capítulo 3</span>
+            <a href="../capitulo-04/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 4 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap3.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

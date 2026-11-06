@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Capítulo 2 — Construindo uma rede | Redes de Computadores</title>
-    <link rel="stylesheet" href="../../assets/playground.css">
-    <link rel="stylesheet" href="../../assets/livro.css">
     <meta name="description" content="Material didático complementar: da camada de enlace à camada de rede — pacotes, endereçamento, tabelas de encaminhamento e roteamento por vetor de distância e por estado de enlace.">
 
     <!-- Bootstrap -->
@@ -14,124 +12,10 @@
         rel="stylesheet"
     >
 
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
     <style>
-        :root {
-            --accent: #0d6efd;
-            --text: #212529;
-            --muted: #6c757d;
-            --background: #f8f9fa;
-            --datagrama: #0d6efd;
-            --circuito: #6610f2;
-            --dv: #d63384;
-            --ls: #198754;
-            --code-bg: #1e1e2e;
-            --code-fg: #e6e6e6;
-        }
-
-        body {
-            color: var(--text);
-            background: var(--background);
-        }
-
-        .hero {
-            padding: 80px 0 60px;
-            background: white;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .hero h1 {
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .hero .lead {
-            max-width: 760px;
-            color: var(--muted);
-        }
-
-        section.chapter-section {
-            padding: 55px 0;
-            scroll-margin-top: 90px;
-        }
-
-        section.chapter-section:nth-of-type(even) {
-            background: white;
-        }
-
-        h2.section-title {
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-        }
-
-        h2.section-title .kicker {
-            display: block;
-            font-size: .8rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--accent);
-            font-weight: 600;
-            margin-bottom: .4rem;
-        }
-
-        .card-soft {
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            background: white;
-        }
-
-        .toc {
-            position: sticky;
-            top: 85px;
-        }
-
-        .toc .nav-link {
-            color: var(--muted);
-            padding: .3rem 0;
-            font-size: .9rem;
-        }
-
-        .toc .nav-link.active {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        figure.diagram {
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin: 1.5rem 0;
-        }
-
-        figure.diagram figcaption {
-            font-size: .85rem;
-            color: var(--muted);
-            margin-top: .5rem;
-            text-align: center;
-        }
-
-        pre.code-block {
-            background: var(--code-bg);
-            color: var(--code-fg);
-            border-radius: 10px;
-            padding: 1.1rem 1.25rem;
-            font-size: .85rem;
-            overflow-x: auto;
-            line-height: 1.55;
-        }
-
-        pre.code-block code {
-            color: inherit;
-            white-space: pre;
-        }
-
-        .demo-box {
-            background: #f1f3f5;
-            border: 1px dashed #adb5bd;
-            border-radius: 10px;
-            padding: 1.25rem;
-        }
-
         .addr-chip {
             display: inline-flex;
             align-items: center;
@@ -168,17 +52,7 @@
             background: #f1f3f5;
         }
 
-        blockquote.quote {
-            border-left: 4px solid var(--accent);
-            padding-left: 1rem;
-            color: var(--muted);
-            font-style: italic;
-        }
-
-        footer {
-            border-top: 1px solid #dee2e6;
-            background: white;
-        }
+        html[data-theme="dark"] table.tabela-roteamento th { background: #2c3136 !important; }
 
         .layer-pill {
             display: inline-block;
@@ -188,9 +62,11 @@
             font-weight: 600;
             color: white;
         }
+        /* As figuras aprovadas usam cores fixas; no tema escuro elas ficam sobre um cartão claro. */
+        html[data-theme="dark"] figure.diagram svg { background: #f8f9fa; border-radius: 8px; color: #212529; }
     </style>
 </head>
-<body data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+<body data-capitulo="2" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
 <!-- Navegação -->
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
@@ -218,6 +94,12 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a>
                 </li>
                 <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
             </ul>
@@ -253,8 +135,10 @@
         <!-- TOC lateral -->
         <div class="col-lg-3 d-none d-lg-block">
             <div class="toc py-5">
-                <p class="text-uppercase small text-muted fw-semibold mb-2">Neste capítulo</p>
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
                 <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
                     <a class="nav-link" href="#camada-rede">1. Por que precisamos da camada de rede?</a>
                     <a class="nav-link" href="#pacotes">2. Pacotes e endereçamento</a>
                     <a class="nav-link" href="#organizacao">3. Datagrama vs. circuito virtual</a>
@@ -276,8 +160,35 @@
         <!-- Conteúdo -->
         <div class="col-lg-9">
 
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Dos enlaces à rede</h2>
+    <p>Este capítulo segue a seção 2.2 do livro, “Building a network”: como hosts que não estão ligados diretamente trocam pacotes através de roteadores, e como os roteadores calculam suas tabelas.</p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar o papel da camada de rede, dos roteadores e do pacote.</li>
+                <li>Diferenciar as organizações por <strong>datagrama</strong> e por <strong>circuito virtual</strong>.</li>
+                <li>Reconhecer <strong>buracos negros</strong> e <strong>loops</strong> em tabelas de encaminhamento e aplicar o <strong>prefixo mais longo</strong>.</li>
+                <li>Descrever o roteamento por <strong>vetor de distância</strong>, a contagem ao infinito e o split horizon.</li>
+                <li>Descrever o roteamento por <strong>estado de enlace</strong>: HELLO, LSP, inundação e Dijkstra.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Como funciona a pontuação</h3>
+            <p class="small mb-0">
+                Cada conceito tem perguntas e desafios interativos. Acertos somam pontos, e completar
+                tudo de um conceito rende uma medalha. O progresso fica salvo neste navegador.
+            </p>
+        </div>
+    </div>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
 <!-- 1. Camada de rede -->
-<section id="camada-rede" class="chapter-section">
+<section id="camada-rede" class="chapter-section" data-conceito="camada-rede" data-titulo="Camada de rede">
     <span class="kicker">Motivação</span>
     <h2 class="section-title">Por que precisamos de uma camada de rede?</h2>
 
@@ -290,7 +201,7 @@
         A camada de enlace resolve um problema específico: fazer dois vizinhos diretos — ligados
         pelo mesmo cabo, pela mesma fibra ou pelo mesmo canal de rádio — conversarem sem erros. Mas
         isso não é suficiente para conectar um notebook em Porto Alegre a um servidor no Japão:
-        entre os dois existem dezenas de enlaces distintos, cada um com sua própria tecnologia. É
+        entre os dois existem dezenas de enlaces distintos, cada um com sua própria tecnologia.
         É exatamente esse o papel da <strong>camada de rede</strong>: permitir que hosts que não
         compartilham um enlace direto troquem informação por meio de dispositivos intermediários
         chamados <strong>roteadores</strong>.
@@ -372,7 +283,7 @@
 </section>
 
 <!-- 2. Pacotes -->
-<section id="pacotes" class="chapter-section">
+<section id="pacotes" class="chapter-section" data-conceito="pacotes" data-titulo="Pacotes e endereçamento">
     <span class="kicker">Fundamentos</span>
     <h2 class="section-title">Pacotes e endereçamento</h2>
 
@@ -453,7 +364,7 @@
 </section>
 
 <!-- 3. Organização -->
-<section id="organizacao" class="chapter-section">
+<section id="organizacao" class="chapter-section" data-conceito="organizacao" data-titulo="Datagrama e circuito virtual">
     <span class="kicker">Arquitetura</span>
     <h2 class="section-title">Datagrama vs. circuito virtual</h2>
 
@@ -472,7 +383,7 @@
     <div class="row g-4">
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Modo datagrama: cada pacote carrega o endereço completo e o roteador consulta a tabela a cada pacote."><title>Modo datagrama: cada pacote carrega o endereço completo e o roteador consulta a tabela a cada pacote.</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#0d6efd" font-family="sans-serif">Modo datagrama</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">cada pacote carrega o endereço completo</text>
                     <g font-family="monospace" font-size="11">
@@ -485,11 +396,12 @@
                     <text x="10" y="148" font-size="11" fill="#6c757d" font-family="sans-serif">✔ não exige configuração prévia</text>
                     <text x="10" y="166" font-size="11" fill="#6c757d" font-family="sans-serif">✘ busca na tabela é mais cara</text>
                 </svg>
+                <figcaption>Baseado na Fig. 19 do livro.</figcaption>
             </figure>
         </div>
         <div class="col-md-6">
             <figure class="diagram h-100 mb-0">
-                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Ilustra??o did?tica do cap?tulo"><title>Ilustra??o did?tica do cap?tulo</title>
+                <svg viewBox="0 0 320 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="Circuito virtual: depois de sinalizado o caminho, um rótulo curto substitui o endereço."><title>Circuito virtual: depois de sinalizado o caminho, um rótulo curto substitui o endereço.</title>
                     <text x="10" y="20" font-size="13" font-weight="700" fill="#6610f2" font-family="sans-serif">Circuito virtual</text>
                     <text x="10" y="38" font-size="11" fill="#6c757d" font-family="sans-serif">um rótulo curto substitui o endereço</text>
                     <g font-family="monospace" font-size="11">
@@ -526,7 +438,7 @@
 </section>
 
 <!-- 4. Tabelas de encaminhamento -->
-<section id="tabelas" class="chapter-section">
+<section id="tabelas" class="chapter-section" data-conceito="tabelas" data-titulo="Tabelas de encaminhamento">
     <span class="kicker">Plano de dados</span>
     <h2 class="section-title">Tabelas de encaminhamento, buracos negros e loops</h2>
 
@@ -584,7 +496,7 @@
             </g>
             <text x="10" y="112" font-size="11" fill="#6c757d" font-family="sans-serif">Quando várias entradas combinam com o endereço, o roteador escolhe sempre a mais específica.</text>
         </svg>
-        <figcaption>Longest prefix match: a entrada mais específica que ainda combina com o endereço vence. (Em IPv4 real, de 32 bits, uma rota para um único host seria /32, não /16 — aqui usamos 16 bits só por causa do espaço na figura.)</figcaption>
+        <figcaption>Longest prefix match: a entrada mais específica que ainda combina com o endereço vence. (Em IPv4 real, de 32 bits, uma rota para um único host seria /32, não /16 — aqui usamos 16 bits só por causa do espaço na figura.) Baseado no exemplo da Fig. 23 do livro.</figcaption>
     </figure>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
@@ -618,7 +530,7 @@
 </section>
 
 <!-- 5. Vetor de distância -->
-<section id="vetor-distancia" class="chapter-section">
+<section id="vetor-distancia" class="chapter-section" data-conceito="vetor-distancia" data-titulo="Vetor de distância">
     <span class="kicker">Plano de controle</span>
     <h2 class="section-title">Roteamento por vetor de distância</h2>
 
@@ -710,7 +622,7 @@
 </section>
 
 <!-- 6. Estado de enlace -->
-<section id="estado-enlace" class="chapter-section">
+<section id="estado-enlace" class="chapter-section" data-conceito="estado-enlace" data-titulo="Estado de enlace">
     <span class="kicker">Plano de controle</span>
     <h2 class="section-title">Roteamento por estado de enlace</h2>
 
@@ -765,7 +677,7 @@
             </defs>
             <text x="10" y="185" font-size="11" fill="#6c757d" font-family="sans-serif">Inundação (flooding): cada LSP se espalha pela rede seguindo todos os enlaces, exceto o de chegada.</text>
         </svg>
-        <figcaption>Distribuição de um LSP por inundação — a base para que todo roteador monte o mesmo mapa da rede.</figcaption>
+        <figcaption>Distribuição de um LSP por inundação — a base para que todo roteador monte o mesmo mapa da rede. (Baseado na Fig. 32 do livro.)</figcaption>
     </figure>
 
     <p>
@@ -786,7 +698,7 @@
 </section>
 
 <!-- 7. Comparação / prática -->
-<section id="comparacao" class="chapter-section">
+<section id="comparacao" class="chapter-section" data-conceito="comparacao" data-titulo="Do conceito à prática">
     <span class="kicker">Na prática</span>
     <h2 class="section-title">Do conceito à situação real</h2>
 
@@ -883,7 +795,7 @@
 </section>
 
 <!-- 8. Simulador de roteamento -->
-<section id="grafo-editavel" class="chapter-section">
+<section id="grafo-editavel" class="chapter-section" data-conceito="grafo-editavel" data-titulo="Laboratório de roteamento">
     <span class="kicker">Laboratório interativo</span>
     <h2 class="section-title">Vetor de distância e Dijkstra no mesmo grafo</h2>
     <p>Edite custos ou derrube enlaces e compare as rotas. O vetor de distância usa um limite didático de métrica 16; split horizon e poison reverse alteram os anúncios enviados ao vizinho. Arraste os nós no desenho para reorganizar a visualização. Em uma topologia com rota alternativa, desligar essas proteções pode produzir aumento iterativo da métrica (contagem ao infinito).</p>
@@ -925,7 +837,7 @@
     </div>
 </section>
 
-<section id="traceroute-colavel" class="chapter-section">
+<section id="traceroute-colavel" class="chapter-section" data-conceito="traceroute-colavel" data-titulo="Traceroute">
     <span class="kicker">Diagnóstico de rede</span>
     <h2 class="section-title">Interprete seu próprio traceroute</h2>
     <p>Cole a saída de <code>traceroute</code> (Linux/macOS) ou <code>tracert</code> (Windows). A página extrai saltos e tempos em ms; a visualização é local e não envia o texto para um servidor.</p>
@@ -938,7 +850,7 @@
     </div>
 </section>
 
-<section id="rede-laboratorio" class="chapter-section">
+<section id="rede-laboratorio" class="chapter-section" data-conceito="rede-laboratorio" data-titulo="Prefixos, TTL e LSP">
     <span class="kicker">Visualizações</span><h2 class="section-title">Prefixos, TTL e inundação de LSP</h2>
     <div class="demo-box mb-4">
         <h3 class="h6">Longest-prefix match com IPv4/CIDR</h3>
@@ -1002,7 +914,7 @@
 
 
 <!-- 9. Exemplos de código -->
-<section id="exemplos" class="chapter-section">
+<section id="exemplos" class="chapter-section" data-conceito="exemplos" data-titulo="Exemplos de código">
     <span class="kicker">Mão na massa</span>
     <h2 class="section-title">Exemplos de código</h2>
 
@@ -1170,7 +1082,9 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
     <div class="container">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span class="text-muted">Redes de Computadores — Capítulo 2</span>
-            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">← Voltar aos capítulos</a>
+            <a href="../capitulo-01/index.html" class="text-muted text-decoration-none">← Capítulo 1</a>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">Voltar aos capítulos</a>
+            <a href="../capitulo-03/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 3 →</a>
         </div>
     </div>
 </footer>
@@ -1345,6 +1259,9 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
     document.getElementById("dvResetBtn").addEventListener("click", iniciaDV);
     iniciaDV();
 </script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/desafios-cap2.js"></script>
 <script src="../../assets/playground.js"></script>
 <script src="../../assets/simulacoes.js"></script>
 <script src="../../assets/livro.js"></script>
