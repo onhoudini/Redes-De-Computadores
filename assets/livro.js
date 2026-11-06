@@ -3,6 +3,8 @@
 
     function aplicarTema(theme) {
         document.documentElement.setAttribute("data-theme", theme);
+        // O Bootstrap só adapta tabelas, formulários, links e afins com data-bs-theme.
+        document.documentElement.setAttribute("data-bs-theme", theme);
         var buttons = document.querySelectorAll(".theme-toggle");
         buttons.forEach(function (button) {
             button.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");

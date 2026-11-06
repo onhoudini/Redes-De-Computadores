@@ -45,6 +45,16 @@ html[data-theme="dark"] .btn-outline-secondary { color: #dee2e6; border-color: #
 html[data-theme="dark"] .btn-outline-secondary:hover { color: #17191c; background-color: #ced4da; border-color: #ced4da; }
 html[data-theme="dark"] .btn-outline-primary { color: #9ec5fe; border-color: #6ea8fe; }
 html[data-theme="dark"] .btn-outline-primary:hover { color: #17191c; background-color: #6ea8fe; }
+html[data-theme="dark"] .btn-outline-primary.active,
+html[data-theme="dark"] .btn-outline-primary:active { color: #17191c; background-color: #6ea8fe; border-color: #6ea8fe; }
+html[data-theme="dark"] .btn-outline-success { color: #75b798; border-color: #75b798; }
+html[data-theme="dark"] .btn-outline-danger { color: #ea868f; border-color: #ea868f; }
+html[data-theme="dark"] .btn-outline-success:hover,
+html[data-theme="dark"] .btn-outline-danger:hover { color: #17191c; }
+/* Cores de texto semânticas legíveis sobre fundo escuro. */
+html[data-theme="dark"] .text-success { color: #75b798 !important; }
+html[data-theme="dark"] .text-danger { color: #ea868f !important; }
+html[data-theme="dark"] .text-primary { color: #6ea8fe !important; }
 html[data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
 
 html[data-theme="dark"] .text-muted,
