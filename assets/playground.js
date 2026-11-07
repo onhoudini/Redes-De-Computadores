@@ -150,6 +150,109 @@
                 { "nivel": "Intermediário", "texto": "Qual é o menor número de bits que permite usar com segurança um enlace de 100 Gbit/s com MSL de 120 s?", "resposta": "41 bits: é preciso 2^n ≥ 10^11 × 120 / 8 = 1,5 × 10^12, e log2 disso ≈ 40,4." },
                 { "nivel": "Desafio", "texto": "Refaça os cálculos com MSL = 30 s. Com 32 bits, um enlace de 10 Gbit/s fica seguro?", "resposta": "O limite sobe para ≈ 1145 Mbit/s, ainda abaixo de 10 Gbit/s: o espaço acaba em 3,44 s, menos que os 30 s do MSL. É por isso que o TCP usa extensões como os timestamps (PAWS) em enlaces rápidos." }
             ]
+        ],
+        "capitulo5": [
+            [
+                {"nivel": "Aquecimento", "texto": "Acrescente a linha \"10.0.0.99    stanford-ai\" ao HOSTS_TXT e preveja a saída do primeiro laço.", "resposta": "stanford-ai -> 10.0.0.99. As outras duas linhas não mudam; UCLA-CCN continua resolvendo porque o código converte tudo para minúsculas."},
+                {"nivel": "Intermediário", "texto": "Acrescente no fim do arquivo a linha \"10.9.9.9     sri-nic\", um nome repetido. O que o programa resolve para sri-nic?", "resposta": "10.9.9.9: o dicionário guarda a última linha e apaga a primeira sem avisar. No espaço de nomes plano, o NIC precisava recusar nomes repetidos."},
+                {"nivel": "Desafio", "texto": "Mantendo 30 bytes por linha, a partir de quantos hosts uma única atualização transfere mais de 1 TB (10^12 bytes)?", "resposta": "182 575 hosts: é preciso n × n × 30 > 10^12, ou seja, n > √(3,33 × 10^10) ≈ 182 574,2."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Acrescente \"-ns.exemplo.org\" e \"ns1.exemplo.org\" à lista e preveja o resultado.", "resposta": "-ns.exemplo.org é inválido ('-ns' não começa com letra); ns1.exemplo.org é válido, porque o dígito está no meio do rótulo."},
+                {"nivel": "Intermediário", "texto": "Mude LABEL para aceitar rótulos começando com dígito, como permite a RFC 1123. Qual nome da lista muda de resultado?", "resposta": "LABEL = re.compile(r\"[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?\"). Só 3com.com muda: passa a ser válido."},
+                {"nivel": "Desafio", "texto": "Acrescente o limite de 63 caracteres por rótulo da RFC 1035 e teste com \"a\" * 63 + \".com\" e \"a\" * 64 + \".com\".", "resposta": "Dentro do laço: if len(rotulo) > 63: return False, f\"rótulo com {len(rotulo)} caracteres\". O primeiro nome é válido e o segundo, inválido."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Acrescente \"ação.example\" à primeira lista. Qual é a forma ASCII?", "resposta": "xn--ao-siap.example. As letras ASCII (a, o) ficam no começo e os caracteres ç e ã são codificados depois do hífen."},
+                {"nivel": "Intermediário", "texto": "Chame compara(\"GOOGLE.COM\", \"google.com\"). O que o código responde? E o DNS?", "resposta": "O código diz DIFERENTES, com 9 posições diferentes (todas as letras). O DNS trata os dois como o mesmo nome, porque não diferencia maiúsculas de minúsculas em ASCII (RFC 1035)."},
+                {"nivel": "Desafio", "texto": "Escreva suspeito(nome), que devolve True se o nome tiver algum caractere fora do ASCII. Teste com \"\\u0430pple.com\" e \"bücher.example\". O critério é bom?", "resposta": "def suspeito(nome): return any(ord(c) > 127 for c in nome). Os dois dão True, mas bücher.example é um nome internacionalizado legítimo. Não basta ver se há Unicode; é preciso olhar a mistura de alfabetos (por exemplo, pelo unicodedata.name de cada caractere)."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Acrescente \"h1.dom\" à lista de nomes. Quantas consultas o programa conta no total?", "resposta": "8: h2.dom gasta 2, h3.a.sdom1.dom gasta 4, a repetição sai do cache (0) e h1.dom gasta mais 2."},
+                {"nivel": "Intermediário", "texto": "Resolva \"h1.sdom2.dom\". Até onde a resolução vai?", "resposta": "A raiz indica dom, e dom indica o servidor de sdom2.dom, que não existe no dicionário SERVIDORES: o programa avisa que ele não está na simulação e devolve None, depois de 2 consultas."},
+                {"nivel": "Desafio", "texto": "Faça o resolvedor guardar também as delegações (as zonas aprendidas) e começar pela zona conhecida mais profunda. Quantas consultas cada nome de [\"h2.dom\", \"h3.a.sdom1.dom\", \"h3.a.sdom1.dom\", \"h1.a.sdom1.dom\"] gasta?", "resposta": "2, 3, 0 e 1, num total de 6. Depois de h2.dom, o resolvedor já sabe quem responde por dom; depois de h3.a.sdom1.dom, sabe quem responde por a.sdom1.dom e pergunta direto a ele."}
+            ]
+        ],
+        "capitulo6": [
+            [
+                {"nivel": "Aquecimento", "texto": "Acrescente 20 à tupla de tamanhos. Quantos enlaces e interfaces por host a malha exige?", "resposta": "190 enlaces (20 × 19 / 2) e 19 interfaces por host; a estrela e o anel ficam com 20 enlaces."},
+                {"nivel": "Intermediário", "texto": "A partir de quantos hosts a malha passa de 1000 enlaces?", "resposta": "46 hosts: 45 hosts dão 990 enlaces e 46 dão 1035."},
+                {"nivel": "Desafio", "texto": "Escreva barramento(n) e arvore(n) no mesmo formato (enlaces, interfaces por host) e acrescente colunas à tabela.", "resposta": "barramento(n) devolve (1, 1): um único cabo compartilhado e uma interface por host. arvore(n) devolve n − 1 enlaces, porque toda árvore com n nós tem n − 1 arestas; as interfaces variam de 1 (folhas) a 3 (nós intermediários de uma árvore binária)."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Mude a capacidade de R1-R2 para 30 e preveja a alocação antes de executar.", "resposta": "A1-A2 = 20, B1-B2 = 10, C1-C2 = 10. Agora o gargalo é R2-R3: B e C param em 10 quando ele satura, e A cresce até R1-R2 encher (20 + 10 = 30)."},
+                {"nivel": "Intermediário", "texto": "Acrescente o fluxo \"D1-D2\": {\"R2-R3\"}. Qual é a nova alocação?", "resposta": "A1-A2 = 5, B1-B2 = 5, C1-C2 = 7,5 e D1-D2 = 7,5. R1-R2 satura primeiro e congela A e B em 5; C e D dividem os 15 Mbit/s que sobram em R2-R3."},
+                {"nivel": "Desafio", "texto": "Rode com passo=3. O que dá errado e por quê?", "resposta": "A1-A2 e B1-B2 terminam com 6 cada, e R1-R2 passa a carregar 12 Mbit/s, mais que os 10 de capacidade. O código aumenta antes de verificar, então um passo grande ultrapassa o ponto de saturação. É preciso um passo pequeno ou calcular o aumento exato que satura o primeiro enlace."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Troque todos os tamanhos por 1000. Que fração da banda cada fluxo recebe?", "resposta": "20% cada: com pacotes do mesmo tamanho, o round-robin divide a banda igualmente."},
+                {"nivel": "Intermediário", "texto": "Use tamanhos = [500, 500, 500, 500, 2000]. Que fração fica com o fluxo 5?", "resposta": "50%: por rodada, o fluxo 5 envia 2000 bytes e os outros quatro somam 2000. Cada um dos outros fica com 12,5%."},
+                {"nivel": "Desafio", "texto": "Torne o escalonador justo em bytes: dê a cada fila um crédito de 1500 bytes por rodada, guarde o que sobrar e só envie o pacote da cabeça se ele couber no crédito (deficit round-robin).", "resposta": "Mantenha deficit[i]: na vez da fila i, some 1500 e, enquanto o pacote da cabeça couber, envie-o e desconte o tamanho. Com os tamanhos originais, as frações ficam perto de 20% para todos (por exemplo, 21; 21; 19,5; 19,5 e 19%), em vez de variar de 10 a 30%."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Acrescente G = 3 à lista. O que acontece com os dois ALOHA?", "resposta": "Puro: S ≈ 0,007; com slots: S ≈ 0,149. Com carga alta, quase todo quadro colide, sobretudo no ALOHA puro."},
+                {"nivel": "Intermediário", "texto": "Por que o máximo do ALOHA puro fica em G = 0,5? Derive G·e^(−2G).", "resposta": "A derivada é e^(−2G)(1 − 2G), que se anula em G = 0,5. Ali S = 0,5·e^(−1) = 1/(2e) ≈ 0,184. Para o ALOHA com slots, a derivada de G·e^(−G) é e^(−G)(1 − G), com máximo em G = 1 e S = 1/e."},
+                {"nivel": "Desafio", "texto": "Use simula_slots com G = 0,5 e G = 2 (100 000 slots) e compare com a teoria.", "resposta": "A simulação dá cerca de 0,303 e 0,271, praticamente iguais aos valores teóricos 0,5·e^(−0,5) ≈ 0,303 e 2·e^(−2) ≈ 0,271."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Antes de executar: qual é a chance de a disputa ser resolvida já na primeira colisão?", "resposta": "50%: cada host sorteia 0 ou 1, e há empate em 2 das 4 combinações. A simulação dá cerca de 49%."},
+                {"nivel": "Intermediário", "texto": "Troque k = min(10, n) por k = 1, para que o intervalo nunca cresça. Quantas colisões em média até resolver?", "resposta": "Cerca de 2, a média de uma distribuição geométrica com p = 1/2. Com o intervalo dobrando, a média cai para cerca de 1,65."},
+                {"nivel": "Desafio", "texto": "Com o algoritmo do livro, cerca de 38% das disputas terminam exatamente na segunda colisão. Calcule esse valor.", "resposta": "Para terminar na segunda colisão, a primeira tem de empatar (1/2) e a segunda não. Depois da segunda colisão, cada host sorteia entre 0 e 3, e o empate só acontece com probabilidade 1/4. Logo, 1/2 × 3/4 = 37,5%. O intervalo maior reduz a chance de nova colisão, à custa de esperas mais longas."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Comece com a = b = 0,1 nos dois algoritmos. As taxas ficam iguais?", "resposta": "Sim: partindo de uma alocação justa, tanto AIMD quanto AIAD continuam justos, porque os dois hosts recebem a mesma realimentação e aplicam a mesma regra."},
+                {"nivel": "Intermediário", "texto": "No AIMD, troque 0,5 por 0,8 na diminuição. A diferença final (60 passos) fica maior ou menor?", "resposta": "Maior: cerca de 0,017 em vez de 0,0015 Mbit/s. Com β mais perto de 1, cada congestionamento reduz menos a diferença, e a convergência fica mais lenta."},
+                {"nivel": "Desafio", "texto": "Crie o MIMD: aumento multiplicativo (× 1,1) e diminuição multiplicativa (× 0,5). Ele converge para a justiça?", "resposta": "Não: multiplicar as duas taxas pelo mesmo fator mantém a razão entre elas. Partindo de 0,1 e 1,6, a razão continua 16 para sempre. Só a combinação AIMD faz a diferença encolher."}
+            ]
+        ],
+        "capitulo7": [
+            [
+                {"nivel": "Aquecimento", "texto": "Quantos bytes de cabeçalho as três camadas acrescentam? Que fração do quadro é dado da aplicação?", "resposta": "32 bytes de cabeçalho (14 + 10 + 8) para 15 bytes de dados: o quadro tem 47 bytes (376 bits), e só cerca de 32% é dado da aplicação."},
+                {"nivel": "Intermediário", "texto": "Antes de chamar sobe, troque no quadro b\"[PKT A->B]\" por b\"[PKT B->A]\" (quadro.replace). Em que camada a recepção falha?", "resposta": "O enlace entrega normalmente, mas a rede falha com AssertionError: \"cabeçalho de rede não confere\". Cada camada só lê e retira o próprio cabeçalho."},
+                {"nivel": "Desafio", "texto": "Acrescente o cabeçalho de aplicação (\"aplicação\", b\"[HTTP]\") no início de CABECALHOS. O que muda na ordem dos cabeçalhos no quadro?", "resposta": "O quadro passa a ser b'[QUADRO][PKT A->B][SEG porta=80][HTTP]GET /index.html': o cabeçalho da camada mais baixa fica mais à frente, porque é acrescentado por último, e é o primeiro a ser retirado na recepção."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Troque random.Random(4) por random.Random(7). Que diagnósticos aparecem?", "resposta": "bit trocado, bits a menos, bit trocado, bit trocado e bits a menos."},
+                {"nivel": "Intermediário", "texto": "Conte os diagnósticos de 3000 transmissões com random.Random(0) (use collections.Counter). A distribuição é equilibrada?", "resposta": "Sim, cerca de um terço para cada tipo: 1038 bits a mais, 990 bits a menos e 972 bits trocados."},
+                {"nivel": "Desafio", "texto": "Na rede de verdade, o receptor não conhece a sequência enviada. Como, então, ele percebe esses erros?", "resposta": "Não dá para usar diagnostica. A camada de enlace precisa delimitar os quadros (bit stuffing, por exemplo) para perceber bits a mais ou a menos, e acrescentar códigos de detecção de erros (paridade, CRC) para perceber bits trocados, como no Capítulo 1."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Que camadas do OSI correspondem à camada de aplicação do modelo de cinco camadas?", "resposta": "Três: aplicação, apresentação e sessão."},
+                {"nivel": "Intermediário", "texto": "Acrescente a CORRESPONDE uma terceira informação, o capítulo do site em que cada camada aparece, e imprima-a numa nova coluna.", "resposta": "Por exemplo: Aplicação → 3, Transporte → 4, Rede → 2, Enlace → 1, Física → 1. Basta guardar tuplas de três elementos e desempacotar osi, tcpip, cap no laço."},
+                {"nivel": "Desafio", "texto": "Escreva a função para_tcpip(camada_osi), que devolve a camada TCP/IP equivalente a qualquer camada do OSI.", "resposta": "Percorra CORRESPONDE e devolva o tcpip da entrada em que camada_osi aparece na lista osi. Sessão e Apresentação dão Aplicação; Rede dá Internet; Enlace e Física dão Enlace (link)."}
+            ]
+        ],
+        "capitulo8": [
+            [
+                {"nivel": "Aquecimento", "texto": "Antes de executar: como fica cesar(\"REDE\", 3)?", "resposta": "UHGH: R→U, E→H, D→G, E→H."},
+                {"nivel": "Intermediário", "texto": "Cifre \"ATAQUE\" com k = 13 e depois cifre o resultado de novo com k = 13. O que acontece?", "resposta": "A primeira vez dá NGNDHR; a segunda volta a ATAQUE. Com 26 letras, deslocar 13 duas vezes é dar a volta completa (é a cifra ROT13)."},
+                {"nivel": "Desafio", "texto": "Faça o programa achar a chave sozinho: imprima só a tentativa que contém a palavra \"AO\" como palavra separada.", "resposta": "No laço, teste if \"AO\" in cesar(cifrada, -k).split(): só k = 11 passa, com ENCONTRO AO MEIO DIA. É assim que a força bruta reconhece o texto certo: por ele fazer sentido."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Imprima a chave em hexadecimal. Ela tem quantos bytes?", "resposta": "19 bytes, o tamanho de m1: ce8d7e11e3f220a08a97f32752541b35961aef. No one-time pad, a chave é tão longa quanto a mensagem."},
+                {"nivel": "Intermediário", "texto": "Troque m2 por b\"ATACAR AO AMANHECER\" (igual a m1). O que Eve vê em c1 XOR c2?", "resposta": "Só bytes zero: c1 e c2 são idênticos. Mesmo sem a chave, Eve descobre que as duas mensagens são iguais, outra informação que vaza ao reutilizar a chave."},
+                {"nivel": "Desafio", "texto": "Suponha que Eve só sabe que m1 começa com b\"ATACAR\". O que ela descobre de m2?", "resposta": "xor(xor(c1, c2)[:6], b\"ATACAR\") dá b\"RECUAR\": cada byte conhecido de m1 revela o byte da mesma posição de m2."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Qual é o checksum de b\"PAGUE 109 A BOC\"? E o SHA-256 muda quanto?", "resposta": "129 (um a mais que 128, porque C vem depois de B). O SHA-256 muda cerca de metade dos bits: 126 dos 256 no exemplo do bloco."},
+                {"nivel": "Intermediário", "texto": "Mantendo o checksum 128, ache outra alteração que não seja só trocar a ordem dos caracteres.", "resposta": "Some 1 a um byte e subtraia 1 de outro: por exemplo, b\"PAGUE 118 A BOB\" (0→1 e 9→8) tem o mesmo checksum 128. O SHA-256 continua totalmente diferente."},
+                {"nivel": "Desafio", "texto": "Calcule também o MD5 das mensagens. Quantos bits ele tem e por que não deve ser usado para assinaturas?", "resposta": "hashlib.md5(msg).hexdigest() tem 32 dígitos hexadecimais, ou seja, 128 bits. Colisões do MD5 são conhecidas desde 2004, e a RFC 6151 desaconselha seu uso em assinaturas."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Troque random.Random(7) por random.Random(1). Os resultados mudam?", "resposta": "Não: Alice continua autenticada e Eve continua recusada. O nonce muda, mas a lógica não depende do valor; Eve só passaria se dois nonces seguidos fossem iguais."},
+                {"nivel": "Intermediário", "texto": "Faça Bob usar sempre o mesmo nonce, por exemplo b\"764192\". O que acontece com Eve?", "resposta": "Eve passa a ser aceita: a resposta gravada vale de novo. O nonce precisa mesmo ser usado uma única vez."},
+                {"nivel": "Desafio", "texto": "Continue o laço da cadeia até n chegar a 0. O que Alice envia na última autenticação, e por que isso é um problema?", "resposta": "Com n = 1, Alice envia H^0(P), a própria senha, em claro. Por isso a cadeia deve ser reinicializada (com uma nova senha ou um novo H^n) antes de chegar ao fim."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Use a = 3 e b = 7. Quais são A, B e a chave?", "resposta": "A = 10, B = 17 e a chave = 14 (17³ mod 23 = 10⁷ mod 23 = 14)."},
+                {"nivel": "Intermediário", "texto": "Troque p por 2147483647 e g por 7 e use a = 123456789, b = 987654321. Por que a busca de Eve fica impraticável no navegador?", "resposta": "Alice e Bob calculam a mesma chave na hora com pow(g, a, p), mas Eve teria de testar até 2 bilhões de expoentes um a um. Com primos de milhares de bits, usados na prática, a busca é inviável."},
+                {"nivel": "Desafio", "texto": "Mostre que Mallory consegue ler uma mensagem: cifre o número 42 com a chave Alice-Mallory (some a chave módulo 23), decifre do lado de Mallory e cifre de novo para Bob.", "resposta": "c = (42 + 4) % 23 = 0; Mallory decifra (0 − 4) % 23 = 19, que é 42 mod 23, e cifra para Bob com (19 + 18) % 23 = 14. Bob decifra (14 − 18) % 23 = 19. Os dois lados trocaram a mensagem, e Mallory leu tudo no meio."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Com 10^9 chaves por segundo, quanto tempo leva testar todas as chaves de 56 bits, em anos?", "resposta": "Cerca de 2,28 anos; em média, a chave aparece na metade disso. Com hardware dedicado, muito mais rápido, o DES deixa de ser seguro."},
+                {"nivel": "Intermediário", "texto": "Quantos bits a mais na chave fazem o tempo ser multiplicado por 1000?", "resposta": "Cerca de 10 bits, porque 2^10 = 1024."},
+                {"nivel": "Desafio", "texto": "Refaça a tabela supondo um atacante 10^6 vezes mais rápido (10^15 chaves por segundo). A chave de 128 bits continua segura?", "resposta": "Sim: o tempo cai para cerca de 1,08 × 10^16 anos, ainda muito maior que a idade do universo (≈ 1,4 × 10^10 anos). Já a de 56 bits cai para cerca de 72 segundos."}
+            ]
         ]
     };
 

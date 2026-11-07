@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 6 — Compartilhamento de recursos | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: topologias, justiça max-min, congestionamento, buffers e descarte de pacotes, escalonamento round-robin, distribuição de carga, controle de acesso ao meio (TDM, FDM, ALOHA, CSMA, CSMA/CD, CSMA/CA, Token Ring) e controle de congestionamento com AIMD.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="6" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-05/index.html">Capítulo 5</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-07/index.html">Capítulo 7</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-08/index.html">Capítulo 8</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 6</span>
+        <h1 class="display-5 mb-3">Compartilhamento de recursos</h1>
+        <p class="lead mb-4">
+            Uma rede existe para que muitos usuários troquem informação, e para isso eles dividem
+            recursos: a banda dos enlaces, os buffers dos nós e a capacidade de processar pacotes.
+            Este capítulo mostra como dividir esses recursos de forma eficiente e justa, do acesso
+            a um meio compartilhado ao controle de congestionamento.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#topologias">1. Topologias</a>
+                    <a class="nav-link" href="#justica">2. Justiça max-min</a>
+                    <a class="nav-link" href="#congestionamento">3. Congestionamento</a>
+                    <a class="nav-link" href="#descarte">4. Descarte e marcação</a>
+                    <a class="nav-link" href="#escalonamento">5. Escalonamento</a>
+                    <a class="nav-link" href="#distribuir-carga">6. Distribuir a carga</a>
+                    <a class="nav-link" href="#mac-estatico">7. Alocação estática</a>
+                    <a class="nav-link" href="#aloha">8. ALOHA</a>
+                    <a class="nav-link" href="#csma-cd">9. CSMA e CSMA/CD</a>
+                    <a class="nav-link" href="#csma-ca">10. CSMA/CA</a>
+                    <a class="nav-link" href="#token-ring">11. Token Ring</a>
+                    <a class="nav-link" href="#controle-congestionamento">12. Controle de congestionamento</a>
+                    <a class="nav-link" href="#exercicios-cap6">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Muitos usuários, recursos limitados</h2>
+    <p>
+        Os usuários de uma rede produzem e consomem informação que atravessa a rede. Para atendê-los,
+        a rede usa vários tipos de recursos, e é importante saber quais são compartilhados. O primeiro
+        e mais importante é a <strong>banda dos enlaces</strong>. Depois vêm os <strong>buffers</strong>
+        dos nós e a <strong>capacidade de processamento</strong> de pacotes dos roteadores.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Comparar as topologias em <strong>malha</strong>, <strong>barramento</strong>, <strong>estrela</strong>, <strong>anel</strong> e <strong>árvore</strong>.</li>
+                <li>Definir e calcular uma alocação <strong>max-min justa</strong>.</li>
+                <li>Explicar o <strong>congestionamento</strong>, o papel dos buffers e o colapso de congestionamento.</li>
+                <li>Comparar descarte (tail drop, drop from front, RED), marcação (FECN, BECN) e escalonamento <strong>round-robin</strong>.</li>
+                <li>Descrever o controle de acesso ao meio: TDM, FDM, <strong>ALOHA</strong>, <strong>CSMA</strong>, <strong>CSMA/CD</strong>, <strong>CSMA/CA</strong> e <strong>Token Ring</strong>.</li>
+                <li>Explicar por que o controle de congestionamento usa <strong>AIMD</strong> e como uma janela de congestionamento regula a taxa.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                O capítulo usa os enlaces e o Go-Back-N do <a href="../capitulo-01/index.html">Capítulo 1</a>,
+                o encaminhamento do <a href="../capitulo-02/index.html">Capítulo 2</a>, as janelas do
+                <a href="../capitulo-04/index.html">Capítulo 4</a> e o serviço de nomes do
+                <a href="../capitulo-05/index.html">Capítulo 5</a>. Ele cobre a seção 2.6 do livro
+                (pág. 80–115 do PDF), a mais longa da Parte 1.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Topologias -->
+<section id="topologias" class="chapter-section" data-conceito="topologias" data-titulo="Topologias">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">Organizações físicas de uma rede local</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A banda de um enlace precisa ser compartilhada em duas situações. A primeira é quando vários
+        hosts estão ligados ao mesmo enlace físico, o caso típico das <strong>redes locais</strong> (LANs),
+        que interligam de algumas dezenas a algumas centenas de hosts numa sala, prédio ou campus. Como
+        ligar, por exemplo, cinco hosts para que qualquer um fale com qualquer outro?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>Malha completa</strong> (Fig. 55): um enlace entre cada par de hosts. É a organização mais confiável e de menor atraso, mas com n hosts exige n(n−1)/2 enlaces e n−1 interfaces por host, e cada host novo exige enlaces novos em todos os outros. Na prática, só é usada com poucos nós e quando a resiliência é essencial.</li>
+        <li><strong>Barramento</strong> (Fig. 56): todos os hosts ligados a um meio compartilhado, em geral um cabo, por uma única interface. Um sinal enviado por um host chega a todos. Se o cabo for cortado, a rede se divide em duas. Os primeiros Ethernet usavam essa topologia.</li>
+        <li><strong>Estrela</strong> (Fig. 57): um enlace entre cada host e o centro, que pode ser um equipamento que só amplifica o sinal ou um dispositivo ativo que entende as mensagens. Se o centro falha, a rede toda falha; se um enlace é cortado, só um host fica de fora. É mais fácil de operar, e o centro é um bom ponto de controle e de observação.</li>
+        <li><strong>Anel</strong> (Fig. 58): cada host tem uma interface no anel, e o sinal percorre o anel num só sentido; um enlace cortado derruba a rede inteira. Em redes metropolitanas, usam-se anéis duplos, com cabos diferentes, para redundância.</li>
+        <li><strong>Árvore</strong> (Fig. 59): usada quando é preciso ligar muitos clientes com baixo custo, como nas redes de TV a cabo.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Escolha a organização, mude o número de hosts e corte enlaces para ver quem continua conversando.</p>
+    <div class="demo-box" data-sim="topologias"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="45|90|10" data-answer="0" data-explain="n(n−1)/2 = 10 × 9 / 2 = 45 enlaces, e cada host precisa de 9 interfaces." data-hint="Cada enlace liga um par de hosts; conte os pares.">
+        <p class="fw-semibold mb-2">Quantos enlaces uma malha completa com 10 hosts exige?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Estrela|Anel com um único sentido|Barramento com um cabo longo" data-answer="0" data-explain="Na estrela, um enlace cortado desliga só um host; no anel simples, a rede toda para; no barramento, a rede se divide." data-hint="Use a simulação: corte um enlace em cada organização.">
+        <p class="fw-semibold mb-2">Em qual organização o corte de um único cabo afeta menos hosts?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Malha: máximo de desempenho e resiliência, custo n(n−1)/2 enlaces.</li>
+        <li>Barramento e anel: uma interface por host, mas um corte afeta muitos.</li>
+        <li>Estrela: fácil de operar; o centro é o ponto crítico. Árvore: barata para muitos clientes.</li>
+        <li>Fora a malha, todas compartilham a banda: é preciso um controle de acesso ao meio.</li>
+    </ul>
+</section>
+
+<!-- 2. Justiça -->
+<section id="justica" class="chapter-section" data-conceito="justica" data-titulo="Justiça max-min">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Compartilhar a banda com justiça</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Antes de projetar um esquema de compartilhamento, é preciso definir o objetivo. Nas estradas,
+        ambulâncias têm prioridade; em algumas cidades há faixas exclusivas para ônibus. Em redes de
+        computadores, o objetivo mais popular é que o compartilhamento seja <strong>justo</strong>. Com dois
+        hosts num enlace de 2 Mbit/s, cada um deve ficar com 1 Mbit/s. Mas e numa rede maior?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Na rede da Fig. 60, A1 envia para A2, B1 para B2 e C1 para C2. Dar a mesma banda a todos (5 Mbit/s)
+        deixa o enlace R2–R3 subutilizado. Dar 10 Mbit/s a A1–A2, 20 a C1–C2 e nada a B1–B2 é claramente
+        injusto. A definição mais usada é a <strong>justiça max-min</strong>: uma alocação é max-min justa se
+        é impossível dar mais banda a um fluxo sem reduzir a de outro fluxo que já tem menos.
+    </p>
+    <p>
+        Com a rede inteira conhecida, ela é obtida por <strong>preenchimento progressivo</strong>: todos os
+        fluxos começam com zero e crescem juntos até um enlace congestionar; os fluxos que passam por esse
+        enlace atingiram o máximo e saem do conjunto de candidatos; o processo continua até o conjunto
+        ficar vazio. Na Fig. 60, A1–A2 e B1–B2 param em 5 Mbit/s quando R1–R2 satura, e C1–C2 cresce até
+        15 Mbit/s, quando R2–R3 satura.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Ajuste a taxa de cada fluxo e veja a carga dos enlaces. Os botões mostram as duas alocações do livro e o preenchimento progressivo.</p>
+    <div class="demo-box" data-sim="max-min"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Não: C1–C2 pode crescer até 15 sem prejudicar ninguém|Sim: todos recebem o mesmo|Não: A1–A2 deveria receber 10" data-answer="0" data-explain="R2–R3 ainda tem 10 Mbit/s livres, e C1–C2 só passa por ele. Aumentá-lo não reduz nenhum fluxo menor." data-hint="Olhe a carga do enlace R2–R3 com 5/5/5.">
+        <p class="fw-semibold mb-2">A alocação 5/5/5 Mbit/s da Fig. 60 é max-min justa?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Justiça max-min: não dá para aumentar um fluxo sem diminuir outro que tem menos.</li>
+        <li>Preenchimento progressivo: todos crescem juntos; quem passa por um enlace saturado para.</li>
+        <li>Em redes grandes, a justiça é sempre um compromisso.</li>
+    </ul>
+</section>
+
+<!-- 3. Congestionamento -->
+<section id="congestionamento" class="chapter-section" data-conceito="congestionamento" data-titulo="Congestionamento">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Congestionamento, buffers e colapso</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Na rede da Fig. 61, todos os enlaces levam 1000 bit/s e os pacotes têm 1000 bits. A envia um
+        pacote por segundo para C, e tudo vai bem. Quando B também começa a transmitir, R1 recebe dois
+        pacotes por segundo, mas só consegue repassar um para R2. O que acontece com o segundo?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Se R1 tem um buffer livre, guarda o pacote até o enlace ficar livre; senão, descarta. Os
+        <strong>buffers</strong> são o segundo recurso compartilhado: absorvem picos passageiros. Se A e B
+        mandam, em média, três pacotes a cada dez segundos (0,6 pacote/s, abaixo da capacidade), mas
+        começam juntos, R1 precisa absorver uma rajada. Uma rede está <strong>congestionada</strong> quando
+        a soma da demanda dos hosts é maior que a capacidade da rede. Os operadores aceitam congestionamentos
+        passageiros (segundos ou minutos), mas querem evitar os que duram dias ou meses.
+    </p>
+    <p>
+        Buffers maiores evitam descartes, mas aumentam o atraso. E buffers enormes não resolvem: se A e B
+        mandam mil pacotes cada com Go-Back-N, a fila cresce, o atraso cresce, os temporizadores expiram,
+        os hosts retransmitem, a fila cresce ainda mais… No fim, o enlace R1–R2 transporta muitas cópias
+        dos mesmos pacotes. É o <strong>colapso de congestionamento</strong> (RFC 896): a rede carrega
+        pacotes sem entregar dados úteis.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        O colapso não é só teoria. Em outubro de 1986, a vazão entre o Lawrence Berkeley Laboratory e a
+        Universidade da Califórnia em Berkeley caiu de 32 kbit/s para 40 bit/s, uma queda de mil vezes,
+        segundo o relato de Van Jacobson citado pelo livro (pág. 85 do PDF). Esse trabalho levou às técnicas
+        de controle de congestionamento que permitiram à Internet crescer.
+    </div>
+    <p>
+        O terceiro recurso é a <strong>capacidade de processamento</strong>: para encaminhar, o roteador
+        consulta a tabela de encaminhamento, o que gasta ciclos de CPU e acessos à memória. Por isso o
+        desempenho de um roteador tem duas medidas: a capacidade em <strong>bits por segundo</strong>, que
+        depende das interfaces e da interconexão interna e é atingida com pacotes grandes, e o desempenho de
+        consulta em <strong>pacotes por segundo</strong>, que limita o roteador com pacotes pequenos.
+    </p>
+    <p>
+        Quando a fila cresce, o atraso cresce (Fig. 62). Com ocupação baixa mas não nula, a vazão aumenta;
+        com o buffer quase cheio, a vazão para de crescer e pode cair, por causa das retransmissões
+        desnecessárias. Um bom ponto de operação é uma ocupação baixa: boa utilização e pouco atraso.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">A e B começam uma rajada ao mesmo tempo. Ajuste a rajada e o buffer de R1 e acompanhe segundo a segundo.</p>
+    <div class="demo-box" data-sim="buffer-roteador"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque o atraso cresce, os hosts retransmitem e o enlace carrega cópias inúteis|Porque buffers grandes corrompem pacotes|Porque o roteador passa a descartar todos os pacotes" data-answer="0" data-explain="Com buffers enormes nada é descartado, mas o atraso dispara retransmissões; o enlace transporta várias cópias do mesmo pacote." data-hint="Pense no que acontece com o temporizador de retransmissão do Go-Back-N.">
+        <p class="fw-semibold mb-2">Por que buffers infinitos em R1 não evitam o colapso de congestionamento?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Em pacotes por segundo|Em bits por segundo|Em segundos de atraso" data-answer="0" data-explain="Com pacotes pequenos, o limite é o número de consultas à tabela que o roteador faz por segundo." data-hint="Releia a nota sobre pacotes por segundo e bits por segundo.">
+        <p class="fw-semibold mb-2">Um roteador encaminha pacotes mínimos. Em que medida o desempenho dele costuma ficar limitado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Recursos compartilhados: banda, buffers e capacidade de processamento.</li>
+        <li>Congestionamento: demanda maior que a capacidade; buffers absorvem rajadas curtas.</li>
+        <li>Buffers demais aumentam o atraso e não evitam o colapso de congestionamento.</li>
+    </ul>
+</section>
+
+<!-- 4. Descarte e marcação -->
+<section id="descarte" class="chapter-section" data-conceito="descarte-marcacao" data-titulo="Descarte e marcação">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Como a rede avisa que está congestionada</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Os hosts conseguem adaptar a demanda ao estado da rede, desde que percebam o congestionamento.
+        Uma forma é medir o atraso (o RTT cresce com a fila), mas em enlaces rápidos a variação pode se
+        confundir com flutuações normais. Que outros sinais a rede pode dar?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        <strong>Descartar pacotes</strong> é a segunda reação de um nó. As filas são FIFO, para manter a
+        ordem, e um mecanismo de descarte responde a duas perguntas: <em>quando</em> descartar (com o buffer
+        cheio, ou antes, quando a ocupação cresce demais) e <em>qual</em> pacote descartar.
+    </p>
+    <ul>
+        <li><strong>Tail drop</strong>: com o buffer cheio, descarta o pacote que chega. É simples e o mais usado, mas mantém os buffers cheios (atraso para aplicações de tempo real) e é cego: pode descartar o pacote de um fluxo interativo enquanto o buffer está ocupado por transferências grandes.</li>
+        <li><strong>Drop from front</strong>: descarta o pacote da cabeça da fila, que já esperou muito; o host percebe a perda mais cedo.</li>
+        <li><strong>Descarte probabilístico</strong>, como o <strong>RED</strong> (<em>Random Early Discard</em>): mede a ocupação média e, quando ela fica alta, descarta com certa probabilidade. Assim, os descartes atingem os fluxos em proporção à banda que usam.</li>
+    </ul>
+    <p>
+        Descartar não é o ideal, porque o pacote descartado já gastou recursos nos nós anteriores. A rede
+        também pode <strong>marcar</strong> pacotes:
+    </p>
+    <ul>
+        <li><strong>FECN</strong> (<em>Forward Explicit Congestion Notification</em>), em redes de datagramas: um bit do cabeçalho é ligado ao passar por um nó congestionado; o destino mede a fração de pacotes marcados e avisa o emissor. O host percebe o congestionamento sem depender de perdas.</li>
+        <li><strong>BECN</strong> (<em>Backward</em>), em redes de circuitos virtuais: o nó marca os pacotes do caminho de volta (por exemplo, as confirmações), o que avisa o emissor mais rápido.</li>
+        <li><strong>Pacotes de controle</strong> enviados à origem: usados em redes pequenas, evitados nas grandes, porque aumentam a carga justo no congestionamento e roteadores são lentos para criar pacotes.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="politicas-descarte"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Tail drop|Drop from front|RED" data-answer="0" data-explain="O tail drop descarta qualquer pacote que chegue com o buffer cheio, sem olhar de qual fluxo ele é." data-hint="Qual política o livro chama de cega?">
+        <p class="fw-semibold mb-2">Qual política pode descartar o pacote de um fluxo interativo só porque o buffer está cheio de pacotes de uma transferência?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="BECN, porque marca os pacotes do caminho de volta|FECN, porque marca os pacotes de ida|Descarte, porque é implícito" data-answer="0" data-explain="Marcando as confirmações que voltam, o aviso chega ao emissor sem esperar o destino processar os pacotes de ida." data-hint="Compare por onde viaja a marca em cada técnica.">
+        <p class="fw-semibold mb-2">Em circuitos virtuais, qual técnica avisa o emissor mais rápido?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Sinais de congestionamento: atraso, descarte, marcação e pacotes de controle.</li>
+        <li>Tail drop é simples e cego; RED descarta cedo e em proporção à banda.</li>
+        <li>FECN marca na ida; BECN marca na volta e avisa mais rápido.</li>
+    </ul>
+</section>
+
+<!-- 5. Escalonamento -->
+<section id="escalonamento" class="chapter-section" data-conceito="escalonamento" data-titulo="Escalonamento">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Escalonamento round-robin</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Descartar e marcar não são as únicas reações possíveis. Um roteador também pode atrasar seletivamente
+        os pacotes de alguns fluxos. Se o objetivo é dividir a banda de saída com justiça, como organizar os buffers?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Uma possibilidade é ter uma <strong>fila por fluxo</strong> (digamos N filas): cada pacote que chega
+        vai para o fim da fila do seu fluxo. Um <strong>escalonador</strong> é executado a cada oportunidade
+        de transmissão e escolhe de qual fila sai o próximo pacote. O mais simples é o
+        <strong>round-robin</strong> (Fig. 63), que serve as filas em rodízio. Se todos os fluxos usam pacotes
+        do mesmo tamanho, a banda é dividida com justiça; caso contrário, ele favorece os fluxos de pacotes
+        maiores. Há extensões que dividem com justiça mesmo com tamanhos variáveis, fora do escopo do livro.
+    </p>
+    <pre class="mono small p-3 rounded" style="background:var(--surface-2);white-space:pre-wrap"># N filas
+# variável de estado: next_queue
+next_queue = 0
+while True:
+    if isEmpty(buffer):
+        wait()                      # espera o próximo pacote
+    if not(isEmpty(queue[next_queue])):
+        p = remove_packet(queue[next_queue])
+        send(p)                     # envia o pacote da cabeça da fila
+    next_queue = (next_queue + 1) % N</pre>
+    <p class="small text-muted">Pseudocódigo do escalonador round-robin (livro, pág. 88 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="round-robin"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O de 1500 bytes, com 75% da banda|Os dois recebem 50%|O de 500 bytes, porque envia mais rápido" data-answer="0" data-explain="O rodízio é justo em pacotes: um pacote de cada por vez. Em bytes, fica 1500 / (1500 + 500) = 75%." data-hint="O round-robin envia o mesmo número de pacotes de cada fila.">
+        <p class="fw-semibold mb-2">Dois fluxos com filas cheias: um usa pacotes de 1500 bytes e o outro, de 500. Quem leva mais banda com round-robin?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Uma fila por fluxo e um escalonador que escolhe a próxima a transmitir.</li>
+        <li>Round-robin: justo em pacotes; em bytes, só se os tamanhos forem iguais.</li>
+    </ul>
+</section>
+
+<!-- 6. Distribuir a carga -->
+<section id="distribuir-carga" class="chapter-section" data-conceito="distribuir-carga" data-titulo="Distribuir a carga">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">Distribuindo a carga pela rede</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Além de agir em cada nó, dá para desviar tráfego dos enlaces carregados, limitar quem entra na rede
+        ou espalhar a carga entre várias fontes. Como servir um arquivo popular, como a imagem de uma
+        distribuição Linux, a milhões de usuários?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>Pesos dinâmicos:</strong> os primeiros algoritmos de roteamento mediam o atraso e mudavam os pesos dos enlaces. Na prática, isso podia causar oscilações sem reduzir o congestionamento. Hoje, contra congestionamentos longos (horas ou dias), mede-se a demanda e escolhem-se pesos que minimizem a carga máxima; se não bastar, a rede precisa de enlaces novos ou mais rápidos, o que pode levar meses.</li>
+        <li><strong>Controle de admissão:</strong> em redes de circuitos virtuais, a rede só cria um circuito se houver recursos; senão, recusa. É o que faz o sinal de ocupado da rede telefônica. Em redes de datagramas, isso não se aplica facilmente, porque um host pode mandar qualquer pacote a qualquer destino a qualquer hora.</li>
+        <li><strong>Serviço de nomes:</strong> o arquivo fica em vários servidores, e o serviço de nomes devolve endereços diferentes a clientes diferentes (Capítulo 5).</li>
+        <li><strong>BitTorrent:</strong> o arquivo é dividido em blocos de tamanho fixo, e metadados indicam quais hosts guardam cada bloco. O cliente baixa os blocos em qualquer ordem, de hosts diferentes e em paralelo, e passa a oferecer os blocos que já tem. Assim, quanto mais popular o arquivo, mais fontes ele tem.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="bittorrent"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque cada cliente que baixa um bloco passa a oferecê-lo|Porque os blocos são menores que o arquivo|Porque o servidor fica mais rápido" data-answer="0" data-explain="Os clientes participam da distribuição: o número de fontes cresce com a popularidade do arquivo." data-hint="Compare as fontes de blocos nos dois modos da simulação.">
+        <p class="fw-semibold mb-2">Por que o BitTorrent aguenta bem um arquivo muito popular?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Contra congestionamento longo: ajustar pesos ou aumentar a rede.</li>
+        <li>Controle de admissão: natural em circuitos virtuais, difícil em datagramas.</li>
+        <li>Espalhar a carga: vários servidores via nomes, ou blocos trocados entre clientes (BitTorrent).</li>
+    </ul>
+</section>
+
+<!-- 7. MAC estático -->
+<section id="mac-estatico" class="chapter-section" data-conceito="mac-estatico" data-titulo="Alocação estática">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Controle de acesso ao meio: alocação estática</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Numa LAN, se dois dispositivos transmitem ao mesmo tempo, os sinais se sobrepõem e o receptor não
+        decodifica nenhum dos quadros: é uma <strong>colisão</strong>, a principal causa de erros em LANs
+        com fio. Todas as tecnologias de LAN usam um algoritmo de <strong>controle de acesso ao meio</strong>
+        (MAC) para reduzir ou evitar colisões.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>Há duas famílias de algoritmos MAC:</p>
+    <ul>
+        <li><strong>Determinísticos ou pessimistas:</strong> evitam toda colisão, garantindo que só um dispositivo transmita por vez, ao custo de algum trabalho para coordenar os dispositivos.</li>
+        <li><strong>Estocásticos ou otimistas:</strong> aceitam colisões como parte da operação e tentam minimizá-las; costumam ser mais fáceis de implementar.</li>
+    </ul>
+    <p>
+        A solução determinística mais simples é a <strong>alocação estática</strong>: com N dispositivos numa
+        LAN de b Mbit/s, cada um recebe b/N Mbit/s.
+    </p>
+    <ul>
+        <li><strong>FDM</strong> (<em>Frequency Division Multiplexing</em>): cada dispositivo usa uma frequência diferente, então não há colisões. Nas fibras ópticas, a variante <strong>WDM</strong> dá um comprimento de onda a cada dispositivo. O espectro de rádio (de cerca de 3 kHz a 300 GHz) é dividido assim entre rádio, TV, celulares, satélites etc.</li>
+        <li><strong>TDM</strong> (<em>Time Division Multiplexing</em>): o tempo é dividido em quadros de 125 µs, e cada conversa tem sempre a mesma posição em cada quadro (Fig. 64). Uma conversa telefônica é um sinal de 64 kbit/s, ou seja, um byte a cada 125 µs; na Europa, trinta conversas são multiplexadas numa linha E1 de 2 Mbit/s.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A linha E1 tem 2,048 Mbit/s divididos em 32 intervalos de 64 kbit/s: 30 para voz e 2 para
+        sincronização e sinalização (<a href="https://en.wikipedia.org/wiki/E-carrier" target="_blank" rel="noopener noreferrer">Wikipedia: E-carrier</a>).
+    </p>
+    <p>
+        TDM e FDM servem bem a conversas de taxa fixa. Computadores, porém, têm comportamento
+        <strong>liga-desliga</strong>: enviam o mais rápido possível durante um período curto e ficam calados
+        por muito tempo. Com alocação estática, cada computador ligado só usaria 1/N da banda, mesmo com os
+        outros calados. Os algoritmos MAC dinâmicos, a seguir, resolvem isso.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="tdm"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="1/4 da banda, mesmo com os outros calados|A banda inteira, porque os outros estão calados|Nada, porque o TDM só serve para voz" data-answer="0" data-explain="A posição de cada fonte no quadro é fixa; os intervalos dos outros ficam vazios." data-hint="Na simulação, escolha os quatro computadores e observe os intervalos de uma única fonte.">
+        <p class="fw-semibold mb-2">Num TDM estático com 4 computadores, quanto um computador consegue usar quando só ele tem dados?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Colisão: duas transmissões simultâneas que o receptor não decodifica.</li>
+        <li>MAC determinístico evita colisões; MAC estocástico as minimiza.</li>
+        <li>FDM/WDM e TDM dividem frequência ou tempo de forma fixa: ótimos para voz, ineficientes para tráfego liga-desliga.</li>
+    </ul>
+</section>
+
+<!-- 8. ALOHA -->
+<section id="aloha" class="chapter-section" data-conceito="aloha" data-titulo="ALOHA">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">ALOHA e ALOHA com slots</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nos anos 1960, a Universidade do Havaí quis ligar terminais distantes a um computador central sem usar
+        linhas telefônicas. Criou a primeira tecnologia de rádio por pacotes, a <strong>ALOHANet</strong>, e
+        mostrou que computadores podem ser interligados por rádio.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Os quadros tinham tamanho fixo (704 bits: 80 caracteres de 8 bits, controle e paridade), e havia dois
+        canais na faixa de 400 MHz: um do computador central para todos os terminais e outro compartilhado
+        pelos terminais. O central conferia a paridade e confirmava cada quadro correto no seu canal; o terminal
+        retransmitia os quadros sem confirmação. Retransmitir logo após um timeout fixo sincronizaria terminais
+        que colidiram, por isso cada terminal espera um <strong>tempo aleatório</strong> antes de tentar de novo.
+    </p>
+    <pre class="mono small p-3 rounded" style="background:var(--surface-2);white-space:pre-wrap"># ALOHA
+N = 1
+while N &lt;= max:
+    send(frame)
+    wait(ack_on_return_channel or timeout)
+    if ack_on_return_channel:
+        break                       # transmissão bem-sucedida
+    else:                           # timeout
+        wait(random_time)
+        N = N + 1
+else:
+    pass                            # tentativas demais</pre>
+    <p>
+        O ALOHA funciona bem com o canal pouco carregado, mas a utilização máxima é baixa e, acima dela, a rede
+        fica instável e colapsa com as retransmissões que colidem. O <strong>ALOHA com slots</strong> divide o
+        tempo em intervalos do tamanho de um quadro e só deixa transmitir no início de cada intervalo (o
+        relógio pode vir do computador central). Essa mudança simples <strong>dobra</strong> a utilização máxima.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Divergência no livro</span><br>
+        O livro dá dois valores para o máximo do ALOHA puro: 0,186 (pág. 92 do PDF) e 18,4% (pág. 93). O
+        correto é 1/(2e) ≈ 0,184, atingido com carga G = 0,5. Para o ALOHA com slots, o livro dá 36,6%
+        (pág. 93); o máximo é 1/e ≈ 0,368, com G = 1. O bloco de código 4, abaixo, faz as contas.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">G é a carga oferecida: quantos quadros, contando retransmissões, tentam usar o canal por tempo de quadro.</p>
+    <div class="demo-box" data-sim="aloha"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque um quadro só colide com os que começam no mesmo slot|Porque os quadros ficam menores|Porque o central confirma mais rápido" data-answer="0" data-explain="No ALOHA puro, um quadro é vulnerável durante dois tempos de quadro; com slots, só durante um." data-hint="Compare as faixas de tempo em que outro quadro pode atrapalhar.">
+        <p class="fw-semibold mb-2">Por que o ALOHA com slots dobra a utilização máxima?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>ALOHA: transmite quando quer; sem confirmação, espera um tempo aleatório e retransmite.</li>
+        <li>Máximo de ≈ 18,4% (puro) e ≈ 36,8% (com slots); com carga alta, colapsa.</li>
+        <li>Variantes do ALOHA ainda aparecem em redes sem fio.</li>
+    </ul>
+</section>
+
+<!-- 9. CSMA e CSMA/CD -->
+<section id="csma-cd" class="chapter-section" data-conceito="csma-cd" data-titulo="CSMA e CSMA/CD">
+    <span class="kicker">Conceito 9</span>
+    <h2 class="section-title">CSMA e CSMA/CD</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O ALOHA só serve para redes pouco carregadas. Projetar uma rede para baixa utilização é possível,
+        mas caro. Uma melhoria óbvia: antes de transmitir, <strong>escutar o canal</strong>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        No <strong>CSMA</strong> (<em>Carrier Sense Multiple Access</em>), o nó só transmite com o canal livre.
+        No CSMA <strong>persistente</strong>, ele espera o canal ficar livre e transmite na hora; se dois nós
+        esperavam, os dois transmitem juntos e colidem. No CSMA <strong>não persistente</strong>, quem encontra
+        o canal ocupado espera um tempo aleatório antes de escutar de novo, o que evita essa sincronização e
+        melhora a utilização, com um pouco mais de espera quando a rede está vazia. Sob as hipóteses da análise
+        citada pelo livro, o CSMA persistente chega a 52,9% da capacidade e o não persistente, a 81,5%.
+    </p>
+    <p>
+        Num cabo, o sinal se propaga a cerca de 200 000 km/s: num cabo de 1 km, leva 5 µs de uma ponta à
+        outra. Hosts diferentes recebem o início de um quadro em instantes diferentes (Fig. 65), e dois hosts
+        podem achar o canal livre e transmitir quase juntos (Fig. 66). Numa rede com fio, o host consegue
+        <strong>detectar a colisão enquanto transmite</strong>, comparando o sinal que envia com o que sente
+        no cabo. É a base do <strong>CSMA/CD</strong> (<em>Collision Detection</em>), usado no Ethernet: ao
+        detectar uma colisão, o host para imediatamente e envia um sinal de <em>jamming</em> para que todos a
+        percebam.
+    </p>
+    <ul>
+        <li><strong>Pior caso</strong> (Fig. 67): com τ o tempo de propagação de ponta a ponta, B começa pouco antes de τ e A só detecta a colisão perto de 2τ. Uma colisão só pode acontecer nos primeiros 2τ de uma transmissão.</li>
+        <li><strong>Sem confirmações:</strong> como colisões são quase a única causa de erro numa rede com fio, o CSMA/CD dispensa as confirmações: se não houve colisão, o quadro é dado como entregue.</li>
+        <li><strong>Quadro mínimo</strong> (Fig. 68): para isso funcionar, o host precisa transmitir por pelo menos 2τ, senão termina antes de perceber a colisão. Isso impõe um <strong>tamanho mínimo de quadro</strong>; no Ethernet, 2τ é o <strong>slot time</strong>.</li>
+        <li><strong>Backoff exponencial binário:</strong> depois da N-ésima colisão, o host espera r slot times, com r sorteado entre 0 e 2<sup>k</sup>−1 e k = min(10, N). Com dois hosts, a primeira tentativa evita nova colisão em 50% dos casos, e o intervalo dobra a cada colisão para se adaptar a redes mais carregadas.</li>
+    </ul>
+    <p>
+        Depois de cada quadro, o host espera um curto intervalo entre quadros, o que dá chance aos outros e
+        contribui para a justiça. Mesmo assim, o CSMA/CD nem sempre é justo: um cliente que só manda
+        confirmações pode sofrer colisões seguidas com um servidor que envia quadros longos.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">A fica numa ponta do cabo e B na outra. Escolha quando B começa e a duração dos quadros.</p>
+    <div class="demo-box" data-sim="csma-cd"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque um quadro mais curto que 2τ pode terminar antes de o emissor perceber a colisão|Porque quadros curtos têm mais erros de bits|Porque o jamming precisa de espaço no quadro" data-answer="0" data-explain="Sem confirmações, o emissor precisa estar transmitindo quando o sinal do outro host chega; isso exige transmitir por pelo menos 2τ." data-hint="Na simulação, reduza a duração e ponha B para começar perto de τ.">
+        <p class="fw-semibold mb-2">Por que o CSMA/CD exige um tamanho mínimo de quadro?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="0, 1, 2 ou 3 slot times|0 ou 1 slot time|Sempre 2 slot times" data-answer="0" data-explain="Com N = 2, k = 2 e r é sorteado entre 0 e 2² − 1 = 3." data-hint="Use k = min(10, N) e o intervalo de 0 a 2^k − 1.">
+        <p class="fw-semibold mb-2">Depois da segunda colisão de um quadro, quanto o host pode esperar?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>CSMA: escuta antes; o não persistente espera um tempo aleatório e usa melhor o canal.</li>
+        <li>CSMA/CD: detecta a colisão enquanto transmite e para; não usa confirmações.</li>
+        <li>Quadro mínimo de 2τ (slot time) e backoff exponencial binário.</li>
+    </ul>
+</section>
+
+<!-- 10. CSMA/CA -->
+<section id="csma-ca" class="chapter-section" data-conceito="csma-ca" data-titulo="CSMA/CA">
+    <span class="kicker">Conceito 10</span>
+    <h2 class="section-title">CSMA/CA e a estação escondida</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Numa rede sem fio, como o WiFi, um dispositivo não consegue detectar uma colisão enquanto transmite.
+        Além disso, o sinal de rádio não se propaga igual em todas as direções. O que muda no acesso ao meio?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>CSMA/CA</strong> (<em>Collision Avoidance</em>) também escuta o canal, mas tenta
+        <em>evitar</em> colisões ajustando bem os temporizadores. Usa confirmações, com número de sequência
+        (contra duplicatas) e CRC (contra erros):
+    </p>
+    <ul>
+        <li><strong>SIFS</strong>: o pequeno intervalo entre receber um quadro e enviar a confirmação, o tempo de mudar o rádio de recepção para transmissão.</li>
+        <li><strong>DIFS</strong>: para transmitir, o canal precisa estar livre por pelo menos esse tempo, se o último quadro recebido estava correto; <strong>EIFS</strong>, se estava corrompido (sinal de colisões). Como SIFS &lt; DIFS &lt; EIFS, ninguém transmite no meio de uma confirmação (Fig. 69).</li>
+        <li><strong>Backoff:</strong> cada dispositivo sorteia um atraso aleatório, cujo intervalo cresce exponencialmente com as retransmissões. O intervalo inicial, de 0 a 7 slot times, é sete vezes maior que no CSMA/CD, porque as colisões não são detectadas e podem estragar o quadro inteiro. O temporizador fica <strong>congelado</strong> enquanto o canal está ocupado e recomeça quando ele fica livre (Fig. 71).</li>
+    </ul>
+    <p>
+        A <strong>estação escondida</strong> (Fig. 72): dois dispositivos separados por uma parede (ou um morro,
+        ou um caminhão) não se ouvem, mas ambos alcançam um terceiro. Para isso, o CSMA/CA permite
+        <strong>reservar</strong> o canal com dois quadros curtos de controle: o emissor envia um
+        <strong>RTS</strong> (<em>Request To Send</em>) com a duração da reserva, e o destino responde, após
+        um SIFS, com um <strong>CTS</strong> (<em>Clear To Send</em>) com a mesma duração. Quem ouve qualquer
+        um dos dois adia o acesso até o fim da reserva (Fig. 73). Como RTS e CTS custam tempo, a reserva é útil
+        quando as colisões são frequentes; alguns dispositivos só a ligam depois de erros de transmissão.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="estacao-escondida"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Pelo CTS enviado por B, que C consegue ouvir|Pelo RTS enviado por A, que C consegue ouvir|Pelo ACK do quadro anterior" data-answer="0" data-explain="C não ouve A, mas ouve B; o CTS traz a duração da reserva." data-hint="Quem C consegue ouvir na figura?">
+        <p class="fw-semibold mb-2">Na estação escondida, como C fica sabendo da reserva de A?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque o dispositivo não detecta colisões, que podem estragar o quadro inteiro|Porque o rádio é mais lento que o cabo|Porque o CSMA/CA não usa confirmações" data-answer="0" data-explain="No CSMA/CD a colisão só afeta o início do quadro; no CSMA/CA pode afetar o quadro todo, então vale espalhar mais as tentativas." data-hint="Compare o que cada técnica sabe sobre as colisões enquanto transmite.">
+        <p class="fw-semibold mb-2">Por que o backoff inicial do CSMA/CA é maior que o do CSMA/CD?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>CSMA/CA: escuta, espera DIFS (ou EIFS) e um backoff aleatório; confirma após SIFS.</li>
+        <li>O backoff congela com o canal ocupado.</li>
+        <li>RTS/CTS reserva o canal e resolve a estação escondida.</li>
+    </ul>
+</section>
+
+<!-- 11. Token Ring -->
+<section id="token-ring" class="chapter-section" data-conceito="token-ring" data-titulo="Token Ring">
+    <span class="kicker">Conceito 11</span>
+    <h2 class="section-title">Acesso determinístico: Token Ring</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nos anos 1970 e 1980, houve um grande debate sobre o melhor MAC para LANs. Os algoritmos otimistas
+        eram fáceis de implementar e aguentavam carga, mas nenhum garantia entregar um quadro dentro de um
+        atraso máximo, e algumas aplicações precisam de atrasos previsíveis. O comitê IEEE 802 acabou criando
+        três grupos: o 802.3 para CSMA/CD e, entre os defensores das fichas (<em>tokens</em>), o 802.4 (Token
+        Bus, defendido pela indústria liderada pela General Motors) e o 802.5 (Token Ring, defendido pela IBM).
+        Essas tecnologias quase não são mais usadas, mas os princípios continuam importantes.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Um <strong>Token Ring</strong> é um conjunto de estações num anel unidirecional (Fig. 74), por onde
+        circulam dois tipos de quadro: <strong>tokens</strong> e quadros de dados. O token é a autorização para
+        transmitir. Para enviar, a estação <strong>captura</strong> o token, retirando-o do anel; como só uma
+        estação o tem, não há colisões. Depois de transmitir, ela retira o próprio quadro do anel e devolve o token.
+    </p>
+    <ul>
+        <li>A interface de cada estação faz parte do anel e repassa o sinal mesmo com a estação desligada. Em modo de escuta, ela introduz um atraso de um bit e regenera o sinal.</li>
+        <li>O token tem 24 bits (Fig. 75): Starting Delimiter, Access Control (com o bit <em>Token</em>) e Ending Delimiter.</li>
+        <li>Para capturar o token, a estação espera o quarto bit do Access Control: se o bit Token está ligado, ela o zera no seu buffer de um bit. O começo do token vira o começo de um quadro de dados (Fig. 76), e a estação passa a transmitir. O atraso de um bit é o que permite essa captura.</li>
+        <li>Um quadro passa por todas as estações; o destino reconhece o próprio endereço e o copia. A estação fica em modo de transmissão até receber o último bit do próprio quadro, para que ele não fique no anel para sempre.</li>
+        <li>O <strong>Monitor</strong>, escolhido por eleição, insere um atraso de pelo menos 24 bits (para o token caber no anel), envia o primeiro token e verifica se ele passa regularmente. Como uma estação pode reter o token por no máximo o Token Holding Time (THT, pouco menos de 10 ms), com N estações o token precisa passar pelo Monitor pelo menos a cada N × THT. Se não passar, o Monitor reinicializa o anel e envia um token novo. Se o Monitor falhar, outra estação é eleita.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="token-ring"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque só a estação que tem o token pode transmitir|Porque o anel é rápido demais para colisões|Porque o Monitor descarta quadros repetidos" data-answer="0" data-explain="O token é único; quem não o tem só repassa bits." data-hint="O que o token representa?">
+        <p class="fw-semibold mb-2">Por que não há colisões num Token Ring que funciona normalmente?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Reinicializa o anel e envia um token novo|Espera para sempre|Pede a todas as estações que transmitam juntas" data-answer="0" data-explain="Se o token não passa dentro do limite, o Monitor corta o anel, reinicializa-o e gera um token." data-hint="Veja o registro da simulação depois de perder o token.">
+        <p class="fw-semibold mb-2">O que o Monitor faz quando o token não passa por ele dentro do tempo esperado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Só quem tem o token transmite: acesso determinístico, sem colisões.</li>
+        <li>Captura pelo bit Token, graças ao atraso de um bit por estação.</li>
+        <li>O Monitor mantém o token circulando e recupera o anel em caso de falha.</li>
+    </ul>
+</section>
+
+<!-- 12. Controle de congestionamento -->
+<section id="controle-congestionamento" class="chapter-section" data-conceito="controle-congestionamento" data-titulo="Controle de congestionamento">
+    <span class="kicker">Conceito 12</span>
+    <h2 class="section-title">Controle de congestionamento</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        As redes misturam enlaces de dezenas de kbit/s a centenas de Gbit/s, e qualquer host deve conseguir
+        trocar segmentos com um servidor rápido. Na Fig. 77, o servidor A, num enlace de 10 Mbit/s, envia para
+        C por um caminho com um enlace de 2 Mbit/s. Como A descobre a que taxa pode enviar?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        <strong>Autorregulação (<em>self clocking</em>, Fig. 78):</strong> com uma janela de três segmentos, A
+        envia três segmentos seguidos e para. O buffer de R1 os guarda e os repassa a 2 Mbit/s; cada
+        confirmação de C libera um segmento novo. Depois da primeira janela, A envia um segmento por
+        confirmação: as confirmações funcionam como um relógio que ajusta A à taxa do destino, desde que haja
+        buffers.
+    </p>
+    <p>
+        Com muitos emissores (Fig. 79), a fila cresce e o RTT também. Com segmentos de 10 000 bits, cada um
+        leva 1 ms no enlace de 10 Mbit/s e 5 ms no de 2 Mbit/s: o RTT, sem propagação, é cerca de 6 ms; com 100
+        segmentos na fila, passa a 1 + 100 × 5 + 5 ms. Com Go-Back-N, os temporizadores expiram, janelas inteiras
+        são retransmitidas e a fila cresce mais: é o colapso de congestionamento, que aconteceu várias vezes na
+        Internet no fim dos anos 1980. Para evitá-lo, os hosts precisam regular a taxa. Na Internet, isso é feito
+        na camada de transporte. Com n hosts dividindo um gargalo, o esquema deve atingir três objetivos:
+    </p>
+    <ol>
+        <li><strong>evitar congestionamento:</strong> a soma das taxas não passa da banda do gargalo;</li>
+        <li><strong>ser eficiente:</strong> a soma das taxas fica perto da banda do gargalo, um recurso caro;</li>
+        <li><strong>ser justo:</strong> em geral, max-min justo; com um único gargalo, todos recebem a mesma taxa.</li>
+    </ol>
+    <p>
+        No plano de alocações (Fig. 81), o eixo x é a taxa de B e o eixo y, a de A, com um gargalo de 2 Mbit/s.
+        A reta x + y = 2 é a <strong>reta de eficiência</strong>, e a diagonal x = y, a <strong>reta de
+        justiça</strong>. (0,7; 0,7) é justo mas ineficiente; (1,5; 0,5) é eficiente mas injusto; (1; 1) é as duas
+        coisas.
+    </p>
+    <p>
+        Com <strong>realimentação binária</strong>, o host só sabe se a rede está congestionada ou não. Uma
+        adaptação linear tem a forma r(t+1) = α + β·r(t), com constantes diferentes para cada situação. A análise
+        de Chiu e Jain mostra que, para ser justa e eficiente, ela precisa ser <strong>AIMD</strong>: aumento
+        aditivo sem congestionamento (α &gt; 0, β = 1) e diminuição multiplicativa com congestionamento
+        (α = 0, β &lt; 1).
+    </p>
+    <pre class="mono small p-3 rounded" style="background:var(--surface-2);white-space:pre-wrap"># Additive Increase Multiplicative Decrease
+if congestion:
+    rate = rate * betaC     # diminuição multiplicativa, betaC &lt; 1
+else:
+    rate = rate + alphaN    # aumento aditivo, alphaN &gt; 0</pre>
+    <p>
+        A realimentação pode ser <strong>implícita</strong>, como no TCP, que trata perdas como sinal de
+        congestionamento (verdade em redes com fio, nem sempre nas sem fio), ou <strong>explícita</strong>, como
+        no DECbit: roteadores congestionados ligam um bit nos pacotes, e o destino devolve essa informação nas
+        confirmações (para IP, RFC 3168).
+    </p>
+    <p>
+        <strong>Com janelas:</strong> ajustar a taxa diretamente exige temporizadores finos; protocolos como o
+        TCP ajustam a janela. Na Fig. 83, os enlaces de acesso têm 1 Mbit/s, o gargalo R1–R2 tem 500 kbit/s e os
+        pacotes têm 1000 bits. Com janela de 1 segmento, A envia a 250 kbit/s (Fig. 84); com 2, já atinge os
+        500 kbit/s do gargalo (Fig. 85); com 4, continua em 500 kbit/s, mas dois pacotes esperam no buffer de R1 e
+        o RTT cresce (Fig. 86). Daí a <strong>janela de congestionamento</strong> cwin: a janela de envio fica
+        limitada a min(swin, cwin), além da janela anunciada pelo receptor. No aumento aditivo, cwin cresce um
+        segmento por RTT (cwin += 1/cwin a cada confirmação nova); na diminuição multiplicativa, cai pela metade
+        quando há congestionamento.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Dois hosts partem de uma alocação injusta. Compare AIMD e AIAD no plano de alocações.</p>
+    <div class="demo-box" data-sim="aimd-plano"></div>
+    <p class="small text-muted">Agora a janela de congestionamento de um host com realimentação do tipo DECbit: o roteador marca os pacotes quando há fila.</p>
+    <div class="demo-box" data-sim="janela-aimd"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="AIMD: só a diminuição multiplicativa reduz a diferença entre as taxas|AIAD: aumentar e diminuir igual é mais justo|MIMD: multiplicar sempre converge mais rápido" data-answer="0" data-explain="Multiplicar as duas taxas por β &lt; 1 diminui mais quem tem mais; somar ou subtrair o mesmo valor mantém a diferença." data-hint="Na simulação, veja o que acontece com a diferença entre as taxas em cada algoritmo.">
+        <p class="fw-semibold mb-2">Qual adaptação leva dois hosts com taxas diferentes a uma alocação justa e eficiente?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="500 kbit/s, com dois pacotes esperando no buffer de R1|1 Mbit/s, o dobro da janela 2|1000 kbit/s divididos com B" data-answer="0" data-explain="O gargalo de 500 kbit/s limita a taxa; a janela maior só cria fila e aumenta o RTT." data-hint="Qual é a banda do enlace R1–R2?">
+        <p class="fw-semibold mb-2">Na Fig. 83, com janela de 4 segmentos, a que taxa A envia?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Self clocking: as confirmações ditam o ritmo do emissor.</li>
+        <li>Objetivos: evitar congestionamento, ser eficiente e ser justo.</li>
+        <li>Com realimentação binária, só o AIMD converge para justo e eficiente.</li>
+        <li>Na prática, a janela de congestionamento faz o papel da taxa: min(swin, cwin).</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap6" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> quantos enlaces e interfaces por host exigem uma malha e uma estrela com 8 hosts?
+            <details><summary>Ver solução</summary><p class="mb-0">Malha: 8 × 7 / 2 = 28 enlaces e 7 interfaces por host. Estrela: 8 enlaces e 1 interface por host.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> num cabo de 2 km, com o sinal a 200 000 km/s, quanto vale τ? E o slot time?
+            <details><summary>Ver solução</summary><p class="mb-0">τ = 2 km / 200 000 km/s = 10 µs, e o slot time é 2τ = 20 µs.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> nesse cabo, a 10 Mbit/s, qual é o menor quadro que garante a detecção de colisões?
+            <details><summary>Ver solução</summary><p class="mb-0">O quadro precisa durar 20 µs: 10 × 10<sup>6</sup> bit/s × 20 × 10<sup>−6</sup> s = 200 bits (25 bytes).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> no exemplo da Fig. 79, qual é o RTT com 100 segmentos de 10 000 bits na fila?
+            <details><summary>Ver solução</summary><p class="mb-0">1 + 100 × 5 + 5 = 506 ms, contra cerca de 6 ms com a fila vazia.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> no ALOHA com slots, qual é a fração de slots vazios com G = 1?
+            <details><summary>Ver solução</summary><p class="mb-0">A probabilidade de nenhum quadro num slot é e<sup>−G</sup> = e<sup>−1</sup> ≈ 36,8%; outros 36,8% têm exatamente um quadro (sucesso) e os 26,4% restantes, colisões.</p></details></li>
+        <li><strong>Desafio:</strong> dois hosts com AIMD (α = 0,1 Mbit/s, β = 0,5) dividem um gargalo de 2 Mbit/s e partem de A = 0,2 e B = 1,4. Depois do primeiro congestionamento, qual é a diferença entre as taxas?
+            <details><summary>Ver solução</summary><p class="mb-0">Os dois crescem juntos e a diferença fica em 1,2. A soma vai de 1,6 para 1,8 e 2,0 (ainda não passa de 2) e, no terceiro aumento, chega a 0,5 + 1,7 = 2,2: congestionado. A diminuição multiplicativa leva a 0,25 e 0,85, e a diferença cai de 1,2 para 0,6. Cada congestionamento corta a diferença pela metade.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Seis trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Quanto custa cada topologia</h3>
+    <pre class="code-block"><code>def malha(n):
+    return n * (n - 1) // 2, n - 1          # enlaces, interfaces por host
+
+def estrela(n):
+    return n, 1
+
+def anel(n):
+    return n, 1
+
+print(f"{'hosts':>6} | {'malha: enlaces':>14} {'interfaces':>10} | {'estrela':>7} | {'anel':>4}")
+for n in (5, 10, 50, 100, 1000):
+    e, i = malha(n)
+    print(f"{n:>6} | {e:>14,} {i:>10} | {estrela(n)[0]:>7} | {anel(n)[0]:>4}")
+
+# Acrescentar um host à malha: quantos enlaces novos?
+n = 5
+print("Do 5º para o 6º host, a malha ganha", malha(n + 1)[0] - malha(n)[0], "enlaces")</code></pre>
+
+    <h3 class="h6 mt-4">2. Alocação max-min por preenchimento progressivo</h3>
+    <pre class="code-block"><code>def max_min(capacidade, fluxos, passo=0.5):
+    """Preenchimento progressivo: todos os fluxos crescem juntos até saturar um enlace."""
+    taxa = {f: 0.0 for f in fluxos}
+    candidatos = set(fluxos)
+    while candidatos:
+        for f in candidatos:
+            taxa[f] += passo
+        carga = {e: sum(taxa[f] for f in fluxos if e in fluxos[f]) for e in capacidade}
+        cheios = {e for e in capacidade if carga[e] >= capacidade[e] - 1e-9}
+        for f in list(candidatos):
+            if fluxos[f] &amp; cheios:          # o fluxo passa por um enlace saturado
+                candidatos.remove(f)
+    return taxa
+
+# Rede da Fig. 60 do livro
+capacidade = {"R1-R2": 10, "R2-R3": 20}
+fluxos = {"A1-A2": {"R1-R2"}, "B1-B2": {"R1-R2", "R2-R3"}, "C1-C2": {"R2-R3"}}
+for f, t in max_min(capacidade, fluxos).items():
+    print(f"{f}: {t:g} Mbit/s")</code></pre>
+
+    <h3 class="h6 mt-4">3. O escalonador round-robin do livro</h3>
+    <pre class="code-block"><code>from collections import deque
+
+def round_robin(filas, tempo_total):
+    """Pseudocódigo do livro (pág. 88): serve as filas em rodízio, um pacote por vez."""
+    n = len(filas)
+    enviados = [0] * n            # bytes enviados por fluxo
+    proxima, tempo = 0, 0
+    while tempo &lt; tempo_total and any(filas):
+        if filas[proxima]:
+            p = filas[proxima].popleft()      # tamanho do pacote em bytes
+            enviados[proxima] += p
+            tempo += p                        # o enlace leva tempo proporcional ao tamanho
+        proxima = (proxima + 1) % n
+    return enviados
+
+tamanhos = [1000, 1000, 1500, 500, 1000]
+filas = [deque([t] * 1000) for t in tamanhos]   # filas sempre cheias
+enviados = round_robin(filas, 100_000)
+total = sum(enviados)
+for i, (t, b) in enumerate(zip(tamanhos, enviados), 1):
+    print(f"fluxo {i} ({t:>4} bytes): {b:>6} bytes = {100 * b / total:4.1f}% da banda")</code></pre>
+
+    <h3 class="h6 mt-4">4. A utilização do ALOHA</h3>
+    <pre class="code-block"><code>import math, random
+
+def puro(G):
+    return G * math.exp(-2 * G)
+
+def com_slots(G):
+    return G * math.exp(-G)
+
+for G in (0.25, 0.5, 1.0, 2.0):
+    print(f"G = {G:4}: ALOHA puro S = {puro(G):.3f} | com slots S = {com_slots(G):.3f}")
+print(f"Máximos: puro 1/(2e) = {1 / (2 * math.e):.3f}; com slots 1/e = {1 / math.e:.3f}")
+
+# Conferência por simulação: ALOHA com slots, chegadas de Poisson com média G por slot
+def simula_slots(G, slots, rnd):
+    sucesso = 0
+    for _ in range(slots):
+        # número de quadros no slot: conta eventos de Poisson com média G
+        k, p, limite = 0, 1.0, math.exp(-G)
+        while True:
+            p *= rnd.random()
+            if p &lt; limite:
+                break
+            k += 1
+        sucesso += (k == 1)
+    return sucesso / slots
+
+rnd = random.Random(1)
+print(f"Simulação com slots, G = 1: S = {simula_slots(1.0, 100_000, rnd):.3f}")</code></pre>
+
+    <h3 class="h6 mt-4">5. Backoff exponencial binário</h3>
+    <pre class="code-block"><code>import random
+
+def disputa(rnd, max_tentativas=16):
+    """Dois hosts colidiram. Devolve quantas colisões houve até um deles transmitir sozinho."""
+    for n in range(1, max_tentativas + 1):
+        k = min(10, n)
+        a = rnd.randint(0, 2 ** k - 1)     # r = random(0, 2**k - 1), como no pseudocódigo do livro
+        b = rnd.randint(0, 2 ** k - 1)
+        if a != b:
+            return n
+    return None
+
+rnd = random.Random(42)
+resultados = [disputa(rnd) for _ in range(10_000)]
+media = sum(resultados) / len(resultados)
+print(f"Colisões em média até resolver: {media:.2f}")
+for n in range(1, 5):
+    print(f"resolvida na colisão {n}: {resultados.count(n) / len(resultados):.1%}")</code></pre>
+
+    <h3 class="h6 mt-4">6. AIMD × AIAD com dois fluxos</h3>
+    <pre class="code-block"><code>def simula(alg, a=0.1, b=1.6, capacidade=2.0, passos=60):
+    """Dois hosts com a mesma realimentação binária: congestionado se a + b > capacidade."""
+    for _ in range(passos):
+        if a + b > capacidade:
+            if alg == "AIMD":
+                a, b = a * 0.5, b * 0.5        # diminuição multiplicativa
+            else:
+                a, b = max(0, a - 0.3), max(0, b - 0.3)   # diminuição aditiva
+        else:
+            a, b = a + 0.1, b + 0.1            # aumento aditivo
+    return a, b
+
+for alg in ("AIMD", "AIAD"):
+    a, b = simula(alg)
+    print(f"{alg}: A = {a:.2f}, B = {b:.2f}, diferença = {abs(a - b):.2f} Mbit/s")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 2.6, "Sharing resources" (pág. 80–115 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 896 — <a href="https://www.rfc-editor.org/rfc/rfc896" target="_blank" rel="noopener noreferrer">Congestion Control in IP/TCP Internetworks</a> (colapso de congestionamento)</li>
+        <li>RFC 3168 — <a href="https://www.rfc-editor.org/rfc/rfc3168" target="_blank" rel="noopener noreferrer">The Addition of Explicit Congestion Notification (ECN) to IP</a></li>
+        <li>RFC 1812 — <a href="https://www.rfc-editor.org/rfc/rfc1812" target="_blank" rel="noopener noreferrer">Requirements for IP Version 4 Routers</a> (desaconselha pacotes de aviso de congestionamento)</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Max-min_fairness" target="_blank" rel="noopener noreferrer">Max-min fairness</a></li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/ALOHAnet" target="_blank" rel="noopener noreferrer">ALOHAnet</a></li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/CSMA/CD" target="_blank" rel="noopener noreferrer">CSMA/CD</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Hidden_node_problem" target="_blank" rel="noopener noreferrer">Hidden node problem</a></li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Token_ring" target="_blank" rel="noopener noreferrer">Token ring</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Additive_increase/multiplicative_decrease" target="_blank" rel="noopener noreferrer">Additive increase/multiplicative decrease</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/E-carrier" target="_blank" rel="noopener noreferrer">E-carrier</a> (complemento sobre a linha E1)</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-05/index.html" class="text-muted text-decoration-none">← Capítulo 5</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 6</span>
+            <a href="../capitulo-07/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 7 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap6.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

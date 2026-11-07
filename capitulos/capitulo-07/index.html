@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 7 — Modelos de referência | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: o modelo de referência de cinco camadas, as camadas física, de enlace, de rede, de transporte e de aplicação, e os modelos TCP/IP e OSI.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="7" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-05/index.html">Capítulo 5</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-06/index.html">Capítulo 6</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-08/index.html">Capítulo 8</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 7</span>
+        <h1 class="display-5 mb-3">Modelos de referência</h1>
+        <p class="lead mb-4">
+            Bits, quadros, pacotes, segmentos e mensagens: os capítulos anteriores foram montando
+            uma pilha de camadas, cada uma usando o serviço da de baixo. Este capítulo dá nome a essa
+            organização, o modelo de referência de cinco camadas, e o compara com os modelos TCP/IP e OSI.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#modelos">1. O modelo de cinco camadas</a>
+                    <a class="nav-link" href="#fisica">2. Camada física</a>
+                    <a class="nav-link" href="#enlace">3. Camada de enlace</a>
+                    <a class="nav-link" href="#rede">4. Camada de rede</a>
+                    <a class="nav-link" href="#transporte">5. Camada de transporte</a>
+                    <a class="nav-link" href="#aplicacao">6. Camada de aplicação</a>
+                    <a class="nav-link" href="#tcpip-osi">7. TCP/IP e OSI</a>
+                    <a class="nav-link" href="#exercicios-cap7">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Uma pilha para organizar tudo</h2>
+    <p>
+        Com a complexidade crescente das redes, os pesquisadores dos anos 1970 propuseram
+        <strong>modelos de referência</strong> para facilitar a descrição de protocolos e serviços. O mais
+        influente foi o modelo <strong>OSI</strong> (<em>Open Systems Interconnection</em>), base da
+        padronização de redes na ISO. O modelo usado pelo livro, e por este site, é uma versão simplificada
+        do OSI, com cinco camadas.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Nomear as cinco camadas do modelo de referência e a ordem entre elas.</li>
+                <li>Descrever o serviço de cada camada e as imperfeições do serviço da camada física.</li>
+                <li>Usar a terminologia do livro: <strong>bits</strong>, <strong>quadros</strong>, <strong>pacotes</strong>, <strong>segmentos</strong> e <strong>SDUs</strong>.</li>
+                <li>Explicar por que um roteador só vai até a camada de rede.</li>
+                <li>Comparar o modelo de cinco camadas com o <strong>TCP/IP</strong> (quatro) e o <strong>OSI</strong> (sete).</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Cada camada já apareceu antes: física e enlace no <a href="../capitulo-01/index.html">Capítulo 1</a>,
+                rede no <a href="../capitulo-02/index.html">Capítulo 2</a>, aplicação no
+                <a href="../capitulo-03/index.html">Capítulo 3</a> e transporte no
+                <a href="../capitulo-04/index.html">Capítulo 4</a>. O capítulo cobre a seção 2.7 do livro
+                (pág. 115–119 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Modelo de cinco camadas -->
+<section id="modelos" class="chapter-section" data-conceito="modelos" data-titulo="O modelo de cinco camadas">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">O modelo de referência de cinco camadas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Para descrever uma rede sem se perder nos detalhes, é útil dividi-la em camadas: cada uma oferece um
+        serviço à camada de cima usando o serviço da camada de baixo. Que camadas são essas?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O modelo do livro tem cinco camadas (Fig. 91). De cima para baixo: <strong>aplicação</strong>,
+        <strong>transporte</strong>, <strong>rede</strong>, <strong>enlace</strong> e <strong>física</strong>,
+        esta última ligada ao meio de transmissão físico. Os hosts têm as cinco camadas; os roteadores, que
+        só encaminham pacotes, vão até a camada de rede (Fig. 94 e 95).
+    </p>
+    <figure class="diagram">
+        <svg viewBox="0 0 400 230" class="sim-svg w-100" style="max-height:250px" role="img" aria-label="Cinco camadas empilhadas: aplicação, transporte, rede, enlace e física, sobre o meio de transmissão físico.">
+            <title>As cinco camadas do modelo de referência, de cima para baixo: aplicação, transporte, rede, enlace e física; abaixo da física, o meio de transmissão físico.</title>
+            <g font-size="13" text-anchor="middle">
+                <rect class="camada" x="120" y="10" width="160" height="34" rx="5"/><text x="200" y="32">Aplicação</text>
+                <rect class="camada" x="120" y="50" width="160" height="34" rx="5"/><text x="200" y="72">Transporte</text>
+                <rect class="camada" x="120" y="90" width="160" height="34" rx="5"/><text x="200" y="112">Rede</text>
+                <rect class="camada" x="120" y="130" width="160" height="34" rx="5"/><text x="200" y="152">Enlace</text>
+                <rect class="camada" x="120" y="170" width="160" height="34" rx="5"/><text x="200" y="192">Física</text>
+                <line class="linha" x1="40" y1="218" x2="360" y2="218"/>
+                <text x="200" y="230" font-size="11">meio de transmissão físico</text>
+            </g>
+        </svg>
+        <figcaption>As cinco camadas do modelo de referência (baseado na Fig. 91 do livro).</figcaption>
+    </figure>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Siga uma mensagem de A até B, camada por camada, passando por um roteador.</p>
+    <div class="demo-box" data-sim="pilha-camadas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Uma versão simplificada do modelo OSI|Uma versão ampliada do TCP/IP com sete camadas|Um modelo sem relação com o OSI" data-answer="0" data-explain="O livro diz que o seu modelo de cinco camadas pode ser visto como uma versão simplificada do OSI." data-hint="Releia a apresentação do capítulo.">
+        <p class="fw-semibold mb-2">Como o livro descreve o seu modelo de cinco camadas?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cinco camadas: aplicação, transporte, rede, enlace e física.</li>
+        <li>Cada camada usa o serviço da de baixo e serve a de cima.</li>
+        <li>Hosts têm as cinco; roteadores vão até a rede.</li>
+    </ul>
+</section>
+
+<!-- 2. Física -->
+<section id="fisica" class="chapter-section" data-conceito="fisica" data-titulo="Camada física">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">A camada física</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Na base da pilha, dois dispositivos ligados diretamente por um meio físico trocam um sinal elétrico ou
+        óptico. É o assunto do começo do <a href="../capitulo-01/index.html">Capítulo 1</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O ponto importante é o <strong>serviço</strong> que a camada física oferece: em geral, um serviço
+        <strong>não confiável</strong> de troca de <strong>bits</strong>, a unidade de informação dessa camada
+        (Fig. 92). Ele não é confiável porque a camada física pode:
+    </p>
+    <ul>
+        <li>mudar o valor de um bit transmitido, por exemplo por interferência eletromagnética;</li>
+        <li>entregar ao receptor <strong>mais</strong> bits do que o emissor enviou;</li>
+        <li>entregar ao receptor <strong>menos</strong> bits do que o emissor enviou.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="fisica-nao-confiavel"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O bit|O quadro|O byte" data-answer="0" data-explain="A camada física troca bits; quadros são a unidade da camada de enlace." data-hint="Pense no que circula pelo meio na Fig. 92.">
+        <p class="fw-semibold mb-2">Qual é a unidade de informação da camada física?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Unidade: o bit.</li>
+        <li>Serviço não confiável: bits trocados, a mais ou a menos.</li>
+    </ul>
+</section>
+
+<!-- 3. Enlace -->
+<section id="enlace" class="chapter-section" data-conceito="enlace" data-titulo="Camada de enlace">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">A camada de enlace</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Sobre o serviço imperfeito da camada física, a camada de enlace permite que dois hosts ligados
+        diretamente troquem informação organizada, como os quadros do <a href="../capitulo-01/index.html">Capítulo 1</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A unidade da camada de enlace é o <strong>quadro</strong> (<em>frame</em>), uma sequência finita de bits.
+        As camadas de enlace variam bastante: algumas usam quadros de tamanho variável e outras de tamanho fixo;
+        algumas oferecem serviço orientado a conexão e outras sem conexão; algumas entregam com confiabilidade
+        e outras não dão garantias.
+    </p>
+    <p>
+        A Fig. 93 mostra duas entidades de enlace trocando quadros "diretamente", mas na prática a entidade da
+        esquerda emite um <span class="mono">Data.request</span> para a camada física <strong>para cada bit</strong>
+        do quadro. A física converte os bits num sinal; do outro lado, decodifica o sinal e emite os
+        <span class="mono">Data.indication</span> correspondentes. Sem erros de transmissão, a entidade da direita
+        recebe o quadro enviado.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="1000|1|125" data-answer="0" data-explain="A camada de enlace emite um Data.request por bit do quadro." data-hint="Releia como a entidade de enlace usa a camada física.">
+        <p class="fw-semibold mb-2">Para enviar um quadro de 1000 bits, quantos <span class="mono">Data.request</span> a camada de enlace emite para a camada física?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Unidade: o quadro, uma sequência finita de bits.</li>
+        <li>Liga hosts conectados diretamente; o serviço pode ou não ser confiável.</li>
+        <li>Usa a física bit a bit: um Data.request por bit.</li>
+    </ul>
+</section>
+
+<!-- 4. Rede -->
+<section id="rede" class="chapter-section" data-conceito="rede" data-titulo="Camada de rede">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">A camada de rede</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A camada de enlace só liga hosts ligados diretamente. Muitas vezes, porém, os hosts que precisam
+        conversar não estão no mesmo meio físico. Esse é o trabalho da camada de rede, o tema do
+        <a href="../capitulo-02/index.html">Capítulo 2</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        As entidades de rede trocam <strong>pacotes</strong>: sequências finitas de bytes transportadas pela
+        camada de enlace dentro de um ou mais quadros. Um pacote costuma levar informação sobre a origem e o
+        destino e passa por vários dispositivos intermediários, os <strong>roteadores</strong>, no caminho (Fig. 94).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Dentro de um ou mais quadros|Dentro de um segmento|Diretamente como sinal elétrico" data-answer="0" data-explain="O pacote é transportado pela camada de enlace dentro de um ou mais quadros." data-hint="Qual camada fica logo abaixo da rede?">
+        <p class="fw-semibold mb-2">Como um pacote é transportado entre dois nós vizinhos?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Unidade: o pacote, uma sequência finita de bytes, com origem e destino.</li>
+        <li>Liga hosts em meios diferentes, através de roteadores.</li>
+    </ul>
+</section>
+
+<!-- 5. Transporte -->
+<section id="transporte" class="chapter-section" data-conceito="transporte" data-titulo="Camada de transporte">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">A camada de transporte</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A camada de rede faz os hosts se alcançarem, mas entre os mesmos dois hosts podem existir vários fluxos
+        de comunicação, com necessidades diferentes: alguns exigem entrega confiável, outros não.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Identificar um fluxo de comunicação entre dois hosts é tarefa da <strong>camada de transporte</strong>
+        (o <a href="../capitulo-04/index.html">Capítulo 4</a>). Suas entidades trocam <strong>segmentos</strong>,
+        sequências finitas de bytes transportadas dentro de um ou mais pacotes; a entidade de transporte entrega
+        segmentos (ou partes deles) à camada de rede como <span class="mono">Data.request</span> (Fig. 95). Na
+        Internet, as camadas de transporte mais usadas são o <strong>TCP</strong>, um serviço confiável, orientado
+        a conexão e de fluxo de bytes, e o <strong>UDP</strong>, um serviço não confiável e sem conexão.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Identificar os fluxos de comunicação entre dois hosts|Levar pacotes por roteadores|Converter bits em sinais" data-answer="0" data-explain="A rede liga os hosts; o transporte distingue os fluxos que existem entre eles." data-hint="O que a camada de rede não resolve sozinha?">
+        <p class="fw-semibold mb-2">Qual é a tarefa da camada de transporte segundo o livro?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="TCP|UDP|Os dois" data-answer="1" data-explain="O UDP oferece um serviço não confiável e sem conexão; o TCP é confiável, orientado a conexão e de fluxo de bytes." data-hint="Releia a descrição dos dois protocolos.">
+        <p class="fw-semibold mb-2">Qual protocolo de transporte oferece um serviço sem conexão e não confiável?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Unidade: o segmento, transportado em um ou mais pacotes.</li>
+        <li>Distingue fluxos entre os mesmos hosts.</li>
+        <li>TCP: confiável, com conexão, fluxo de bytes. UDP: não confiável, sem conexão.</li>
+    </ul>
+</section>
+
+<!-- 6. Aplicação -->
+<section id="aplicacao" class="chapter-section" data-conceito="aplicacao" data-titulo="Camada de aplicação">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">A camada de aplicação e a terminologia</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No topo da pilha estão as aplicações, como as do <a href="../capitulo-03/index.html">Capítulo 3</a>.
+        Com cinco camadas trocando informação, convém ter um nome para a unidade de cada uma.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A camada de aplicação inclui todos os mecanismos e estruturas de dados de que as aplicações precisam.
+        A informação trocada entre duas entidades de aplicação é chamada de <strong>ADU</strong>
+        (<em>Application Data Unit</em>) ou, de forma genérica, <strong>SDU</strong> (<em>Service Data Unit</em>)
+        (Fig. 96). Daqui em diante, o livro usa sempre esta terminologia:
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm small">
+            <thead><tr><th>Camada</th><th>As entidades trocam</th></tr></thead>
+            <tbody>
+                <tr><td>Física</td><td>bits</td></tr>
+                <tr><td>Enlace</td><td>quadros</td></tr>
+                <tr><td>Rede</td><td>pacotes</td></tr>
+                <tr><td>Transporte</td><td>segmentos</td></tr>
+                <tr><td>Aplicação</td><td>SDUs</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="unidades-camadas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Segmentos|Pacotes|Quadros" data-answer="0" data-explain="Entidades de transporte trocam segmentos; os pacotes são da camada de rede." data-hint="Use a tabela acima.">
+        <p class="fw-semibold mb-2">O que trocam duas entidades da camada de transporte?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Aplicação: mecanismos e estruturas das aplicações; unidade ADU ou SDU.</li>
+        <li>Bits, quadros, pacotes, segmentos e SDUs, de baixo para cima.</li>
+    </ul>
+</section>
+
+<!-- 7. TCP/IP e OSI -->
+<section id="tcpip-osi" class="chapter-section" data-conceito="tcpip-osi" data-titulo="TCP/IP e OSI">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Os modelos TCP/IP e OSI</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Dois modelos de referência fizeram sucesso na comunidade de redes: o TCP/IP e o OSI. Como eles se
+        comparam com o modelo de cinco camadas?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        <strong>TCP/IP:</strong> ao contrário do OSI, a comunidade TCP/IP não se esforçou para definir um modelo
+        detalhado; os objetivos da arquitetura da Internet só foram documentados depois que o TCP/IP já estava em
+        uso. A RFC 1122, que define os requisitos dos hosts da Internet, cita quatro camadas: <strong>aplicação</strong>,
+        <strong>transporte</strong>, <strong>Internet</strong> (equivalente à rede do modelo do livro) e
+        <strong>enlace</strong> (<em>link</em>), que junta as funções das camadas física e de enlace. Fora essa
+        diferença nas camadas de baixo, o TCP/IP é muito próximo do modelo de cinco camadas.
+    </p>
+    <p>
+        <strong>OSI:</strong> tem sete camadas (Fig. 97). As quatro de baixo são parecidas com as do modelo do
+        livro; a camada de aplicação é refinada em três:
+    </p>
+    <ul>
+        <li><strong>Sessão:</strong> organiza e sincroniza o diálogo entre as entidades de apresentação. Enquanto o transporte lida com a falta de confiabilidade da rede, a sessão esconde as falhas das conexões de transporte: estabelece a conexão de sessão, mantém a troca em ordem (inclusive após uma liberação abrupta da conexão de transporte) e a encerra de forma ordenada.</li>
+        <li><strong>Apresentação:</strong> lida com as diferentes formas de representar a informação nos computadores (inteiros de 32 ou 64 bits, números de ponto flutuante, códigos de caracteres, registros estruturados), oferecendo uma representação comum dos dados. A notação <strong>ASN.1</strong> foi criada para ela e ainda é usada por alguns protocolos.</li>
+        <li><strong>Aplicação:</strong> o que não cabe na sessão nem na apresentação; no OSI, ela é dividida em vários elementos de serviço genéricos.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro diz que o Unicode representa "mais de 100 000 caracteres" e que ainda não é o padrão universal
+        de troca de texto. As versões atuais do Unicode já passam de 150 000 caracteres, e o UTF-8 se tornou a
+        codificação dominante na Web (<a href="https://en.wikipedia.org/wiki/Unicode" target="_blank" rel="noopener noreferrer">Wikipedia: Unicode</a>).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="comparar-modelos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Física e enlace|Rede e transporte|Sessão e apresentação" data-answer="0" data-explain="A camada link da RFC 1122 junta as funções da física e do enlace do modelo de cinco camadas." data-hint="Compare a parte de baixo das pilhas no diagrama.">
+        <p class="fw-semibold mb-2">A camada de enlace (<em>link</em>) do TCP/IP corresponde a quais camadas do modelo do livro?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Apresentação|Sessão|Transporte" data-answer="0" data-explain="A apresentação oferece uma representação comum dos dados, e a ASN.1 foi criada para ela." data-hint="Qual camada do OSI trata da representação da informação?">
+        <p class="fw-semibold mb-2">Em que camada do OSI fica a notação ASN.1?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>TCP/IP (RFC 1122): aplicação, transporte, Internet e enlace (física + enlace).</li>
+        <li>OSI: sete camadas; a aplicação do livro vira aplicação, apresentação e sessão.</li>
+        <li>O modelo do livro fica entre os dois.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap7" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> ordene de baixo para cima: segmento, bit, SDU, pacote, quadro.
+            <details><summary>Ver solução</summary><p class="mb-0">Bit (física), quadro (enlace), pacote (rede), segmento (transporte) e SDU (aplicação).</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> um host A envia a B por dois roteadores. Quantas vezes a mensagem passa por uma camada de rede?
+            <details><summary>Ver solução</summary><p class="mb-0">Quatro: em A, nos dois roteadores e em B. A camada de transporte só é usada em A e em B.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> uma SDU de 1000 bytes ganha cabeçalhos de 20 bytes no transporte, 20 na rede e 18 no enlace. Quantos bits a camada física transmite?
+            <details><summary>Ver solução</summary><p class="mb-0">1000 + 20 + 20 + 18 = 1058 bytes, ou 8464 bits, e a camada de enlace emite 8464 <span class="mono">Data.request</span>.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> a camada física entregou 01010010 quando o emissor enviou 0101010. O que aconteceu?
+            <details><summary>Ver solução</summary><p class="mb-0">Chegaram 8 bits para 7 enviados: a camada física entregou bits a mais (um bit 0 a mais depois da quinta posição).</p></details></li>
+        <li><strong>Desafio:</strong> uma aplicação precisa retomar uma transferência longa depois que a conexão de transporte cai, sem recomeçar do zero. Em que camada do OSI esse mecanismo ficaria? E no modelo do livro?
+            <details><summary>Ver solução</summary><p class="mb-0">No OSI, na camada de sessão, que esconde as falhas das conexões de transporte. No modelo de cinco camadas (e no TCP/IP), dentro da própria camada de aplicação.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Encapsulamento e desencapsulamento</h3>
+    <pre class="code-block"><code># Cada camada acrescenta o seu cabeçalho na frente do que recebeu de cima.
+CABECALHOS = [
+    ("transporte", b"[SEG porta=80]"),
+    ("rede",       b"[PKT A->B]"),
+    ("enlace",     b"[QUADRO]"),
+]
+
+def desce(sdu):
+    unidade = sdu
+    for camada, cab in CABECALHOS:
+        unidade = cab + unidade
+        print(f"{camada:>10}: {unidade}")
+    return unidade
+
+def sobe(quadro):
+    unidade = quadro
+    for camada, cab in reversed(CABECALHOS):
+        assert unidade.startswith(cab), f"cabeçalho de {camada} não confere"
+        unidade = unidade[len(cab):]
+        print(f"{camada:>10} entrega: {unidade}")
+    return unidade
+
+quadro = desce(b"GET /index.html")
+bits = "".join(f"{byte:08b}" for byte in quadro)
+print(f"    física: {len(bits)} bits, começando por {bits[:24]}...")
+print("Recebido pela aplicação:", sobe(quadro))</code></pre>
+
+    <h3 class="h6 mt-4">2. Uma camada física não confiável</h3>
+    <pre class="code-block"><code>import random
+
+def canal_fisico(bits, rnd):
+    """Camada física não confiável: troca, insere ou remove um bit (livro, pág. 115)."""
+    i = rnd.randrange(len(bits))
+    tipo = rnd.choice(["troca", "insere", "remove"])
+    if tipo == "troca":
+        return bits[:i] + ("1" if bits[i] == "0" else "0") + bits[i + 1:]
+    if tipo == "insere":
+        return bits[:i] + rnd.choice("01") + bits[i:]
+    return bits[:i] + bits[i + 1:]
+
+def diagnostica(enviado, recebido):
+    if len(recebido) > len(enviado):
+        return "bits a mais"
+    if len(recebido) &lt; len(enviado):
+        return "bits a menos"
+    if recebido != enviado:
+        return "bit trocado"
+    return "sem erro"
+
+rnd = random.Random(4)
+enviado = "01010010100010101001010"       # a sequência da Fig. 92 do livro
+for _ in range(5):
+    recebido = canal_fisico(enviado, rnd)
+    print(f"{recebido:&lt;25} -> {diagnostica(enviado, recebido)}")</code></pre>
+
+    <h3 class="h6 mt-4">3. Três modelos lado a lado</h3>
+    <pre class="code-block"><code>CINCO = ["Aplicação", "Transporte", "Rede", "Enlace", "Física"]
+OSI = ["Aplicação", "Apresentação", "Sessão", "Transporte", "Rede", "Enlace", "Física"]
+TCPIP = ["Aplicação", "Transporte", "Internet", "Enlace (link)"]
+
+# Para cada camada do modelo de 5 camadas: camadas equivalentes no OSI e no TCP/IP
+CORRESPONDE = {
+    "Aplicação":  (["Aplicação", "Apresentação", "Sessão"], "Aplicação"),
+    "Transporte": (["Transporte"], "Transporte"),
+    "Rede":       (["Rede"], "Internet"),
+    "Enlace":     (["Enlace"], "Enlace (link)"),
+    "Física":     (["Física"], "Enlace (link)"),
+}
+UNIDADE = {"Aplicação": "SDU", "Transporte": "segmento", "Rede": "pacote", "Enlace": "quadro", "Física": "bit"}
+
+print(f"{'5 camadas':&lt;11} {'unidade':&lt;9} {'OSI':&lt;36} TCP/IP")
+for camada in CINCO:
+    osi, tcpip = CORRESPONDE[camada]
+    print(f"{camada:&lt;11} {UNIDADE[camada]:&lt;9} {' + '.join(osi):&lt;36} {tcpip}")
+print(f"OSI: {len(OSI)} camadas · 5 camadas · TCP/IP: {len(TCPIP)} camadas")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 2.7, "The reference models" (pág. 115–119 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 1122 — <a href="https://www.rfc-editor.org/rfc/rfc1122" target="_blank" rel="noopener noreferrer">Requirements for Internet Hosts — Communication Layers</a> (as quatro camadas do TCP/IP)</li>
+        <li>ITU-T X.200 — <a href="https://www.itu.int/rec/T-REC-X.200-199407-I/en" target="_blank" rel="noopener noreferrer">Open Systems Interconnection — Basic Reference Model</a> (o modelo OSI, citado pelo livro como [X200])</li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Modelo_OSI" target="_blank" rel="noopener noreferrer">Modelo OSI</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Internet_protocol_suite" target="_blank" rel="noopener noreferrer">Internet protocol suite</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Unicode" target="_blank" rel="noopener noreferrer">Unicode</a> (complemento)</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-06/index.html" class="text-muted text-decoration-none">← Capítulo 6</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 7</span>
+            <a href="../capitulo-08/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 8 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap7.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

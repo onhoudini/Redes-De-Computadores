@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 5 — Nomes e endereços | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: endereços de rede e de transporte, nomes, hosts.txt, a árvore de nomes de domínio, a sintaxe dos nomes, nomes internacionalizados, ataque homógrafo, resolução pelo DNS e benefícios dos nomes.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="5" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-06/index.html">Capítulo 6</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-07/index.html">Capítulo 7</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-08/index.html">Capítulo 8</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 5</span>
+        <h1 class="display-5 mb-3">Nomes e endereços</h1>
+        <p class="lead mb-4">
+            As camadas de rede e de transporte trabalham com endereços: cadeias de bits de tamanho fixo.
+            Pessoas, por outro lado, preferem nomes. Este capítulo mostra como a Internet passou de um
+            único arquivo com todos os nomes para o DNS, uma base de dados distribuída em árvore, e por
+            que as aplicações devem depender de nomes, e não de endereços.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#enderecos">1. Endereços</a>
+                    <a class="nav-link" href="#nomes">2. Por que nomes</a>
+                    <a class="nav-link" href="#hosts-txt">3. O arquivo hosts.txt</a>
+                    <a class="nav-link" href="#hierarquia">4. A árvore de nomes</a>
+                    <a class="nav-link" href="#sintaxe">5. Sintaxe dos nomes</a>
+                    <a class="nav-link" href="#idn">6. Nomes internacionais</a>
+                    <a class="nav-link" href="#resolucao">7. Resolução pelo DNS</a>
+                    <a class="nav-link" href="#beneficios">8. Benefícios dos nomes</a>
+                    <a class="nav-link" href="#exercicios-cap5">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">De endereços a nomes</h2>
+    <p>
+        Nos capítulos anteriores, cada host tinha um <strong>endereço</strong> de rede, e cada aplicação,
+        uma <strong>porta</strong>. Endereços são naturais para as entidades de rede e de transporte, mas
+        não para pessoas: ninguém quer decorar a cadeia de bits de cada servidor. A solução é dar
+        <strong>nomes</strong> aos hosts e usar um <strong>serviço de mapeamento</strong> que traduz cada
+        nome no endereço correspondente.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar o papel dos endereços de rede, do campo de protocolo e das portas na multiplexação.</li>
+                <li>Justificar o uso de <strong>nomes</strong> como um nível de indireção sobre os endereços.</li>
+                <li>Descrever o <strong>hosts.txt</strong> e por que ele não escala.</li>
+                <li>Ler e montar nomes totalmente qualificados na <strong>árvore de nomes de domínio</strong> e validá-los pela gramática BNF.</li>
+                <li>Explicar os nomes internacionalizados (<span class="mono">xn--</span>) e o <strong>ataque homógrafo</strong>.</li>
+                <li>Seguir a <strong>resolução</strong> de um nome pelos servidores raiz, pela delegação e pelos <strong>resolvedores</strong> com cache.</li>
+                <li>Listar os benefícios dos nomes: mobilidade de servidores, distribuição de carga e vários serviços num só servidor.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                O capítulo usa a multiplexação por portas do <a href="../capitulo-04/index.html#portas">Capítulo 4</a>,
+                o modelo cliente-servidor e as gramáticas BNF/ABNF do <a href="../capitulo-03/index.html">Capítulo 3</a>.
+                Ele cobre a seção 2.5 do livro (pág. 76–80 do PDF). O DNS em detalhe fica para a Parte 2 do livro.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Endereços -->
+<section id="enderecos" class="chapter-section" data-conceito="enderecos" data-titulo="Endereços">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">Endereços nas camadas de rede e de transporte</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Um mesmo host pode rodar, ao mesmo tempo, um protocolo de transporte confiável e um protocolo
+        de transporte sem conexão. Quando chega um pacote, como a camada de rede sabe a qual deles
+        entregar o segmento? E, quando o segmento chega à camada de transporte, a qual aplicação?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        As camadas de rede e de transporte usam <strong>endereços</strong> codificados como cadeias de
+        bits de tamanho fixo. Um endereço de rede identifica um host de forma única. Para multiplexar os
+        segmentos dos vários protocolos de transporte, o cabeçalho do pacote leva um <strong>campo</strong>
+        que indica qual protocolo deve processar o segmento. Como existem poucos protocolos de transporte,
+        esse campo não precisa ser longo. Os <strong>números de porta</strong> têm o papel equivalente na
+        camada de transporte: permitem multiplexar os dados de vários processos de aplicação.
+    </p>
+    <figure class="diagram">
+        <svg viewBox="0 0 640 190" class="sim-svg w-100" style="max-height:220px" role="img" aria-label="Um pacote chega a um host; o campo de protocolo escolhe o protocolo de transporte e a porta escolhe a aplicação.">
+            <title>Dois níveis de multiplexação: o campo de protocolo do pacote escolhe entre o transporte confiável e o sem conexão; a porta do segmento escolhe a aplicação.</title>
+            <g font-size="12" text-anchor="middle">
+                <rect class="camada" x="230" y="140" width="180" height="34" rx="5"/><text x="320" y="162">Rede (endereço do host)</text>
+                <rect class="camada" x="90" y="80" width="200" height="34" rx="5"/><text x="190" y="102">Transporte confiável</text>
+                <rect class="camada" x="350" y="80" width="200" height="34" rx="5"/><text x="450" y="102">Transporte sem conexão</text>
+                <line class="linha" x1="300" y1="140" x2="200" y2="114"/><line class="linha" x1="340" y1="140" x2="440" y2="114"/>
+                <text x="320" y="128" font-size="11">campo de protocolo</text>
+                <rect class="no" x="40" y="16" width="110" height="30" rx="5"/><text x="95" y="36">aplicação, porta 80</text>
+                <rect class="no" x="170" y="16" width="120" height="30" rx="5"/><text x="230" y="36">aplicação, porta 25</text>
+                <rect class="no" x="390" y="16" width="120" height="30" rx="5"/><text x="450" y="36">aplicação, porta 53</text>
+                <line class="linha" x1="170" y1="80" x2="95" y2="46"/><line class="linha" x1="210" y1="80" x2="230" y2="46"/><line class="linha" x1="450" y1="80" x2="450" y2="46"/>
+                <text x="590" y="36" font-size="11">portas</text>
+            </g>
+        </svg>
+        <figcaption>Dois níveis de multiplexação dentro de um host. Ilustração do texto do livro (pág. 76); os números de porta são exemplos.</figcaption>
+    </figure>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque só existem poucos protocolos de transporte|Porque o endereço do host já identifica o protocolo|Porque o protocolo é sempre o mesmo em toda a Internet" data-answer="0" data-explain="Com poucos protocolos de transporte para distinguir, bastam poucos bits." data-hint="O livro justifica o tamanho do campo pela quantidade de valores que ele precisa distinguir.">
+        <p class="fw-semibold mb-2">Por que o campo do pacote que indica o protocolo de transporte pode ser curto?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Endereço de rede: identifica o host.</li>
+        <li>Campo de protocolo no pacote: escolhe o protocolo de transporte.</li>
+        <li>Porta no segmento: escolhe o processo de aplicação.</li>
+    </ul>
+</section>
+
+<!-- 2. Nomes -->
+<section id="nomes" class="chapter-section" data-conceito="nomes" data-titulo="Por que nomes">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Por que usar nomes</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nos primeiros anos da Internet, poucos hosts (principalmente minicomputadores) estavam ligados à
+        rede, e as aplicações mais populares eram login remoto e transferência de arquivos. Em 1983 já havia
+        cerca de quinhentos hosts, cada um com um endereço único. Obrigar as pessoas a decorar esses
+        endereços não era nada prático.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Pessoas preferem lembrar <strong>nomes</strong>. Um nome é uma cadeia de caracteres, e um
+        <strong>serviço de mapeamento</strong> permite que as aplicações traduzam cada nome no endereço
+        correspondente. Além de ser mais amigável, isso cria um <strong>nível de indireção</strong>, muito
+        útil em várias situações.
+    </p>
+    <p>
+        Usar nomes como apelidos de endereços é uma técnica comum em computação. Quem programa numa
+        linguagem de alto nível escreve com <strong>variáveis</strong>, sem saber se elas ficam na memória
+        ou em registradores. Do mesmo jeito, como os nomes estão num nível acima dos endereços, os endereços
+        viram meros identificadores técnicos, que podem mudar à vontade. <strong>Só os nomes são estáveis.</strong>
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O endereço, porque é o que a rede usa|O nome, porque o endereço pode mudar sem que os usuários percebam|Os dois mudam juntos sempre" data-answer="1" data-explain="Os endereços viram identificadores técnicos que podem mudar; só os nomes são estáveis." data-hint="Pense na analogia com as variáveis de um programa.">
+        <p class="fw-semibold mb-2">Com um serviço de nomes, o que deve permanecer estável para os usuários de um servidor?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Endereços servem à rede; nomes servem às pessoas.</li>
+        <li>Um serviço de mapeamento traduz nome → endereço.</li>
+        <li>O nome é um nível de indireção: o endereço pode mudar, o nome fica.</li>
+    </ul>
+</section>
+
+<!-- 3. hosts.txt -->
+<section id="hosts-txt" class="chapter-section" data-conceito="hosts-txt" data-titulo="O arquivo hosts.txt">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">O arquivo hosts.txt</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A primeira solução para usar nomes foi um simples arquivo de texto, parecido com a tabela de
+        símbolos de um programa compilado: o <strong>hosts.txt</strong>, com o nome e o endereço de cada
+        host da Internet.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O arquivo era mantido pela SRI International, que coordenava o <strong>Network Information Center
+        (NIC)</strong>. Quando um novo host era ligado à rede, o administrador registrava o nome e o endereço
+        no NIC, que atualizava o hosts.txt no seu servidor. Todos os hosts da Internet baixavam regularmente
+        a versão atualizada e a guardavam num local conhecido (RFC 952), onde as aplicações a consultavam.
+    </p>
+    <p>
+        Isso funciona com algumas centenas de hosts, mas não com milhares ou milhões. Além disso, a ARPANet
+        usava um <strong>espaço de nomes plano</strong>: cada host tinha um nome único na rede inteira. Para
+        evitar colisões, os nomes costumavam juntar o nome da instituição a um sufixo para o host, uma
+        espécie de hierarquia improvisada.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Registre hosts no NIC e veja o que acontece com o arquivo. Depois, aumente o tamanho da rede.</p>
+    <div class="demo-box" data-sim="hosts-txt"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Cada host baixa o arquivo inteiro a cada atualização, e o arquivo cresce com o número de hosts|O arquivo não permite nomes com letras maiúsculas|O NIC não tinha servidores" data-answer="0" data-explain="O tamanho do arquivo e o número de hosts que o baixam crescem juntos: o tráfego cresce com o quadrado do número de hosts." data-hint="Use a barra de escala da simulação e compare 500 e 50 000 hosts.">
+        <p class="fw-semibold mb-2">Por que o hosts.txt não serve para uma rede com milhões de hosts?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>hosts.txt: um arquivo central com todos os pares nome–endereço, mantido pelo NIC.</li>
+        <li>Espaço de nomes plano: cada nome precisa ser único na rede inteira.</li>
+        <li>Não escala: o arquivo e o número de cópias crescem juntos.</li>
+    </ul>
+</section>
+
+<!-- 4. Hierarquia -->
+<section id="hierarquia" class="chapter-section" data-conceito="hierarquia" data-titulo="A árvore de nomes">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">A árvore de nomes de domínio</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        As limitações do espaço plano ficaram claras antes do fim da ARPANet, e a RFC 819 propôs um esquema
+        de nomes <strong>hierárquico</strong>. A RFC discutia organizar os nomes como um grafo dirigido, mas
+        a Internet optou por uma <strong>árvore</strong> capaz de conter todos os nomes.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li>Os <strong>domínios de topo</strong> (TLDs, <em>top-level domains</em>) estão ligados direto à raiz. O primeiro foi o <span class="mono">.arpa</span>, acrescentado como sufixo aos nomes do hosts.txt.</li>
+        <li>Em 1984 vieram os TLDs genéricos <span class="mono">.gov</span>, <span class="mono">.edu</span>, <span class="mono">.com</span>, <span class="mono">.mil</span> e <span class="mono">.org</span>.</li>
+        <li>A RFC 1032 propôs usar os códigos de país de duas letras da ISO-3166, como <span class="mono">.be</span> (Bélgica), <span class="mono">.fr</span> (França), <span class="mono">.us</span> (EUA) e <span class="mono">.tv</span> (Tuvalu). Assim, todo país ganhou automaticamente um TLD.</li>
+        <li>O conjunto de TLDs é gerido pela <strong>ICANN</strong>, que também cria TLDs genéricos sem ligação com países (por exemplo, <span class="mono">.cat</span>, para a língua catalã).</li>
+        <li>Cada TLD é gerido por uma organização que decide como registrar subdomínios. A maioria usa a regra "quem chegar primeiro leva", com exceções: <span class="mono">.gov</span> é do governo dos EUA, <span class="mono">.int</span> é de organizações internacionais e <span class="mono">.ca</span> é principalmente de quem tem presença no Canadá.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro diz que havia "discussões em andamento" na ICANN para aumentar o número de TLDs. Isso já
+        aconteceu: a lista oficial da IANA tem hoje mais de mil TLDs
+        (<a href="https://data.iana.org/TLD/tlds-alpha-by-domain.txt" target="_blank" rel="noopener noreferrer">lista da IANA</a>).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">A árvore da Fig. 53 do livro. Clique num nó para montar o nome totalmente qualificado.</p>
+    <div class="demo-box" data-sim="arvore-dominios"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Um host chamado www, no domínio computer-networking, dentro do TLD info|Um domínio chamado info, dentro de computer-networking, dentro de www|Três servidores diferentes, um para cada rótulo" data-answer="0" data-explain="O nome é lido da esquerda para a direita: primeiro o host, depois os domínios, até o TLD; a raiz fica implícita à direita." data-hint="Na árvore, o TLD fica logo abaixo da raiz.">
+        <p class="fw-semibold mb-2">O que significa <span class="mono">www.computer-networking.info</span>?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Os nomes formam uma árvore; os TLDs ficam logo abaixo da raiz.</li>
+        <li>TLDs genéricos (<span class="mono">.com</span>, <span class="mono">.org</span>…) e de país (<span class="mono">.be</span>, <span class="mono">.fr</span>…).</li>
+        <li>A ICANN gere os TLDs; cada TLD define as regras dos seus subdomínios.</li>
+    </ul>
+</section>
+
+<!-- 5. Sintaxe -->
+<section id="sintaxe" class="chapter-section" data-conceito="sintaxe" data-titulo="Sintaxe dos nomes">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">A sintaxe dos nomes totalmente qualificados</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Para que todos os programas aceitem os mesmos nomes, a sintaxe precisa ser precisa. A RFC 1035 a
+        define com uma gramática BNF, o mesmo tipo de notação que você viu no Capítulo 3.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <pre class="mono small p-3 rounded" style="background:var(--surface-2);white-space:pre-wrap">domain ::= subdomain | " "
+subdomain ::= label | subdomain "." label
+label ::= letter [ [ ldh-str ] let-dig ]
+ldh-str ::= let-dig-hyp | let-dig-hyp ldh-str
+let-dig-hyp ::= let-dig | "-"
+let-dig ::= letter | digit
+letter ::= qualquer uma das 52 letras de A a Z, maiúsculas ou minúsculas
+digit ::= qualquer um dos dez dígitos de 0 a 9</pre>
+    <p class="small text-muted">BNF dos nomes totalmente qualificados (Listing 1 do livro, pág. 78 do PDF).</p>
+    <p>
+        Um nome é uma lista ordenada de <strong>rótulos</strong> (<em>labels</em>) separados por ponto. Cada
+        rótulo começa com letra, pode ter letras, dígitos e hífen, e termina com letra ou dígito. O nome é
+        lido da esquerda para a direita: o primeiro rótulo é um host ou domínio, seguido da hierarquia de
+        domínios, terminando na raiz, implícita à direita. O TLD precisa ser um dos TLDs registrados.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Na BNF da RFC 1035, <span class="mono">" "</span> representa o nome vazio (a raiz). A regra de começar
+        com letra foi relaxada pela <a href="https://www.rfc-editor.org/rfc/rfc1123#section-2.1" target="_blank" rel="noopener noreferrer">RFC 1123, seção 2.1</a>,
+        que passou a aceitar rótulos começando com dígito (por isso existem nomes como <span class="mono">3com.com</span>).
+        A RFC 1035 também limita cada rótulo a 63 caracteres. O validador abaixo segue a BNF do livro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="validador-fqdn"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque termina com hífen|Porque tem dígitos|Porque tem mais de dois rótulos" data-answer="0" data-explain="Pela regra label, o último caractere de um rótulo precisa ser let-dig: letra ou dígito." data-hint="Olhe a regra label: como um rótulo pode terminar?">
+        <p class="fw-semibold mb-2">Por que <span class="mono">servidor-.edu</span> é inválido pela BNF?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Nome = rótulos separados por ponto, lidos do host até o TLD.</li>
+        <li>Rótulo: começa com letra, termina com letra ou dígito, hífen só no meio.</li>
+        <li>A raiz fica implícita à direita.</li>
+    </ul>
+</section>
+
+<!-- 6. IDN e homógrafos -->
+<section id="idn" class="chapter-section" data-conceito="idn-homografo" data-titulo="Nomes internacionais">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">Nomes internacionalizados e o ataque homógrafo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O DNS nasceu quando a Internet era usada principalmente na América do Norte, e o projeto inicial
+        supunha nomes só com letras e dígitos (RFC 1035). Com o uso da Internet no mundo todo, passou a ser
+        importante aceitar caracteres fora do ASCII, como em <span class="mono">são-paulo</span> ou <span class="mono">bücher</span>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Os <strong>nomes de domínio internacionalizados</strong> (RFC 3490) funcionam assim: quase todos os
+        caracteres Unicode podem ser usados, com algumas exceções (o ponto, por exemplo, continua sendo o
+        separador). Depois, o nome em Unicode é convertido numa cadeia ASCII com o prefixo
+        <span class="mono">xn--</span>. Os detalhes do algoritmo estão nas RFC 3490 e 3492.
+    </p>
+    <p>
+        Essa liberdade abriu espaço para o <strong>ataque homógrafo</strong>: dois nomes visualmente
+        parecidos que não correspondem ao mesmo servidor. O exemplo do livro é
+        <span class="mono">G00GLE.COM</span> × <span class="mono">GOOGLE.COM</span>: o primeiro usa dois
+        zeros no lugar das letras O. Com outros caracteres Unicode, dá para construir nomes visualmente
+        idênticos a nomes existentes.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Compare dois nomes caractere a caractere e veja a forma ASCII (<span class="mono">xn--</span>) que vai para o DNS.</p>
+    <div class="demo-box" data-sim="homografo"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Uma cadeia ASCII com o prefixo xn--|Uma cadeia UTF-8 enviada sem mudanças|Um endereço IP" data-answer="0" data-explain="Os nomes em Unicode são convertidos para ASCII com o prefixo xn-- (RFC 3490 e 3492)." data-hint="Veja a última linha da simulação com o nome bücher.example.">
+        <p class="fw-semibold mb-2">Em que um nome como <span class="mono">bücher.example</span> é convertido para uso no DNS?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>IDN: nome em Unicode convertido para ASCII com <span class="mono">xn--</span>.</li>
+        <li>Homógrafo: nome que parece outro, mas tem caracteres diferentes.</li>
+        <li>O que vale é a sequência de códigos, não a aparência.</li>
+    </ul>
+</section>
+
+<!-- 7. Resolução -->
+<section id="resolucao" class="chapter-section" data-conceito="resolucao" data-titulo="Resolução pelo DNS">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">A resolução de nomes pelo DNS</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A árvore de nomes é a peça central do <strong>DNS</strong> (<em>Domain Name System</em>), uma base de
+        dados distribuída com os mapeamentos entre nomes totalmente qualificados e endereços. Mas, se nenhum
+        servidor tem a base inteira, como um cliente descobre o endereço de um nome qualquer?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O DNS usa o modelo cliente-servidor. Cada <strong>servidor de nomes</strong> guarda uma parte da base
+        e responde às consultas dos clientes; há pelo menos um servidor responsável por cada domínio. Na
+        árvore da Fig. 54, o servidor responsável por <span class="mono">dom</span> responde diretamente:
+    </p>
+    <ul>
+        <li>o endereço de qualquer host que esteja diretamente em <span class="mono">dom</span> (por exemplo, <span class="mono">h2.dom</span>);</li>
+        <li>quais servidores respondem por cada subdomínio direto de <span class="mono">dom</span> (<span class="mono">sdom1.dom</span> e <span class="mono">sdom2.dom</span>, mas não <span class="mono">z.sdom1.dom</span>).</li>
+    </ul>
+    <figure class="diagram">
+        <svg viewBox="0 0 640 200" class="sim-svg w-100" style="max-height:230px" role="img" aria-label="Árvore da Fig. 54: dom contém sdom2, h1, h2, h3 e sdom1; sdom1 contém a, b e z; a contém h1, h2 e h3.">
+            <title>Árvore simples de nomes de domínio (Fig. 54). Os domínios são círculos: dom contém os hosts h1, h2 e h3 e os subdomínios sdom1 e sdom2; sdom1 contém os subdomínios a, b e z; a contém os hosts h1, h2 e h3.</title>
+            <g font-size="12" text-anchor="middle">
+                <line class="linha" x1="320" y1="40" x2="90" y2="90"/><line class="linha" x1="320" y1="40" x2="200" y2="90"/>
+                <line class="linha" x1="320" y1="40" x2="290" y2="90"/><line class="linha" x1="320" y1="40" x2="380" y2="90"/>
+                <line class="linha" x1="320" y1="40" x2="500" y2="90"/>
+                <line class="linha" x1="500" y1="104" x2="420" y2="140"/><line class="linha" x1="500" y1="104" x2="500" y2="140"/><line class="linha" x1="500" y1="104" x2="590" y2="140"/>
+                <line class="linha" x1="420" y1="154" x2="340" y2="182"/><line class="linha" x1="420" y1="154" x2="420" y2="182"/><line class="linha" x1="420" y1="154" x2="500" y2="182"/>
+                <circle class="no" cx="320" cy="28" r="15"/><text x="320" y="32">dom</text>
+                <circle class="no" cx="90" cy="98" r="15"/><text x="90" y="102" font-size="10">sdom2</text>
+                <text x="200" y="102">h1</text><text x="290" y="102">h2</text><text x="380" y="102">h3</text>
+                <circle class="no" cx="500" cy="98" r="15"/><text x="500" y="102" font-size="10">sdom1</text>
+                <circle class="no" cx="420" cy="147" r="12"/><text x="420" y="151">a</text>
+                <circle class="no" cx="500" cy="147" r="12"/><text x="500" y="151">b</text>
+                <circle class="no" cx="590" cy="147" r="12"/><text x="590" y="151">z</text>
+                <text x="340" y="194">h1</text><text x="420" y="194">h2</text><text x="500" y="194">h3</text>
+            </g>
+        </svg>
+        <figcaption>Uma árvore simples de nomes de domínio (baseado na Fig. 54 do livro). Círculos são domínios; os demais nomes são hosts.</figcaption>
+    </figure>
+    <p>
+        Para obter <span class="mono">h3.a.sdom1.dom</span>, o cliente pergunta ao servidor de
+        <span class="mono">dom</span>, que indica o servidor de <span class="mono">sdom1.dom</span>, que indica
+        o de <span class="mono">a.sdom1.dom</span>, que finalmente responde o endereço. Para que qualquer nome
+        possa ser resolvido, existem os <strong>servidores raiz</strong>: cada um conhece os servidores de
+        todos os TLDs, e todos dão as mesmas respostas.
+    </p>
+    <p>
+        Para falar com os servidores raiz, o cliente precisa saber os endereços deles, e manter essa lista
+        atualizada em todos os hosts seria difícil. Por isso existem os <strong>resolvedores</strong>
+        (<em>DNS resolvers</em>): servidores que fazem a resolução para um conjunto de clientes. Cada host
+        manda suas consultas a um resolvedor local; são as <strong>consultas recursivas</strong>, porque o
+        resolvedor percorre a hierarquia em nome do cliente. Vantagens:
+    </p>
+    <ul>
+        <li>os hosts não precisam manter a lista dos servidores raiz;</li>
+        <li>os hosts não mandam consultas a servidores no mundo inteiro;</li>
+        <li>o resolvedor atende muitos hosts e pode guardar as respostas em <strong>cache</strong>, respondendo rápido às consultas populares e aliviando todos os servidores de DNS.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Resolva nomes da Fig. 54 com e sem resolvedor. Depois, ligue o cache e resolva dois nomes do mesmo domínio.</p>
+    <div class="demo-box" data-sim="resolucao-dns"></div>
+    <p class="small text-muted">Na simulação, a raiz conhece só <span class="mono">dom</span>, que faz o papel de domínio de topo. O cache guarda também as indicações de servidor recebidas no caminho, que também são respostas recebidas pelo resolvedor.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O endereço de h3.a.sdom1.dom|Qual servidor responde por sdom1.dom|O endereço de todos os hosts da árvore" data-answer="1" data-explain="O servidor de dom só responde hosts diretamente em dom e indica os servidores dos subdomínios diretos." data-hint="Releia as duas coisas que o servidor de dom sabe responder.">
+        <p class="fw-semibold mb-2">Perguntado sobre <span class="mono">h3.a.sdom1.dom</span>, o que o servidor de <span class="mono">dom</span> responde?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Os hosts não precisam conhecer os servidores raiz, e o cache alivia os servidores|O resolvedor torna os nomes mais curtos|O resolvedor elimina a necessidade de servidores raiz" data-answer="0" data-explain="Os servidores raiz continuam existindo; o resolvedor só concentra o trabalho e guarda respostas em cache." data-hint="Releia a lista de vantagens dos resolvedores.">
+        <p class="fw-semibold mb-2">Qual é a vantagem de mandar as consultas a um resolvedor?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cada servidor de nomes responde pelo seu domínio e delega os subdomínios diretos.</li>
+        <li>Os servidores raiz conhecem os servidores de todos os TLDs.</li>
+        <li>O resolvedor faz a consulta recursiva pelo cliente e guarda as respostas em cache.</li>
+    </ul>
+</section>
+
+<!-- 8. Benefícios -->
+<section id="beneficios" class="chapter-section" data-conceito="beneficios" data-titulo="Benefícios dos nomes">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">Os benefícios dos nomes</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Imagine uma aplicação em que clientes buscam informação em servidores. Numa primeira versão, ela usa
+        só endereços: o servidor roda num host e os clientes se conectam ao endereço dele. Dois problemas:
+    </p>
+    <ul>
+        <li>se o servidor mudar de máquina, todos os clientes precisam saber o novo endereço;</li>
+        <li>se houver muitos clientes ao mesmo tempo, não dá para acrescentar outro servidor sem mudar os endereços que os clientes usam.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Com nomes, os clientes consultam o serviço de nomes antes de contactar o servidor. Se o servidor mudar
+        de máquina, basta atualizar o mapeamento nome → endereço. E um serviço muito popular pode crescer
+        mapeando <strong>um nome num conjunto de endereços</strong>. Para escolher o endereço de cada resposta,
+        o livro cita três estratégias:
+    </p>
+    <ul>
+        <li>um endereço <strong>aleatório</strong> do conjunto;</li>
+        <li>o endereço do servidor <strong>menos carregado</strong>, acompanhando a carga dos servidores;</li>
+        <li>o servidor <strong>mais próximo</strong>, deduzindo a localização do cliente pela consulta.</li>
+    </ul>
+    <p>
+        A lista de endereços não precisa ser fixa: dá para acrescentar e retirar servidores conforme a carga.
+        O contrário também é útil: <strong>vários nomes num único endereço</strong>. Servidores de pessoas ou
+        pequenas empresas recebem poucos clientes por dia, e dedicar uma máquina a cada um seria desperdício.
+        Um único servidor físico atende vários serviços, cada um com seu nome; se um deles ficar popular, o nome
+        dele passa a apontar para um conjunto de endereços.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">Três servidores atendem <span class="mono">www.exemplo.org</span>. Escolha a estratégia, mande clientes e mude um servidor de máquina.</p>
+    <div class="demo-box" data-sim="nome-para-enderecos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Atualizar o mapeamento nome → endereço no serviço de nomes|Avisar cada cliente do novo endereço|Manter a máquina antiga ligada para sempre" data-answer="0" data-explain="Os clientes usam o nome; basta o serviço de nomes passar a responder o novo endereço." data-hint="Na simulação, o que aconteceu com os clientes que usavam o nome depois da mudança?">
+        <p class="fw-semibold mb-2">O servidor de um serviço identificado por nome mudou de máquina. O que é preciso fazer?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Vários nomes num único endereço|Um nome em vários endereços|Um endereço em vários servidores raiz" data-answer="0" data-explain="Vários serviços com poucos clientes, cada um com seu nome, dividem o mesmo servidor físico." data-hint="Pense em pequenos sites que recebem poucas visitas por dia.">
+        <p class="fw-semibold mb-2">Qual mapeamento evita desperdiçar uma máquina para cada serviço pouco acessado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Nomes deixam o servidor mudar de máquina sem afetar os clientes.</li>
+        <li>Um nome → vários endereços: distribui a carga (aleatório, menos carregado, mais próximo).</li>
+        <li>Vários nomes → um endereço: vários serviços num só servidor.</li>
+        <li>Como as variáveis num programa, as aplicações devem depender de nomes, e não de endereços.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap5" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> separe <span class="mono">blog.computer-networking.info</span> em rótulos e diga o papel de cada um.
+            <details><summary>Ver solução</summary><p class="mb-0"><span class="mono">blog</span> é o host, <span class="mono">computer-networking</span> é o domínio e <span class="mono">info</span> é o domínio de topo; a raiz fica implícita à direita.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> quais destes nomes são válidos pela BNF do livro: <span class="mono">ns-1.exemplo.org</span>, <span class="mono">-ns.exemplo.org</span>, <span class="mono">ns1.exemplo.org</span>?
+            <details><summary>Ver solução</summary><p class="mb-0"><span class="mono">ns-1.exemplo.org</span> e <span class="mono">ns1.exemplo.org</span>. O rótulo <span class="mono">-ns</span> começa com hífen, e a regra label exige letra no início.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> na Fig. 54, quantos servidores um resolvedor sem cache consulta para resolver <span class="mono">h1.a.sdom1.dom</span>, contando a raiz?
+            <details><summary>Ver solução</summary><p class="mb-0">Quatro: a raiz, o servidor de <span class="mono">dom</span>, o de <span class="mono">sdom1.dom</span> e o de <span class="mono">a.sdom1.dom</span>.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> com o hosts.txt, cada um dos n hosts baixa um arquivo de n linhas a cada atualização. Quantas linhas circulam com 1000 hosts? E com 2000?
+            <details><summary>Ver solução</summary><p class="mb-0">1 000 000 e 4 000 000: o tráfego cresce com n², então dobrar os hosts quadruplica as linhas transferidas.</p></details></li>
+        <li><strong>Desafio:</strong> um serviço popular usa a estratégia "mais próximo", e quase todos os clientes de hoje estão na mesma região. O que acontece com a carga? Que estratégia do livro corrigiria isso?
+            <details><summary>Ver solução</summary><p class="mb-0">O servidor daquela região fica sobrecarregado e os outros ociosos. A estratégia "menos carregado" distribuiria melhor; também dá para acrescentar endereços ao conjunto da região.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Quatro trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Um hosts.txt em miniatura</h3>
+    <pre class="code-block"><code>HOSTS_TXT = """
+# hosts.txt distribuído pelo NIC (formato simplificado)
+10.0.0.73    sri-nic
+10.1.0.51    mit-multics
+10.3.0.11    ucla-ccn
+10.2.0.5     utah-cs
+"""
+
+def carrega(texto):
+    """Monta a tabela nome -> endereço, ignorando comentários e linhas vazias."""
+    tabela = {}
+    for linha in texto.splitlines():
+        linha = linha.split("#", 1)[0].strip()
+        if not linha:
+            continue
+        endereco, nome = linha.split()
+        tabela[nome.lower()] = endereco
+    return tabela
+
+def resolve(tabela, nome):
+    return tabela.get(nome.lower(), "nome desconhecido")
+
+tabela = carrega(HOSTS_TXT)
+for nome in ["sri-nic", "UCLA-CCN", "stanford-ai"]:
+    print(f"{nome:12} -> {resolve(tabela, nome)}")
+
+# Cada host baixa o arquivo inteiro do NIC a cada atualização.
+for n in (500, 5_000, 50_000):
+    tamanho = n * 30                      # ~30 bytes por linha
+    print(f"{n:>6} hosts: arquivo de {tamanho/1e3:>7.0f} kB, {n * tamanho/1e9:>8.3f} GB transferidos por atualização")</code></pre>
+
+    <h3 class="h6 mt-4">2. Validando nomes pela BNF</h3>
+    <pre class="code-block"><code>import re
+
+# Listing 1 do livro (RFC 1035): label ::= letter [ [ ldh-str ] let-dig ]
+LABEL = re.compile(r"[A-Za-z]([A-Za-z0-9-]*[A-Za-z0-9])?")
+
+def valida(nome):
+    """Devolve (ok, motivo) segundo a BNF dos nomes totalmente qualificados."""
+    if nome == "":
+        return False, "nome vazio"
+    for rotulo in nome.split("."):
+        if rotulo == "":
+            return False, "rótulo vazio (dois pontos seguidos ou ponto na ponta)"
+        if not LABEL.fullmatch(rotulo):
+            if not rotulo[0].isalpha():
+                return False, f"'{rotulo}' não começa com letra"
+            if rotulo.endswith("-"):
+                return False, f"'{rotulo}' termina com hífen"
+            return False, f"'{rotulo}' tem caractere fora de letra, dígito e hífen"
+    return True, "ok"
+
+for nome in ["www.computer-networking.info", "blog.uclouvain.be", "3com.com",
+             "meu_site.org", "a..b", "servidor-.edu", "h3.a.sdom1.dom"]:
+    ok, motivo = valida(nome)
+    print(f"{nome:30} {'válido' if ok else 'inválido'}: {motivo}")</code></pre>
+
+    <h3 class="h6 mt-4">3. Nomes internacionalizados e homógrafos</h3>
+    <pre class="code-block"><code>import unicodedata
+
+# 1. Nomes internacionalizados (RFC 3490): Unicode -> ASCII com prefixo xn--
+for nome in ["bücher.example", "são-paulo.example", "例え.jp"]:
+    ascii_ = nome.encode("idna").decode("ascii")
+    print(f"{nome:20} -> {ascii_}")
+
+# 2. Ataque homógrafo: nomes parecidos, códigos diferentes
+def compara(a, b):
+    print(f"\n{a!r} x {b!r}: {'iguais' if a == b else 'DIFERENTES'}")
+    for x, y in zip(a, b):
+        if x != y:
+            print(f"  {x!r} U+{ord(x):04X} {unicodedata.name(x)}")
+            print(f"  {y!r} U+{ord(y):04X} {unicodedata.name(y)}")
+
+compara("GOOGLE.COM", "G00GLE.COM")
+compara("apple.com", "аpple.com")      # o primeiro 'а' é cirílico
+print("\nVersão ASCII do falso apple:", "аpple.com".encode("idna").decode())</code></pre>
+
+    <h3 class="h6 mt-4">4. Um resolvedor iterativo com cache</h3>
+    <pre class="code-block"><code># Árvore da Fig. 54. Cada servidor de nomes conhece os hosts do seu domínio
+# e os servidores dos subdomínios diretos (delegações).
+SERVIDORES = {
+    ".":            {"delega": {"dom": "ns.dom"}},
+    "dom":          {"hosts": {"h1": "10.0.0.1", "h2": "10.0.0.2", "h3": "10.0.0.3"},
+                     "delega": {"sdom1": "ns.sdom1.dom", "sdom2": "ns.sdom2.dom"}},
+    "sdom1.dom":    {"delega": {"a": "ns.a.sdom1.dom", "b": "ns.b.sdom1.dom", "z": "ns.z.sdom1.dom"}},
+    "a.sdom1.dom":  {"hosts": {"h1": "10.1.1.1", "h2": "10.1.1.2", "h3": "10.1.1.3"}},
+}
+
+class Resolvedor:
+    def __init__(self):
+        self.cache = {}          # nome -> endereço
+        self.consultas = 0
+
+    def resolve(self, nome):
+        if nome in self.cache:
+            print(f"  {nome}: resposta do cache")
+            return self.cache[nome]
+        rotulos = nome.split(".")
+        zona = "."                                  # começa pelos servidores raiz
+        for i in range(len(rotulos) - 1, -1, -1):
+            servidor = SERVIDORES.get(zona)
+            if servidor is None:
+                print(f"  o servidor de {zona!r} não está nesta simulação")
+                return None
+            self.consultas += 1
+            proximo = rotulos[i]
+            if i == 0 and proximo in servidor.get("hosts", {}):
+                endereco = servidor["hosts"][proximo]
+                print(f"  pergunta a {zona!r}: {nome} = {endereco}")
+                self.cache[nome] = endereco
+                return endereco
+            if proximo in servidor.get("delega", {}):
+                filho = ".".join(rotulos[i:])
+                print(f"  pergunta a {zona!r}: quem responde por {filho!r}?")
+                zona = filho
+            else:
+                print(f"  pergunta a {zona!r}: {nome} não existe")
+                return None
+        return None
+
+r = Resolvedor()
+for nome in ["h2.dom", "h3.a.sdom1.dom", "h3.a.sdom1.dom"]:
+    print(nome)
+    r.resolve(nome)
+print("Consultas enviadas a servidores de nomes:", r.consultas)</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 2.5, "Naming and addressing" (pág. 76–80 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 952 — <a href="https://www.rfc-editor.org/rfc/rfc952" target="_blank" rel="noopener noreferrer">DoD Internet Host Table Specification</a> (o formato do hosts.txt)</li>
+        <li>RFC 819 — <a href="https://www.rfc-editor.org/rfc/rfc819" target="_blank" rel="noopener noreferrer">The Domain Naming Convention for Internet User Applications</a></li>
+        <li>RFC 1032 — <a href="https://www.rfc-editor.org/rfc/rfc1032" target="_blank" rel="noopener noreferrer">Domain Administrators Guide</a></li>
+        <li>RFC 1035 — <a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank" rel="noopener noreferrer">Domain Names — Implementation and Specification</a></li>
+        <li>RFC 1123 — <a href="https://www.rfc-editor.org/rfc/rfc1123" target="_blank" rel="noopener noreferrer">Requirements for Internet Hosts</a> (rótulos começando com dígito, complemento)</li>
+        <li>RFC 3490 — <a href="https://www.rfc-editor.org/rfc/rfc3490" target="_blank" rel="noopener noreferrer">Internationalizing Domain Names in Applications</a> e RFC 3492 — <a href="https://www.rfc-editor.org/rfc/rfc3492" target="_blank" rel="noopener noreferrer">Punycode</a></li>
+        <li>RFC 5737 — <a href="https://www.rfc-editor.org/rfc/rfc5737" target="_blank" rel="noopener noreferrer">IPv4 Address Blocks Reserved for Documentation</a> (endereços usados na simulação)</li>
+        <li>IANA — <a href="https://data.iana.org/TLD/tlds-alpha-by-domain.txt" target="_blank" rel="noopener noreferrer">lista oficial de domínios de topo</a>, citada pelo livro</li>
+        <li>InterNIC — <a href="https://www.internic.net/domain/root.zone" target="_blank" rel="noopener noreferrer">cópia da zona raiz</a>, citada pelo livro</li>
+        <li>Zakon, R. — <a href="https://www.zakon.org/robert/internet/timeline/" target="_blank" rel="noopener noreferrer">Hobbes' Internet Timeline</a>, fonte do livro para os 500 hosts de 1983</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/IDN_homograph_attack" target="_blank" rel="noopener noreferrer">IDN homograph attack</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-04/index.html" class="text-muted text-decoration-none">← Capítulo 4</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 5</span>
+            <a href="../capitulo-06/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 6 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap5.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

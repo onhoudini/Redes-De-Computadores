@@ -12,7 +12,11 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
 | 2 — Construindo uma rede | 2.2 Building a network | aprovado pelo professor |
 | 3 — Aplicações | 2.3 Applications | pronto |
 | 4 — A camada de transporte | 2.4 The transport layer | pronto |
-| próximo | 2.5 Naming and addressing | a fazer |
+| 5 — Nomes e endereços | 2.5 Naming and addressing | pronto |
+| 6 — Compartilhamento de recursos | 2.6 Sharing resources | pronto |
+| 7 — Modelos de referência | 2.7 The reference models | pronto |
+| 8 — Segurança de redes | 2.8 Network security | pronto |
+| próximo | Parte 2 (3.x Protocols) | a decidir com o usuário |
 
 ### Estrutura
 
@@ -68,4 +72,4 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
 ## Pendências conhecidas
 
 - **Cap. 2, grafo editável:** o texto diz que desligar split horizon e poison reverse "pode produzir aumento iterativo da métrica (contagem ao infinito)". O simulador recalcula as rotas do zero a cada clique, então isso não acontece. Ajustar o texto ou o simulador depende do ok do usuário.
-- **Próximo capítulo:** seção 2.5 "Naming and addressing".
+- **Próximo passo:** com o capítulo 8, a Parte 1 do livro (seções 2.1 a 2.8) está completa. A regra "capítulo N = seção 2.N" não cobre a Parte 2 (seções 3.1 a 3.18, pág. 133 do PDF em diante): pergunte ao usuário como numerar e agrupar os próximos capítulos. O rodapé do capítulo 8 aponta para "Todos os capítulos"; troque por "Próximo: Capítulo 9 →" quando ele existir.

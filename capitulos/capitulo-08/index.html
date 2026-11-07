@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 8 — Segurança de redes | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: senhas, atacantes passivos e ativos, negação de serviço, cifras simétricas, criptografia de chave pública, funções de hash, protocolos de autenticação e a troca de chaves de Diffie-Hellman.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="8" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-02/index.html">Capítulo 2</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-05/index.html">Capítulo 5</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-06/index.html">Capítulo 6</a></li>
+                <li class="nav-item"><a class="nav-link" href="../capitulo-07/index.html">Capítulo 7</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 8</span>
+        <h1 class="display-5 mb-3">Segurança de redes</h1>
+        <p class="lead mb-4">
+            No começo, as redes eram usadas por poucos pesquisadores que confiavam uns nos outros.
+            Com o crescimento, apareceram quem escuta, quem altera e quem tenta derrubar. Este capítulo
+            mostra as ameaças e as ferramentas criptográficas usadas para se proteger delas: cifras,
+            hashes, protocolos de autenticação e troca de chaves.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#senhas">1. Senhas pela rede</a>
+                    <a class="nav-link" href="#passivo">2. Atacante passivo</a>
+                    <a class="nav-link" href="#ativo">3. Atacante ativo</a>
+                    <a class="nav-link" href="#dos">4. Negação de serviço</a>
+                    <a class="nav-link" href="#simetrica">5. Cifras de chave secreta</a>
+                    <a class="nav-link" href="#chave-publica">6. Chave pública</a>
+                    <a class="nav-link" href="#hash">7. Funções de hash</a>
+                    <a class="nav-link" href="#autenticacao">8. Protocolos de autenticação</a>
+                    <a class="nav-link" href="#troca-chaves">9. Troca de chaves</a>
+                    <a class="nav-link" href="#exercicios-cap8">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Quando a rede deixa de ser confiável</h2>
+    <p>
+        Para analisar a segurança de uma rede, o livro raciocina sobre as <strong>capacidades do
+        atacante</strong>. Os personagens são os mesmos da literatura de segurança desde o artigo de Diffie e
+        Hellman: <strong>Alice</strong> e <strong>Bob</strong> querem se comunicar; <strong>Eve</strong> escuta
+        (<em>eavesdrop</em>); <strong>Mallory</strong> intercepta e altera; <strong>Ted</strong> é uma terceira
+        parte em quem os dois confiam.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Distinguir atacantes <strong>passivos</strong>, <strong>ativos</strong> (MITM) e ataques de <strong>negação de serviço</strong>, incluindo reflexão e amplificação.</li>
+                <li>Explicar o princípio de <strong>Kerckhoffs</strong>, o one-time pad e o papel do tamanho da chave.</li>
+                <li>Diferenciar criptografia de <strong>chave secreta</strong> e de <strong>chave pública</strong>, cifragem e assinatura.</li>
+                <li>Explicar por que um checksum não protege contra Mallory e o que é um <strong>hash criptográfico</strong>.</li>
+                <li>Comparar protocolos de autenticação contra <strong>reprodução</strong> e MITM: desafio-resposta, cadeia de hash, chave pública e certificados.</li>
+                <li>Executar a troca de chaves de <strong>Diffie-Hellman</strong> e explicar por que ela precisa ser autenticada.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Os diagramas de sequência são os do <a href="../capitulo-04/index.html">Capítulo 4</a>, e a
+                amplificação usa o modelo requisição-resposta do <a href="../capitulo-03/index.html">Capítulo 3</a>.
+                O capítulo cobre a seção 2.8 do livro (pág. 119–132 do PDF), a última da Parte 1. As simulações
+                mostram só os mecanismos descritos no livro, com personagens e números fictícios.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Senhas -->
+<section id="senhas" class="chapter-section" data-conceito="senhas" data-titulo="Senhas pela rede">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">Senhas pela rede</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nos primeiros anos, quase todos os dispositivos ligados às redes eram abertos e os usuários eram de
+        confiança. Com o crescimento, apareceu a necessidade de controle de acesso: nas universidades, por
+        exemplo, professores nem sempre confiavam nos alunos.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Num computador isolado, o controle de acesso mais comum é a <strong>senha</strong>: cada usuário tem um
+        nome e uma senha, e a força da senha depende de quão difícil é adivinhá-la. Quando os computadores foram
+        ligados em rede, as aplicações de acesso remoto mantiveram o esquema: o usuário manda o nome pela rede e
+        depois a senha, para confirmar a identidade.
+    </p>
+    <div class="demo-box" data-sim="login-senha"></div>
+    <p class="small text-muted">Login remoto com nome de usuário e senha (baseado no diagrama do livro, pág. 120 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Da dificuldade de adivinhar os caracteres escolhidos|Do tamanho do nome de usuário|Da velocidade da rede" data-answer="0" data-explain="O livro define a força da senha pela dificuldade de adivinhar os caracteres escolhidos por cada usuário." data-hint="Releia a explicação sobre senhas.">
+        <p class="fw-semibold mb-2">De que depende a força de uma senha?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Senha: o controle de acesso clássico.</li>
+        <li>No login remoto, nome e senha atravessam a rede.</li>
+    </ul>
+</section>
+
+<!-- 2. Passivo -->
+<section id="passivo" class="chapter-section" data-conceito="passivo" data-titulo="Atacante passivo">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">O atacante passivo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No login do conceito anterior, a senha de Alice passa pela rede. Quem consegue vê-la?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>atacante passivo</strong> observa e, em geral, grava a informação que passa numa rede ou num
+        trecho dela (um enlace, por exemplo). É o atacante mais básico, e muitas tecnologias são vulneráveis a
+        ele. O livro sempre o chama de <strong>Eve</strong>. Com o nome e a senha de Alice, Eve se autentica como
+        Alice no computador de Bob e faz tudo o que Alice pode fazer. Numa rede sem fio aberta, coletar os dados
+        de um usuário é fácil, e há programas que automatizam isso. A melhor defesa é usar técnicas
+        criptográficas para que a senha <strong>nunca</strong> trafegue em claro.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        Em 2013, documentos divulgados por Edward Snowden revelaram que agências governamentais coletavam grandes
+        volumes de dados em enlaces da Internet, mais interessadas nos <strong>metadados</strong> (quem fala com
+        quem) do que no conteúdo. A IETF declarou na <a href="https://www.rfc-editor.org/rfc/rfc7258" target="_blank" rel="noopener noreferrer">RFC 7258</a>
+        que essa vigilância em massa é um ataque a ser combatido no projeto dos protocolos (pág. 121 do PDF).
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="bisbilhotagem"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Repetir a senha capturada para se autenticar como Alice|Alterar os comandos de Alice no caminho|Derrubar o servidor de Bob" data-answer="0" data-explain="O atacante passivo só observa e grava; com a senha, ele se passa por Alice depois." data-hint="Eve só consegue ler o que passa.">
+        <p class="fw-semibold mb-2">O que Eve, uma atacante passiva, consegue fazer com o login em claro de Alice?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Atacante passivo (Eve): observa e grava o que passa.</li>
+        <li>Senhas em claro são capturadas e reutilizadas.</li>
+        <li>Vigilância em massa é tratada como ataque (RFC 7258).</li>
+    </ul>
+</section>
+
+<!-- 3. Ativo -->
+<section id="ativo" class="chapter-section" data-conceito="ativo" data-titulo="Atacante ativo">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">O atacante ativo (homem no meio)</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        E se o atacante, além de ler, puder mudar as mensagens? Basta, por exemplo, que Alice esteja ligada a um
+        ponto de acesso WiFi controlado por ele.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>atacante ativo</strong>, ou ataque <strong>MITM</strong> (<em>man in the middle</em>), acontece
+        quando alguém, o <strong>Mallory</strong> do livro, configura a rede para capturar e modificar os pacotes
+        trocados por dois usuários. O caso mais simples é Mallory controlar um roteador no caminho entre Alice e
+        Bob: ele pode mudar os comandos de Alice e as respostas do servidor de Bob. É um ataque muito poderoso e,
+        às vezes, difícil de combater sem técnicas criptográficas avançadas.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="mallory"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Mallory pode modificar as mensagens; Eve só pode lê-las|Eve pode modificar; Mallory só pode ler|Não há diferença" data-answer="0" data-explain="O atacante passivo observa; o ativo também captura e altera os pacotes." data-hint="Compare as duas simulações.">
+        <p class="fw-semibold mb-2">Qual é a diferença entre Mallory e Eve?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Atacante ativo (Mallory): captura e altera.</li>
+        <li>Basta controlar um equipamento no caminho, como um roteador ou ponto de acesso.</li>
+    </ul>
+</section>
+
+<!-- 4. DoS -->
+<section id="dos" class="chapter-section" data-conceito="dos" data-titulo="Negação de serviço">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Negação de serviço, reflexão e amplificação</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nem todo atacante quer ler ou alterar dados. Alguns só querem impedir que um serviço funcione.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Num ataque de <strong>negação de serviço</strong> (<em>Denial of Service</em>, DoS), o atacante gera
+        pacotes suficientes para saturar um serviço. O mais simples é mandar mais pacotes do que a banda do enlace
+        que liga o alvo à rede; o alvo pode ser um servidor, uma empresa ou até um país. Na prática, o tráfego vem
+        de muitas fontes comprometidas pelo atacante: é a <strong>negação de serviço distribuída</strong> (DDoS),
+        difícil de rastrear e de conter. Qualquer recurso limitado serve de alvo: banda, poder de processamento,
+        memória ou o tamanho das tabelas de um protocolo. Ataques de alguns Gbit/s a dezenas de Gbit/s são
+        frequentes; em 2015, segundo alguns relatos, o github.com sofreu um DDoS de 400 Gbit/s.
+    </p>
+    <p>
+        Projetistas de protocolos têm um papel importante, porque alguns ataques exploram falhas de projeto.
+        Num protocolo requisição-resposta sobre datagramas, Bob responde ao endereço de origem que está no pacote.
+        Mallory manda requisições a Bob com o endereço de <strong>Alice</strong> como origem:
+    </p>
+    <ul>
+        <li><strong>Reflexão:</strong> Bob manda a resposta a Alice, que acha que está sendo atacada por Bob. Com muitos servidores como Bob, Mallory se esconde atrás de muitos refletores.</li>
+        <li><strong>Amplificação:</strong> se a resposta é k vezes maior que a requisição, cada 1 Gbit/s gasto por Mallory vira k Gbit/s contra Alice.</li>
+    </ul>
+    <p>
+        Por isso, um protocolo nunca deve mandar uma resposta grande antes de ter a prova de que a requisição
+        veio mesmo da origem indicada.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="amplificacao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque a resposta é muito maior que a requisição|Porque o atacante usa muitos computadores|Porque o servidor é lento" data-answer="0" data-explain="O fator k = resposta / requisição multiplica a banda do atacante." data-hint="O que diferencia reflexão de amplificação?">
+        <p class="fw-semibold mb-2">Quando uma reflexão vira amplificação?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>DoS: saturar um recurso limitado; DDoS: a partir de muitas fontes.</li>
+        <li>Reflexão: a resposta vai para quem foi posto como origem falsa.</li>
+        <li>Amplificação: resposta k vezes maior; confirme a origem antes de responder grande.</li>
+    </ul>
+</section>
+
+<!-- 5. Simétrica -->
+<section id="simetrica" class="chapter-section" data-conceito="simetrica" data-titulo="Cifras de chave secreta">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Cifras de chave secreta</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A criptografia nasceu com espiões e exércitos, que queriam mensagens indecifráveis mesmo se o inimigo
+        capturasse a mensagem ou o mensageiro. Uma das primeiras cifras é atribuída a Júlio César: cada letra é
+        trocada pela que está k posições depois no alfabeto. Com k = 3, SECRET vira VHFUHW.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A segurança da cifra de César depende de o algoritmo ser secreto, e a experiência mostrou que não dá
+        para supor isso. O <strong>princípio de Kerckhoffs</strong> diz: <em>um algoritmo criptográfico deve ser
+        seguro mesmo que o atacante saiba tudo sobre o sistema, menos um parâmetro, a chave secreta</em>. Todo
+        sistema que depende do segredo do algoritmo acaba quebrado.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro grafa "Kerckhoff", mas o nome do criptógrafo é Auguste <strong>Kerckhoffs</strong>
+        (<a href="https://en.wikipedia.org/wiki/Kerckhoffs%27s_principle" target="_blank" rel="noopener noreferrer">Wikipedia: Kerckhoffs's principle</a>).
+    </p>
+    <ul>
+        <li><strong>XOR e one-time pad:</strong> com uma chave K, cifra-se C = M ⊕ K, e o receptor recupera M = C ⊕ K. Se a chave tem bits realmente aleatórios e é tão longa quanto a mensagem, ninguém recupera o texto original: é a cifra perfeita, ou <strong>cifra de Vernam</strong>. O problema é a chave do tamanho da mensagem; reutilizar a chave em vários blocos torna o esquema inseguro.</li>
+        <li><strong>Cifras práticas</strong> usam chaves curtas (56, 64, 128, 256 bits…) e são funções reversíveis: existe D tal que D(K, E(K, M)) = M. As mais usadas: o <strong>DES</strong> (1977), com chaves de 56 bits que já não resistem à força bruta (o 3DES combina três chaves); o <strong>RC4</strong>, rápido, mas com fraquezas, hoje proibido (RFC 7465); o <strong>AES</strong> (2001, de Daemen e Rijmen, padronizado pelo NIST), com blocos de 128 bits e chaves de 128, 192 ou 256 bits; e o <strong>ChaCha20</strong>, usado em vários protocolos (RFC 7539).</li>
+        <li><strong>Tamanho do bloco:</strong> a mensagem é dividida em blocos desse tamanho e, se necessário, completada (<em>padding</em>) antes de cifrar. <strong>Tamanho da chave:</strong> indica a resistência à <strong>força bruta</strong>, em que o atacante testa todas as chaves.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <p class="small text-muted">A cifra de César e a força bruta das 25 chaves:</p>
+    <div class="demo-box" data-sim="cesar"></div>
+    <p class="small text-muted">O one-time pad e o que acontece quando a chave é reutilizada:</p>
+    <div class="demo-box" data-sim="xor-otp"></div>
+    <p class="small text-muted">Quanto tempo leva testar todas as chaves:</p>
+    <div class="demo-box" data-sim="forca-bruta"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="A segurança deve depender só da chave, não do segredo do algoritmo|O algoritmo deve ser mantido em segredo|A chave deve ser do tamanho da mensagem" data-answer="0" data-explain="O algoritmo é suposto público; só a chave é secreta." data-hint="Releia a citação de Kerckhoffs.">
+        <p class="fw-semibold mb-2">O que diz o princípio de Kerckhoffs?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Dobra o número de chaves possíveis|Aumenta em 1 o número de chaves|Não muda nada" data-answer="0" data-explain="Com n bits há 2^n chaves; com n + 1 bits, 2^(n+1) = 2 × 2^n." data-hint="Quantas chaves existem com n bits?">
+        <p class="fw-semibold mb-2">O que um bit a mais na chave faz com o trabalho da força bruta?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Kerckhoffs: algoritmo público, chave secreta.</li>
+        <li>One-time pad: perfeito, mas a chave precisa ser aleatória, do tamanho da mensagem e usada uma única vez.</li>
+        <li>DES (56 bits) é fraco; AES e ChaCha20 são os atuais; o tamanho da chave mede a resistência à força bruta.</li>
+    </ul>
+</section>
+
+<!-- 6. Chave pública -->
+<section id="chave-publica" class="chapter-section" data-conceito="chave-publica" data-titulo="Chave pública">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">Criptografia de chave pública e assinaturas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Com chave secreta, Alice e Bob precisam combinar a chave antes. Nos anos 1970, Diffie e Hellman
+        propuseram um tipo diferente de criptografia, em que essa combinação prévia deixa de ser necessária.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Na <strong>criptografia de chave pública</strong>, cada usuário tem duas chaves geradas juntas: uma
+        <strong>pública</strong>, distribuída a todos, e uma <strong>privada</strong>, guardada em segredo. Elas
+        têm uma relação matemática tal que é computacionalmente difícil obter a privada a partir da pública.
+    </p>
+    <ul>
+        <li><strong>Cifrar para alguém:</strong> para mandar M a Alice, Bob calcula E(Alice<sub>pub</sub>, M); só Alice decifra, com D(Alice<sub>priv</sub>, ·).</li>
+        <li><strong>Assinar:</strong> Alice calcula SM = E(Alice<sub>priv</sub>, M). Qualquer um decifra com Alice<sub>pub</sub>, e conseguir isso prova que a mensagem foi assinada com a chave privada de Alice, que só ela conhece.</li>
+        <li>Os esquemas mais usados são o <strong>RSA</strong>, baseado em exponenciação modular com inteiros grandes, e a <strong>criptografia de curvas elípticas</strong> (ECC), que costuma exigir chaves menores e menos processamento. Os detalhes de ambos ficam fora do escopo do livro.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="A chave pública de Alice|A chave privada de Bob|A chave pública de Bob" data-answer="0" data-explain="Cifrando com a chave pública de Alice, só a chave privada dela decifra." data-hint="Quem precisa conseguir decifrar?">
+        <p class="fw-semibold mb-2">Bob quer mandar uma mensagem que só Alice possa ler. Que chave ele usa para cifrar?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="A chave privada de Alice|A chave pública de Alice|A chave pública de Bob" data-answer="0" data-explain="A assinatura usa a chave privada; qualquer um a verifica com a pública." data-hint="Só Alice pode ter produzido a assinatura.">
+        <p class="fw-semibold mb-2">Com que chave Alice assina uma mensagem?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Par de chaves: pública (todos conhecem) e privada (só o dono).</li>
+        <li>Cifrar com a pública do destinatário; assinar com a própria privada.</li>
+        <li>RSA e ECC são os esquemas mais difundidos.</li>
+    </ul>
+</section>
+
+<!-- 7. Hash -->
+<section id="hash" class="chapter-section" data-conceito="hash" data-titulo="Funções de hash">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Funções de hash criptográficas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Assinar um arquivo grande inteiro com chave pública é caro. Seria mais rápido assinar só um resumo dele.
+        Mas que resumo serve?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Um checksum ou um CRC não serve: se Mallory interceptar a mensagem, ele a altera e ajusta para que o
+        resumo continue igual. É preciso um resumo que impeça o atacante de produzir outra mensagem com o mesmo
+        valor: as <strong>funções de hash criptográficas</strong>. A função ideal daria um número diferente para
+        cada entrada, o que é impossível; as funções reais são uma aproximação, com resumos de 128, 160, 256 bits
+        ou mais. Elas têm o <strong>efeito avalanche</strong> (uma pequena mudança na mensagem muda muito o hash) e
+        são muito difíceis de inverter. As mais conhecidas são o <strong>MD5</strong> (RFC 1321), o
+        <strong>SHA-1</strong> (160 bits) e a família <strong>SHA-2</strong> (224, 256, 384 ou 512 bits).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Divergência no livro</span><br>
+        O livro diz que ataques ao MD5 foram publicados em 2010 e que o SHA-1 "é usado em vários protocolos". As
+        colisões do MD5 são conhecidas desde 2004, e a <a href="https://www.rfc-editor.org/rfc/rfc6151" target="_blank" rel="noopener noreferrer">RFC 6151</a>
+        (2011) desaconselha seu uso em assinaturas. O SHA-1 também é considerado inseguro desde a primeira colisão
+        pública, em 2017, e vem sendo substituído pelo SHA-2 (Wikipedia:
+        <a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="noopener noreferrer">MD5</a>,
+        <a href="https://en.wikipedia.org/wiki/SHA-1" target="_blank" rel="noopener noreferrer">SHA-1</a>).
+    </p>
+    <p>
+        Algoritmos criptográficos também dependem de <strong>números aleatórios</strong> (para gerar chaves, por
+        exemplo), e gerá-los bem é difícil: toda implementação precisa de um gerador seguro (RFC 4086).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="hash-avalanche"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque Mallory consegue alterar a mensagem mantendo o mesmo checksum|Porque o checksum é grande demais|Porque o checksum é secreto" data-answer="0" data-explain="Um checksum é fácil de ajustar; um hash criptográfico torna inviável achar outra mensagem com o mesmo resumo." data-hint="Lembre-se do desafio da simulação.">
+        <p class="fw-semibold mb-2">Por que assinar só o checksum de uma mensagem não protege contra Mallory?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Hash criptográfico: resumo de tamanho fixo, efeito avalanche, difícil de inverter.</li>
+        <li>Checksums e CRCs detectam erros, não falsificações.</li>
+        <li>MD5 e SHA-1 estão obsoletos; use SHA-2.</li>
+    </ul>
+</section>
+
+<!-- 8. Autenticação -->
+<section id="autenticacao" class="chapter-section" data-conceito="autenticacao" data-titulo="Protocolos de autenticação">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">Protocolos de autenticação</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        De volta ao problema do conceito 1: como Alice prova a Bob que é Alice sem que Eve ou Mallory consigam
+        se passar por ela depois?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>Hash(senha):</strong> Eve não consegue inverter o hash, mas nem precisa: repete o mesmo valor. É um <strong>ataque de reprodução</strong> (<em>replay</em>).</li>
+        <li><strong>Desafio-resposta:</strong> Bob manda um número aleatório, o <strong>nonce</strong> (usado uma única vez), e Alice responde Hash(nonce || senha). Bob faz a mesma conta e confere. Eve não recupera a senha nem reproduz a resposta, porque o nonce muda. Mas Bob precisa guardar a senha em claro, e invasões do computador de Bob já expuseram milhões de senhas.</li>
+        <li><strong>Cadeia de hash de Lamport:</strong> Alice calcula H<sup>10</sup>(P) = H(H(…H(P)…)), e Bob guarda só esse valor e o número 10. Para se autenticar, Alice envia H<sup>9</sup>(P); Bob confere que H(H<sup>9</sup>(P)) é o que tem guardado, passa a guardar H<sup>9</sup>(P) e decrementa o contador. Eve não usa o valor capturado (Bob já espera o anterior) nem calcula H<sup>−1</sup>. Quando o contador chega a zero, a cadeia é reinicializada. Esses dois protocolos resistem a Eve, mas não a Mallory.</li>
+        <li><strong>Chave pública:</strong> se os dois já conhecem as chaves públicas um do outro, Bob manda um nonce R e Alice o devolve assinado com a sua chave privada. Bob não deve fazer contas caras antes de saber com quem fala, para não virar alvo de DoS.</li>
+        <li><strong>MITM na troca de chaves:</strong> se Alice manda a própria chave pública na primeira mensagem, Mallory a troca pela dele e assina o nonce de Bob com a chave privada dele: Bob acha que fala com Alice.</li>
+        <li><strong>Falha de reflexão:</strong> num protocolo rápido em que cada um assina o nonce do outro, Mallory pode iniciar uma sessão com Alice só para fazê-la assinar o nonce que Bob mandou a ele. A solução é dar estrutura ao nonce (as identidades, ou um bit dizendo quem é cliente e quem é servidor).</li>
+        <li><strong>Certificados:</strong> uma terceira parte confiável, Ted, cuja chave pública Alice e Bob já têm, assina a ligação entre a identidade e a chave pública de cada um (identidade, chave pública e hash do conjunto assinado com a chave privada de Ted). Quem manda a chave pública manda junto o certificado.</li>
+    </ul>
+    <p>
+        Para se comunicarem com segurança, Alice e Bob precisam se autenticar mutuamente e combinar como cifrar.
+        Cifrar tudo com chave pública é caro; na prática, a chave pública só protege as chaves secretas, que cifram
+        o grosso dos dados.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="protocolos-autenticacao"></div>
+    <p class="small text-muted">A cadeia de hash de Lamport com SHA-256 de verdade:</p>
+    <div class="demo-box" data-sim="cadeia-hash"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Para que a resposta mude a cada autenticação e não possa ser reproduzida|Para cifrar a senha|Para Bob não precisar da senha" data-answer="0" data-explain="Como o nonce muda, uma resposta capturada não serve na próxima vez." data-hint="O que Eve tenta fazer com o que capturou?">
+        <p class="fw-semibold mb-2">Para que serve o nonce no desafio-resposta?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Ligar com segurança uma identidade à sua chave pública|Cifrar as mensagens de Alice|Gerar nonces aleatórios" data-answer="0" data-explain="Um certificado é a assinatura de Ted sobre a identidade e a chave pública de alguém." data-hint="Que problema o MITM com troca de chave explorava?">
+        <p class="fw-semibold mb-2">Para que serve um certificado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Reprodução: repetir uma prova capturada. Defesa: nonces ou cadeias de hash.</li>
+        <li>Contra Mallory, é preciso saber de quem é cada chave pública: certificados.</li>
+        <li>Nonces sem estrutura abrem espaço para ataques de reflexão.</li>
+    </ul>
+</section>
+
+<!-- 9. Troca de chaves -->
+<section id="troca-chaves" class="chapter-section" data-conceito="troca-chaves" data-titulo="Troca de chaves">
+    <span class="kicker">Conceito 9</span>
+    <h2 class="section-title">A troca de chaves de Diffie-Hellman</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Para cifrar com chave secreta, Alice e Bob precisam combinar uma chave, mesmo com Eve escutando tudo.
+        Como fazer isso sem nunca mandar a chave pela rede?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O algoritmo mais usado é o de <strong>Diffie e Hellman</strong>. Dois números são públicos: o módulo p,
+        primo, e a base g, uma raiz primitiva de p. Alice sorteia a e manda A = g<sup>a</sup> mod p; Bob sorteia b
+        e manda B = g<sup>b</sup> mod p. Alice calcula B<sup>a</sup> mod p, Bob calcula A<sup>b</sup> mod p, e os
+        dois obtêm o mesmo valor, g<sup>ab</sup> mod p. A segurança vem da dificuldade de calcular
+        <strong>logaritmos discretos</strong>: sabendo A, é muito difícil achar a.
+    </p>
+    <p>
+        No exemplo do livro, com p = 23 e g = 5: Alice escolhe a = 8 e manda 5<sup>8</sup> mod 23 = 16; Bob
+        escolhe b = 13 e manda 5<sup>13</sup> mod 23 = 21; Alice calcula 21<sup>8</sup> mod 23 = 3 e Bob calcula
+        16<sup>13</sup> mod 23 = 3. Com inteiros grandes e aleatórios, a única saída de Eve é testar todos os
+        valores possíveis, o que é computacionalmente caríssimo. Não há prova formal de segurança, mas séculos
+        de matemática não acharam um método eficiente.
+    </p>
+    <p>
+        Sozinho, porém, o Diffie-Hellman <strong>não resiste a Mallory</strong>: ele faz uma troca com Alice e
+        outra com Bob, fica com duas chaves e repassa tudo, decifrando e cifrando de novo. A solução é uma
+        <strong>troca autenticada</strong>: Bob assina o que envia com a sua chave privada e manda o certificado
+        emitido por Ted; Alice confere a assinatura e o certificado. Mallory não forja o certificado nem assina
+        como Bob. O Diffie-Hellman nunca deve ser usado sem autenticação.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <div class="demo-box" data-sim="diffie-hellman"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="p, g, A e B|a e b|A chave g^ab mod p" data-answer="0" data-explain="Os parâmetros p e g são públicos, e A e B atravessam a rede; a, b e a chave nunca são enviados." data-hint="O que passa pela rede?">
+        <p class="fw-semibold mb-2">No Diffie-Hellman, o que Eve consegue ver?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Autenticando a troca com assinaturas e certificados|Usando um p maior|Trocando a e b com mais frequência" data-answer="0" data-explain="Um p maior protege contra Eve, mas não contra Mallory; só a autenticação impede que ele se ponha no meio." data-hint="Na simulação, o que fez Alice detectar Mallory?">
+        <p class="fw-semibold mb-2">Como impedir o ataque de Mallory contra o Diffie-Hellman?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>A = g<sup>a</sup> mod p, B = g<sup>b</sup> mod p; chave = g<sup>ab</sup> mod p.</li>
+        <li>Segurança: dificuldade do logaritmo discreto com números grandes.</li>
+        <li>Sem autenticação, Mallory fica no meio; com certificado e assinatura, não.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap8" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> cifre REDE com César e k = 3. Quantas chaves Eve precisa testar no pior caso?
+            <details><summary>Ver solução</summary><p class="mb-0">UHGH. Só 25 chaves úteis (k de 1 a 25), por isso a cifra cai na hora.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> Mallory gasta 3 Gbit/s em requisições de 50 bytes que geram respostas de 2000 bytes. Quanto chega à vítima?
+            <details><summary>Ver solução</summary><p class="mb-0">O fator é k = 2000 / 50 = 40, então chegam 3 × 40 = 120 Gbit/s.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> com p = 23 e g = 5, Alice escolhe a = 3 e Bob, b = 7. Calcule A, B e a chave.
+            <details><summary>Ver solução</summary><p class="mb-0">A = 5³ mod 23 = 10; B = 5⁷ mod 23 = 17; chave = 17³ mod 23 = 10⁷ mod 23 = 14.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Bob guarda H<sup>4</sup>(P) e n = 4. Alice já se autenticou uma vez. O que Bob guarda agora e o que Alice envia na próxima vez?
+            <details><summary>Ver solução</summary><p class="mb-0">Depois da primeira autenticação, Bob guarda H<sup>3</sup>(P) e n = 3. Na próxima, Alice envia H<sup>2</sup>(P), e Bob confere que H(H<sup>2</sup>(P)) = H<sup>3</sup>(P).</p></details></li>
+        <li><strong>Desafio:</strong> por que, no desafio-resposta, uma invasão do computador de Bob é mais grave do que na cadeia de hash?
+            <details><summary>Ver solução</summary><p class="mb-0">No desafio-resposta Bob guarda a senha em claro, que o invasor pode usar (e que talvez sirva em outros sistemas). Na cadeia de hash, Bob só guarda H<sup>n</sup>(P), que não pode ser invertido para dar o valor que Alice enviará na próxima vez.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Seis trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. César e a força bruta</h3>
+    <pre class="code-block"><code>ALFABETO = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+def cesar(texto, k):
+    """Troca cada letra pela que está k posições depois no alfabeto."""
+    saida = ""
+    for c in texto:
+        if c in ALFABETO:
+            saida += ALFABETO[(ALFABETO.index(c) + k) % 26]
+        else:
+            saida += c
+    return saida
+
+print("SECRET com k = 3:", cesar("SECRET", 3))        # o exemplo do livro
+
+# Força bruta: só existem 25 chaves úteis
+cifrada = cesar("ENCONTRO AO MEIO DIA", 11)
+print("Cifrada:", cifrada)
+for k in range(1, 26):
+    print(f"k = {k:2}: {cesar(cifrada, -k)}")</code></pre>
+
+    <h3 class="h6 mt-4">2. One-time pad e a chave reutilizada</h3>
+    <pre class="code-block"><code>import random
+
+def xor(a, b):
+    return bytes(x ^ y for x, y in zip(a, b))
+
+rnd = random.Random(2021)                   # numa aplicação real: secrets.token_bytes
+m1 = b"ATACAR AO AMANHECER"
+chave = bytes(rnd.randrange(256) for _ in m1)   # chave aleatória do tamanho da mensagem
+
+c1 = xor(m1, chave)
+print("cifrado:  ", c1.hex())
+print("decifrado:", xor(c1, chave))
+
+# O erro: reutilizar a mesma chave numa segunda mensagem
+m2 = b"RECUAR AO ANOITECER"
+c2 = xor(m2, chave)
+print("c1 XOR c2 == m1 XOR m2?", xor(c1, c2) == xor(m1, m2))
+print("Eve conhece m1 e recupera m2:", xor(xor(c1, c2), m1))</code></pre>
+
+    <h3 class="h6 mt-4">3. Checksum × SHA-256</h3>
+    <pre class="code-block"><code>import hashlib
+
+def checksum(msg):
+    return sum(msg) % 256                  # soma simples dos bytes, como um checksum
+
+def sha256(msg):
+    return hashlib.sha256(msg).hexdigest()
+
+original = b"PAGUE 109 A BOB"
+mallory = b"PAGUE 901 A BOB"               # os mesmos bytes em outra ordem
+for m in (original, mallory):
+    print(f"{m}: checksum = {checksum(m):3}  SHA-256 = {sha256(m)[:24]}...")
+
+# Efeito avalanche: um único caractere muda cerca de metade dos 256 bits
+a = int(sha256(b"PAGUE 109 A BOB"), 16)
+b = int(sha256(b"PAGUE 109 A BOC"), 16)
+print("bits diferentes entre os dois SHA-256:", bin(a ^ b).count("1"), "de 256")</code></pre>
+
+    <h3 class="h6 mt-4">4. Desafio-resposta e cadeia de hash</h3>
+    <pre class="code-block"><code>import hashlib, random
+
+def H(dados):
+    return hashlib.sha256(dados).hexdigest()
+
+SENHA = b"1234xyz$"
+rnd = random.Random(7)                     # numa aplicação real: secrets.randbelow
+
+# 1. Desafio-resposta: Bob manda um nonce; Alice responde H(nonce || senha)
+def bob_autentica(resposta_de):
+    nonce = str(rnd.randrange(10**6)).encode()
+    esperado = H(nonce + SENHA)
+    return resposta_de(nonce) == esperado
+
+capturada = {}
+def alice(nonce):
+    r = H(nonce + SENHA)
+    capturada["ultima"] = r                # Eve grava tudo o que passa
+    return r
+
+def eve(nonce):
+    return capturada["ultima"]             # reproduz a resposta antiga
+
+print("Alice autenticada:", bob_autentica(alice))
+print("Eve reproduzindo: ", bob_autentica(eve))
+
+# 2. Cadeia de hash de Lamport: Bob guarda H^n(P), nunca a senha
+def Hn(dados, n):
+    for _ in range(n):
+        dados = H(dados).encode()
+    return dados
+
+n = 10
+guardado = Hn(SENHA, n)
+for tentativa in range(3):
+    enviado = Hn(SENHA, n - 1)             # Alice manda H^(n-1)(P)
+    ok = H(enviado).encode() == guardado
+    print(f"autenticação com H^{n - 1}(P):", ok)
+    if ok:
+        guardado, n = enviado, n - 1        # Bob passa a guardar o valor recebido
+print("Eve reproduz H^9(P) depois:", H(Hn(SENHA, 9)).encode() == guardado)</code></pre>
+
+    <h3 class="h6 mt-4">5. Diffie-Hellman, Eve e Mallory</h3>
+    <pre class="code-block"><code>p, g = 23, 5                               # públicos (exemplo do livro)
+a, b = 8, 13                               # segredos de Alice e de Bob
+
+A = pow(g, a, p)                           # Alice -> Bob
+B = pow(g, b, p)                           # Bob -> Alice
+print(f"A = {A}, B = {B}")
+print(f"Alice calcula {pow(B, a, p)}; Bob calcula {pow(A, b, p)}")
+
+# Eve vê p, g, A e B. Com p pequeno, ela testa todos os expoentes.
+x = next(x for x in range(1, p) if pow(g, x, p) == A)
+print(f"Eve descobre um expoente x = {x} e a chave {pow(B, x, p)}")
+
+# Mallory no meio: troca A e B pelo seu próprio valor
+m = 6
+M = pow(g, m, p)
+print(f"Chave Alice-Mallory: {pow(M, a, p)} = {pow(A, m, p)}")
+print(f"Chave Mallory-Bob:   {pow(M, b, p)} = {pow(B, m, p)}")</code></pre>
+
+    <h3 class="h6 mt-4">6. Tamanho da chave e força bruta</h3>
+    <pre class="code-block"><code>TAXA = 10**9                                # chaves testadas por segundo (hipótese)
+ANO = 365 * 24 * 3600
+
+for bits in (40, 56, 64, 128, 256):
+    total = 2 ** bits
+    anos = total / TAXA / ANO               # pior caso: testar todas as chaves
+    print(f"{bits:3} bits: {total:.2e} chaves -> {anos:.2e} anos para testar todas")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 2.8, "Network security" (pág. 119–132 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>Diffie, W.; Hellman, M. <a href="https://ee.stanford.edu/~hellman/publications/24.pdf" target="_blank" rel="noopener noreferrer">New Directions in Cryptography</a> (1976), citado pelo livro como [DH1976]</li>
+        <li>RFC 7258 — <a href="https://www.rfc-editor.org/rfc/rfc7258" target="_blank" rel="noopener noreferrer">Pervasive Monitoring Is an Attack</a></li>
+        <li>RFC 7465 — <a href="https://www.rfc-editor.org/rfc/rfc7465" target="_blank" rel="noopener noreferrer">Prohibiting RC4 Cipher Suites</a></li>
+        <li>RFC 7539 — <a href="https://www.rfc-editor.org/rfc/rfc7539" target="_blank" rel="noopener noreferrer">ChaCha20 and Poly1305 for IETF Protocols</a></li>
+        <li>RFC 1321 — <a href="https://www.rfc-editor.org/rfc/rfc1321" target="_blank" rel="noopener noreferrer">The MD5 Message-Digest Algorithm</a> e RFC 6151 — <a href="https://www.rfc-editor.org/rfc/rfc6151" target="_blank" rel="noopener noreferrer">Updated Security Considerations for MD5</a></li>
+        <li>RFC 4086 — <a href="https://www.rfc-editor.org/rfc/rfc4086" target="_blank" rel="noopener noreferrer">Randomness Requirements for Security</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Password_strength" target="_blank" rel="noopener noreferrer">Password strength</a>, citada pelo livro</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Kerckhoffs%27s_principle" target="_blank" rel="noopener noreferrer">Kerckhoffs's principle</a>, <a href="https://pt.wikipedia.org/wiki/Cifra_de_C%C3%A9sar" target="_blank" rel="noopener noreferrer">Cifra de César</a>, <a href="https://en.wikipedia.org/wiki/One-time_pad" target="_blank" rel="noopener noreferrer">One-time pad</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Hash_chain" target="_blank" rel="noopener noreferrer">Hash chain</a>, <a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="noopener noreferrer">MD5</a>, <a href="https://en.wikipedia.org/wiki/SHA-1" target="_blank" rel="noopener noreferrer">SHA-1</a></li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Troca_de_chaves_de_Diffie%E2%80%93Hellman" target="_blank" rel="noopener noreferrer">Troca de chaves de Diffie–Hellman</a>, <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack" target="_blank" rel="noopener noreferrer">Denial-of-service attack</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-07/index.html" class="text-muted text-decoration-none">← Capítulo 7</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 8</span>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">Todos os capítulos</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap8.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>
