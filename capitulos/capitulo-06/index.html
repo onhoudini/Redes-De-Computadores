@@ -150,7 +150,7 @@
         <li><strong>Árvore</strong> (Fig. 59): usada quando é preciso ligar muitos clientes com baixo custo, como nas redes de TV a cabo.</li>
     </ul>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">Escolha a organização, mude o número de hosts e corte enlaces para ver quem continua conversando.</p>
     <div class="demo-box" data-sim="topologias"></div>
 
@@ -199,7 +199,7 @@
         15 Mbit/s, quando R2–R3 satura.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">Ajuste a taxa de cada fluxo e veja a carga dos enlaces. Os botões mostram as duas alocações do livro e o preenchimento progressivo.</p>
     <div class="demo-box" data-sim="max-min"></div>
 
@@ -264,7 +264,7 @@
         desnecessárias. Um bom ponto de operação é uma ocupação baixa: boa utilização e pouco atraso.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">A e B começam uma rajada ao mesmo tempo. Ajuste a rajada e o buffer de R1 e acompanhe segundo a segundo.</p>
     <div class="demo-box" data-sim="buffer-roteador"></div>
 
@@ -317,7 +317,7 @@
         <li><strong>Pacotes de controle</strong> enviados à origem: usados em redes pequenas, evitados nas grandes, porque aumentam a carga justo no congestionamento e roteadores são lentos para criar pacotes.</li>
     </ul>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="politicas-descarte"></div>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
@@ -368,7 +368,7 @@ while True:
     next_queue = (next_queue + 1) % N</pre>
     <p class="small text-muted">Pseudocódigo do escalonador round-robin (livro, pág. 88 do PDF).</p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="round-robin"></div>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
@@ -403,7 +403,7 @@ while True:
         <li><strong>BitTorrent:</strong> o arquivo é dividido em blocos de tamanho fixo, e metadados indicam quais hosts guardam cada bloco. O cliente baixa os blocos em qualquer ordem, de hosts diferentes e em paralelo, e passa a oferecer os blocos que já tem. Assim, quanto mais popular o arquivo, mais fontes ele tem.</li>
     </ul>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="bittorrent"></div>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
@@ -458,7 +458,7 @@ while True:
         outros calados. Os algoritmos MAC dinâmicos, a seguir, resolvem isso.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="tdm"></div>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
@@ -519,7 +519,7 @@ else:
         (pág. 93); o máximo é 1/e ≈ 0,368, com G = 1. O bloco de código 4, abaixo, faz as contas.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">G é a carga oferecida: quantos quadros, contando retransmissões, tentam usar o canal por tempo de quadro.</p>
     <div class="demo-box" data-sim="aloha"></div>
 
@@ -577,7 +577,7 @@ else:
         confirmações pode sofrer colisões seguidas com um servidor que envia quadros longos.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">A fica numa ponta do cabo e B na outra. Escolha quando B começa e a duração dos quadros.</p>
     <div class="demo-box" data-sim="csma-cd"></div>
 
@@ -629,7 +629,7 @@ else:
         quando as colisões são frequentes; alguns dispositivos só a ligam depois de erros de transmissão.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="estacao-escondida"></div>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
@@ -678,7 +678,7 @@ else:
         <li>O <strong>Monitor</strong>, escolhido por eleição, insere um atraso de pelo menos 24 bits (para o token caber no anel), envia o primeiro token e verifica se ele passa regularmente. Como uma estação pode reter o token por no máximo o Token Holding Time (THT, pouco menos de 10 ms), com N estações o token precisa passar pelo Monitor pelo menos a cada N × THT. Se não passar, o Monitor reinicializa o anel e envia um token novo. Se o Monitor falhar, outra estação é eleita.</li>
     </ul>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="token-ring"></div>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
@@ -765,7 +765,7 @@ else:
         quando há congestionamento.
     </p>
 
-    <h3 class="h5 mt-4 mb-3">3. Visualização e exploração</h3>
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">Dois hosts partem de uma alocação injusta. Compare AIMD e AIAD no plano de alocações.</p>
     <div class="demo-box" data-sim="aimd-plano"></div>
     <p class="small text-muted">Agora a janela de congestionamento de um host com realimentação do tipo DECbit: o roteador marca os pacotes quando há fila.</p>

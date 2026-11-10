@@ -151,6 +151,8 @@ html[data-theme="dark"] .chat-erro { background: #58151c; color: #f8d7da; }
 .sim-svg .camada { fill: var(--surface-2); stroke: var(--line); }
 .sim-svg .pacote { fill: #ffc107; stroke: #997404; stroke-width: 2; }
 .sim-svg .pacote-resp { fill: #20c997; stroke: #0f5132; stroke-width: 2; }
+/* Texto dentro dos balões amarelos e verdes: escuro nos dois temas. */
+.sim-svg .balao-texto { fill: #212529; }
 html[data-theme="dark"] .sim-svg .no-ativo { fill: #3d3100; }
 
 .buffer { display: flex; gap: 3px; flex-wrap: wrap; }

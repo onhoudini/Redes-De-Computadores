@@ -15,21 +15,21 @@ Cada conceito deve ser apresentado como uma unidade independente de aprendizagem
 - **[Nome do conceito A]**
   1. Contextualização
   2. Explicação
-  3. Visualização e exploração
+  3. Visualização
   4. Prática
   5. Fixação
 
 - **[Nome do conceito B]**
   1. Contextualização
   2. Explicação
-  3. Visualização e exploração
+  3. Visualização
   4. Prática
   5. Fixação
 
 - **[Nome do conceito C]**
   ...
 
-Nos capítulos 1 e 2 a etapa 3 se chama apenas "Visualização". Os dois títulos são aceitos; os capítulos novos usam "Visualização e exploração".
+A etapa 3 se chama "Visualização" em todos os capítulos; quando um conceito tem mais de uma visualização, o título pode ganhar um complemento ("3. Visualização — números de sequência por byte").
 
 No HTML, cada conceito é uma `<section class="chapter-section">` com um `kicker` acima do título e as etapas como `<h3>` numerados ("1. Contextualização", "2. Explicação"…).
 
@@ -66,7 +66,7 @@ Desenvolva cada conceito seguindo a estrutura definida na seção 1.
 
 - **Contextualização:** apresente um problema, situação, pergunta ou exemplo que introduza o conceito.
 - **Explicação:** ensine o conceito de forma clara e progressiva, utilizando exemplos e subdivisões quando necessário.
-- **Visualização e exploração:** utilize diagramas, animações, comparações, gráficos, fluxos ou outras representações visuais. Sempre que aplicável, permita que o usuário manipule, experimente ou explore o conceito interativamente. Priorize a interação quando ela contribuir para a aprendizagem.
+- **Visualização:** utilize diagramas, animações, comparações, gráficos, fluxos ou outras representações visuais. Sempre que aplicável, permita que o usuário manipule, experimente ou explore o conceito interativamente. Priorize a interação quando ela contribuir para a aprendizagem.
 - **Prática:** proponha atividades que exijam a aplicação do conhecimento, com dificuldade adequada ao conteúdo. Inclua desafios e feedback nas próprias atividades.
 - **Fixação:** resuma os pontos essenciais e verifique a compreensão quando apropriado.
 

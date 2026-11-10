@@ -7,11 +7,17 @@
     function hex2(n) { return n.toString(16).toUpperCase().padStart(2, "0"); }
     function bin8(n) { return n.toString(2).padStart(8, "0"); }
 
-    // Anima um círculo ao longo de uma poligonal. Com movimento reduzido, pula para o fim.
-    function animarCaminho(circulo, pontos, duracao, aoTerminar) {
+    // Põe um círculo (cx/cy) ou um grupo <g> (transform) na posição (x, y).
+    function posiciona(no, x, y) {
+        if (no.tagName.toLowerCase() === "circle") { no.setAttribute("cx", x); no.setAttribute("cy", y); }
+        else no.setAttribute("transform", "translate(" + x + " " + y + ")");
+    }
+
+    // Anima um círculo ou um grupo ao longo de uma poligonal. Com movimento reduzido, pula para o fim.
+    function animarCaminho(no, pontos, duracao, aoTerminar) {
         if (R.reduzMovimento() || pontos.length < 2) {
             var f = pontos[pontos.length - 1];
-            circulo.setAttribute("cx", f[0]); circulo.setAttribute("cy", f[1]);
+            posiciona(no, f[0], f[1]);
             if (aoTerminar) aoTerminar();
             return;
         }
@@ -25,7 +31,7 @@
             if (terminou) return;
             terminou = true;
             var f = pontos[pontos.length - 1];
-            circulo.setAttribute("cx", f[0]); circulo.setAttribute("cy", f[1]);
+            posiciona(no, f[0], f[1]);
             if (aoTerminar) aoTerminar();
         }
         // Salvaguarda: se a aba estiver em segundo plano (rAF pausado), conclui pelo relógio.
@@ -37,9 +43,7 @@
             var acc = 0, k = 0;
             while (k < comprimentos.length - 1 && acc + comprimentos[k] < alvo) { acc += comprimentos[k]; k++; }
             var frac = comprimentos[k] ? (alvo - acc) / comprimentos[k] : 1;
-            var x = pontos[k][0] + (pontos[k + 1][0] - pontos[k][0]) * frac;
-            var y = pontos[k][1] + (pontos[k + 1][1] - pontos[k][1]) * frac;
-            circulo.setAttribute("cx", x); circulo.setAttribute("cy", y);
+            posiciona(no, pontos[k][0] + (pontos[k + 1][0] - pontos[k][0]) * frac, pontos[k][1] + (pontos[k + 1][1] - pontos[k][1]) * frac);
             if (alvo < total) requestAnimationFrame(quadro);
             else concluir();
         }
@@ -47,15 +51,29 @@
     }
 
     /* ------------------------------------------------------------------
-     * 1. Modelo cliente-servidor
+     * 1. Modelo cliente-servidor (Fig. 36): a mensagem viaja num balão,
+     *    e o servidor mostra a ação que executou antes de responder.
      * ------------------------------------------------------------------ */
     R.registrar("cliente-servidor", function (raiz) {
         var servidores = {
-            web: { nome: "Servidor web", req: "GET /index.html", resp: "200 OK + página HTML" },
-            impressao: { nome: "Servidor de impressão", req: "IMPRIMIR relatorio.pdf", resp: "Trabalho 17 na fila" },
-            email: { nome: "Servidor de e-mail", req: "ENVIAR mensagem para bob@exemplo.org", resp: "Mensagem aceita para entrega" },
-            musica: { nome: "Servidor de música", req: "TOCAR faixa 42", resp: "Fluxo de áudio da faixa 42" }
+            web: { nome: "Servidor web", req: "GET /index.html", resp: function () { return "200 OK + página HTML"; },
+                acao: function (st) { st.n = (st.n || 0) + 1; },
+                estado: function (st) { return [st.n ? "Página index.html entregue " + st.n + " vez(es)." : "Nenhuma página pedida ainda."]; } },
+            impressao: { nome: "Servidor de impressão", req: "IMPRIMIR relatorio.pdf", resp: function (st) { return "Trabalho " + st.fila[st.fila.length - 1] + " na fila"; },
+                acao: function (st) { st.fila = st.fila || []; st.fila.push(17 + st.fila.length); },
+                estado: function (st) {
+                    return (st.fila || []).length
+                        ? ["Fila da impressora:"].concat(st.fila.map(function (n) { return "trabalho " + n + ": relatorio.pdf"; }))
+                        : ["Fila da impressora vazia."];
+                } },
+            email: { nome: "Servidor de e-mail", req: "ENVIAR mensagem para bob@exemplo.org", resp: function () { return "Mensagem aceita para entrega"; },
+                acao: function (st) { st.n = (st.n || 0) + 1; },
+                estado: function (st) { return [st.n ? "Caixa de saída: " + st.n + " mensagem(ns) para bob@exemplo.org, a caminho do servidor do destinatário." : "Caixa de saída vazia."]; } },
+            musica: { nome: "Servidor de música", req: "TOCAR faixa 42", resp: function () { return "Fluxo de áudio da faixa 42"; },
+                acao: function (st) { st.tocando = true; },
+                estado: function (st) { return [st.tocando ? "♪ Tocando a faixa 42 para o cliente." : "Nenhuma faixa tocando."]; } }
         };
+        var estados = { web: {}, impressao: {}, email: {}, musica: {} };
         var visitados = {};
         var concluir = R.desafio(raiz, "cs-servidores", 15, "Falar com os quatro tipos de servidor");
 
@@ -63,12 +81,16 @@
             Object.keys(servidores).map(function (k) { return el("option", { value: k }, servidores[k].nome); }));
         var camadas = el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("camadas") });
         var enviar = u.botao("Enviar requisição", "btn-primary", rodar);
-        var saida = u.feedback();
+        var fase = el("p", { class: "small fw-semibold mt-2 mb-1", "aria-live": "polite" }, "Escolha um servidor e envie uma requisição.");
+        var saida = el("p", { class: "small mt-1 mb-0" });
         var contagem = el("p", { class: "small text-muted mb-0" });
+        var tituloPainel = el("p", { class: "small fw-semibold mb-1" });
+        var listaPainel = el("ul", { class: "small mb-0 ps-3" });
+        var painel = el("div", { class: "p-2 h-100", style: "border:1px solid var(--line);border-radius:8px;background:var(--surface)", "aria-live": "polite" }, tituloPainel, listaPainel);
 
         var NOMES = ["Aplicação", "Transporte", "Rede", "Enlace", "Física"];
         var desenho = svg("svg", { viewBox: "0 0 620 260", class: "sim-svg w-100", style: "max-height:300px", role: "img", "aria-label": "Cliente e servidor trocando requisição e resposta." });
-        desenho.appendChild(svg("title", { text: "Cliente à esquerda e servidor à direita. A requisição segue em uma seta horizontal; com as camadas visíveis, ela desce pela pilha do cliente, atravessa a rede e sobe pela pilha do servidor." }));
+        desenho.appendChild(svg("title", { text: "Cliente à esquerda e servidor à direita. A requisição segue num balão pela seta de requisições, o servidor executa a ação e a resposta volta pela seta de respostas; com as camadas visíveis, as mensagens descem pela pilha do cliente, atravessam a rede e sobem pela pilha do servidor." }));
         var grupoCamadas = svg("g");
         NOMES.forEach(function (n, i) {
             var y = 40 + i * 40;
@@ -81,17 +103,43 @@
         grupoCamadas.appendChild(svg("text", { x: 310, y: 240, "text-anchor": "middle", "font-size": 12 }, "provedor do serviço (“a rede”)"));
         var cliente = svg("rect", { x: 20, y: 40, width: 130, height: 32, rx: 5, class: "no" });
         var servidor = svg("rect", { x: 470, y: 40, width: 130, height: 32, rx: 5, class: "no" });
-        var rotuloServidor = svg("text", { x: 535, y: 30, "text-anchor": "middle", "font-size": 12, "font-weight": 600 }, "Servidor");
-        desenho.append(grupoCamadas, cliente, servidor,
+        var rotuloServidor = svg("text", { x: 535, y: 30, "text-anchor": "middle", "font-size": 12, "font-weight": 600 }, "Servidor web");
+        var idSeta = u.novoId("seta-cs");
+        desenho.append(
+            svg("defs", null, svg("marker", { id: idSeta, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" },
+                svg("path", { d: "M0 0 L10 5 L0 10 z", class: "seq-arrowhead" }))),
+            grupoCamadas, cliente, servidor,
             svg("text", { x: 85, y: 61, "text-anchor": "middle", "font-size": 12 }, "Aplicação"),
             svg("text", { x: 535, y: 61, "text-anchor": "middle", "font-size": 12 }, "Aplicação"),
             svg("text", { x: 85, y: 30, "text-anchor": "middle", "font-size": 12, "font-weight": 600 }, "Cliente"), rotuloServidor,
-            svg("line", { x1: 150, y1: 50, x2: 470, y2: 50, class: "linha", "stroke-dasharray": "6 4" }),
-            svg("line", { x1: 470, y1: 64, x2: 150, y2: 64, class: "linha", "stroke-dasharray": "6 4" }));
-        var rotuloReq = svg("text", { x: 310, y: 44, "text-anchor": "middle", "font-size": 11 }, "Requisições");
-        var rotuloResp = svg("text", { x: 310, y: 80, "text-anchor": "middle", "font-size": 11 }, "Respostas");
-        var bolinha = svg("circle", { r: 9, cx: 150, cy: 57, class: "pacote", visibility: "hidden" });
-        desenho.append(rotuloReq, rotuloResp, bolinha);
+            svg("line", { x1: 152, y1: 48, x2: 466, y2: 48, class: "linha", "stroke-dasharray": "6 4", "marker-end": "url(#" + idSeta + ")" }),
+            svg("line", { x1: 468, y1: 66, x2: 154, y2: 66, class: "linha", "stroke-dasharray": "6 4", "marker-end": "url(#" + idSeta + ")" }),
+            svg("text", { x: 310, y: 38, "text-anchor": "middle", "font-size": 11 }, "Requisições"),
+            svg("text", { x: 310, y: 86, "text-anchor": "middle", "font-size": 11 }, "Respostas"));
+
+        // Balão com o texto da mensagem; a posição animada é o centro do balão.
+        var fundoBalao = svg("rect", { x: -60, y: -11, width: 120, height: 22, rx: 11, class: "pacote" });
+        var textoBalao = svg("text", { x: 0, y: 4, "text-anchor": "middle", "font-size": 11, class: "balao-texto" });
+        var balao = svg("g", { visibility: "hidden" }, fundoBalao, textoBalao);
+        desenho.appendChild(balao);
+
+        function preparaBalao(texto, classe) {
+            var curto = texto.length > 26 ? texto.slice(0, 25) + "…" : texto;
+            var largura = Math.min(190, curto.length * 6.4 + 18);
+            textoBalao.textContent = curto;
+            fundoBalao.setAttribute("x", -largura / 2);
+            fundoBalao.setAttribute("width", largura);
+            fundoBalao.setAttribute("class", classe);
+            balao.setAttribute("visibility", "visible");
+            return largura;
+        }
+
+        function mostraPainel() {
+            var k = tipo.value, nome = servidores[k].nome;
+            tituloPainel.textContent = "No " + nome.charAt(0).toLowerCase() + nome.slice(1);
+            listaPainel.replaceChildren.apply(listaPainel, servidores[k].estado(estados[k]).map(function (l) { return el("li", null, l); }));
+        }
+        tipo.addEventListener("change", function () { rotuloServidor.textContent = servidores[tipo.value].nome; mostraPainel(); });
 
         function atualizaCamadas() {
             grupoCamadas.setAttribute("visibility", camadas.checked ? "visible" : "hidden");
@@ -103,27 +151,46 @@
         atualizaCamadas();
 
         function rodar() {
-            var s = servidores[tipo.value];
+            var k = tipo.value, s = servidores[k];
             rotuloServidor.textContent = s.nome;
-            enviar.disabled = true;
-            bolinha.setAttribute("visibility", "visible");
-            bolinha.setAttribute("class", "pacote");
-            var ida = camadas.checked
-                ? [[85, 56], [85, 216], [535, 216], [535, 56]]
-                : [[150, 57], [470, 57]];
-            saida.className = "small mt-2 mb-0";
-            saida.textContent = "Cliente → " + s.nome + ": “" + s.req + "”";
-            animarCaminho(bolinha, ida, camadas.checked ? 1800 : 900, function () {
-                bolinha.setAttribute("class", "pacote-resp");
-                var volta = ida.slice().reverse();
-                animarCaminho(bolinha, volta, camadas.checked ? 1800 : 900, function () {
-                    saida.textContent = "Cliente → " + s.nome + ": “" + s.req + "” · Resposta: “" + s.resp + "”";
-                    enviar.disabled = false;
-                    visitados[tipo.value] = true;
-                    var n = Object.keys(visitados).length;
-                    contagem.textContent = "Tipos de servidor consultados: " + n + " de 4.";
-                    if (n === 4) concluir();
-                });
+            enviar.disabled = true; tipo.disabled = true; camadas.disabled = true;
+            servidor.setAttribute("class", "no");
+            saida.textContent = "Requisição: “" + s.req + "”";
+            fase.textContent = "1. A requisição vai do cliente ao servidor.";
+            var w = preparaBalao(s.req, "pacote");
+            var dur = camadas.checked ? 1800 : 1100;
+            // Com as camadas, o balão desce pela pilha do cliente, cruza a rede e sobe pela do servidor,
+            // sem sair da área do desenho.
+            function pelasCamadas(larg) {
+                var xe = Math.max(85, larg / 2 + 4), xd = Math.min(535, 620 - larg / 2 - 4);
+                return [[xe, 56], [xe, 216], [xd, 216], [xd, 56]];
+            }
+            var ida = camadas.checked ? pelasCamadas(w) : [[150 + w / 2, 48], [470 - w / 2, 48]];
+            posiciona(balao, ida[0][0], ida[0][1]);
+            animarCaminho(balao, ida, dur, function () {
+                // O servidor executa a ação pedida antes de responder.
+                balao.setAttribute("visibility", "hidden");
+                servidor.setAttribute("class", "no no-ativo");
+                fase.textContent = "2. O servidor executa a ação pedida.";
+                s.acao(estados[k]);
+                mostraPainel();
+                setTimeout(function () {
+                    servidor.setAttribute("class", "no");
+                    var resp = s.resp(estados[k]);
+                    var w2 = preparaBalao(resp, "pacote-resp");
+                    var volta = camadas.checked ? pelasCamadas(w2).reverse() : [[470 - w2 / 2, 66], [150 + w2 / 2, 66]];
+                    posiciona(balao, volta[0][0], volta[0][1]);
+                    fase.textContent = "3. A resposta volta do servidor ao cliente.";
+                    animarCaminho(balao, volta, dur, function () {
+                        fase.textContent = "Troca concluída: o cliente pediu, o servidor agiu e respondeu.";
+                        saida.textContent = "Requisição: “" + s.req + "” · Resposta: “" + resp + "”";
+                        enviar.disabled = false; tipo.disabled = false; camadas.disabled = false;
+                        visitados[k] = true;
+                        var n = Object.keys(visitados).length;
+                        contagem.textContent = "Tipos de servidor consultados: " + n + " de 4.";
+                        if (n === 4) concluir();
+                    });
+                }, R.reduzMovimento() ? 0 : 800);
             });
         }
 
@@ -132,8 +199,12 @@
                 el("div", { class: "col-sm-5" }, u.campo("Tipo de servidor", tipo)),
                 el("div", { class: "col-sm-4" }, el("div", { class: "form-check mb-2" }, camadas, el("label", { class: "form-check-label small", for: camadas.id }, "Mostrar camadas inferiores"))),
                 el("div", { class: "col-sm-3 mb-2" }, enviar)),
-            desenho, saida, contagem,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): envie uma requisição a cada um dos quatro tipos de servidor."));
+            desenho,
+            el("div", { class: "row g-2 mt-1" },
+                el("div", { class: "col-md-7" }, fase, saida, contagem),
+                el("div", { class: "col-md-5" }, painel)),
+            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): envie uma requisição a cada um dos quatro tipos de servidor (livro, pág. 55 do PDF)."));
+        mostraPainel();
     });
 
     /* ------------------------------------------------------------------
