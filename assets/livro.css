@@ -56,6 +56,13 @@ html[data-theme="dark"] .text-success { color: #75b798 !important; }
 html[data-theme="dark"] .text-danger { color: #ea868f !important; }
 html[data-theme="dark"] .text-primary { color: #6ea8fe !important; }
 html[data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+/* Menus de capítulos (dropdowns da navbar) no tema escuro. */
+html[data-theme="dark"] .dropdown-menu { background-color: #24282c; border-color: #495057; }
+html[data-theme="dark"] .dropdown-item { color: #e9ecef; }
+html[data-theme="dark"] .dropdown-item:hover,
+html[data-theme="dark"] .dropdown-item:focus { color: #e9ecef; background-color: #343a40; }
+html[data-theme="dark"] .dropdown-item.active,
+html[data-theme="dark"] .dropdown-item:active { color: #17191c; background-color: #6ea8fe; }
 
 html[data-theme="dark"] .text-muted,
 html[data-theme="dark"] .form-text {

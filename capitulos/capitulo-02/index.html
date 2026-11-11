@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
-    <link rel="stylesheet" href="../../assets/tutor.css">
     <style>
         .addr-chip {
             display: inline-flex;
@@ -93,26 +92,25 @@
                 <li class="nav-item">
                     <a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../capitulo-01/index.html">Capítulo 1</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../capitulo-03/index.html">Capítulo 3</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../capitulo-04/index.html">Capítulo 4</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../capitulo-05/index.html">Capítulo 5</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../capitulo-06/index.html">Capítulo 6</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../capitulo-07/index.html">Capítulo 7</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../capitulo-08/index.html">Capítulo 8</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. DNS e correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. A web e as chamadas remotas</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
             </ul>
@@ -1334,8 +1332,6 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
 <script src="../../assets/desafios-cap2.js"></script>
 <script src="../../assets/playground.js"></script>
 <script src="../../assets/simulacoes.js"></script>
-<script src="../../assets/tutor-config.js"></script>
-<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
