@@ -238,7 +238,7 @@
             });
             var veredito;
             if (!r.viavel) veredito = el("p", { class: "quiz-no mb-0" }, "✘ Algum enlace recebe mais do que a capacidade: a alocação não é viável.");
-            else if (r.maxmin) veredito = el("p", { class: "quiz-ok mb-0" }, "✔ Alocação max-min justa: nenhum fluxo cresce sem diminuir outro que já tem menos.");
+            else if (r.maxmin) veredito = el("p", { class: "quiz-ok mb-0" }, "✔ Alocação max-min justa: nenhum fluxo cresce sem diminuir outro que já tem a mesma banda ou menos.");
             else {
                 var livres = FLUXOS.filter(function (f, i) { return r.gargalos[i].length === 0; }).map(function (f) { return f.id; });
                 veredito = el("p", { class: "mb-0" }, "Viável, mas não max-min: " + livres.join(", ") + (livres.length > 1 ? " podem" : " pode") + " crescer sem prejudicar um fluxo menor.");

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
 </head>
 <body data-capitulo="8" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
@@ -91,10 +92,16 @@
     <h2 class="section-title">Quando a rede deixa de ser confiável</h2>
     <p>
         Para analisar a segurança de uma rede, o livro raciocina sobre as <strong>capacidades do
-        atacante</strong>. Os personagens são os mesmos da literatura de segurança desde o artigo de Diffie e
-        Hellman: <strong>Alice</strong> e <strong>Bob</strong> querem se comunicar; <strong>Eve</strong> escuta
+        atacante</strong>. Os personagens são os de sempre na literatura de
+        segurança: <strong>Alice</strong> e <strong>Bob</strong> querem se comunicar; <strong>Eve</strong> escuta
         (<em>eavesdrop</em>); <strong>Mallory</strong> intercepta e altera; <strong>Ted</strong> é uma terceira
         parte em quem os dois confiam.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que Alice e Bob apareceram no artigo de Diffie e Hellman de 1976 (pág. 120 do PDF). Na
+        verdade, a primeira menção a eles em criptografia está no artigo do RSA, de Rivest, Shamir e Adleman,
+        de 1978 (<a href="https://en.wikipedia.org/wiki/Alice_and_Bob" target="_blank" rel="noopener noreferrer">Wikipedia: Alice and Bob</a>).
     </p>
     <div class="row g-4 mt-1">
         <div class="col-md-6">
@@ -257,6 +264,12 @@
         memória ou o tamanho das tabelas de um protocolo. Ataques de alguns Gbit/s a dezenas de Gbit/s são
         frequentes; em 2015, segundo alguns relatos, o github.com sofreu um DDoS de 400 Gbit/s.
     </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Esses números são da época do livro. Hoje os maiores ataques já estão na casa dos Tbit/s: em 2018, o
+        próprio GitHub recebeu 1,35 Tbit/s num ataque de amplificação que usava servidores memcached
+        (<a href="https://en.wikipedia.org/wiki/Denial-of-service_attack" target="_blank" rel="noopener noreferrer">Wikipedia: Denial-of-service attack</a>).
+    </p>
     <p>
         Projetistas de protocolos têm um papel importante, porque alguns ataques exploram falhas de projeto.
         Num protocolo requisição-resposta sobre datagramas, Bob responde ao endereço de origem que está no pacote.
@@ -313,9 +326,18 @@
     </p>
     <ul>
         <li><strong>XOR e one-time pad:</strong> com uma chave K, cifra-se C = M ⊕ K, e o receptor recupera M = C ⊕ K. Se a chave tem bits realmente aleatórios e é tão longa quanto a mensagem, ninguém recupera o texto original: é a cifra perfeita, ou <strong>cifra de Vernam</strong>. O problema é a chave do tamanho da mensagem; reutilizar a chave em vários blocos torna o esquema inseguro.</li>
-        <li><strong>Cifras práticas</strong> usam chaves curtas (56, 64, 128, 256 bits…) e são funções reversíveis: existe D tal que D(K, E(K, M)) = M. As mais usadas: o <strong>DES</strong> (1977), com chaves de 56 bits que já não resistem à força bruta (o 3DES combina três chaves); o <strong>RC4</strong>, rápido, mas com fraquezas, hoje proibido (RFC 7465); o <strong>AES</strong> (2001, de Daemen e Rijmen, padronizado pelo NIST), com blocos de 128 bits e chaves de 128, 192 ou 256 bits; e o <strong>ChaCha20</strong>, usado em vários protocolos (RFC 7539).</li>
+        <li><strong>Cifras práticas</strong> usam chaves curtas (56, 64, 128, 256 bits…) e são funções reversíveis: existe D tal que D(K, E(K, M)) = M. As mais usadas: o <strong>DES</strong> (1977), com chaves de 56 bits que já não resistem à força bruta (o 3DES combina três chaves e também foi descontinuado pelo NIST); o <strong>RC4</strong>, rápido, mas com fraquezas, hoje proibido (RFC 7465); o <strong>AES</strong> (2001, de Daemen e Rijmen, padronizado pelo NIST), com blocos de 128 bits e chaves de 128, 192 ou 256 bits; e o <strong>ChaCha20</strong>, usado em vários protocolos (RFC 7539, hoje substituída pela RFC 8439).</li>
         <li><strong>Tamanho do bloco:</strong> a mensagem é dividida em blocos desse tamanho e, se necessário, completada (<em>padding</em>) antes de cifrar. <strong>Tamanho da chave:</strong> indica a resistência à <strong>força bruta</strong>, em que o atacante testa todas as chaves.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O AES é uma <strong>cifra de bloco</strong>: cifra blocos de 128 bits, e um <strong>modo de operação</strong>
+        define como encadear os blocos de uma mensagem longa. O ChaCha20 é uma <strong>cifra de fluxo</strong>: gera
+        uma sequência pseudoaleatória que é combinada por XOR com a mensagem, como no one-time pad, e por isso
+        dispensa o <em>padding</em>. Os protocolos atuais usam modos que cifram e autenticam ao mesmo tempo (AEAD),
+        como o AES-GCM e o ChaCha20-Poly1305
+        (<a href="https://www.rfc-editor.org/rfc/rfc8439" target="_blank" rel="noopener noreferrer">RFC 8439</a>).
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">A cifra de César e a força bruta das 25 chaves:</p>
@@ -363,6 +385,13 @@
         <li><strong>Assinar:</strong> Alice calcula SM = E(Alice<sub>priv</sub>, M). Qualquer um decifra com Alice<sub>pub</sub>, e conseguir isso prova que a mensagem foi assinada com a chave privada de Alice, que só ela conhece.</li>
         <li>Os esquemas mais usados são o <strong>RSA</strong>, baseado em exponenciação modular com inteiros grandes, e a <strong>criptografia de curvas elípticas</strong> (ECC), que costuma exigir chaves menores e menos processamento. Os detalhes de ambos ficam fora do escopo do livro.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        "Assinar = cifrar com a chave privada" (pág. 124 do PDF) é uma simplificação que só vale para o RSA
+        didático. Na prática, assina-se o <strong>hash</strong> da mensagem (veja o próximo conceito) com esquemas
+        próprios de assinatura, como RSA-PSS, ECDSA e Ed25519; no ECDSA e no Ed25519 não há nenhuma etapa de
+        "cifrar". A ideia central continua valendo: só a chave privada produz a assinatura, e a pública a verifica.
+    </p>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz" data-options="A chave pública de Alice|A chave privada de Bob|A chave pública de Bob" data-answer="0" data-explain="Cifrando com a chave pública de Alice, só a chave privada dela decifra." data-hint="Quem precisa conseguir decifrar?">
@@ -409,6 +438,15 @@
         pública, em 2017, e vem sendo substituído pelo SHA-2 (Wikipedia:
         <a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="noopener noreferrer">MD5</a>,
         <a href="https://en.wikipedia.org/wiki/SHA-1" target="_blank" rel="noopener noreferrer">SHA-1</a>).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Formalmente, um hash criptográfico deve resistir a três ataques: achar uma mensagem com um hash dado
+        (<strong>pré-imagem</strong>), achar outra mensagem com o mesmo hash de uma mensagem dada
+        (<strong>segunda pré-imagem</strong>) e achar duas mensagens quaisquer com o mesmo hash
+        (<strong>colisão</strong>). Um hash sozinho não protege contra Mallory, que pode trocar a mensagem
+        <em>e</em> o hash. Para isso o hash precisa de uma chave secreta (um <strong>MAC</strong>, como o HMAC da
+        <a href="https://www.rfc-editor.org/rfc/rfc2104" target="_blank" rel="noopener noreferrer">RFC 2104</a>) ou de uma assinatura.
     </p>
     <p>
         Algoritmos criptográficos também dependem de <strong>números aleatórios</strong> (para gerar chaves, por
@@ -501,9 +539,19 @@
     <p>
         No exemplo do livro, com p = 23 e g = 5: Alice escolhe a = 8 e manda 5<sup>8</sup> mod 23 = 16; Bob
         escolhe b = 13 e manda 5<sup>13</sup> mod 23 = 21; Alice calcula 21<sup>8</sup> mod 23 = 3 e Bob calcula
-        16<sup>13</sup> mod 23 = 3. Com inteiros grandes e aleatórios, a única saída de Eve é testar todos os
-        valores possíveis, o que é computacionalmente caríssimo. Não há prova formal de segurança, mas séculos
-        de matemática não acharam um método eficiente.
+        16<sup>13</sup> mod 23 = 3. Com inteiros grandes e aleatórios, o livro diz que a única saída de Eve é testar
+        todos os valores possíveis, o que é computacionalmente caríssimo. Não há prova formal de segurança, mas
+        séculos de matemática não acharam um método eficiente.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        "Testar todos os valores" (pág. 131 do PDF) não é a única saída: existem algoritmos bem mais rápidos que
+        a força bruta para o logaritmo discreto (como o <em>index calculus</em> e o crivo de corpos numéricos),
+        embora ainda inviáveis para números grandes. É por isso que se usam módulos de 2048 bits ou mais. Um
+        computador quântico grande quebraria o problema com o algoritmo de Shor, e por isso protocolos novos já
+        estão migrando para a criptografia pós-quântica
+        (<a href="https://en.wikipedia.org/wiki/Discrete_logarithm" target="_blank" rel="noopener noreferrer">Wikipedia: Discrete logarithm</a>,
+        <a href="https://en.wikipedia.org/wiki/Shor%27s_algorithm" target="_blank" rel="noopener noreferrer">Shor's algorithm</a>).
     </p>
     <p>
         Sozinho, porém, o Diffie-Hellman <strong>não resiste a Mallory</strong>: ele faz uma troca com Alice e
@@ -698,7 +746,9 @@ for bits in (40, 56, 64, 128, 256):
         <li>Diffie, W.; Hellman, M. <a href="https://ee.stanford.edu/~hellman/publications/24.pdf" target="_blank" rel="noopener noreferrer">New Directions in Cryptography</a> (1976), citado pelo livro como [DH1976]</li>
         <li>RFC 7258 — <a href="https://www.rfc-editor.org/rfc/rfc7258" target="_blank" rel="noopener noreferrer">Pervasive Monitoring Is an Attack</a></li>
         <li>RFC 7465 — <a href="https://www.rfc-editor.org/rfc/rfc7465" target="_blank" rel="noopener noreferrer">Prohibiting RC4 Cipher Suites</a></li>
-        <li>RFC 7539 — <a href="https://www.rfc-editor.org/rfc/rfc7539" target="_blank" rel="noopener noreferrer">ChaCha20 and Poly1305 for IETF Protocols</a></li>
+        <li>RFC 7539 — <a href="https://www.rfc-editor.org/rfc/rfc7539" target="_blank" rel="noopener noreferrer">ChaCha20 and Poly1305 for IETF Protocols</a> (substituída pela RFC 8439)</li>
+        <li>RFC 8439 — <a href="https://www.rfc-editor.org/rfc/rfc8439" target="_blank" rel="noopener noreferrer">ChaCha20 and Poly1305 for IETF Protocols</a> (versão atual, complemento)</li>
+        <li>RFC 2104 — <a href="https://www.rfc-editor.org/rfc/rfc2104" target="_blank" rel="noopener noreferrer">HMAC: Keyed-Hashing for Message Authentication</a> (complemento)</li>
         <li>RFC 1321 — <a href="https://www.rfc-editor.org/rfc/rfc1321" target="_blank" rel="noopener noreferrer">The MD5 Message-Digest Algorithm</a> e RFC 6151 — <a href="https://www.rfc-editor.org/rfc/rfc6151" target="_blank" rel="noopener noreferrer">Updated Security Considerations for MD5</a></li>
         <li>RFC 4086 — <a href="https://www.rfc-editor.org/rfc/rfc4086" target="_blank" rel="noopener noreferrer">Randomness Requirements for Security</a></li>
         <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Password_strength" target="_blank" rel="noopener noreferrer">Password strength</a>, citada pelo livro</li>
@@ -732,6 +782,8 @@ for bits in (40, 56, 64, 128, 256):
 <script src="../../assets/gamificacao.js"></script>
 <script src="../../assets/sims-cap8.js"></script>
 <script src="../../assets/playground.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 </body>
 </html>

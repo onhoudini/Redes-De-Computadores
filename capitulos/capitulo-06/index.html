@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
 </head>
 <body data-capitulo="6" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
@@ -189,7 +190,14 @@
         Na rede da Fig. 60, A1 envia para A2, B1 para B2 e C1 para C2. Dar a mesma banda a todos (5 Mbit/s)
         deixa o enlace R2–R3 subutilizado. Dar 10 Mbit/s a A1–A2, 20 a C1–C2 e nada a B1–B2 é claramente
         injusto. A definição mais usada é a <strong>justiça max-min</strong>: uma alocação é max-min justa se
-        é impossível dar mais banda a um fluxo sem reduzir a de outro fluxo que já tem menos.
+        é impossível dar mais banda a um fluxo sem reduzir a de outro fluxo que já tem a mesma banda ou menos.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro escreve "um fluxo que já tem <em>menos</em>" (págs. 83 e 107 do PDF). Com a desigualdade
+        estrita, a divisão igual 5/5/5 de um único gargalo não seria max-min justa: daria para aumentar um
+        fluxo reduzindo outro que tem a mesma banda. A definição usual usa "menor ou igual", e é com ela que
+        o preenchimento progressivo abaixo produz uma alocação max-min justa.
     </p>
     <p>
         Com a rede inteira conhecida, ela é obtida por <strong>preenchimento progressivo</strong>: todos os
@@ -210,7 +218,7 @@
 
     <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
     <ul class="mb-0">
-        <li>Justiça max-min: não dá para aumentar um fluxo sem diminuir outro que tem menos.</li>
+        <li>Justiça max-min: não dá para aumentar um fluxo sem diminuir outro que tem a mesma banda ou menos.</li>
         <li>Preenchimento progressivo: todos crescem juntos; quem passa por um enlace saturado para.</li>
         <li>Em redes grandes, a justiça é sempre um compromisso.</li>
     </ul>
@@ -305,7 +313,7 @@
     <ul>
         <li><strong>Tail drop</strong>: com o buffer cheio, descarta o pacote que chega. É simples e o mais usado, mas mantém os buffers cheios (atraso para aplicações de tempo real) e é cego: pode descartar o pacote de um fluxo interativo enquanto o buffer está ocupado por transferências grandes.</li>
         <li><strong>Drop from front</strong>: descarta o pacote da cabeça da fila, que já esperou muito; o host percebe a perda mais cedo.</li>
-        <li><strong>Descarte probabilístico</strong>, como o <strong>RED</strong> (<em>Random Early Discard</em>): mede a ocupação média e, quando ela fica alta, descarta com certa probabilidade. Assim, os descartes atingem os fluxos em proporção à banda que usam.</li>
+        <li><strong>Descarte probabilístico</strong>, como o <strong>RED</strong> (<em>Random Early Detection</em>, que o livro chama de <em>Random Early Discard</em>): mede a ocupação média e, quando ela fica alta, descarta com certa probabilidade. Assim, os descartes atingem os fluxos em proporção à banda que usam.</li>
     </ul>
     <p>
         Descartar não é o ideal, porque o pacote descartado já gastou recursos nos nós anteriores. A rede
@@ -316,6 +324,14 @@
         <li><strong>BECN</strong> (<em>Backward</em>), em redes de circuitos virtuais: o nó marca os pacotes do caminho de volta (por exemplo, as confirmações), o que avisa o emissor mais rápido.</li>
         <li><strong>Pacotes de controle</strong> enviados à origem: usados em redes pequenas, evitados nas grandes, porque aumentam a carga justo no congestionamento e roteadores são lentos para criar pacotes.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        As siglas FECN e BECN vêm do Frame Relay, uma rede de circuitos virtuais que tem os dois bits no
+        cabeçalho. O livro associa o FECN às redes de datagramas (pág. 87 do PDF) pela ideia, que existe
+        nelas: na Internet, a marcação para frente é o ECN do IP
+        (<a href="https://www.rfc-editor.org/rfc/rfc3168" target="_blank" rel="noopener noreferrer">RFC 3168</a>).
+        O nome original do RED é <em>Random Early Detection</em> (Floyd e Jacobson, 1993).
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="politicas-descarte"></div>
@@ -400,8 +416,18 @@ while True:
         <li><strong>Pesos dinâmicos:</strong> os primeiros algoritmos de roteamento mediam o atraso e mudavam os pesos dos enlaces. Na prática, isso podia causar oscilações sem reduzir o congestionamento. Hoje, contra congestionamentos longos (horas ou dias), mede-se a demanda e escolhem-se pesos que minimizem a carga máxima; se não bastar, a rede precisa de enlaces novos ou mais rápidos, o que pode levar meses.</li>
         <li><strong>Controle de admissão:</strong> em redes de circuitos virtuais, a rede só cria um circuito se houver recursos; senão, recusa. É o que faz o sinal de ocupado da rede telefônica. Em redes de datagramas, isso não se aplica facilmente, porque um host pode mandar qualquer pacote a qualquer destino a qualquer hora.</li>
         <li><strong>Serviço de nomes:</strong> o arquivo fica em vários servidores, e o serviço de nomes devolve endereços diferentes a clientes diferentes (Capítulo 5).</li>
-        <li><strong>BitTorrent:</strong> o arquivo é dividido em blocos de tamanho fixo, e metadados indicam quais hosts guardam cada bloco. O cliente baixa os blocos em qualquer ordem, de hosts diferentes e em paralelo, e passa a oferecer os blocos que já tem. Assim, quanto mais popular o arquivo, mais fontes ele tem.</li>
+        <li><strong>BitTorrent:</strong> o arquivo é dividido em blocos de tamanho fixo, e metadados indicam quais hosts guardam cada bloco (no BitTorrent real, veja a nota abaixo). O cliente baixa os blocos em qualquer ordem, de hosts diferentes e em paralelo, e passa a oferecer os blocos que já tem. Assim, quanto mais popular o arquivo, mais fontes ele tem.</li>
     </ul>
+
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro simplifica (pág. 89 do PDF): no BitTorrent real, o arquivo de metadados
+        (<span class="mono">.torrent</span>) traz o tamanho das peças, o hash de cada uma e o endereço do
+        <em>tracker</em>, mas não a lista de quem tem cada bloco. O cliente obtém os outros participantes no
+        tracker ou numa tabela de hash distribuída (DHT), e descobre quais peças cada um tem pelas mensagens
+        trocadas com eles (<a href="https://www.bittorrent.org/beps/bep_0003.html" target="_blank" rel="noopener noreferrer">especificação BEP 3</a>).
+        A simulação segue o modelo do livro.
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="bittorrent"></div>
@@ -566,9 +592,9 @@ else:
         percebam.
     </p>
     <ul>
-        <li><strong>Pior caso</strong> (Fig. 67): com τ o tempo de propagação de ponta a ponta, B começa pouco antes de τ e A só detecta a colisão perto de 2τ. Uma colisão só pode acontecer nos primeiros 2τ de uma transmissão.</li>
+        <li><strong>Pior caso</strong> (Fig. 67): com τ o tempo de propagação de ponta a ponta, B começa pouco antes de τ e A só detecta a colisão perto de 2τ. Outro host só consegue começar a transmitir nos primeiros τ, antes de o sinal de A chegar até ele; o sinal desse outro host, porém, pode levar até 2τ para chegar a A. Por isso A pode sofrer uma colisão nos primeiros 2τ da transmissão, e nunca depois.</li>
         <li><strong>Sem confirmações:</strong> como colisões são quase a única causa de erro numa rede com fio, o CSMA/CD dispensa as confirmações: se não houve colisão, o quadro é dado como entregue.</li>
-        <li><strong>Quadro mínimo</strong> (Fig. 68): para isso funcionar, o host precisa transmitir por pelo menos 2τ, senão termina antes de perceber a colisão. Isso impõe um <strong>tamanho mínimo de quadro</strong>; no Ethernet, 2τ é o <strong>slot time</strong>.</li>
+        <li><strong>Quadro mínimo</strong> (Fig. 68): para isso funcionar, o host precisa transmitir por pelo menos 2τ, senão termina antes de perceber a colisão. Isso impõe um <strong>tamanho mínimo de quadro</strong>; no Ethernet, 2τ é o <strong>slot time</strong>. Complemento: no Ethernet de 10 Mbit/s, o slot time é de 512 bits (51,2 µs), o que dá o quadro mínimo de 64 bytes, e o host desiste do quadro depois de 16 tentativas.</li>
         <li><strong>Backoff exponencial binário:</strong> depois da N-ésima colisão, o host espera r slot times, com r sorteado entre 0 e 2<sup>k</sup>−1 e k = min(10, N). Com dois hosts, a primeira tentativa evita nova colisão em 50% dos casos, e o intervalo dobra a cada colisão para se adaptar a redes mais carregadas.</li>
     </ul>
     <p>
@@ -989,6 +1015,8 @@ for alg in ("AIMD", "AIAD"):
 <script src="../../assets/gamificacao.js"></script>
 <script src="../../assets/sims-cap6.js"></script>
 <script src="../../assets/playground.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 </body>
 </html>

@@ -164,3 +164,26 @@ A gamificação está em `assets/gamificacao.js`:
 - Ao concluir todas as perguntas e desafios de um conceito, o usuário ganha a medalha do conceito.
 - Níveis por fração da pontuação máxima: Bit → Quadro → Pacote → Segmento → Mensagem.
 - O painel permite reiniciar o progresso.
+
+### Tutor de IA
+
+Cada capítulo tem um tutor de IA, aberto pelo botão "Tutor" no canto inferior direito ou pelo botão "Perguntar ao tutor" no início de cada conceito.
+
+- **Arquivos:**
+  - `assets/tutor.js` e `assets/tutor.css`;
+  - a configuração fica em `assets/tutor-config.js`: chave do OpenRouter, modelo (hoje `google/gemma-4-26b-a4b-it:free`), modelos reserva opcionais e endereço da API.
+- **Contexto do modelo:** o tutor envia ao modelo, como mensagem de sistema:
+  - o texto da seção do livro, em `assets/tutor/livro-capNN.txt`, com marcações `[pág. N do PDF]`;
+  - as notas `nota-livro`;
+  - as perguntas rápidas, os enunciados dos desafios e a seção de exercícios da página. As respostas não vão: elas ficam em `<details>` ou em atributos.
+- **Comportamento:**
+  - responde em português do Brasil, citando a página do PDF;
+  - marca como complemento o que não estiver no livro;
+  - cita só fontes abertas;
+  - nos exercícios e desafios, dá dicas e perguntas-guia em vez da resposta final.
+- **Gerar o texto de um capítulo:** os textos saem do `livro.pdf` com `python ferramentas/extrai_livro.py N`. A faixa de páginas de cada capítulo fica na tabela `CAPITULOS` do script.
+- **Chave:**
+  - O site é estático, então a chave da configuração fica visível no código e todos os visitantes dividem o limite dela.
+  - Se a chave estiver vazia ou for recusada, o tutor pede ao aluno a chave dele, guardada só no navegador (`redes-tutor-chave`).
+- **Conversa:** a conversa de cada capítulo fica em `redes-tutor-capN` e é apagada em "Nova conversa".
+- **Pontuação:** o tutor não dá pontos.

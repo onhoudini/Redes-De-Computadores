@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
 </head>
 <body data-capitulo="4" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
@@ -470,15 +471,21 @@
     <ul>
         <li><strong>Atrasos muito variáveis:</strong> pacotes seguem caminhos diferentes e esperam em filas de roteadores carregados.</li>
         <li><strong>Reordenação e duplicação:</strong> a rede não entrega necessariamente em ordem.</li>
-        <li><strong>SDUs grandes:</strong> a aplicação pode gerar SDUs maiores que o tamanho máximo de um pacote; o transporte fragmenta e remonta.</li>
+        <li><strong>SDUs grandes:</strong> a aplicação pode gerar SDUs maiores que o tamanho máximo de um pacote; o transporte as divide em vários segmentos (<strong>segmentação</strong>) e o receptor as remonta.</li>
     </ul>
     <p>Como o transporte se adapta:</p>
     <ul>
         <li><strong>Checksum/CRC</strong> calculado sobre o segmento inteiro (cabeçalho e carga útil); segmentos inválidos são descartados.</li>
-        <li><strong>Números de sequência contam bytes:</strong> o seq no cabeçalho é a posição do primeiro byte da carga útil no fluxo. Isso detecta perdas, permite reordenar e facilita a fragmentação.</li>
+        <li><strong>Números de sequência contam bytes:</strong> o seq no cabeçalho é a posição do primeiro byte da carga útil no fluxo. Isso detecta perdas, permite reordenar e facilita a segmentação.</li>
         <li><strong>Números grandes:</strong> 32 ou 64 bits, contra 8 bits em alguns enlaces, porque um segmento consome milhares de números e porque segmentos atrasados precisam ser detectados.</li>
         <li><strong>Selective Repeat:</strong> como a rede reordena, o receptor deve guardar os segmentos fora de ordem.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro chama essa divisão de <em>fragment and reassemble</em> (págs. 70 e 72 do PDF). Na
+        terminologia da Internet, "fragmentação" é o nome usado na camada de rede (um pacote dividido
+        para caber num enlace com MTU menor); no transporte, fala-se em <strong>segmentação</strong>.
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização — números de sequência por byte</h3>
     <div class="demo-box" data-sim="numeracao-bytes"></div>
@@ -491,6 +498,14 @@
         confirmação. O emissor mantém <span class="mono">swin</span> (sua janela de envio) e
         <span class="mono">rwin</span> (a janela anunciada), e nunca tem mais de
         <span class="mono">min(swin, rwin)</span> segmentos sem confirmação.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro mede as janelas em segmentos (pág. 73 do PDF),
+        o que simplifica as figuras. Num protocolo cujos números de sequência contam bytes, como o TCP,
+        a janela anunciada é medida em <strong>bytes</strong>. No Capítulo 6 entra uma terceira janela,
+        a de congestionamento (<span class="mono">cwin</span>), e o limite passa a ser
+        <span class="mono">min(swin, rwin, cwin)</span>.
     </p>
     <p>
         Se a aplicação receptora não lê rápido o suficiente, o buffer enche e a janela anunciada cai a
@@ -506,7 +521,7 @@
     <p>
         Como os números de sequência são reutilizados, um segmento muito atrasado poderia ser aceito
         como se fosse novo. Os protocolos combinam duas defesas: números de 32 bits ou mais e o MSL
-        imposto pela rede (2 minutos na Internet, RFC 793). Isso limita a vazão: com <em>n</em> bits, não
+        imposto pela rede (2 minutos na Internet, RFC 9293). Isso limita a vazão: com <em>n</em> bits, não
         se pode passar por mais de 2<sup>n</sup> números de sequência a cada MSL.
     </p>
     <p class="nota-livro small">
@@ -711,7 +726,7 @@ r = envia("B", A, r)
 envia("A", B, r)</code></pre>
 
     <h3 class="h6 mt-4">4. Quanto o MSL limita a vazão?</h3>
-    <pre class="code-block"><code>MSL = 120  # segundos, valor assumido na Internet (RFC 793)
+    <pre class="code-block"><code>MSL = 120  # segundos, valor assumido na Internet (RFC 9293)
 
 for n in (16, 32, 64):
     espaco = 2 ** n                   # bytes numerados antes de repetir um número
@@ -730,7 +745,7 @@ print(f"A 10 Gbit/s, os 2^32 números acabam em {tempo:.2f} s (MSL = {MSL} s)")<
     <ul>
         <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 2.4, "The transport layer".
             <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
-        <li>RFC 793 — <a href="https://www.rfc-editor.org/rfc/rfc793" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a> (MSL de 2 minutos)</li>
+        <li>RFC 9293 — <a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank" rel="noopener noreferrer">Transmission Control Protocol (TCP)</a> (MSL de 2 minutos; substituiu a RFC 793 em 2022)</li>
         <li>RFC 7323 — <a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">TCP Extensions for High Performance</a> (PAWS, citado em um desafio)</li>
     </ul>
     <blockquote class="quote mt-4">
@@ -759,6 +774,8 @@ print(f"A 10 Gbit/s, os 2^32 números acabam em {tempo:.2f} s (MSL = {MSL} s)")<
 <script src="../../assets/gamificacao.js"></script>
 <script src="../../assets/sims-cap4.js"></script>
 <script src="../../assets/playground.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 </body>
 </html>

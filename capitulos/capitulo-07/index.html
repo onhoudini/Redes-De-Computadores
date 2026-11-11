@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
 </head>
 <body data-capitulo="7" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
@@ -348,6 +349,15 @@
             </tbody>
         </table>
     </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        No Capítulo 4, SDU foi o dado que um usuário entrega a um serviço (por exemplo, a aplicação à camada
+        de transporte). O modelo OSI usa um segundo termo para o que as entidades de uma mesma camada trocam
+        entre si: <strong>PDU</strong> (<em>Protocol Data Unit</em>), isto é, a SDU recebida mais o cabeçalho
+        daquela camada. Nessa linguagem, quadros, pacotes e segmentos são as PDUs do enlace, da rede e do
+        transporte, e a SDU de uma camada vira a carga útil da PDU da camada de baixo
+        (<a href="https://en.wikipedia.org/wiki/Protocol_data_unit" target="_blank" rel="noopener noreferrer">Wikipedia: Protocol data unit</a>).
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <div class="demo-box" data-sim="unidades-camadas"></div>
@@ -560,6 +570,8 @@ print(f"OSI: {len(OSI)} camadas · 5 camadas · TCP/IP: {len(TCPIP)} camadas")</
 <script src="../../assets/gamificacao.js"></script>
 <script src="../../assets/sims-cap7.js"></script>
 <script src="../../assets/playground.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 </body>
 </html>
