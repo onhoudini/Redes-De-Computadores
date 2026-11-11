@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 10 — A web e as chamadas remotas | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: a web e o HTML, URIs, pedidos e respostas HTTP, conexões persistentes, cookies, caches e proxies, pipelining e HTTP/2, e chamadas de procedimento remoto com XDR, JSON e JSON-RPC.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="10" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. DNS e correio eletrônico</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-10/index.html">10. A web e as chamadas remotas</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 10 · Parte 2: Protocolos</span>
+        <h1 class="display-5 mb-3">A web e as chamadas remotas</h1>
+        <p class="lead mb-4">
+            A web nasceu para compartilhar documentos entre físicos e virou a aplicação mais usada da Internet. Este
+            capítulo mostra as URIs, o protocolo HTTP e o que foi feito para torná-lo mais rápido. Depois, sai da conversa
+            entre pessoas e documentos para a conversa entre programas: as chamadas de procedimento remoto.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#web">1. A web e o HTML</a>
+                    <a class="nav-link" href="#uri">2. URIs</a>
+                    <a class="nav-link" href="#http">3. Pedidos e respostas</a>
+                    <a class="nav-link" href="#persistente">4. Conexões persistentes</a>
+                    <a class="nav-link" href="#cookies">5. Cookies</a>
+                    <a class="nav-link" href="#caches">6. Caches e proxies</a>
+                    <a class="nav-link" href="#http2">7. Pipelining e HTTP/2</a>
+                    <a class="nav-link" href="#rpc-dados">8. RPC: os dados</a>
+                    <a class="nav-link" href="#rpc-chamado">9. RPC: a chamada</a>
+                    <a class="nav-link" href="#exercicios-cap10">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Documentos e programas pela rede</h2>
+    <p>
+        O HTTP é um protocolo de texto, como o SMTP do capítulo anterior: o cliente pede, o servidor responde. A
+        simplicidade ajudou a web a crescer, mas as páginas ficaram grandes, cheias de imagens e scripts, e os pedidos
+        um por um passaram a custar caro. O livro acompanha essa evolução, do HTTP/1.0 ao HTTP/2.0, e termina com as
+        chamadas de procedimento remoto, em que o "documento" trocado é o parâmetro de uma função.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Identificar as três peças da web (<strong>URI</strong>, <strong>HTML</strong>, <strong>HTTP</strong>) e decompor uma URI em esquema, autoridade, caminho, consulta e fragmento.</li>
+                <li>Montar e ler <strong>pedidos e respostas HTTP</strong>: métodos, cabeçalhos e códigos de status.</li>
+                <li>Comparar uma conexão por objeto, <strong>conexões persistentes</strong>, <strong>pipelining</strong> e os <strong>quadros do HTTP/2</strong>.</li>
+                <li>Explicar como <strong>cookies</strong>, <strong>caches</strong>, <strong>proxies</strong> e <strong>CDNs</strong> funcionam e quais problemas de privacidade os cookies trazem.</li>
+                <li>Codificar parâmetros em <strong>XDR</strong> e <strong>JSON</strong> e explicar como um <strong>RPC</strong> alcança o procedimento e lida com pedidos repetidos.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                O capítulo usa o formato de mensagens e o MIME do <a href="../capitulo-09/index.html">Capítulo 9</a>, o
+                modelo cliente-servidor e a ordem dos bytes do <a href="../capitulo-03/index.html">Capítulo 3</a> e as
+                conexões do <a href="../capitulo-04/index.html">Capítulo 4</a>. Ele cobre as seções 3.4 a 3.6 do livro
+                (pág. 148–169 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. A web -->
+<section id="web" class="chapter-section" data-conceito="web" data-titulo="A web e o HTML">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">A web, os padrões abertos e o HTML</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No começo, a Internet servia para terminal remoto (telnet), e-mail e transferência de arquivos. O
+        <strong>FTP</strong> (<a href="https://www.rfc-editor.org/rfc/rfc959" target="_blank" rel="noopener noreferrer">RFC 959</a>)
+        tinha um modo autenticado, com usuário e senha, e um modo anônimo, para arquivos públicos. Hoje o acesso
+        autenticado é feito com ssh (scp, sftp), e o anônimo, pela web (pág. 148 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        No fim dos anos 1980, os físicos do CERN precisavam trocar documentos. Tim Berners-Lee avaliou as soluções da
+        época e, como nenhuma servia, criou um sistema novo, chamado primeiro de <em>mesh</em> e logo de
+        <strong>world wide web</strong>. O hipertexto (documentos com links para outros documentos) já existia desde a
+        proposta de 1945 e as experiências dos anos 1960; a novidade da web foi deixar um link apontar para um
+        documento guardado em <strong>outra máquina</strong> (pág. 148 do PDF). Um sistema assim precisa de três peças:
+    </p>
+    <ol>
+        <li>um <strong>esquema de endereços</strong> que identifique cada documento sem ambiguidade: as URIs;</li>
+        <li>um <strong>formato de documento</strong>: o HTML;</li>
+        <li>um <strong>protocolo</strong> para buscar os documentos: o HTTP.</li>
+    </ol>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Padrões abertos e implementações abertas</strong> (pág. 149 do PDF). Sem padrões abertos, a web não teria
+        chegado ao tamanho atual. Também ajudou o CERN ter publicado servidores e clientes de código aberto, que
+        funcionavam como estavam e podiam ser estendidos. O NCSA, por exemplo, acrescentou imagens ao navegador Mosaic,
+        que deu origem à Netscape e aos primeiros navegadores e servidores comerciais.
+    </div>
+    <p>
+        O <strong>HTML</strong> veio do SGML, padronizado pela ISO em 1986 para documentos que precisam continuar
+        legíveis por décadas. Uma linguagem de marcação mistura o texto com anotações sobre ele. Um elemento HTML tem
+        uma <strong>marca de abertura</strong> (com atributos opcionais), um conteúdo e uma <strong>marca de fechamento</strong>
+        (pág. 150–151 do PDF):
+    </p>
+    <pre class="log mb-3">&lt;tag atributo1="valor1" atributo2="valor2">texto a exibir&lt;/tag></pre>
+    <p>
+        O documento tem um cabeçalho (<code>&lt;head></code>, com o título, por exemplo) e um corpo (<code>&lt;body></code>).
+        No corpo, <code>&lt;h1></code> é um título, <code>&lt;ul></code> e <code>&lt;li></code> fazem uma lista,
+        <code>&lt;img src="URI"></code> inclui uma imagem, que pode estar em qualquer servidor e é baixada automaticamente,
+        e <code>&lt;a href="URI">texto&lt;/a></code> é um link. Folhas de estilo e JavaScript vieram depois, nas
+        especificações mantidas pelo W3C.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Permitir que um link aponte para um documento em outra máquina|Inventar o hipertexto|Substituir o e-mail" data-answer="0" data-explain="O hipertexto já existia; a novidade foi o link entre máquinas remotas (pág. 148 do PDF)." data-hint="O livro diz que o hipertexto foi proposto em 1945.">
+        <p class="fw-semibold mb-2">Qual foi a principal inovação da web em relação ao hipertexto dos anos 1980?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="O navegador baixa a imagem automaticamente, mesmo que esteja em outro servidor|O servidor da página copia a imagem para dentro do HTML|A imagem só aparece se estiver no mesmo servidor" data-answer="0" data-explain="A imagem pode estar em qualquer servidor; o cliente a baixa ao montar a página (pág. 151 do PDF)." data-hint="Pense no que o atributo src contém.">
+        <p class="fw-semibold mb-2">O que acontece com &lt;img src="http://outro.example/foto.png"> numa página?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Web = URI (endereço) + HTML (formato) + HTTP (protocolo).</li>
+        <li>Padrões e implementações abertas explicam boa parte do sucesso da web.</li>
+        <li>HTML: elementos com marca de abertura, conteúdo e marca de fechamento.</li>
+    </ul>
+</section>
+
+<!-- 2. URI -->
+<section id="uri" class="chapter-section" data-conceito="uri" data-titulo="URIs">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">URIs</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        <code>ftp://cnn.example.com&amp;story=breaking_news@10.0.0.1/top_story.htm</code>: a maioria das pessoas acha que
+        esse endereço leva a um documento em cnn.example.com. Leva? Para responder, é preciso conhecer a gramática.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Uma <strong>Uniform Resource Identifier</strong> (<a href="https://www.rfc-editor.org/rfc/rfc3986" target="_blank" rel="noopener noreferrer">RFC 3986</a>)
+        é uma cadeia de caracteres que identifica um recurso sem ambiguidade. Parte da gramática (pág. 149 do PDF):
+    </p>
+    <pre class="log mb-3">URI         = scheme ":" "//" authority path [ "?" query ] [ "#" fragment ]
+scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+authority   = [ userinfo "@" ] host [ ":" port ]
+query       = *( pchar / "/" / "?" )
+fragment    = *( pchar / "/" / "?" )
+pchar       = unreserved / pct-encoded / sub-delims / ":" / "@"
+pct-encoded = "%" HEXDIG HEXDIG
+unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"</pre>
+    <ul>
+        <li><strong>Esquema</strong>: um seletor que diz como ler o resto. Costuma indicar o protocolo (http, https), mas
+            nem sempre: <code>urn:isbn:0-380-81593-1</code> identifica um livro sem dizer como buscá-lo. Depois do
+            esquema vêm <code>:</code> e <code>//</code>.</li>
+        <li><strong>Autoridade</strong>: o nome DNS ou o endereço IP do servidor, opcionalmente precedido de informação
+            sobre o usuário (antes de <code>@</code>) e seguido de <code>:</code> e uma porta. A porta só aparece quando
+            não é a padrão do protocolo. Colocar uma senha na URI (permitido na antiga RFC 1738) é hoje obsoleto e
+            inseguro.</li>
+        <li><strong>Caminho</strong>: estruturado como nomes de arquivo no Unix, o que não quer dizer que o servidor guarde
+            arquivos assim. Sem caminho, o servidor devolve um documento padrão.</li>
+        <li><strong>Consulta</strong> (depois de <code>?</code>) e <strong>fragmento</strong> (depois de <code>#</code>, um
+            trecho do documento), ambos opcionais (pág. 150 do PDF).</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o nome do host pode ser seguido de "<em>semicolon</em>" (ponto e vírgula) e da porta (pág. 150 do
+        PDF). Pela gramática acima, o separador é o <strong>dois-pontos</strong>: <code>host:porta</code>, como em
+        <code>telnet://[2001:db8:3080:3::2]:2323/</code>. Endereços IPv6 vão entre colchetes justamente porque contêm
+        dois-pontos.
+    </p>
+    <p>
+        Agora a URI do começo. O <code>@</code> separa o nome do usuário do host. Tudo o que vem antes dele,
+        <code>cnn.example.com&amp;story=breaking_news</code>, é o <strong>nome de usuário</strong>; o documento
+        top_story.htm é buscado por FTP no host <strong>10.0.0.1</strong> (pág. 150 do PDF). Esse truque já foi usado em
+        golpes de phishing.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Caracteres fora do conjunto permitido são escritos com <code>%</code> e dois dígitos hexadecimais de cada byte
+        (UTF-8): "café" vira <code>caf%C3%A9</code>, e um espaço, <code>%20</code>. A lista de esquemas registrados é
+        mantida pela <a href="https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml" target="_blank" rel="noopener noreferrer">IANA</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="dissecar-uri"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Não: o fragmento fica no navegador, que o usa para ir ao trecho do documento|Sim, junto com a consulta|Sim, num cabeçalho próprio" data-answer="0" data-explain="O fragmento identifica uma parte do documento já recebido; o pedido HTTP leva só o caminho e a consulta (complemento, RFC 3986, seção 3.5)." data-hint="O fragmento indica uma parte do documento.">
+        <p class="fw-semibold mb-2">O fragmento (#…) de uma URI é enviado ao servidor no pedido HTTP?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>esquema://[usuário@]host[:porta]caminho[?consulta][#fragmento]</li>
+        <li>O host é o que vem depois do último @ da autoridade.</li>
+        <li>Porta separada por dois-pontos; IPv6 entre colchetes; senha na URI é obsoleta.</li>
+    </ul>
+</section>
+
+<!-- 3. HTTP -->
+<section id="http" class="chapter-section" data-conceito="http" data-titulo="Pedidos e respostas HTTP">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Pedidos e respostas HTTP</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Com a URI em mãos, o navegador abre uma conexão TCP com o servidor e conversa em linhas de texto, como no SMTP.
+        Mas o que, exatamente, vai em cada linha?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>HyperText Transfer Protocol</strong> roda sobre o fluxo de bytes, e os servidores escutam na
+        <strong>porta 80</strong>. Ele foi muito inspirado no e-mail (Fig. 13, pág. 151–152 do PDF):
+    </p>
+    <ul>
+        <li><strong>Pedido:</strong> uma linha com o método, a URI e a versão; um cabeçalho, que termina numa linha vazia;
+            e, opcionalmente, um documento MIME.</li>
+        <li><strong>Resposta:</strong> uma linha de status; um cabeçalho, que termina numa linha vazia; e um documento MIME.</li>
+    </ul>
+    <p>Os três métodos mais importantes:</p>
+    <ul>
+        <li><strong>GET</strong>: busca um documento. Para http://www.w3.org/MarkUp/, o cliente abre uma conexão TCP com
+            www.w3.org na porta 80 e envia <code>GET /MarkUp/ HTTP/1.0</code>.</li>
+        <li><strong>HEAD</strong>: como GET, mas só devolve o cabeçalho, para saber se um documento existe, por exemplo.</li>
+        <li><strong>POST</strong>: envia um documento ao servidor, anexado ao pedido como documento MIME.</li>
+    </ul>
+    <p>Cabeçalhos comuns (pág. 152–153 do PDF):</p>
+    <ul>
+        <li>nos dois sentidos: <strong>Content-Length:</strong> (tamanho em bytes), <strong>Content-Type:</strong>
+            (text/html, por exemplo) e <strong>Content-Encoding:</strong> (x-gzip, por exemplo);</li>
+        <li>nas respostas: <strong>Server:</strong> (a versão do servidor, que alguns administradores escondem por
+            segurança), <strong>Date:</strong> e <strong>Last-Modified:</strong>;</li>
+        <li>nos pedidos: <strong>User-Agent:</strong> (o cliente), <strong>If-Modified-Since:</strong> (só mande o
+            documento se for mais novo que a minha cópia), <strong>Referer:</strong> (a página de onde veio o link) e
+            <strong>Host:</strong> (o nome do servidor pedido).</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro escreve o cabeçalho como "<em>Referrer:</em>" (pág. 153 do PDF). O nome padronizado é
+        <strong>Referer:</strong>, com um r só, um erro de grafia que entrou na especificação original
+        (<a href="https://www.rfc-editor.org/rfc/rfc1945" target="_blank" rel="noopener noreferrer">RFC 1945</a>) e ficou.
+        Os próprios exemplos do livro usam <code>Referer:</code>.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>A importância do Host:</strong> (pág. 153 do PDF). A primeira versão do HTTP não tinha essa linha. Se uma
+        empresa hospeda web.example.com e www.example.net no mesmo servidor, e os dois sites têm /index.html, o pedido
+        <code>GET /index.html HTTP/1.0</code> não diz qual dos dois o cliente quer. Com o Host:, um único servidor
+        físico pode hospedar muitos sites independentes.
+    </div>
+    <p>A linha de status tem a versão, um código de três dígitos e uma frase, com a mesma ideia do SMTP:</p>
+    <ul>
+        <li><strong>2xx</strong>, sucesso: 200 OK.</li>
+        <li><strong>3xx</strong>: 301 Moved Permanently (o documento mudou de lugar; o novo endereço vem em
+            <code>Location:</code>) e 304 Not Modified (resposta a um If-Modified-Since: a cópia do cliente ainda vale).</li>
+        <li><strong>4xx</strong>, erro no pedido: 400 Bad Request, 404 Not Found.</li>
+        <li><strong>5xx</strong>, erro no servidor: 500 Internal Server Error.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que os códigos 3xx indicam que o documento "não está mais disponível no servidor" (pág. 153 do PDF).
+        Isso vale para o 301, mas não para o 304, que diz o contrário: o documento continua lá e não mudou. A definição
+        do padrão é mais geral: 3xx é <strong>redirecionamento</strong>, ou seja, o cliente precisa fazer mais alguma
+        coisa para completar o pedido (<a href="https://www.rfc-editor.org/rfc/rfc9110#section-15.4" target="_blank" rel="noopener noreferrer">RFC 9110, seção 15.4</a>).
+    </p>
+    <p>O exemplo do livro, um pedido HTTP/1.0 feito com a ferramenta curl (pág. 153–154 do PDF):</p>
+    <pre class="log mb-3">GET / HTTP/1.0
+User-Agent: curl/7.19.4 (universal-apple-darwin10.0) libcurl/7.19.4 OpenSSL/0.9.8l zlib/1.2.3
+Host: www.ietf.org
+
+HTTP/1.1 200 OK
+Date: Mon, 15 Mar 2010 13:40:38 GMT
+Server: Apache/2.2.4 (Linux/SUSE) mod_ssl/2.2.4 OpenSSL/0.9.8e (truncated)
+Last-Modified: Tue, 09 Mar 2010 21:26:53 GMT
+Content-Length: 17019
+Content-Type: text/html
+
+&lt;!DOCTYPE HTML PUBLIC .../HTML></pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        As RFCs que o livro cita para o HTTP/1.1 (2616 e 7230) foram substituídas em 2022 pela
+        <a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener noreferrer">RFC 9110</a> (semântica),
+        pela <a href="https://www.rfc-editor.org/rfc/rfc9111" target="_blank" rel="noopener noreferrer">RFC 9111</a> (caches) e
+        pela <a href="https://www.rfc-editor.org/rfc/rfc9112" target="_blank" rel="noopener noreferrer">RFC 9112</a> (o formato
+        do HTTP/1.1). Hoje quase toda a web usa <strong>https</strong>, na porta 443: o mesmo HTTP dentro de uma conexão TLS,
+        assunto do Capítulo 11.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="servidor-http"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="HEAD|GET|POST" data-answer="0" data-explain="HEAD devolve só o cabeçalho, com Last-Modified e Content-Length, sem o documento (pág. 152 do PDF)." data-hint="Qual método não traz o documento?">
+        <p class="fw-semibold mb-2">Um programa quer saber se um arquivo de 2 GB mudou, sem baixá-lo. Qual método usa?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Um erro no pedido do cliente|Um erro no servidor|Sucesso" data-answer="0" data-explain="4xx: o servidor detectou um erro no pedido (pág. 153 do PDF)." data-hint="Compare com os códigos do SMTP, mas olhe a lista do HTTP.">
+        <p class="fw-semibold mb-2">O que indica uma resposta 404?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Pedido: método URI versão + cabeçalho + linha vazia + documento opcional.</li>
+        <li>Resposta: versão código frase + cabeçalho + linha vazia + documento.</li>
+        <li>Host: permite vários sites num servidor; If-Modified-Since: e 304 evitam baixar de novo.</li>
+    </ul>
+</section>
+
+<!-- 4. Conexões persistentes -->
+<section id="persistente" class="chapter-section" data-conceito="persistente" data-titulo="Conexões persistentes">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Conexões persistentes</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Para facilitar a implementação, o HTTP abria uma conexão TCP para cada pedido. Para páginas só de texto, tudo
+        bem: o usuário passa um tempo lendo. Mas e uma página com dezenas de imagens?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Uma conexão por objeto tem dois custos (pág. 154 do PDF): os pacotes para abrir e fechar cada conexão TCP, que
+        aumentam o tráfego e o tempo total da página; e o grande número de conexões abertas, que pode sobrecarregar o
+        servidor. A solução do HTTP/1.1 foram as <strong>conexões persistentes</strong>: o cliente manda vários pedidos
+        pela mesma conexão. Dois cabeçalhos controlam o uso:
+    </p>
+    <ul>
+        <li><strong>Connection:</strong> <code>Keep-Alive</code> (o cliente quer manter a conexão) ou <code>Close</code>
+            (quem enviou vai fechá-la ao fim da resposta);</li>
+        <li><strong>Keep-Alive:</strong> o servidor diz quantos pedidos ainda aceita e depois de quantos segundos parado
+            fecha a conexão: <code>Keep-Alive: timeout=15, max=100</code>.</li>
+    </ul>
+    <p>
+        No exemplo do livro (pág. 155–156 do PDF), o navegador busca a página de www.kame.net, a folha de estilo e o
+        ícone pela mesma conexão; o servidor responde com <code>max=100</code>, <code>max=99</code> e
+        <code>max=98</code>. O ícone não existe (404), mas a conexão continua aberta.
+    </p>
+    <p>
+        Mesmo na mesma conexão, cada pedido é <strong>independente</strong>: o servidor não usa nada além do próprio
+        pedido para respondê-lo. Por isso o navegador repete User-Agent: e Host: em todos os pedidos (pág. 156–157 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="conexoes-http"></div>
+    <p class="small text-muted">Modelo simplificado: abrir a conexão custa 1 RTT, cada pedido e resposta mais 1 RTT, e o tempo de transmissão é desprezado.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque cada pedido HTTP precisa ser completo: o servidor não usa informação de pedidos anteriores|Porque o servidor esquece a conexão a cada pedido|Por exigência do TCP" data-answer="0" data-explain="A independência dos pedidos é uma escolha central do HTTP (pág. 156–157 do PDF)." data-hint="O livro fala em pedidos “self-contained”.">
+        <p class="fw-semibold mb-2">Por que o navegador repete o User-Agent: em todos os pedidos de uma mesma conexão persistente?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>HTTP/1.0: uma conexão TCP por objeto. HTTP/1.1: conexões persistentes.</li>
+        <li>Connection: Keep-Alive ou Close; Keep-Alive: timeout e max.</li>
+        <li>Cada pedido continua independente dos outros.</li>
+    </ul>
+</section>
+
+<!-- 5. Cookies -->
+<section id="cookies" class="chapter-section" data-conceito="cookies" data-titulo="Cookies">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Guardando estado: cookies</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Se cada pedido é independente, como uma loja lembra o seu carrinho de uma página para a outra? Ou um site lembra o
+        idioma que você escolheu?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>O livro discute três mecanismos (pág. 157 do PDF):</p>
+    <ol>
+        <li><strong>Autenticação:</strong> o HTTP tem cabeçalhos para pedir usuário e senha
+            (<a href="https://www.rfc-editor.org/rfc/rfc2617" target="_blank" rel="noopener noreferrer">RFC 2617</a>), mas ninguém
+            aceita decorar uma senha para cada site visitado.</li>
+        <li><strong>Cabeçalhos Accept-*:</strong> <code>Accept-Language:</code> diz os idiomas preferidos, mas costuma
+            vir da configuração do navegador, e é difícil escolher site a site.</li>
+        <li><strong>Cookies</strong>, a solução adotada. Criados pela Netscape e padronizados na
+            <a href="https://www.rfc-editor.org/rfc/rfc6265" target="_blank" rel="noopener noreferrer">RFC 6265</a>: um cookie
+            é uma cadeia curta escolhida pelo servidor para representar um cliente.</li>
+    </ol>
+    <p>
+        Quando chega um pedido sem <strong>Cookie:</strong>, o servidor gera um cookie e o manda no cabeçalho
+        <strong>Set-Cookie:</strong> da resposta, com parâmetros como os domínios em que ele vale. O navegador guarda os
+        cookies e, a cada pedido, anexa o cookie do domínio, se tiver um. A resposta passa a depender da URL
+        <strong>e</strong> do cookie (pág. 157–158 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Cookies e privacidade</strong> (pág. 158 do PDF). Uma empresa de anúncios, ad.com, coloca imagens nas
+        páginas de muitos sites. Cada vez que o navegador busca uma dessas imagens, manda o cookie de ad.com. Assim, ad.com
+        pode acompanhar os interesses de quem visita todos esses sites e direcionar anúncios. Defensores da privacidade
+        chegaram a processar empresas de anúncios.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Um cookie mandado por um servidor diferente do site que você está visitando é um <strong>cookie de terceiro</strong>.
+        Por causa do rastreamento, o Safari bloqueia e o Firefox isola por site esses cookies por padrão
+        (<a href="https://en.wikipedia.org/wiki/HTTP_cookie#Third-party_cookie" target="_blank" rel="noopener noreferrer">Wikipedia: HTTP cookie</a>).
+        Mesmo sem cookies, o cabeçalho Referer: ainda conta ao anunciante de qual página veio o pedido.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="cookies"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Set-Cookie: na resposta do servidor; depois, Cookie: em cada pedido do navegador|Cookie: na resposta; Set-Cookie: no pedido|O navegador escolhe o valor e o envia em Cookie:" data-answer="0" data-explain="O servidor escolhe o cookie e o manda com Set-Cookie:; o navegador o devolve com Cookie: (pág. 157 do PDF)." data-hint="Quem escolhe o valor do cookie?">
+        <p class="fw-semibold mb-2">Em que ordem aparecem os cabeçalhos de cookie?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cookie: cadeia escolhida pelo servidor (Set-Cookie:) e devolvida pelo navegador (Cookie:).</li>
+        <li>Permite carrinhos, sessões e preferências sobre um HTTP sem estado.</li>
+        <li>Cookies de terceiros permitem rastrear pessoas entre sites.</li>
+    </ul>
+</section>
+
+<!-- 6. Caches e proxies -->
+<section id="caches" class="chapter-section" data-conceito="caches" data-titulo="Caches e proxies">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">Caches, proxies e CDNs</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A web passou a entregar música, vídeo, jogos e aplicações, que exigem mais desempenho do que documentos estáticos
+        (pág. 158 do PDF). A forma mais simples de acelerar é não transmitir de novo o que já foi transmitido.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Com o método HEAD e o If-Modified-Since:, o navegador confere se a cópia no seu cache ainda vale. Caches também
+        podem ficar <strong>dentro da rede</strong> (Fig. 14, pág. 159 do PDF):
+    </p>
+    <ul>
+        <li><strong>Proxy web:</strong> numa pequena empresa, ligada à Internet por um enlace lento, Alice e Bob leem o
+            mesmo jornal, e a mesma informação passa duas vezes pelo enlace. Com um proxy, todos os navegadores mandam os
+            pedidos a ele; se o conteúdo já está no cache do proxy, ele responde direto, senão busca no servidor e guarda
+            uma cópia. Algumas empresas também usam o proxy para controlar e bloquear sites.</li>
+        <li><strong>Proxy reverso:</strong> fica na frente dos servidores. Um servidor que monta páginas consultando
+            bancos de dados e gasta 10 ms por pedido, em sequência, não atende mais de 100 pedidos por segundo. Um proxy
+            reverso com cache responde os pedidos repetidos sem incomodar o servidor e pode dividir a carga entre vários
+            servidores.</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Servindo conteúdo de vários servidores</strong> (pág. 159–160 do PDF). Quem acessa www.service.net tem a
+        impressão de falar com um servidor só. Uma forma de distribuir a carga é guardar todos os arquivos em todos os
+        servidores e deixar o DNS escolher: por rodízio (<em>round-robin</em>), pelo menos carregado ou pelo mais próximo
+        do cliente. Outra é usar k proxies reversos perto dos clientes e N−k servidores com o conteúdo. As empresas que
+        espalham proxies reversos pelo mundo são as <strong>redes de distribuição de conteúdo</strong> (CDNs).
+    </div>
+    <p>
+        As páginas cresceram muito. Quando o livro foi escrito, uma página média tinha quase 2 MB: 27 kB de HTML,
+        120 kB de fontes, 60 kB de CSS, quase 1 MB de imagens e mais de 400 kB de JavaScript, e exigia cerca de
+        <strong>70 pedidos HTTP</strong> (Fig. 15, pág. 160 do PDF). Os números atuais estão no
+        <a href="https://httparchive.org/reports/page-weight" target="_blank" rel="noopener noreferrer">HTTP Archive</a>,
+        a fonte do livro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="proxy-cache"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="100|10|1000" data-answer="0" data-explain="1 s / 10 ms = 100 pedidos por segundo (pág. 159 do PDF)." data-hint="Quantos intervalos de 10 ms cabem em um segundo?">
+        <p class="fw-semibold mb-2">Um servidor gasta 10 ms por pedido e atende um de cada vez. Quantos pedidos por segundo ele aguenta, no máximo?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Um proxy reverso, perto do servidor|Um proxy na rede do cliente|Um cookie" data-answer="0" data-explain="O proxy reverso fica na frente dos servidores, e o DNS aponta para ele (pág. 159 do PDF)." data-hint="Quem quer aliviar a carga é o dono do site.">
+        <p class="fw-semibold mb-2">Um site popular quer aliviar o servidor que monta as páginas a partir do banco de dados. O que ele instala?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cache no navegador (If-Modified-Since:), proxy na rede do cliente, proxy reverso na frente do servidor.</li>
+        <li>DNS e proxies reversos espalhados pelo mundo (CDNs) dividem a carga e aproximam o conteúdo.</li>
+    </ul>
+</section>
+
+<!-- 7. Pipelining e HTTP/2 -->
+<section id="http2" class="chapter-section" data-conceito="http2" data-titulo="Pipelining e HTTP/2">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Pipelining e HTTP/2</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Setenta pedidos por página, cada um esperando o anterior. Mesmo com a conexão persistente, o tempo de ida e volta
+        se soma setenta vezes. Dá para pedir tudo de uma vez?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Com o <strong>pipelining</strong>, o navegador manda vários pedidos sem esperar as respostas. No exemplo do livro,
+        cinco objetos de 100 bytes, com 1 Gbit/s e 100 ms de atraso em cada sentido: um de cada vez, são 5 × 200 ms =
+        1 s; com pipelining, as cinco respostas chegam depois de cerca de 200 ms (pág. 161 do PDF). Mas o pipelining só
+        serve para pedidos <strong>idempotentes</strong>, que não dependem dos anteriores. Foi difícil para os navegadores
+        respeitar essa regra, e poucos o implementaram.
+    </p>
+    <div class="demo-box" data-sim="pipelining"></div>
+    <p>
+        O HTTP/1.1 também tem outro problema: tudo é texto ASCII. Fica fácil escrever clientes e depurar, mas os
+        servidores precisam de analisadores complexos, e essa flexibilidade abriu brechas para ataques. O
+        <strong>HTTP/2.0</strong> (<a href="https://www.rfc-editor.org/rfc/rfc7540" target="_blank" rel="noopener noreferrer">RFC 7540</a>)
+        muda duas coisas: usa codificação <strong>binária</strong> e permite vários <strong>streams</strong> na mesma
+        conexão. Ele também comprime os cabeçalhos
+        (<a href="https://www.rfc-editor.org/rfc/rfc7541" target="_blank" rel="noopener noreferrer">RFC 7541</a>). A sessão é
+        dividida em <strong>quadros</strong>, cada um com um cabeçalho de 9 bytes (Fig. 16, pág. 162 do PDF):
+    </p>
+    <pre class="log mb-3">+-----------------------------------------------+
+|                 Length (24)                   |
++---------------+---------------+---------------+
+|   Type (8)    |   Flags (8)   |
++-+-------------+---------------+-------------------------------+
+|R|                 Stream Identifier (31)                      |
++-+-------------------------------------------------------------+
+|                   Frame Payload (0...)                      ...
++---------------------------------------------------------------+</pre>
+    <ul>
+        <li><strong>Length</strong>: 24 bits, então um quadro tem no máximo 2<sup>24</sup> − 1 bytes de dados; o padrão é
+            2<sup>14</sup> = 16 384 bytes, salvo se um quadro Settings negociar outro limite.</li>
+        <li><strong>Type</strong>: <strong>Data</strong> (dados de um objeto), <strong>Headers</strong> (os cabeçalhos HTTP,
+            comprimidos), Settings, Priority, Window_Update, Ping, GoAway…</li>
+        <li><strong>Stream Identifier</strong>: o stream a que o quadro pertence. Os ímpares são do cliente, e os pares,
+            do servidor. É isso que permite <strong>multiplexar</strong> vários objetos na mesma conexão.</li>
+    </ul>
+    <p>
+        A multiplexação ataca o <strong>bloqueio do primeiro da fila</strong> (<em>Head of Line blocking</em>). A 1 Mbit/s,
+        um objeto de 12 500 bytes ocupa a conexão por 100 ms; se ele vem primeiro, um objeto de 125 bytes, talvez um script
+        importante, espera esses 100 ms. Com quadros, o servidor manda 1 250 bytes do longo (10 ms), depois o curto inteiro
+        (1 ms) e depois o resto do longo (pág. 163 do PDF). Quadros longos gastam pouco com cabeçalhos, mas bloqueiam os
+        objetos curtos; quadros curtos fazem o contrário.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que, assim, o cliente recebe o objeto curto depois de 10 ms (pág. 163 do PDF). Pela conta do próprio
+        exemplo, são cerca de 11 ms: 10 ms do primeiro quadro do objeto longo mais 1 ms do objeto curto, sem contar os
+        9 bytes de cabeçalho de cada quadro.
+    </p>
+    <p>
+        Outros recursos (pág. 164–165 do PDF): o quadro <strong>Settings</strong>, o primeiro que o cliente envia, com
+        SETTINGS_MAX_FRAME_SIZE (de 2<sup>14</sup> a 2<sup>24</sup> − 1) e SETTINGS_MAX_CONCURRENT_STREAMS (a RFC recomenda
+        pelo menos 100); o <strong>push</strong>, em que o servidor manda um objeto antes de o cliente pedir, se o cliente
+        permitir (poucos servidores o adotaram); <strong>prioridades</strong> entre streams; e <strong>controle de
+        fluxo</strong> próprio, com janela inicial de 65 535 bytes, ampliada por quadros Window_Update. Para não confundir
+        servidores antigos, uma sessão HTTP/2.0 na porta 80 começa como HTTP/1.1, com os cabeçalhos
+        <code>Connection: Upgrade, HTTP2-Settings</code> e <code>Upgrade: h2c</code>, e o servidor responde
+        <code>101 Switching Protocols</code>.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O nome oficial é HTTP/2, hoje na <a href="https://www.rfc-editor.org/rfc/rfc9113" target="_blank" rel="noopener noreferrer">RFC 9113</a>,
+        que substituiu a 7540 em 2022 e deixou de recomendar o esquema de prioridades e o Upgrade h2c. Na prática, os
+        navegadores só usam HTTP/2 sobre TLS, e o push foi abandonado por eles. O livro promete discutir mudanças na pilha
+        inteira mais adiante: é o caminho do <strong>HTTP/3</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc9114" target="_blank" rel="noopener noreferrer">RFC 9114</a>), que roda
+        sobre o QUIC (<a href="https://www.rfc-editor.org/rfc/rfc9000" target="_blank" rel="noopener noreferrer">RFC 9000</a>)
+        em vez do TCP, para que a perda de um pacote não bloqueie todos os streams.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="hol-http2"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Só para pedidos idempotentes, que não dependem dos anteriores|Só para pedidos POST|Para qualquer pedido, sem restrição" data-answer="0" data-explain="Pela RFC 7230, citada pelo livro, o pipelining só serve para pedidos idempotentes (pág. 162 do PDF)." data-hint="Releia a limitação do pipelining.">
+        <p class="fw-semibold mb-2">Para quais pedidos o pipelining pode ser usado?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Ímpar|Par|Zero" data-answer="0" data-explain="Os identificadores ímpares são do cliente, e os pares, do servidor (pág. 163 do PDF)." data-hint="Quem abre o stream é o cliente.">
+        <p class="fw-semibold mb-2">Um navegador abre um stream novo no HTTP/2 para pedir uma imagem. O identificador do stream é…</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Pipelining: vários pedidos sem esperar; só para pedidos idempotentes.</li>
+        <li>HTTP/2: binário, quadros com cabeçalho de 9 bytes, streams multiplexados, cabeçalhos comprimidos.</li>
+        <li>Quadros menores reduzem o bloqueio do primeiro da fila, mas aumentam o custo dos cabeçalhos.</li>
+    </ul>
+</section>
+
+<!-- 8. RPC: dados -->
+<section id="rpc-dados" class="chapter-section" data-conceito="rpc-dados" data-titulo="RPC: os dados">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">Chamadas remotas: codificando os dados</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Até aqui, pessoas trocavam mensagens e liam documentos. Mas muitas vezes é um programa que precisa de outro: um
+        cálculo pesado feito em outra máquina, por exemplo. Muitos sistemas distribuídos usam a <strong>chamada de
+        procedimento remoto</strong> (RPC) como peça básica (pág. 165 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>Numa chamada local, a maioria das linguagens faz assim (pág. 166 do PDF):</p>
+    <ol>
+        <li>quem chama põe os parâmetros num lugar (registrador, pilha…) onde a função os encontra;</li>
+        <li>transfere a execução para a função;</li>
+        <li>a função lê os parâmetros e calcula;</li>
+        <li>põe os valores de retorno num lugar acessível a quem chamou;</li>
+        <li>devolve a execução.</li>
+    </ol>
+    <p>
+        Em máquinas diferentes, há dois problemas: elas não compartilham a memória, e podem representar números e caracteres
+        de formas diferentes. Daí as duas perguntas: como <strong>codificar</strong> os parâmetros e como
+        <strong>alcançar</strong> a função pela rede. Codificações populares: <strong>XDR</strong>, usada pelo ONC-RPC;
+        XML, usada pelo XML-RPC; e <strong>JSON</strong>.
+    </p>
+    <ul>
+        <li><strong>XDR</strong> (<a href="https://www.rfc-editor.org/rfc/rfc1832" target="_blank" rel="noopener noreferrer">RFC 1832</a>,
+            pág. 166–167 do PDF): cada tipo vira uma sequência de bytes. Um inteiro de 32 bits vai com o byte mais
+            significativo primeiro (<em>big-endian</em>, como você viu no <a href="../capitulo-03/index.html">Capítulo 3</a>);
+            há inteiros de 64 bits; booleanos viram inteiros 0 e 1; números de ponto flutuante seguem o padrão IEEE
+            (no de 64 bits: 1 bit de sinal S, 11 de expoente E e 52 de fração F, valendo
+            (−1)<sup>S</sup> × 2<sup>E−1023</sup> × 1,F). Uma <strong>cadeia de bytes</strong> é o tamanho (um inteiro)
+            seguido dos bytes, completados com zeros até um múltiplo de 4, para alinhar em 32 bits. Um vetor de tamanho
+            variável começa pelo número de elementos.</li>
+        <li><strong>JSON</strong> (<a href="https://www.rfc-editor.org/rfc/rfc4627" target="_blank" rel="noopener noreferrer">RFC 4627</a>,
+            pág. 167–168 do PDF): texto. Inteiros são dígitos ASCII; cadeias vêm entre aspas, com escapes para <code>"</code>
+            e <code>\</code>; booleanos são <code>true</code> e <code>false</code>; objetos são listas de pares
+            entre chaves, e vetores, entre colchetes: <code>{"Primes": [2, 3, 5, 7]}</code>.</li>
+    </ul>
+    <p>
+        A vantagem do JSON é ser legível por uma pessoa; o custo é uma codificação menos compacta: os mesmos dados costumam
+        ocupar mais espaço do que em XDR (pág. 168 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        As versões atuais são a <a href="https://www.rfc-editor.org/rfc/rfc4506" target="_blank" rel="noopener noreferrer">RFC 4506</a>
+        (XDR) e a <a href="https://www.rfc-editor.org/rfc/rfc8259" target="_blank" rel="noopener noreferrer">RFC 8259</a> (JSON).
+        O "costumam" do livro é importante: um número pequeno ocupa um ou dois caracteres em JSON e sempre 4 bytes em XDR.
+        A simulação mostra os dois casos.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="xdr-vs-json"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="12 bytes: 4 de tamanho, 5 de dados e 3 de enchimento|9 bytes: 4 de tamanho e 5 de dados|8 bytes: só os dados, alinhados" data-answer="0" data-explain="O tamanho ocupa 4 bytes, e os 5 bytes de dados são completados até 8, um múltiplo de 4." data-hint="Os dados são alinhados a múltiplos de 4 bytes.">
+        <p class="fw-semibold mb-2">Quantos bytes ocupa a cadeia "redes" (5 bytes) em XDR?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>RPC: codificar os parâmetros e alcançar a função remota.</li>
+        <li>XDR: binário, big-endian, alinhado em 4 bytes. JSON: texto legível, em geral maior.</li>
+    </ul>
+</section>
+
+<!-- 9. RPC: a chamada -->
+<section id="rpc-chamado" class="chapter-section" data-conceito="rpc-chamado" data-titulo="RPC: a chamada">
+    <span class="kicker">Conceito 9</span>
+    <h2 class="section-title">Chamadas remotas: alcançando a função</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A função tem um nome, mas o transporte só conhece endereços e portas. E se o pedido, ou a resposta, se perder no
+        caminho?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A solução mais simples é a função ficar num processo que escuta numa porta conhecida. É o que faz o
+        <strong>JSON-RPC</strong>, sobre datagramas ou sobre conexões. Um pedido é um objeto JSON com os campos
+        <code>jsonrpc</code> (a versão), <code>method</code>, <code>params</code> e <code>id</code>, escolhido por quem chama
+        (pág. 168 do PDF):
+    </p>
+    <pre class="log mb-3">{ "jsonrpc": "2.0", "method": "sum", "params": [1, 3], "id": 1 }
+{ "jsonrpc": "2.0", "result": 4, "id": 1 }
+{ "jsonrpc": "2.0", "error": {"code": -32601, "message": "Method not found"}, "id": 1 }</pre>
+    <p>
+        A resposta traz o mesmo <code>id</code> e um <code>result</code> ou um <code>error</code>, com código, mensagem e
+        dados opcionais. Alguns códigos: −32700, erro ao analisar o pedido; −32602, parâmetros inválidos; −32601, método
+        inexistente.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        No exemplo de erro do livro, a resposta traz <code>"id": "1"</code>, uma cadeia, enquanto o pedido usou o número 1
+        (pág. 168 do PDF). Pela especificação do <a href="https://www.jsonrpc.org/specification" target="_blank" rel="noopener noreferrer">JSON-RPC 2.0</a>,
+        a resposta deve repetir o id do pedido, com o mesmo valor, como no exemplo acima.
+    </p>
+    <p>
+        O <code>id</code> tem o mesmo papel do identificador da mensagem DNS: casar a resposta com o pedido. Ele é importante
+        sobre datagramas, que não são confiáveis. No DNS, repetir uma consulta perdida não causa problema. Num RPC, pode
+        causar: se a <strong>resposta</strong> de um depósito bancário se perde, o cliente reenvia o pedido, e o servidor
+        deposita duas vezes. Ou as funções remotas podem ser chamadas várias vezes sem estragar nada (idempotentes), ou a
+        aplicação precisa detectar pedidos repetidos. Na prática, os programadores preferem a primeira opção (pág. 168–169 do PDF).
+    </p>
+    <p>
+        O <strong>ONC-RPC</strong> (<a href="https://www.rfc-editor.org/rfc/rfc1831" target="_blank" rel="noopener noreferrer">RFC 1831</a>)
+        resolve o endereçamento de outro jeito: como não há portas para todas as funções (são só 2<sup>16</sup> por host),
+        cada servidor registra as suas funções num diretório local, o <strong>portmapper</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc1833" target="_blank" rel="noopener noreferrer">RFC 1833</a>), que escuta na
+        porta 111. Quem chama pergunta primeiro ao portmapper em que porta está a função e depois fala direto com ela
+        (pág. 169 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A versão atual do ONC-RPC é a <a href="https://www.rfc-editor.org/rfc/rfc5531" target="_blank" rel="noopener noreferrer">RFC 5531</a>.
+        Muitas APIs atuais seguem a mesma ideia sobre HTTP, com JSON no corpo dos pedidos.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="json-rpc"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Ao portmapper, na porta 111|Diretamente à porta 80 do servidor|Ao servidor DNS" data-answer="0" data-explain="O portmapper é um diretório local que diz em qual porta está cada função (pág. 169 do PDF)." data-hint="Quem sabe a porta de cada função registrada?">
+        <p class="fw-semibold mb-2">No ONC-RPC, a quem o cliente pergunta primeiro em que porta está uma função?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Definir o saldo como 150 (set_balance(150))|Somar 50 ao saldo (deposit(50))|Transferir 50 para outra conta" data-answer="0" data-explain="Repetir “defina o saldo como 150” dá o mesmo resultado; repetir “some 50” soma de novo." data-hint="Qual operação dá o mesmo resultado se for feita duas vezes?">
+        <p class="fw-semibold mb-2">Qual destas funções remotas é idempotente, ou seja, pode ser repetida sem problema?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>JSON-RPC: jsonrpc, method, params e id; resposta com result ou error e o mesmo id.</li>
+        <li>Perda da resposta + reenvio = execução duplicada, a menos que a função seja idempotente ou o servidor detecte o id repetido.</li>
+        <li>ONC-RPC: o portmapper (porta 111) diz a porta de cada função.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap10" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> decomponha https://alice@www.example.com:8443/docs/a.html?v=2#fim em esquema, usuário, host, porta, caminho, consulta e fragmento.
+            <details><summary>Ver solução</summary><p class="mb-0">https; alice; www.example.com; 8443; /docs/a.html; v=2; fim.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> escreva o pedido HTTP/1.1 que busca http://www.example.net/contato.html.
+            <details><summary>Ver solução</summary><p class="mb-0">GET /contato.html HTTP/1.1, depois Host: www.example.net e uma linha vazia (o User-Agent: é opcional).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> uma página tem o HTML e 9 imagens, e o RTT é 80 ms. Pelo modelo do conceito 4, quanto tempo leva com HTTP/1.0 e com uma conexão persistente sem pipelining?
+            <details><summary>Ver solução</summary><p class="mb-0">10 objetos. HTTP/1.0: 10 × 2 × 80 = 1600 ms. Persistente: 80 + 10 × 80 = 880 ms.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> codifique em XDR o inteiro 258 e a cadeia "Oi".
+            <details><summary>Ver solução</summary><p class="mb-0">258 = 00 00 01 02. "Oi" = 00 00 00 02 4f 69 00 00 (tamanho, dois bytes de dados e dois de enchimento).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> a 1 Mbit/s, com quadros de no máximo 2500 bytes de dados, em quanto tempo chega o objeto de 125 bytes que vem atrás do de 12 500 bytes (ignore os cabeçalhos)?
+            <details><summary>Ver solução</summary><p class="mb-0">O primeiro quadro do objeto longo leva 2500 × 8 / 10<sup>6</sup> = 20 ms, e o curto, 1 ms: 21 ms, contra 101 ms sem quadros.</p></details></li>
+        <li><strong>Desafio:</strong> um serviço de transferências bancárias por JSON-RPC sobre UDP não pode transferir duas vezes. Proponha duas soluções e diga onde cada uma guarda estado.
+            <details><summary>Ver solução</summary><p class="mb-0">(1) O servidor guarda os ids já atendidos e as respostas, e repete a resposta se o id voltar: o estado fica no servidor. (2) A operação vira idempotente: o cliente gera um identificador único da transferência e o servidor só executa uma vez por identificador, ou a operação é escrita como "defina o estado" em vez de "some". Nas duas, o servidor precisa lembrar o que já fez por algum tempo.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Cinco trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Decompondo URIs</h3>
+    <pre class="code-block"><code>from urllib.parse import urlsplit, unquote
+
+uris = [
+    "http://tools.ietf.org/html/rfc3986.html",
+    "mailto:infobot@example.com?subject=current-issue",
+    "http://docs.python.org/library/basehttpserver.html?highlight=http#BaseHTTPServer.BaseHTTPRequestHandler",
+    "telnet://[2001:db8:3080:3::2]:2323/",
+    "ftp://cnn.example.com&amp;story=breaking_news@10.0.0.1/top_story.htm",
+]
+for u in uris:
+    p = urlsplit(u)
+    print(u)
+    print(f"  esquema={p.scheme!r} usuário={p.username!r} host={p.hostname!r} porta={p.port!r}")
+    print(f"  caminho={p.path!r} consulta={p.query!r} fragmento={p.fragment!r}")
+
+print(unquote("/caf%C3%A9%20com%20leite"))</code></pre>
+
+    <h3 class="h6 mt-4">2. Montando pedidos e lendo respostas HTTP</h3>
+    <pre class="code-block"><code>def monta_requisicao(metodo, caminho, cabecalhos, versao="HTTP/1.1"):
+    linhas = [f"{metodo} {caminho} {versao}"]
+    linhas += [f"{nome}: {valor}" for nome, valor in cabecalhos.items()]
+    return "\r\n".join(linhas) + "\r\n\r\n"          # a linha vazia fecha o cabeçalho
+
+def le_resposta(texto):
+    cabeca, _, corpo = texto.partition("\r\n\r\n")
+    status, *linhas = cabeca.split("\r\n")
+    versao, codigo, frase = status.split(" ", 2)
+    cabecalhos = {}
+    for linha in linhas:
+        nome, _, valor = linha.partition(":")
+        cabecalhos[nome.strip().lower()] = valor.strip()
+    return versao, int(codigo), frase, cabecalhos, corpo
+
+pedido = monta_requisicao("GET", "/", {"Host": "www.ietf.org", "User-Agent": "curl/7.19.4"}, "HTTP/1.0")
+print(repr(pedido))
+
+resposta = ("HTTP/1.1 200 OK\r\n"                     # a resposta do livro (pág. 154 do PDF)
+            "Date: Mon, 15 Mar 2010 13:40:38 GMT\r\n"
+            "Server: Apache/2.2.4 (Linux/SUSE) mod_ssl/2.2.4\r\n"
+            "Last-Modified: Tue, 09 Mar 2010 21:26:53 GMT\r\n"
+            "Content-Length: 17019\r\n"
+            "Content-Type: text/html\r\n"
+            "\r\n"
+            "&lt;!DOCTYPE HTML PUBLIC ...")
+versao, codigo, frase, cab, corpo = le_resposta(resposta)
+print(versao, codigo, frase)
+print("Tipo:", cab["content-type"], "| tamanho anunciado:", cab["content-length"])
+classes = {2: "sucesso", 3: "redirecionamento", 4: "erro do cliente", 5: "erro do servidor"}
+print("Classe:", classes[codigo // 100])</code></pre>
+
+    <h3 class="h6 mt-4">3. Quanto tempo leva uma página?</h3>
+    <pre class="code-block"><code>def transmissao(nbytes, banda_bps):
+    return nbytes * 8 / banda_bps                     # segundos para pôr os bits no enlace
+
+def http10(n, rtt, tam, banda):
+    """Uma conexão TCP nova por objeto: 1 RTT para abrir + 1 RTT para pedir e receber."""
+    return n * (2 * rtt + transmissao(tam, banda))
+
+def sequencial(n, rtt, tam, banda):
+    """Conexão persistente já aberta, um pedido de cada vez."""
+    return n * (rtt + transmissao(tam, banda))
+
+def pipelining(n, rtt, tam, banda):
+    """Conexão persistente já aberta, todos os pedidos de uma vez."""
+    return rtt + n * transmissao(tam, banda)
+
+# o exemplo do livro: 5 objetos de 100 bytes, 1 Gbit/s, 100 ms em cada sentido (pág. 161 do PDF)
+n, rtt, tam, banda = 5, 0.200, 100, 1e9
+for nome, f in [("HTTP/1.0", http10), ("sequencial", sequencial), ("pipelining", pipelining)]:
+    print(f"{nome:11} {f(n, rtt, tam, banda) * 1000:7.1f} ms")
+
+# bloqueio do primeiro da fila e os quadros do HTTP/2 (pág. 163 do PDF): 1 Mbit/s
+longo, curto, banda = 12500, 125, 1e6
+print("objeto longo inteiro antes:", (transmissao(longo, banda) + transmissao(curto, banda)) * 1000, "ms")
+print("quadro de 1250 bytes antes:", (transmissao(1250, banda) + transmissao(curto, banda)) * 1000, "ms")</code></pre>
+
+    <h3 class="h6 mt-4">4. XDR à mão e JSON</h3>
+    <pre class="code-block"><code>import struct, json
+
+def xdr_int(n):
+    return struct.pack(">i", n)                       # 4 bytes, o mais significativo primeiro
+
+def xdr_string(texto):
+    dados = texto.encode("utf-8")
+    enchimento = (4 - len(dados) % 4) % 4             # alinha em 4 bytes
+    return xdr_int(len(dados)) + dados + b"\x00" * enchimento
+
+def xdr_array(numeros):
+    return xdr_int(len(numeros)) + b"".join(xdr_int(n) for n in numeros)
+
+print("int 1     :", xdr_int(1).hex(" "))
+print("int -2    :", xdr_int(-2).hex(" "))
+print("'rede'    :", xdr_string("rede").hex(" "))
+print("'redes'   :", xdr_string("redes").hex(" "))
+print("[2,3,5,7] :", xdr_array([2, 3, 5, 7]).hex(" "))
+
+for lista in ([2, 3, 5, 7], [1000000000, 2000000000]):
+    x, j = xdr_array(lista), json.dumps(lista).encode()
+    print(f"{str(lista):26} XDR: {len(x):2} bytes   JSON: {len(j):2} bytes ({j.decode()})")</code></pre>
+
+    <h3 class="h6 mt-4">5. Um servidor JSON-RPC e o pedido repetido</h3>
+    <pre class="code-block"><code>import json
+
+saldo = {"conta": 100}
+
+def soma(a, b):
+    return a + b
+
+def deposita(valor):
+    saldo["conta"] += valor
+    return saldo["conta"]
+
+METODOS = {"sum": soma, "deposit": deposita}
+ja_vistos = {}                                         # id -> resposta (para pedidos repetidos)
+
+def atende(texto, lembra_ids=False):
+    try:
+        pedido = json.loads(texto)
+    except json.JSONDecodeError:
+        return json.dumps({"jsonrpc": "2.0", "error": {"code": -32700, "message": "Parse error"}, "id": None})
+    ident = pedido.get("id")
+    if lembra_ids and ident in ja_vistos:
+        return ja_vistos[ident]                        # repete a resposta sem executar de novo
+    metodo = METODOS.get(pedido.get("method"))
+    if metodo is None:
+        resposta = {"jsonrpc": "2.0", "error": {"code": -32601, "message": "Method not found"}, "id": ident}
+    else:
+        try:
+            resposta = {"jsonrpc": "2.0", "result": metodo(*pedido.get("params", [])), "id": ident}
+        except TypeError:
+            resposta = {"jsonrpc": "2.0", "error": {"code": -32602, "message": "Invalid params"}, "id": ident}
+    ja_vistos[ident] = json.dumps(resposta)
+    return ja_vistos[ident]
+
+print(atende('{"jsonrpc": "2.0", "method": "sum", "params": [1, 3], "id": 1}'))   # o exemplo do livro
+print(atende('{"jsonrpc": "2.0", "method": "mul", "params": [1, 3], "id": 2}'))
+print(atende('{"jsonrpc": "2.0", "method": "sum", "params": [1], "id": 3}'))
+print(atende('{"jsonrpc": "2.0", "method": "sum"'))
+
+# a resposta de um depósito se perde, e o cliente repete o mesmo pedido
+deposito = '{"jsonrpc": "2.0", "method": "deposit", "params": [50], "id": 7}'
+atende(deposito)
+atende(deposito)
+print("saldo depois de repetir o pedido:", saldo["conta"])</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seções 3.4 "The HyperText Transfer Protocol", 3.5 "Making HTTP faster" e 3.6 "Remote Procedure Calls" (pág. 148–169 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 959 — <a href="https://www.rfc-editor.org/rfc/rfc959" target="_blank" rel="noopener noreferrer">File Transfer Protocol</a></li>
+        <li>RFC 3986 — <a href="https://www.rfc-editor.org/rfc/rfc3986" target="_blank" rel="noopener noreferrer">Uniform Resource Identifier (URI): Generic Syntax</a></li>
+        <li>RFC 1945 — <a href="https://www.rfc-editor.org/rfc/rfc1945" target="_blank" rel="noopener noreferrer">HTTP/1.0</a> e RFC 2616 — <a href="https://www.rfc-editor.org/rfc/rfc2616" target="_blank" rel="noopener noreferrer">HTTP/1.1</a> (citadas pelo livro)</li>
+        <li>RFC 9110 — <a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener noreferrer">HTTP Semantics</a>, RFC 9111 — <a href="https://www.rfc-editor.org/rfc/rfc9111" target="_blank" rel="noopener noreferrer">HTTP Caching</a> e RFC 9112 — <a href="https://www.rfc-editor.org/rfc/rfc9112" target="_blank" rel="noopener noreferrer">HTTP/1.1</a> (versões atuais, complemento)</li>
+        <li>RFC 6265 — <a href="https://www.rfc-editor.org/rfc/rfc6265" target="_blank" rel="noopener noreferrer">HTTP State Management Mechanism</a> e RFC 2617 — <a href="https://www.rfc-editor.org/rfc/rfc2617" target="_blank" rel="noopener noreferrer">HTTP Authentication</a></li>
+        <li>RFC 7540 — <a href="https://www.rfc-editor.org/rfc/rfc7540" target="_blank" rel="noopener noreferrer">HTTP/2</a>, RFC 7541 — <a href="https://www.rfc-editor.org/rfc/rfc7541" target="_blank" rel="noopener noreferrer">HPACK</a> e RFC 9113 — <a href="https://www.rfc-editor.org/rfc/rfc9113" target="_blank" rel="noopener noreferrer">HTTP/2</a> (versão atual, complemento)</li>
+        <li>RFC 9114 — <a href="https://www.rfc-editor.org/rfc/rfc9114" target="_blank" rel="noopener noreferrer">HTTP/3</a> e RFC 9000 — <a href="https://www.rfc-editor.org/rfc/rfc9000" target="_blank" rel="noopener noreferrer">QUIC</a> (complemento)</li>
+        <li>RFC 1832 — <a href="https://www.rfc-editor.org/rfc/rfc1832" target="_blank" rel="noopener noreferrer">XDR</a> e RFC 4506 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc4506" target="_blank" rel="noopener noreferrer">XDR</a></li>
+        <li>RFC 4627 — <a href="https://www.rfc-editor.org/rfc/rfc4627" target="_blank" rel="noopener noreferrer">JSON</a> e RFC 8259 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc8259" target="_blank" rel="noopener noreferrer">JSON</a></li>
+        <li>RFC 1831 — <a href="https://www.rfc-editor.org/rfc/rfc1831" target="_blank" rel="noopener noreferrer">ONC-RPC</a>, RFC 5531 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc5531" target="_blank" rel="noopener noreferrer">ONC-RPC</a> e RFC 1833 — <a href="https://www.rfc-editor.org/rfc/rfc1833" target="_blank" rel="noopener noreferrer">Binding Protocols for ONC RPC (portmapper)</a></li>
+        <li><a href="https://www.jsonrpc.org/specification" target="_blank" rel="noopener noreferrer">JSON-RPC 2.0 Specification</a>, citada pelo livro como [JSON-RPC2]</li>
+        <li>HTTP Archive — <a href="https://httparchive.org/reports/page-weight" target="_blank" rel="noopener noreferrer">Page Weight</a>, fonte da Fig. 15 do livro</li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/World_Wide_Web" target="_blank" rel="noopener noreferrer">World Wide Web</a>, <a href="https://en.wikipedia.org/wiki/HTTP_pipelining" target="_blank" rel="noopener noreferrer">HTTP pipelining</a> (citada pelo livro), <a href="https://en.wikipedia.org/wiki/HTTP_cookie" target="_blank" rel="noopener noreferrer">HTTP cookie</a>, <a href="https://pt.wikipedia.org/wiki/Rede_de_fornecimento_de_conte%C3%BAdo" target="_blank" rel="noopener noreferrer">Rede de fornecimento de conteúdo</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-09/index.html" class="text-muted text-decoration-none">← Capítulo 9</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 10</span>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">Todos os capítulos</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap10.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

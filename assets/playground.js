@@ -253,6 +253,60 @@
                 {"nivel": "Intermediário", "texto": "Quantos bits a mais na chave fazem o tempo ser multiplicado por 1000?", "resposta": "Cerca de 10 bits, porque 2^10 = 1024."},
                 {"nivel": "Desafio", "texto": "Refaça a tabela supondo um atacante 10^6 vezes mais rápido (10^15 chaves por segundo). A chave de 128 bits continua segura?", "resposta": "Sim: o tempo cai para cerca de 1,08 × 10^16 anos, ainda muito maior que a idade do universo (≈ 1,4 × 10^10 anos). Já a de 56 bits cai para cerca de 72 segundos."}
             ]
+        ],
+        "capitulo9": [
+            [
+                {"nivel": "Aquecimento", "texto": "Acrescente \"2001:0db8:0000:0000:0001:0000:0000:0001\" à lista. Qual é a forma compacta, e por que o \"::\" fica no primeiro bloco de zeros?", "resposta": "2001:db8::1:0:0:1. Há duas sequências de dois grupos nulos, do mesmo tamanho; a RFC 5952 manda comprimir a primeira."},
+                {"nivel": "Intermediário", "texto": "Quantos rótulos tem o nome reverso do exemplo do livro? Use len(ip.reverse_pointer.split(\".\")).", "resposta": "34: os 32 nibbles do endereço (128 / 4) mais ip6 e arpa."},
+                {"nivel": "Desafio", "texto": "Escreva uma função que diga quantos grupos de 16 bits o \"::\" esconde num endereço compacto. Quanto dá para \"ff01::101\"?", "resposta": "6. Conte os grupos escritos (ff01 e 101, dois) e subtraia de 8. Uma solução: 8 - len([g for g in texto.split(\":\") if g])."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Quantos bytes tem a variável consulta? Confira com len(consulta).", "resposta": "12, o tamanho fixo do cabeçalho DNS: seis inteiros de 16 bits."},
+                {"nivel": "Intermediário", "texto": "Leia o cabeçalho bytes.fromhex(\"ab cd 81 83 00 01 00 00 00 01 00 00\") com le_cabecalho. O que aconteceu?", "resposta": "É uma resposta (QR = 1) com RD e RA ligados e RCODE = 3: o nome não existe. Não há registro na seção Answer, e há 1 na seção Authority."},
+                {"nivel": "Desafio", "texto": "Monte a resposta à consulta 55279 com RD, RA e TC ligados e uma pergunta. Qual é o valor das flags em hexadecimal, e o que o cliente deve fazer?", "resposta": "0x8380 (QR = 0x8000, TC = 0x200, RD = 0x100, RA = 0x80). TC indica resposta truncada: o cliente repete a consulta sobre TCP."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Rode b64(bytes.fromhex(\"14b9\")). O resultado bate com o FPs= impresso no livro?", "resposta": "Não: 0x14b9 dá FLk=. FPs= vem de 0x14fb, que é o que os bits impressos no livro mostram."},
+                {"nivel": "Intermediário", "texto": "Quantos caracteres Base64 saem de 100 bytes? Confira com len(b64(bytes(100))). Qual é o aumento?", "resposta": "136: 34 grupos (33 completos e 1 de um byte) × 4 caracteres. É 36% maior; para entradas grandes, o aumento tende a 33%."},
+                {"nivel": "Desafio", "texto": "Use base64.b64decode para decodificar \"T2kgdHVybWEh\". Que texto aparece?", "resposta": "b'Oi turma!' (decodifique com .decode() para ter a string Oi turma!)."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Quantos destinatários tem a linha To: da primeira mensagem? Use msg[\"To\"].split(\",\").", "resposta": "2: Alice Doe e Alice Smith."},
+                {"nivel": "Intermediário", "texto": "Troque a última linha \"--simple boundary--\" por \"--simple boundary\", como está impresso no livro. O que muda na saída?", "resposta": "O módulo encontra uma terceira parte, vazia, e registra o defeito CloseBoundaryNotFoundDefect: sem a fronteira final com dois hífens, ele não sabe onde a mensagem termina."},
+                {"nivel": "Desafio", "texto": "Acrescente uma terceira parte com Content-Type: text/html antes da fronteira final. Quantas partes o módulo encontra, e de que tipos?", "resposta": "3 partes: text/plain, text/plain e text/html. Cada parte começa com a linha --simple boundary seguida do seu cabeçalho e de uma linha vazia."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Troque a ordem para RCPT TO: antes de MAIL FROM:, como diz o texto do livro na pág. 146. O que o servidor responde?", "resposta": "503 para o RCPT TO: (falta o remetente), 250 para o MAIL FROM: e 503 para o DATA, porque nenhum destinatário foi aceito."},
+                {"nivel": "Intermediário", "texto": "Acrescente \"RCPT TO:<carol@example.com>\" depois do de Bob. O que diz a resposta ao DATA?", "resposta": "250 Ok: queued para 2 destinatário(s). Uma mensagem pode ter vários RCPT TO:."},
+                {"nivel": "Desafio", "texto": "Conte quantas respostas começam com 4 ou 5 na sessão [\"DATA\", \"EHLO x\", \"RCPT TO:<ninguem@example.com>\", \"MAIL FROM:<a@b>\", \"RCPT TO:<ninguem@example.com>\", \"QUIT\"].", "resposta": "3: DATA (503, antes de tudo), o primeiro RCPT TO: (503, sem remetente) e o segundo (550, caixa inexistente)."}
+            ]
+        ],
+        "capitulo10": [
+            [
+                {"nivel": "Aquecimento", "texto": "Na URI 5 (ftp://cnn.example.com&...), quais são o usuário e o host?", "resposta": "Usuário: cnn.example.com&story=breaking_news. Host: 10.0.0.1. Tudo o que vem antes do @ é o usuário."},
+                {"nivel": "Intermediário", "texto": "Acrescente \"https://alice:segredo@www.example.com:8443/a?x=1#fim\" à lista. O que aparece em p.password e p.port?", "resposta": "'segredo' e 8443. É por isso que senha na URI é obsoleta: qualquer um que veja a URI lê a senha."},
+                {"nivel": "Desafio", "texto": "Use urllib.parse.quote para codificar \"/café com leite\". O que sai, e por que o é vira dois códigos?", "resposta": "/caf%C3%A9%20com%20leite. Em UTF-8, é ocupa dois bytes (C3 A9), e cada byte vira um %XX; o espaço vira %20."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Quantos bytes tem o pedido montado? Use len(pedido).", "resposta": "63, contando os CR LF de cada linha e a linha vazia final."},
+                {"nivel": "Intermediário", "texto": "Leia \"HTTP/1.1 301 Moved Permanently\r\nLocation: http://www.example.net/novo.html\r\n\r\n\" com le_resposta. Qual é a classe, e para onde o cliente deve ir?", "resposta": "Redirecionamento (3xx). O novo endereço está em cab[\"location\"]: http://www.example.net/novo.html."},
+                {"nivel": "Desafio", "texto": "Faça le_resposta conferir se o corpo tem o tamanho anunciado em Content-Length. A resposta do livro passa?", "resposta": "Não: o cabeçalho anuncia 17019 bytes, mas o corpo do exemplo tem só 25 (len(corpo.encode())), porque o livro omitiu o documento HTML. Um cliente real esperaria pelos bytes que faltam."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "No exemplo do livro, quantos milissegundos o pipelining economiza em relação ao modo sequencial?", "resposta": "800 ms: 1000 ms contra 200 ms."},
+                {"nivel": "Intermediário", "texto": "Refaça o exemplo com banda de 1 Mbit/s (1e6). Quanto dá o pipelining, e por quê?", "resposta": "204 ms: agora a transmissão conta. 5 × 100 bytes × 8 / 10^6 = 4 ms somados ao RTT de 200 ms."},
+                {"nivel": "Desafio", "texto": "Para a página média do livro, 70 objetos, com RTT de 50 ms e tam = 0, quanto levam HTTP/1.0 e o modo sequencial?", "resposta": "HTTP/1.0: 70 × 2 × 50 ms = 7 s. Sequencial: 70 × 50 ms = 3,5 s (mais 50 ms para abrir a conexão, que a função não conta). Com pipelining, cerca de 50 ms."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Qual é a saída de xdr_int(258).hex(\" \")?", "resposta": "00 00 01 02: 258 = 256 + 2, com o byte mais significativo primeiro."},
+                {"nivel": "Intermediário", "texto": "Quantos bytes ocupam xdr_string(\"\"), xdr_string(\"abcd\") e xdr_string(\"maçã\")?", "resposta": "4, 8 e 12. A cadeia vazia é só o tamanho; \"abcd\" não precisa de enchimento; \"maçã\" tem 6 bytes em UTF-8, completados para 8, mais 4 do tamanho."},
+                {"nivel": "Desafio", "texto": "Ache o menor inteiro positivo n para o qual a lista [n] ocupa o mesmo número de bytes em XDR e em JSON.", "resposta": "100000. Em XDR, [n] ocupa sempre 8 bytes (n e o elemento); em JSON, len(str(n)) + 2. Com 6 dígitos, \"[100000]\" tem 8 caracteres."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Qual é a resposta para sum com params [2, 5]?", "resposta": "{\"jsonrpc\": \"2.0\", \"result\": 7, \"id\": ...}, com o id que você usou."},
+                {"nivel": "Intermediário", "texto": "Troque as duas chamadas finais por atende(deposito, lembra_ids=True). Qual é o saldo?", "resposta": "150: o segundo pedido, com o mesmo id 7, recebe a resposta guardada, sem depositar de novo."},
+                {"nivel": "Desafio", "texto": "Com lembra_ids=True, o que acontece se o depósito usar o id 1, já usado pelo sum?", "resposta": "O servidor devolve a resposta antiga do sum ({\"result\": 4, \"id\": 1}) e não deposita: o saldo continua 100. Os ids precisam ser únicos para cada pedido novo."}
+            ]
         ]
     };
 
@@ -414,6 +468,7 @@
                     return resposta;
                 });
                 pyodide.globals.set("seed_value", Number(seed));
+                pyodide.globals.set("_playground_fonte", fonte);
                 var wrapper = [
                     "import sys, io, builtins, random, json, base64",
                     "_playground_output = io.StringIO()",
@@ -424,7 +479,8 @@
                     "builtins.input = lambda prompt='': (sys.stdout.write(str(prompt)), js_input(str(prompt)))[1]",
                     "random.seed(seed_value)",
                     "try:",
-                    ...fonte.split("\n").map(function (line) { return "    " + line; }),
+                    // O código roda intacto (sem recuo), para que strings de várias linhas não ganhem espaços.
+                    "    exec(compile(_playground_fonte, '<código>', 'exec'), globals())",
                     "finally:",
                     "    sys.stdout = _playground_old_stdout",
                     "    builtins.input = _playground_old_input",

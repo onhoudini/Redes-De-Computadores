@@ -4,9 +4,9 @@ Guia para agentes que trabalham neste repositório. O modelo pedagógico complet
 
 ## O projeto
 
-O repositório transforma o livro *Computer Networking: Principles, Protocols and Practice* (Bonaventure, Release 2021, arquivo `livro.pdf` na raiz) em páginas web interativas, um capítulo por vez. O capítulo N do site corresponde à seção 2.N do livro.
+O repositório transforma o livro *Computer Networking: Principles, Protocols and Practice* (Bonaventure, Release 2021, arquivo `livro.pdf` na raiz) em páginas web interativas, um capítulo por vez. Na Parte 1 do livro (*Principles*), o capítulo N do site corresponde à seção 2.N. Na Parte 2 (*Protocols*), cada capítulo agrupa seções 3.x de um mesmo tema e aprofunda um capítulo da Parte 1. A tabela abaixo é a referência.
 
-| Capítulo | Seção do livro | Situação |
+| Capítulo | Seções do livro (pág. do PDF) | Situação |
 |---|---|---|
 | 1 — Conectando dois hosts | 2.1 Connecting two hosts | aprovado pelo professor |
 | 2 — Construindo uma rede | 2.2 Building a network | aprovado pelo professor |
@@ -16,7 +16,11 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
 | 6 — Compartilhamento de recursos | 2.6 Sharing resources | pronto |
 | 7 — Modelos de referência | 2.7 The reference models | pronto |
 | 8 — Segurança de redes | 2.8 Network security | pronto |
-| próximo | Parte 2 (3.x Protocols) | a decidir com o usuário |
+| 9 — DNS e correio eletrônico | 3.1–3.3 (133–148) | pronto |
+| 10 — A web e as chamadas remotas | 3.4–3.6 (148–169) | pronto |
+| 11 — Protocolos seguros: ssh, TLS e DNSSEC | 3.7–3.9 (169–185) | planejado |
+| 12 — UDP e TCP | 3.10–3.12 (185–205) | planejado |
+| 13 a 16 (roteiro) | 3.13 congestionamento; 3.14 IPv6; 3.15–3.17 roteamento; 3.18 enlace | a fazer |
 
 ### Estrutura
 
@@ -33,9 +37,6 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
   - `sims-capNN.js`: simulações de cada capítulo (caps. 3 em diante).
   - `desafios-cap1.js` e `desafios-cap2.js`: desafios pontuáveis ligados às simulações aprovadas dos caps. 1 e 2.
   - `simulacoes.js`: simulações antigas do cap. 2.
-  - `tutor.js`, `tutor.css` e `tutor-config.js`: tutor de IA (OpenRouter) presente em todos os capítulos. A chave e o modelo ficam em `tutor-config.js`.
-  - `tutor/livro-capNN.txt`: texto da seção do livro enviado ao tutor, com marcações `[pág. N do PDF]`.
-- `ferramentas/extrai_livro.py`: gera os `assets/tutor/livro-capNN.txt` a partir do `livro.pdf`.
 
 ## Regras
 
@@ -50,7 +51,7 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
 
 ## Como criar um capítulo novo
 
-1. Extraia a seção 2.N do `livro.pdf` e liste os conceitos, as figuras (Fig. N) e as páginas do PDF.
+1. Extraia as seções do capítulo (tabela acima) do `livro.pdf` e liste os conceitos, as figuras (Fig. N) e as páginas do PDF. Para ver uma figura que o `pdftotext` não extrai, renderize a página (por exemplo, com PyMuPDF).
 2. Copie `capitulos/capitulo-04/index.html` como base para `capitulos/capitulo-NN/index.html`:
    - `<body data-capitulo="N">`;
    - hero, sumário lateral com `data-gami-toc`;
@@ -60,11 +61,8 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
    - rodapé com capítulo anterior e próximo.
 3. Crie `assets/sims-capNN.js`, com cada simulação registrada por `Redes.registrar` e usada no HTML como `<div data-sim="…">`. Cada desafio de simulação usa `Redes.desafio(raiz, id, pontos, titulo)`.
 4. Escreva os blocos `pre.code-block` e acrescente três desafios por bloco em `desafios["capituloN"]` (`assets/playground.js`). Rode o código com Python local para conferir as respostas.
-5. Ordem dos scripts no fim da página: Bootstrap, `registro.js`, `gamificacao.js`, `sims-capNN.js`, `playground.js`, `tutor-config.js`, `tutor.js`, `livro.js`. No `<head>`, `tutor.css` vem depois de `livro.css`.
-6. Tutor de IA:
-   - acrescente a faixa de páginas do capítulo em `CAPITULOS` (`ferramentas/extrai_livro.py`) e rode `python ferramentas/extrai_livro.py N`;
-   - em `assets/tutor.js`, acrescente o capítulo ao objeto `CAPITULOS` (título no site e seção do livro).
-7. Acrescente o card no `index.html` e o link do capítulo nas navbars e nos rodapés dos outros capítulos.
+5. Ordem dos scripts no fim da página: Bootstrap, `registro.js`, `gamificacao.js`, `sims-capNN.js`, `playground.js`, `livro.js`.
+6. Acrescente o card no `index.html`, no bloco da parte certa ("Parte 1: Princípios" ou "Parte 2: Protocolos"), o capítulo no dropdown da parte em todas as navbars e o link "Próximo" no rodapé do capítulo anterior.
 
 ## Como verificar
 
@@ -73,10 +71,9 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
 - Faça todas as perguntas e desafios: a pontuação máxima tem que ser alcançável, e o progresso deve continuar depois de recarregar a página.
 - Confira os temas claro e escuro e a largura de 375 px, sem rolagem horizontal.
 - Rode cada bloco Python no editor da página.
-- Abra o tutor e faça uma pergunta de conceito e outra pedindo a resposta de um exercício: a primeira deve citar a página do PDF, e a segunda deve receber dicas em vez da resposta.
 - Ao mexer nos capítulos 1 e 2, compare o texto visível de cada seção antes e depois.
 
 ## Pendências conhecidas
 
 - **Cap. 2, grafo editável:** o texto diz que desligar split horizon e poison reverse "pode produzir aumento iterativo da métrica (contagem ao infinito)". O simulador recalcula as rotas do zero a cada clique, então isso não acontece. Ajustar o texto ou o simulador depende do ok do usuário.
-- **Próximo passo:** com o capítulo 8, a Parte 1 do livro (seções 2.1 a 2.8) está completa. A regra "capítulo N = seção 2.N" não cobre a Parte 2 (seções 3.1 a 3.18, pág. 133 do PDF em diante): pergunte ao usuário como numerar e agrupar os próximos capítulos. O rodapé do capítulo 8 aponta para "Todos os capítulos"; troque por "Próximo: Capítulo 9 →" quando ele existir.
+- **Parte 2:** o agrupamento dos capítulos 9 a 12 foi aprovado pelo usuário. Os capítulos 13 a 16 da tabela são só um roteiro: confirme com o usuário antes de começá-los. O rodapé do último capítulo pronto aponta para "Todos os capítulos"; troque por "Próximo: Capítulo N →" quando o seguinte existir.

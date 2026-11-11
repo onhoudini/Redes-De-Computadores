@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 9 — DNS e correio eletrônico | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: os serviços de transporte vistos pela aplicação, endereços IPv6, a mensagem DNS, registros de recurso, DNS reverso, o formato das mensagens de e-mail, MIME, Base64, registros MX, SMTP e POP.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="9" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-09/index.html">9. DNS e correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. A web e as chamadas remotas</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 9 · Parte 2: Protocolos</span>
+        <h1 class="display-5 mb-3">DNS e correio eletrônico</h1>
+        <p class="lead mb-4">
+            A Parte 1 mostrou os princípios. A partir daqui, o livro olha para os protocolos que a Internet usa de
+            verdade. Começamos pela camada de aplicação: como uma aplicação identifica a outra, como é uma mensagem
+            DNS por dentro e como um e-mail sai da caixa de Alice e chega à de Bob.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#servicos">1. Aplicações e transporte</a>
+                    <a class="nav-link" href="#mensagem-dns">2. A mensagem DNS</a>
+                    <a class="nav-link" href="#registros">3. Registros e TTL</a>
+                    <a class="nav-link" href="#reverso">4. DNS reverso</a>
+                    <a class="nav-link" href="#formato-email">5. Formato do e-mail</a>
+                    <a class="nav-link" href="#mime">6. MIME</a>
+                    <a class="nav-link" href="#base64">7. Base64</a>
+                    <a class="nav-link" href="#mx">8. Registros MX</a>
+                    <a class="nav-link" href="#smtp">9. SMTP</a>
+                    <a class="nav-link" href="#pop">10. POP</a>
+                    <a class="nav-link" href="#exercicios-cap9">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Dos princípios aos protocolos</h2>
+    <p>
+        A segunda parte do livro, <em>Protocols</em>, começa pela camada de aplicação, como a primeira. A
+        diferença é o nível de detalhe: em vez de "um serviço de nomes", veremos os bytes de uma mensagem DNS; em
+        vez de "uma aplicação cliente-servidor", veremos os comandos que um servidor de e-mail troca com outro.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Identificar uma aplicação na Internet pelo <strong>endereço</strong>, pelo <strong>protocolo de transporte</strong> e pela <strong>porta</strong>, e escrever endereços <strong>IPv6</strong> na forma compacta.</li>
+                <li>Ler o <strong>cabeçalho DNS</strong> de 12 bytes e as seções de uma mensagem DNS.</li>
+                <li>Explicar os <strong>registros de recurso</strong> (A, AAAA, NS, CNAME, PTR, MX) e o papel do <strong>TTL</strong>, inclusive no DNS reverso.</li>
+                <li>Descrever o <strong>formato</strong> de uma mensagem de e-mail, as extensões <strong>MIME</strong> e a codificação <strong>Base64</strong>.</li>
+                <li>Acompanhar a entrega de um e-mail: registros <strong>MX</strong>, diálogo <strong>SMTP</strong> com seus códigos de resposta e recuperação com <strong>POP</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Este capítulo aprofunda dois capítulos da Parte 1: o <a href="../capitulo-05/index.html">Capítulo 5</a>
+                (nomes, a árvore do DNS e a resolução) e o <a href="../capitulo-03/index.html">Capítulo 3</a>
+                (modelo cliente-servidor, ASCII e ABNF). Ele cobre as seções 3.1 a 3.3 do livro (pág. 133–148 do PDF).
+                Os exemplos usam os dados do livro; quando não, usam nomes e endereços reservados para documentação.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Serviços de transporte -->
+<section id="servicos" class="chapter-section" data-conceito="servicos" data-titulo="Aplicações e transporte">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">Aplicações e serviços de transporte</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Num mesmo computador, o navegador, o cliente de e-mail e um jogo podem estar usando a rede ao mesmo
+        tempo. Quando chega um pacote, como o sistema sabe para qual deles é?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        As aplicações usam um dos dois serviços de transporte que você viu no <a href="../capitulo-04/index.html">Capítulo 4</a>
+        (pág. 133–134 do PDF):
+    </p>
+    <ul>
+        <li><strong>Serviço sem conexão (datagramas):</strong> troca de mensagens independentes. Na Internet, quem o
+            oferece é o <strong>UDP</strong>. Ele não é confiável, mas detecta erros de transmissão: a aplicação não
+            recebe dados corrompidos.</li>
+        <li><strong>Serviço orientado a conexão (fluxo de bytes):</strong> um fluxo de bytes confiável e bidirecional
+            entre as duas aplicações. Na Internet, quem o oferece é o <strong>TCP</strong>.</li>
+    </ul>
+    <p>
+        Nos dois casos, uma aplicação é identificada pelo <strong>endereço</strong> do host onde roda, pelo
+        <strong>protocolo</strong> de transporte e pela <strong>porta</strong>, um número inteiro. A Fig. 1 do livro
+        mostra uma aplicação em 130.104.32.107, UDP, porta 1234, conversando com outra em 139.165.16.12, UDP,
+        porta 53 (a porta do DNS).
+    </p>
+    <p>
+        Há dois tipos de endereço. O <strong>IPv4</strong> tem 32 bits e é escrito em decimal com pontos, um número
+        por byte: 203.0.113.56. O <strong>IPv6</strong> tem 128 bits e é escrito como 8 grupos de 16 bits em
+        hexadecimal, separados por dois-pontos: 2001:db8:3080:2:217:f2ff:fed6:65c0. Um host que só tem IPv4 não
+        consegue conversar diretamente com um host que só tem IPv6.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que os grupos do IPv6 são separados por "<em>semicolons</em>" (ponto e vírgula, pág. 133 do PDF).
+        O separador é o <strong>dois-pontos</strong> (<em>colon</em>), como mostram os próprios exemplos do livro.
+    </p>
+    <p>
+        Como endereços IPv6 costumam ter longas sequências de zeros, existe uma notação compacta: <code>::</code>
+        substitui um ou mais grupos nulos seguidos, e só pode aparecer uma vez. Os exemplos do livro (pág. 134 do PDF):
+    </p>
+    <ul class="mono small">
+        <li>2001:db8:0:0:8:800:200c:417a → 2001:db8::8:800:200c:417a</li>
+        <li>ff01:0:0:0:0:0:0:101 → ff01::101</li>
+        <li>0:0:0:0:0:0:0:1 → ::1</li>
+        <li>0:0:0:0:0:0:0:0 → ::</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Para que todos escrevam o mesmo endereço do mesmo jeito, a
+        <a href="https://www.rfc-editor.org/rfc/rfc5952" target="_blank" rel="noopener noreferrer">RFC 5952</a>
+        recomenda: letras minúsculas, sem zeros à esquerda, <code>::</code> na <strong>maior</strong> sequência de
+        grupos nulos (a primeira, se houver empate) e nunca para um único grupo nulo. A simulação abaixo segue
+        essas regras. O livro, escrito para hosts de 2021, diz que só uma pequena fração deles tinha IPv6; hoje,
+        perto da metade dos acessos ao Google já chega por IPv6
+        (<a href="https://www.google.com/intl/en/ipv6/statistics.html" target="_blank" rel="noopener noreferrer">estatísticas do Google</a>).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="ipv6-compacto"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Endereço, protocolo de transporte e porta|Só o endereço IP|Nome do programa e endereço MAC" data-answer="0" data-explain="O livro identifica cada aplicação pelo host (endereço), pelo protocolo (UDP ou TCP) e pela porta (pág. 133–134 do PDF)." data-hint="Veja a Fig. 1: o que aparece em “Identification”?">
+        <p class="fw-semibold mb-2">O que identifica uma aplicação que usa a rede na Internet?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Não: :: só pode aparecer uma vez, senão não dá para saber quantos zeros cada um esconde|Sim, é a forma mais curta|Sim, desde que os dois blocos tenham o mesmo tamanho" data-answer="0" data-explain="Com dois ::, 2001::1::2 poderia ser 2001:0:1:0:0:0:0:2 ou 2001:0:0:0:1:0:0:2, entre outros. Por isso só um é permitido." data-hint="Tente expandir o endereço de duas maneiras diferentes.">
+        <p class="fw-semibold mb-2">2001::1::2 é um endereço IPv6 válido?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>UDP: datagramas, sem confiabilidade, mas com detecção de erros. TCP: fluxo de bytes confiável.</li>
+        <li>Aplicação = endereço + protocolo + porta.</li>
+        <li>IPv4: 32 bits, decimal com pontos. IPv6: 128 bits, 8 grupos hexadecimais com dois-pontos e <code>::</code> para zeros.</li>
+    </ul>
+</section>
+
+<!-- 2. Mensagem DNS -->
+<section id="mensagem-dns" class="chapter-section" data-conceito="mensagem-dns" data-titulo="A mensagem DNS">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">A mensagem DNS</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No <a href="../capitulo-05/index.html">Capítulo 5</a> você viu a árvore de nomes e o caminho de uma
+        resolução. Falta ver o que vai dentro de cada pergunta e de cada resposta.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O protocolo DNS funciona tanto sobre datagramas quanto sobre fluxo de bytes. Na prática, consultas e
+        respostas curtas usam datagramas (UDP), e respostas longas usam fluxo de bytes (TCP). Toda mensagem DNS tem
+        cinco <strong>seções</strong> (<a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank" rel="noopener noreferrer">RFC 1035</a>,
+        pág. 134–135 do PDF):
+    </p>
+    <ol>
+        <li><strong>Header</strong> (cabeçalho): o tipo da mensagem e o tamanho das outras seções;</li>
+        <li><strong>Question</strong>: a pergunta feita ao servidor;</li>
+        <li><strong>Answer</strong>: a resposta (vazia numa consulta);</li>
+        <li><strong>Authority</strong>: servidores que podem dar uma resposta com autoridade;</li>
+        <li><strong>Additional</strong>: informação extra, não pedida, mas útil.</li>
+    </ol>
+    <p>As três primeiras são obrigatórias. O cabeçalho tem 12 bytes (Fig. 3 do livro, pág. 135 do PDF):</p>
+    <pre class="log mb-3" aria-label="Cabeçalho DNS em seis linhas de 16 bits">                                1  1  1  1  1  1
+  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|                      ID                       |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|                    QDCOUNT                    |
+|                    ANCOUNT                    |
+|                    NSCOUNT                    |
+|                    ARCOUNT                    |
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+</pre>
+    <ul>
+        <li><strong>ID</strong> (<em>Transaction ID</em>): 16 bits aleatórios escolhidos pelo cliente. O servidor
+            devolve o mesmo valor, e o cliente casa a resposta com a pergunta.</li>
+        <li><strong>QR</strong>: 0 na consulta, 1 na resposta. <strong>Opcode</strong>: o tipo de consulta (padrão,
+            atualização…).</li>
+        <li><strong>AA</strong>: a resposta vem de um servidor com <strong>autoridade</strong> sobre o nome, mantido
+            pelos administradores do domínio. Servidores sem autoridade guardam informação de outros domínios e podem
+            estar desatualizados. O bit AA não garante que a resposta é verdadeira: isso só veio com as assinaturas do
+            DNSSEC (<a href="https://www.rfc-editor.org/rfc/rfc4033" target="_blank" rel="noopener noreferrer">RFC 4033</a>),
+            assunto do Capítulo 11.</li>
+        <li><strong>RD</strong> (<em>recursion desired</em>): o cliente pede que o resolvedor percorra a hierarquia por
+            ele. <strong>RA</strong>: o servidor oferece recursão. Resolvedores abertos a qualquer host correm riscos,
+            como a sobrecarga; a maioria só aceita consultas recursivas da própria rede.</li>
+        <li><strong>RCODE</strong>: o código de erro. Os quatro últimos campos contam os registros das outras seções.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro não explica o bit <strong>TC</strong> (<em>truncated</em>). Ele avisa que a resposta não coube no
+        datagrama e foi cortada; o cliente repete a consulta sobre TCP. É assim que o DNS usa o fluxo de bytes para
+        as respostas longas (<a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank" rel="noopener noreferrer">RFC 1035</a>,
+        seção 4.2.1, e <a href="https://www.rfc-editor.org/rfc/rfc7766" target="_blank" rel="noopener noreferrer">RFC 7766</a>).
+        O Opcode 5, de atualização, é definido na <a href="https://www.rfc-editor.org/rfc/rfc2136" target="_blank" rel="noopener noreferrer">RFC 2136</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="cabecalho-dns"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Para casar cada resposta com a pergunta que a originou|Para cifrar a consulta|Para indicar a porta do servidor" data-answer="0" data-explain="O cliente lembra a pergunta e o ID que escolheu; a resposta traz o mesmo ID (pág. 135 do PDF)." data-hint="Pense num cliente com várias consultas pendentes ao mesmo tempo.">
+        <p class="fw-semibold mb-2">Para que serve o Transaction ID?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Não: o bit AA só diz que o servidor afirma ter autoridade; a validade exige DNSSEC|Sim: um servidor com autoridade nunca erra|Sim, desde que RA também esteja ligado" data-answer="0" data-explain="Do ponto de vista da segurança, o bit AA não é uma indicação absoluta de validade (pág. 135 do PDF)." data-hint="Quem impede um atacante de ligar o bit AA numa resposta falsa?">
+        <p class="fw-semibold mb-2">Uma resposta com o bit AA ligado é garantidamente correta?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cinco seções: Header, Question, Answer, Authority, Additional.</li>
+        <li>Cabeçalho de 12 bytes: ID, flags (QR, Opcode, AA, TC, RD, RA, RCODE) e quatro contadores.</li>
+        <li>Consultas curtas vão por UDP; respostas longas, por TCP.</li>
+    </ul>
+</section>
+
+<!-- 3. Registros e TTL -->
+<section id="registros" class="chapter-section" data-conceito="registros" data-titulo="Registros e TTL">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Registros de recurso e TTL</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Uma resposta DNS carrega mais do que um endereço: diz por quanto tempo ele vale, quem cuida do domínio e
+        como chegar a esses servidores. Tudo isso vem em registros de um formato só.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        As quatro últimas seções carregam <strong>Resource Records</strong> (RR), todos com os mesmos campos
+        (Fig. 4, pág. 136 do PDF):
+    </p>
+    <ul>
+        <li><strong>Name</strong>: o nome a que o registro se refere;</li>
+        <li><strong>Type</strong> (2 bytes): o tipo do registro;</li>
+        <li><strong>Class</strong>: criado para usar o DNS fora da Internet; a classe <strong>IN</strong> é a da Internet;</li>
+        <li><strong>TTL</strong>: por quantos segundos um cliente ou resolvedor pode guardar o registro em cache;</li>
+        <li><strong>RDLength</strong> e <strong>RData</strong>: o tamanho e o conteúdo, cujo formato depende do tipo.</li>
+    </ul>
+    <p>Os tipos mais comuns (pág. 136 do PDF):</p>
+    <ul>
+        <li><strong>A</strong>: o endereço IPv4 do nome. <strong>AAAA</strong>: o endereço IPv6.</li>
+        <li><strong>NS</strong>: o nome de um servidor DNS responsável pelo domínio.</li>
+        <li><strong>CNAME</strong>: um apelido. www.example.com pode ser um CNAME de pc12.example.com, o nome do
+            computador que roda o servidor web.</li>
+    </ul>
+    <p>
+        Um <strong>TTL longo</strong> indica um registro estável. Algumas empresas usam <strong>TTL curto</strong> de
+        propósito: uma hospedagem com cem servidores pode dar respostas diferentes a clientes diferentes, sempre
+        apontando o servidor menos carregado. Com TTL pequeno, os clientes precisam perguntar de novo com
+        frequência, e cada nova pergunta pode ser mandada a outro servidor (pág. 136 do PDF).
+    </p>
+    <p>
+        A Fig. 5 do livro mostra a resposta real a uma consulta AAAA por www.ietf.org, de 2013 (pág. 137 do PDF).
+        Trecho:
+    </p>
+    <pre class="log mb-3">;; ->>HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 55279
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 6, ADDITIONAL: 11
+;; ANSWER SECTION:
+www.ietf.org.          1661   IN   AAAA   2001:1890:123a::1:1e
+;; AUTHORITY SECTION:
+ietf.org.              1661   IN   NS     ns1.hkg1.afilias-nst.info.
+ietf.org.              1661   IN   NS     ns0.amsl.com.
+                       … (mais 4 servidores NS)
+;; ADDITIONAL SECTION:
+ns0.amsl.com.        148523   IN   A      64.170.98.2
+ns0.amsl.com.        148523   IN   AAAA   2001:1890:126c::1:2
+                       … (endereços A e AAAA dos outros servidores)</pre>
+    <p>
+        O DNS também é <strong>extensível</strong>: graças aos campos Type e RDLength, um programa que recebe um tipo
+        de registro que não conhece pode pulá-lo e continuar lendo o resto da mensagem. Foi isso que permitiu ao DNS
+        evoluir mantendo a compatibilidade com as implementações antigas (pág. 137 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="cache-ttl"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="1661 segundos, pouco menos de meia hora|148523 segundos|Para sempre, até o servidor mudar o endereço" data-answer="0" data-explain="O TTL do registro AAAA na seção Answer é 1661 s. Depois disso, o resolvedor tem de perguntar de novo." data-hint="Procure o TTL na linha da seção ANSWER.">
+        <p class="fw-semibold mb-2">Na resposta da Fig. 5, por quanto tempo um resolvedor pode guardar o endereço de www.ietf.org?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Seis|Um|Onze" data-answer="0" data-explain="AUTHORITY: 6. Os onze registros da seção Additional são os endereços desses servidores (pág. 136–137 do PDF)." data-hint="Olhe o contador AUTHORITY.">
+        <p class="fw-semibold mb-2">Quantos servidores de nomes cuidam do domínio ietf.org, segundo a Fig. 5?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Mais consultas chegam ao servidor autoritativo|O cache dos resolvedores fica mais eficiente|O endereço deixa de poder mudar" data-answer="0" data-explain="Com TTL curto, as entradas expiram logo, e os resolvedores voltam a perguntar. É o preço do controle fino sobre a distribuição da carga." data-hint="Use a simulação com TTL de 30 s e conte as faltas no cache.">
+        <p class="fw-semibold mb-2">Qual é o custo de usar um TTL bem curto?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>RR: Name, Type, Class, TTL, RDLength, RData.</li>
+        <li>A (IPv4), AAAA (IPv6), NS (servidor do domínio), CNAME (apelido).</li>
+        <li>TTL longo: registro estável. TTL curto: mais consultas, mais controle (distribuição de carga).</li>
+    </ul>
+</section>
+
+<!-- 4. DNS reverso -->
+<section id="reverso" class="chapter-section" data-conceito="reverso" data-titulo="DNS reverso">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">DNS reverso</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O registro de um servidor de e-mail mostra que a conexão veio de 192.0.2.11. Qual é o nome desse computador?
+        A pergunta agora vai do endereço para o nome.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Para isso existe o registro <strong>PTR</strong> (<em>pointer</em>): o RData traz o nome, e o Name traz o
+        endereço codificado num domínio especial (pág. 137 do PDF).
+    </p>
+    <ul>
+        <li><strong>IPv4:</strong> os 4 números do endereço aparecem em ordem inversa, seguidos de
+            <code>in-addr.arpa</code>. Para 192.0.2.11, pergunta-se o PTR de <code>11.2.0.192.in-addr.arpa</code>.</li>
+        <li><strong>IPv6</strong> (<a href="https://www.rfc-editor.org/rfc/rfc3596" target="_blank" rel="noopener noreferrer">RFC 3596</a>):
+            cada <strong>nibble</strong> (4 bits, um dígito hexadecimal) vira um rótulo, do menos significativo ao mais
+            significativo, seguidos de <code>ip6.arpa</code>. Para 2001:1890:123a::1:1e:<br>
+            <code class="small">e.1.0.0.1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.a.3.2.1.0.9.8.1.1.0.0.2.ip6.arpa</code></li>
+    </ul>
+    <p>Na prática, as ferramentas fazem essa conversão sozinhas.</p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o IPv4 é codificado "invertendo os quatro dígitos" (<em>four digits</em>) da notação decimal
+        (pág. 137 do PDF). São os quatro <strong>números</strong> (os 4 bytes), e não dígitos: em 192.0.2.11, os
+        dígitos invertidos dariam outra coisa. O exemplo do livro, 11.2.0.192.in-addr.arpa, está correto.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Por que inverter? Os nomes do DNS vão do mais específico (à esquerda) para o mais geral (à direita), e os
+        endereços, ao contrário. Invertendo, cada byte (ou nibble) vira um nível da árvore, e quem administra um bloco
+        de endereços pode receber a delegação da subárvore correspondente.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="nome-reverso"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="34|32|8" data-answer="0" data-explain="32 nibbles (128 / 4) mais os rótulos ip6 e arpa." data-hint="Quantos dígitos hexadecimais tem um endereço de 128 bits?">
+        <p class="fw-semibold mb-2">Quantos rótulos (partes separadas por pontos) tem um nome do DNS reverso IPv6, contando ip6 e arpa?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>PTR: do endereço para o nome.</li>
+        <li>IPv4: bytes invertidos + in-addr.arpa. IPv6: nibbles invertidos + ip6.arpa.</li>
+    </ul>
+</section>
+
+<!-- 5. Formato do e-mail -->
+<section id="formato-email" class="chapter-section" data-conceito="formato-email" data-titulo="Formato do e-mail">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">O formato das mensagens de e-mail</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Alice escreve para Bob num cliente de e-mail; o servidor de Alice descobre o servidor de Bob e entrega a
+        mensagem; Bob a lê no seu cliente ou no webmail (Fig. 6, pág. 138 do PDF). Antes de ver os protocolos, o
+        livro define o que é uma mensagem válida.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>O sistema de e-mail tem quatro componentes (pág. 138 do PDF):</p>
+    <ul>
+        <li>um <strong>formato de mensagem</strong>;</li>
+        <li><strong>protocolos</strong> para hosts e servidores trocarem mensagens;</li>
+        <li><strong>clientes</strong> para criar e ler mensagens;</li>
+        <li><strong>software de servidor</strong> para trocar mensagens com eficiência.</li>
+    </ul>
+    <p>
+        Como uma carta, a mensagem tem um <strong>cabeçalho</strong> (metadados) e um <strong>corpo</strong>. Ela é
+        feita só de linhas de caracteres ASCII, cada uma com até 998 caracteres e terminada por CR LF
+        (<a href="https://www.rfc-editor.org/rfc/rfc5322" target="_blank" rel="noopener noreferrer">RFC 5322</a>).
+        Uma <strong>linha vazia</strong> separa o cabeçalho do corpo. Cada linha do cabeçalho começa com uma palavra-chave
+        seguida de dois-pontos:
+    </p>
+    <ul>
+        <li><strong>From:</strong> e <strong>Date:</strong> são obrigatórias. O endereço tem a forma usuário@domínio.</li>
+        <li><strong>Subject:</strong> o assunto.</li>
+        <li><strong>To:</strong> os destinatários principais; <strong>cc:</strong> quem recebe cópia; os dois são
+            vistos por todos. <strong>bcc:</strong> cópia oculta: essa linha não é entregue aos destinatários. Nem o
+            To: é obrigatório: uma mensagem só com bcc: é válida.</li>
+        <li><strong>Message-Id:</strong> um identificador único, na forma texto@domínio; <strong>In-reply-to:</strong>
+            o identificador da mensagem respondida.</li>
+        <li><strong>Received:</strong> cada servidor que processa a mensagem acrescenta uma linha. Elas servem para
+            depurar problemas de entrega (pág. 139–140 do PDF).</li>
+    </ul>
+    <pre class="log mb-3">From: Bob Smith &lt;Bob@machine.example>
+To: Alice Doe &lt;alice@example.net>, Alice Smith &lt;Alice@machine.example>
+Subject: Hello
+Date: Mon, 8 Mar 2010 19:55:06 -0600
+
+This is the "Hello world" of email messages.
+This is the second line of the body</pre>
+    <p class="small text-muted">Exemplo do livro (pág. 139 do PDF). Repare na linha vazia depois de Date:.</p>
+    <p>
+        Cada servidor acrescenta a sua linha Received: no <strong>topo</strong> do cabeçalho. Lidas de baixo para
+        cima, elas contam o caminho da mensagem. O livro mostra um cabeçalho real de 2010, de uma mensagem que saiu
+        de wira.firstpr.com.au, na Austrália, e chegou a smtp3.sgsi.ucl.ac.be, na Bélgica.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="rastreia-received"></div>
+    <p class="small text-muted">
+        Linhas Received: do livro (pág. 140 do PDF), resumidas. Uma delas é de um filtro de conteúdo
+        (amavisd-new) que roda no próprio core3.amsl.com; por isso aparecem saltos de "localhost".
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Os de To: e cc:, mas não os de bcc:|Todos, inclusive os de bcc:|Só os de To:" data-answer="0" data-explain="A linha bcc: não é entregue aos destinatários; To: e cc: são vistas por todos (pág. 139 do PDF)." data-hint="O que significa cópia oculta?">
+        <p class="fw-semibold mb-2">Quais destinatários aparecem para quem recebe a mensagem?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="A primeira linha vazia|A linha Subject:|A primeira linha que começa com espaço" data-answer="0" data-explain="Uma linha só com CR LF marca o fim do cabeçalho (pág. 138 do PDF)." data-hint="Releia o exemplo do livro.">
+        <p class="fw-semibold mb-2">O que separa o cabeçalho do corpo de uma mensagem?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Mensagem = cabeçalho + linha vazia + corpo, tudo em linhas ASCII de até 998 caracteres.</li>
+        <li>From: e Date: são obrigatórias; bcc: não chega aos destinatários.</li>
+        <li>Received: é acrescentada no topo por cada servidor: de baixo para cima, o caminho.</li>
+    </ul>
+</section>
+
+<!-- 6. MIME -->
+<section id="mime" class="chapter-section" data-conceito="mime" data-titulo="MIME">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">MIME: além do texto ASCII</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Só ASCII virou um problema: quem não escreve em inglês precisa de acentos e outros alfabetos, e todo mundo quer
+        mandar imagens, arquivos e áudio. Mas os servidores de e-mail já instalados não podiam quebrar.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A IETF criou as <strong>Multipurpose Internet Mail Extensions</strong> (MIME) como extensões do formato antigo
+        (RFC 822), em vez de um formato novo, para manter a compatibilidade. A
+        <a href="https://www.rfc-editor.org/rfc/rfc2045" target="_blank" rel="noopener noreferrer">RFC 2045</a>
+        define três linhas de cabeçalho (pág. 140–141 do PDF):
+    </p>
+    <ul>
+        <li><strong>MIME-Version:</strong> a versão (1.0). Sem ela, a mensagem segue o formato original.</li>
+        <li><strong>Content-Type:</strong> o tipo de dado, na forma tipo/subtipo.</li>
+        <li><strong>Content-Transfer-Encoding:</strong> como a parte foi codificada para passar por servidores que só
+            aceitam ASCII de 7 bits.</li>
+    </ul>
+    <p>
+        Duas estruturas são as mais comuns (<a href="https://www.rfc-editor.org/rfc/rfc2046" target="_blank" rel="noopener noreferrer">RFC 2046</a>):
+        <strong>multipart/mixed</strong>, com partes independentes (um texto e um arquivo), e
+        <strong>multipart/alternative</strong>, com várias versões da mesma informação (texto simples e HTML).
+    </p>
+    <p>
+        Como separar as partes? Uma linha vazia não serve, porque o corpo tem muitas. Uma linha fixa, como
+        <code>*-LAST_LINE-*</code>, também não, porque pode aparecer no próprio texto (por exemplo, num e-mail que
+        explica o formato MIME). A solução é o parâmetro <strong>boundary</strong> do Content-Type: o remetente
+        escolhe a fronteira, em geral ao acaso, e cada parte começa com uma linha <code>--fronteira</code>
+        (pág. 141 do PDF).
+    </p>
+    <pre class="log mb-3">MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="simple boundary"
+
+preamble, to be ignored
+
+--simple boundary
+Content-Type: text/plain; charset=us-ascii
+
+First part
+
+--simple boundary
+Content-Type: text/plain; charset=us-ascii
+
+Second part
+--simple boundary--</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        No exemplo do livro (pág. 141 do PDF), a mensagem termina com <code>--simple boundary</code>. A
+        <a href="https://www.rfc-editor.org/rfc/rfc2046#section-5.1.1" target="_blank" rel="noopener noreferrer">RFC 2046</a>
+        exige que a última fronteira tenha dois hífens também no fim, <code>--simple boundary--</code>, para marcar que
+        não há mais partes; o exemplo acima já está corrigido. O livro também cita <code>charset=UTF8</code>; o nome
+        registrado na IANA é <code>UTF-8</code>.
+    </p>
+    <p>
+        Cada parte também tem o seu Content-Type. Tipos comuns: <strong>text</strong> (text/plain, text/html, com o
+        parâmetro charset), <strong>image</strong> (gif, jpg, png), <strong>audio</strong>, <strong>video</strong> e
+        <strong>application</strong>, para dados de um programa específico (pág. 141–142 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Do ASCII ao Unicode</strong> (pág. 142 do PDF). Cada fabricante tinha o seu conjunto de caracteres até
+        o ASCII de 7 bits (<a href="https://www.rfc-editor.org/rfc/rfc20" target="_blank" rel="noopener noreferrer">RFC 20</a>)
+        ser adotado. Para as línguas europeias, vieram os conjuntos ISO-8859, de 8 bits, que não bastam para as
+        línguas asiáticas. O <strong>Unicode</strong>, proposto no fim dos anos 1980, cobre todas as línguas escritas
+        e foi adotado pela maioria dos fabricantes. A passagem para Unicode também chegou ao e-mail
+        (<a href="https://www.rfc-editor.org/rfc/rfc4952" target="_blank" rel="noopener noreferrer">RFC 4952</a>) e aos nomes de
+        domínio, como você viu no <a href="../capitulo-05/index.html">Capítulo 5</a>.
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="monta-mime"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="multipart/alternative|multipart/mixed|text/plain" data-answer="0" data-explain="As duas partes são versões da mesma informação; o cliente mostra a melhor que souber exibir." data-hint="As partes trazem informações diferentes ou a mesma informação?">
+        <p class="fw-semibold mb-2">Um e-mail traz o mesmo texto em texto simples e em HTML. Qual Content-Type?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Para que a fronteira não apareça por acaso dentro de uma das partes|Para cifrar a mensagem|Para economizar bytes" data-answer="0" data-explain="Se a linha de fronteira aparecer no conteúdo, o destinatário corta a mensagem no lugar errado." data-hint="Faça o teste na simulação com a fronteira “simple boundary”.">
+        <p class="fw-semibold mb-2">Por que os clientes de e-mail costumam sortear a fronteira?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>MIME-Version, Content-Type e Content-Transfer-Encoding.</li>
+        <li>mixed: partes independentes. alternative: versões da mesma informação.</li>
+        <li>A fronteira separa as partes e fecha com <code>--fronteira--</code>.</li>
+    </ul>
+</section>
+
+<!-- 7. Base64 -->
+<section id="base64" class="chapter-section" data-conceito="base64" data-titulo="Base64">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Base64</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Uma foto é uma sequência de bytes quaisquer, inclusive bytes que não são caracteres ASCII imprimíveis. Como
+        fazê-la passar por servidores que só aceitam linhas de texto?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O Content-Transfer-Encoding diz como cada parte foi codificada. O padrão é ASCII de 7 bits; as codificações
+        mais usadas são <strong>quoted-printable</strong> e <strong>Base64</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc4648" target="_blank" rel="noopener noreferrer">RFC 4648</a>,
+        pág. 142–143 do PDF). O Base64:
+    </p>
+    <ol>
+        <li>divide os bytes em grupos de <strong>3 bytes</strong> (24 bits);</li>
+        <li>divide cada grupo em <strong>4 campos de 6 bits</strong>;</li>
+        <li>troca cada campo (0 a 63) por um caractere: A–Z (0–25), a–z (26–51), 0–9 (52–61), + (62) e / (63).</li>
+    </ol>
+    <p>O exemplo do livro, tirado da RFC 4648:</p>
+    <pre class="log mb-3">Entrada   0x14fb9c03d97e
+8 bits    00010100 11111011 10011100 00000011 11011001 01111110
+6 bits    000101 001111 101110 011100 000000 111101 100101 111110
+Decimal   5 15 46 28 0 61 37 62
+Base64    FPucA9l+</pre>
+    <p>
+        Se o número de bytes não é múltiplo de 3, o último grupo tem 1 ou 2 bytes: completa-se o último campo de 6
+        bits com zeros e usa-se o caractere de enchimento <strong>=</strong>, uma vez quando o grupo tem 2 bytes e
+        duas vezes quando tem 1 byte:
+    </p>
+    <pre class="log mb-3">Entrada 0x14     8 bits 00010100            6 bits 000101 000000         Decimal 5 0      Base64 FA==
+Entrada 0x14fb   8 bits 00010100 11111011   6 bits 000101 001111 101100  Decimal 5 15 44  Base64 FPs=</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Os dois exemplos com enchimento têm erros de impressão no livro (pág. 143 do PDF). No primeiro, a linha decimal
+        aparece como "50", em vez de "5 0" (dois valores). No segundo, a entrada aparece como 0x14b9, mas os bits
+        mostrados, 00010100 11111011, são de 0x14fb, e é 0x14fb que dá FPs=. Codificado, 0x14b9 daria FLk=. Os
+        valores acima já estão corrigidos.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O preço da codificação: cada 3 bytes viram 4 caracteres, um aumento de cerca de 33% (mais as quebras de linha
+        que o MIME exige a cada 76 caracteres, segundo a RFC 2045).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="base64-bits"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Um|Dois|Nenhum" data-answer="0" data-explain="5 bytes = um grupo de 3 e um de 2; o grupo de 2 bytes gera 3 caracteres e um =." data-hint="Divida 5 por 3 e veja quantos bytes sobram.">
+        <p class="fw-semibold mb-2">Quantos caracteres = aparecem ao codificar 5 bytes?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="8|6|12" data-answer="0" data-explain="6 bytes = 2 grupos de 3 = 2 × 4 = 8 caracteres, como em FPucA9l+." data-hint="Cada grupo de 3 bytes vira 4 caracteres.">
+        <p class="fw-semibold mb-2">Quantos caracteres tem a codificação Base64 de 6 bytes?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>3 bytes → 4 campos de 6 bits → 4 caracteres de uma tabela de 64.</li>
+        <li>Grupo incompleto: zeros no último campo e = como enchimento.</li>
+    </ul>
+</section>
+
+<!-- 8. MX -->
+<section id="mx" class="chapter-section" data-conceito="mx" data-titulo="Registros MX">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">Entrega: os registros MX</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A mensagem de Alice está pronta e endereçada a bob@b.net. O servidor de Alice sabe o domínio de Bob, mas não
+        o nome do servidor que guarda a caixa dele.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O cliente de Alice entrega a mensagem ao servidor SMTP configurado para o domínio dela. Esse servidor consulta
+        os registros <strong>MX</strong> (<em>Mail eXchange</em>) do domínio do destinatário no DNS. Cada registro MX
+        traz uma <strong>preferência numérica</strong> e o nome completo de um servidor SMTP capaz de receber as
+        mensagens do domínio (Fig. 8, pág. 143–144 do PDF):
+    </p>
+    <ul>
+        <li>o servidor com a <strong>menor</strong> preferência numérica é tentado primeiro;</li>
+        <li>se ele não responde, tenta-se o segundo, e assim por diante;</li>
+        <li>o servidor de Bob guarda a mensagem até que Bob a busque, pelo webmail ou por protocolos como POP e IMAP.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro cita a RFC 2821, que foi substituída pela
+        <a href="https://www.rfc-editor.org/rfc/rfc5321#section-5.1" target="_blank" rel="noopener noreferrer">RFC 5321</a>
+        (seção 5.1). Ela acrescenta dois detalhes: entre servidores com a mesma preferência, o remetente sorteia a ordem,
+        o que distribui a carga; e, se nenhum responde, a mensagem fica na fila e o remetente tenta de novo por alguns
+        dias antes de desistir e avisar quem a enviou (seção 4.5.4.1).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="mx-preferencia"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="mail.b.net (preferência 5)|backup.b.net (preferência 50)|O que responder mais rápido" data-answer="0" data-explain="Menor número = maior preferência (pág. 144 do PDF)." data-hint="A menor preferência numérica é usada primeiro.">
+        <p class="fw-semibold mb-2">O domínio b.net tem os registros MX “50 backup.b.net” e “5 mail.b.net”. Qual servidor é tentado primeiro?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>O remetente descobre o servidor do destinatário pelos registros MX do domínio.</li>
+        <li>Menor preferência numérica primeiro; os outros são reservas.</li>
+    </ul>
+</section>
+
+<!-- 9. SMTP -->
+<section id="smtp" class="chapter-section" data-conceito="smtp" data-titulo="SMTP">
+    <span class="kicker">Conceito 9</span>
+    <h2 class="section-title">O protocolo SMTP</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Entre o cliente de Alice e o servidor dela, e entre os dois servidores, a mensagem viaja pelo mesmo
+        protocolo de texto. É um bom exemplo de protocolo da camada de aplicação, no estilo que você viu no
+        <a href="../capitulo-03/index.html">Capítulo 3</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Simple Mail Transfer Protocol</strong> (<a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener noreferrer">RFC 5321</a>)
+        é cliente-servidor. A especificação distingue cinco tipos de processo (pág. 144 do PDF):
+    </p>
+    <ul>
+        <li><strong>MUA</strong> (<em>Mail User Agent</em>): o cliente de e-mail ou o webmail, onde a mensagem é escrita;</li>
+        <li><strong>MSA</strong> (<em>Submission</em>): recebe a mensagem do MUA;</li>
+        <li><strong>MTA</strong> (<em>Transmission</em>): transmite a mensagem, direto ou por MTAs intermediários, até o MTA do domínio de destino;</li>
+        <li><strong>MDA</strong> (<em>Delivery</em>): guarda a mensagem para o MUA do destinatário.</li>
+    </ul>
+    <p>
+        O SMTP é usado entre MUA e MSA, entre MSA e MTA e entre MTAs. Ele roda sobre o fluxo de bytes (TCP), e os
+        servidores escutam na <strong>porta 25</strong>. Cada comando é uma linha ASCII terminada por CR LF; cada
+        resposta tem um <strong>código de três dígitos</strong> e um comentário opcional. Os cinco comandos principais
+        são EHLO, MAIL FROM:, RCPT TO:, DATA e QUIT (Fig. 9, pág. 144–145 do PDF).
+    </p>
+    <p>O primeiro dígito da resposta diz o resultado (pág. 145 do PDF):</p>
+    <ul>
+        <li><strong>2xy</strong>: comando aceito;</li>
+        <li><strong>3xy</strong>: aceito, mas o servidor espera mais informação (por exemplo, 354 depois de DATA);</li>
+        <li><strong>4xy</strong>: falha <strong>temporária</strong>: tente de novo mais tarde (421, 450, 452);</li>
+        <li><strong>5xy</strong>: falha <strong>permanente</strong>: não adianta repetir (500 a 503 para erros nos comandos; 550 para caixa inexistente).</li>
+    </ul>
+    <p>
+        A gramática da Fig. 10 do livro define o código como <code>%x32-35 %x30-35 %x30-39</code>: primeiro dígito
+        de 2 a 5, segundo de 0 a 5, terceiro de 0 a 9. FTP e HTTP usam uma estrutura parecida. A transferência tem três
+        fases: abrir a conexão e trocar saudações (EHLO); transferir uma ou mais mensagens (MAIL FROM:, RCPT TO:,
+        DATA); encerrar (QUIT). O exemplo do livro (pág. 146 do PDF):
+    </p>
+    <pre class="log mb-3">S: 220 smtp.example.com ESMTP MTA information
+C: EHLO mta.example.org
+S: 250 Hello mta.example.org, glad to meet you
+C: MAIL FROM:&lt;alice@example.org>
+S: 250 Ok
+C: RCPT TO:&lt;bob@example.com>
+S: 250 Ok
+C: DATA
+S: 354 End data with &lt;CR>&lt;LF>.&lt;CR>&lt;LF>
+C: From: "Alice Doe" &lt;alice@example.org>
+C: To: Bob Smith &lt;bob@example.com>
+C: Date: Mon, 9 Mar 2010 18:22:32 +0100
+C: Subject: Hello
+C:
+C: Hello Bob
+C: This is a small message containing 4 lines of text.
+C: Best regards,
+C: Alice
+C: .
+S: 250 Ok: queued as 12345
+C: QUIT
+S: 221 Bye</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Ao comentar esse exemplo, o livro diz que o cliente primeiro informa o destinatário com RCPT TO: e depois usa
+        MAIL FROM: (pág. 146 do PDF). A ordem é a contrária, como no próprio exemplo e na RFC 5321: primeiro
+        <strong>MAIL FROM:</strong>, depois um ou mais <strong>RCPT TO:</strong>, depois DATA. Na ordem errada, o
+        servidor responde 503 (<em>Bad sequence of commands</em>).
+    </p>
+    <p>
+        O fim da mensagem é uma linha só com um ponto. O livro conclui que uma mensagem não pode ter uma linha com um
+        ponto sozinho e que o cliente acrescenta um espaço antes ou depois dele (nota de rodapé, pág. 146 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O mecanismo do SMTP é outro: o <strong>dot-stuffing</strong>. Antes de enviar, o cliente acrescenta um ponto a
+        mais no começo de toda linha que comece com ponto; o servidor tira esse ponto extra ao receber. Assim, a mensagem
+        pode conter uma linha com um ponto sozinho, e ela chega intacta
+        (<a href="https://www.rfc-editor.org/rfc/rfc5321#section-4.5.2" target="_blank" rel="noopener noreferrer">RFC 5321, seção 4.5.2</a>).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Relays abertos e spam</strong> (pág. 146–147 do PDF). No começo, qualquer um podia usar qualquer servidor
+        SMTP para encaminhar mensagens. O primeiro abuso comercial documentado foi em 1978, na ARPANET. Com o custo
+        quase nulo de mandar e-mails, o spam cresceu (um estudo da ENISA de 2009 estimou 95% das mensagens), e os
+        servidores deixaram de ser abertos (<a href="https://www.rfc-editor.org/rfc/rfc5068" target="_blank" rel="noopener noreferrer">RFC 5068</a>).
+        Extensões como a autenticação SMTP (<a href="https://www.rfc-editor.org/rfc/rfc4954" target="_blank" rel="noopener noreferrer">RFC 4954</a>)
+        exigem que o MUA se identifique antes de o MSA aceitar a mensagem.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Hoje os clientes entregam mensagens ao MSA na porta 587 (<a href="https://www.rfc-editor.org/rfc/rfc6409" target="_blank" rel="noopener noreferrer">RFC 6409</a>),
+        com autenticação; a porta 25 ficou para a conversa entre servidores. Para autenticar o domínio de origem, as
+        técnicas que o livro cita evoluíram para SPF (<a href="https://www.rfc-editor.org/rfc/rfc7208" target="_blank" rel="noopener noreferrer">RFC 7208</a>),
+        DKIM (<a href="https://www.rfc-editor.org/rfc/rfc6376" target="_blank" rel="noopener noreferrer">RFC 6376</a>) e
+        DMARC (<a href="https://www.rfc-editor.org/rfc/rfc7489" target="_blank" rel="noopener noreferrer">RFC 7489</a>).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="dialogo-smtp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Falha temporária: o cliente tenta de novo mais tarde|Falha permanente: o cliente desiste|Sucesso parcial" data-answer="0" data-explain="4xy é negativa transitória; 452 significa falta de espaço no servidor, que pode ser resolvida (pág. 145 do PDF)." data-hint="Qual é a diferença entre 4xy e 5xy?">
+        <p class="fw-semibold mb-2">O servidor responde 452 a um RCPT TO:. O que isso significa?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Sim: 2, 4 e 9 estão nas faixas da gramática|Não: o terceiro dígito vai só até 5|Não: o primeiro dígito vai só até 4" data-answer="0" data-explain="Primeiro dígito %x32-35 (2 a 5), segundo %x30-35 (0 a 5), terceiro %x30-39 (0 a 9)." data-hint="Confira cada dígito com a sua faixa.">
+        <p class="fw-semibold mb-2">Pela gramática da Fig. 10, “249” é um código de resposta válido?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Uma linha com um ponto sozinho|O comando QUIT|Uma linha vazia" data-answer="0" data-explain="Depois do 354, o cliente manda cabeçalho e corpo e termina com CR LF . CR LF (pág. 146 do PDF)." data-hint="Veja a resposta 354.">
+        <p class="fw-semibold mb-2">Como o cliente indica o fim da mensagem depois de DATA?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>MUA → MSA → MTA(s) → MDA; SMTP entre MUA, MSA e MTAs, sobre TCP, porta 25.</li>
+        <li>EHLO, MAIL FROM:, RCPT TO:, DATA, QUIT, nessa ordem.</li>
+        <li>Códigos: 2 aceito, 3 continue, 4 tente depois, 5 desista.</li>
+    </ul>
+</section>
+
+<!-- 10. POP -->
+<section id="pop" class="chapter-section" data-conceito="pop" data-titulo="POP">
+    <span class="kicker">Conceito 10</span>
+    <h2 class="section-title">Buscando o correio: POP</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nos primeiros minicomputadores, cada host tinha o seu servidor SMTP, e a mensagem era gravada direto num arquivo
+        do usuário. Com os computadores pessoais dos anos 1980, os usuários passaram a ler e-mail no próprio
+        computador, que nem sempre está ligado. Era preciso um protocolo para buscar as mensagens no servidor
+        (pág. 147 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Dois protocolos ficaram populares. O <strong>IMAP</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc3501" target="_blank" rel="noopener noreferrer">RFC 3501</a>)
+        mantém todas as mensagens no servidor, em pastas, e permite procurar, baixar, apagar e filtrar. O
+        <strong>Post Office Protocol</strong> (POP, <a href="https://www.rfc-editor.org/rfc/rfc1939" target="_blank" rel="noopener noreferrer">RFC 1939</a>),
+        mais simples, baixa as mensagens do usuário. É outro protocolo de linhas, sobre fluxo de bytes, na
+        <strong>porta 110</strong>. A sessão tem três fases (pág. 147–148 do PDF):
+    </p>
+    <ol>
+        <li><strong>Autorização:</strong> o servidor manda uma linha começando com +OK; o cliente envia USER e PASS.</li>
+        <li><strong>Transação:</strong> STAT (número de mensagens e tamanho total), LIST, RETR n (baixa a mensagem n),
+            DELE n (<strong>marca</strong> a mensagem n para apagar).</li>
+        <li><strong>Atualização:</strong> depois do QUIT, o servidor apaga as mensagens marcadas.</li>
+    </ol>
+    <p>As respostas começam com <strong>+OK</strong> ou <strong>-ERR</strong>. No exemplo do livro:</p>
+    <pre class="log mb-3">S: +OK POP3 server ready
+C: USER alice
+S: +OK
+C: PASS 12345pass
+S: +OK alice's maildrop has 2 messages (620 octets)
+C: STAT
+S: +OK 2 620
+C: RETR 1
+S: +OK 120 octets
+S: &lt;the POP3 server sends message 1>
+S: .
+C: DELE 1
+S: +OK message 1 deleted
+C: QUIT
+S: +OK POP3 server signing off (1 message left)</pre>
+    <p>
+        Repare que a senha de Alice vai <strong>em claro</strong>: quem capturar os pacotes, como a Eve do
+        <a href="../capitulo-08/index.html">Capítulo 8</a>, fica sabendo. A RFC 1939 define o esquema APOP, que não
+        tem esse problema (pág. 148 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O APOP usa MD5, hoje considerado fraco. A solução atual é cifrar a conexão inteira com TLS, nas portas 995
+        (POP3S) e 993 (IMAPS) (<a href="https://www.rfc-editor.org/rfc/rfc8314" target="_blank" rel="noopener noreferrer">RFC 8314</a>).
+        O TLS é assunto do Capítulo 11. A versão atual do IMAP é a
+        <a href="https://www.rfc-editor.org/rfc/rfc9051" target="_blank" rel="noopener noreferrer">RFC 9051</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="dialogo-pop"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Na fase de atualização, depois do QUIT|Assim que o servidor responde +OK ao DELE|Quando o cliente baixa a mensagem com RETR" data-answer="0" data-explain="DELE só marca a mensagem; o QUIT encerra a sessão e permite ao servidor apagar as marcadas (pág. 147 do PDF)." data-hint="Releia o que o livro diz sobre o comando QUIT.">
+        <p class="fw-semibold mb-2">Quando o servidor POP apaga de fato uma mensagem marcada com DELE?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="IMAP|POP|SMTP" data-answer="0" data-explain="O IMAP supõe que todas as mensagens ficam no servidor, em pastas, e oferece busca e filtro (pág. 147 do PDF)." data-hint="Qual dos dois foi projetado para acesso em tempo real a pastas no servidor?">
+        <p class="fw-semibold mb-2">Você lê seu e-mail no celular e no notebook e quer ver as mesmas pastas nos dois. Qual protocolo combina com isso?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>SMTP envia; POP e IMAP buscam.</li>
+        <li>POP: porta 110, fases de autorização, transação e atualização; +OK e -ERR.</li>
+        <li>DELE só marca; o QUIT efetiva. A senha do POP simples vai em claro.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap9" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> escreva na forma compacta 2001:0db8:0000:0000:0000:ff00:0042:8329 e na forma completa ff02::1.
+            <details><summary>Ver solução</summary><p class="mb-0">2001:db8::ff00:42:8329 e ff02:0000:0000:0000:0000:0000:0000:0001.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> codifique em Base64 o texto “Oi!” (bytes 0x4f 0x69 0x21).
+            <details><summary>Ver solução</summary><p class="mb-0">01001111 01101001 00100001 → 010011 110110 100100 100001 → 19 54 36 33 → T2kh. São 3 bytes, então não há enchimento.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> o cabeçalho de uma mensagem DNS é <code>ab cd 81 83 00 01 00 00 00 01 00 00</code>. É consulta ou resposta? O que aconteceu?
+            <details><summary>Ver solução</summary><p class="mb-0">Flags 0x8183 = 1000 0001 1000 0011: QR = 1 (resposta), RD = 1, RA = 1, RCODE = 3 (o nome não existe). Há 1 pergunta, nenhuma resposta e 1 registro na seção Authority.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> qual é o nome do DNS reverso de 203.0.113.56? E qual tipo de registro se pergunta?
+            <details><summary>Ver solução</summary><p class="mb-0">56.113.0.203.in-addr.arpa, tipo PTR.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> um cliente SMTP manda EHLO, RCPT TO:&lt;bob@example.com>, MAIL FROM:&lt;alice@example.org>, DATA. Quais respostas ele recebe?
+            <details><summary>Ver solução</summary><p class="mb-0">250 para o EHLO; 503 para o RCPT TO: (falta o remetente); 250 para o MAIL FROM:; 503 para o DATA, porque nenhum destinatário foi aceito.</p></details></li>
+        <li><strong>Desafio:</strong> uma empresa quer trocar o endereço do seu servidor web amanhã de manhã, sem que os clientes fiquem horas presos ao endereço antigo. Hoje o registro tem TTL de 86400 s. O que ela deve fazer, e quando?
+            <details><summary>Ver solução</summary><p class="mb-0">Reduzir o TTL (para 300 s, por exemplo) pelo menos 86400 s, um dia, antes da troca, para que todas as cópias antigas, com TTL longo, expirem. Na hora da troca, as cópias em cache duram no máximo 5 minutos. Depois, o TTL pode voltar a ser longo.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Cinco trechos em Python que rodam no navegador. Nenhum deles usa a rede: os dados são os exemplos do livro. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Endereços IPv6 e DNS reverso</h3>
+    <pre class="code-block"><code>import ipaddress
+
+enderecos = ["2001:db8:0:0:8:800:200c:417a", "ff01:0:0:0:0:0:0:101",
+             "0:0:0:0:0:0:0:1", "fe80:0:0:0:219:e3ff:fed7:1204"]
+for texto in enderecos:
+    ip = ipaddress.ip_address(texto)
+    print(f"{texto:30} -> {ip.compressed}")
+
+ip = ipaddress.ip_address("2001:1890:123a::1:1e")   # o exemplo do livro
+print("Completo:", ip.exploded)
+print("Reverso: ", ip.reverse_pointer)
+print("IPv4:    ", ipaddress.ip_address("192.0.2.11").reverse_pointer)</code></pre>
+
+    <h3 class="h6 mt-4">2. Montando e lendo o cabeçalho DNS</h3>
+    <pre class="code-block"><code>import struct
+
+def monta_cabecalho(ident, qr, opcode, aa, tc, rd, ra, rcode, qd, an, ns, ar):
+    flags = (qr &lt;&lt; 15) | (opcode &lt;&lt; 11) | (aa &lt;&lt; 10) | (tc &lt;&lt; 9) | (rd &lt;&lt; 8) | (ra &lt;&lt; 7) | rcode
+    return struct.pack("!HHHHHH", ident, flags, qd, an, ns, ar)   # 6 inteiros de 16 bits, big-endian
+
+def le_cabecalho(dados):
+    ident, flags, qd, an, ns, ar = struct.unpack("!HHHHHH", dados[:12])
+    return {"id": ident, "QR": flags >> 15, "Opcode": (flags >> 11) &amp; 0xF,
+            "AA": (flags >> 10) &amp; 1, "TC": (flags >> 9) &amp; 1, "RD": (flags >> 8) &amp; 1,
+            "RA": (flags >> 7) &amp; 1, "RCODE": flags &amp; 0xF, "contagens": (qd, an, ns, ar)}
+
+consulta = monta_cabecalho(55279, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0)
+print("Consulta:", consulta.hex(" "))
+resposta = monta_cabecalho(55279, 1, 0, 0, 0, 1, 1, 0, 1, 1, 6, 11)   # a resposta da Fig. 5
+print("Resposta:", resposta.hex(" "))
+print(le_cabecalho(resposta))</code></pre>
+
+    <h3 class="h6 mt-4">3. Base64 feito à mão</h3>
+    <pre class="code-block"><code>import base64
+
+TABELA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+
+def b64(dados):
+    saida = ""
+    for i in range(0, len(dados), 3):
+        grupo = dados[i:i + 3]
+        bits = "".join(f"{b:08b}" for b in grupo)
+        n = (len(bits) + 5) // 6              # sextetos com bits de verdade
+        bits = bits.ljust(n * 6, "0")          # completa o último sexteto com zeros
+        for k in range(n):
+            saida += TABELA[int(bits[6 * k:6 * k + 6], 2)]
+        saida += "=" * (4 - n)                 # enchimento até 4 caracteres
+    return saida
+
+for h in ["14fb9c03d97e", "14", "14fb"]:
+    dados = bytes.fromhex(h)
+    print(f"0x{h:12} -> {b64(dados):9} (módulo base64: {base64.b64encode(dados).decode()})")
+
+print(b64("Redes".encode()))</code></pre>
+
+    <h3 class="h6 mt-4">4. Lendo mensagens com o módulo email</h3>
+    <pre class="code-block"><code>from email import message_from_string
+
+texto = """From: Bob Smith &lt;Bob@machine.example>
+To: Alice Doe &lt;alice@example.net>, Alice Smith &lt;Alice@machine.example>
+Subject: Hello
+Date: Mon, 8 Mar 2010 19:55:06 -0600
+
+This is the "Hello world" of email messages.
+This is the second line of the body
+"""
+msg = message_from_string(texto)
+print("De:     ", msg["From"])
+print("Assunto:", msg["Subject"])
+print("Corpo:  ", msg.get_payload())
+
+mime = """MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="simple boundary"
+
+preamble, to be ignored
+
+--simple boundary
+Content-Type: text/plain; charset=us-ascii
+
+First part
+
+--simple boundary
+Content-Type: text/plain; charset=us-ascii
+
+Second part
+--simple boundary--
+"""
+m = message_from_string(mime)
+print("multipart?", m.is_multipart(), "| tipo:", m.get_content_type())
+for i, parte in enumerate(m.get_payload(), 1):
+    print(i, parte.get_content_type(), repr(parte.get_payload()))
+print("defeitos:", m.defects)</code></pre>
+
+    <h3 class="h6 mt-4">5. Um servidor SMTP de brinquedo</h3>
+    <pre class="code-block"><code>def servidor_smtp(comandos):
+    """Responde a uma lista de comandos como um servidor SMTP simplificado."""
+    respostas = ["S: 220 smtp.example.com ESMTP"]
+    estado = "inicio"
+    destinatarios = []
+    for cmd in comandos:
+        if cmd.startswith("EHLO") and estado == "inicio":
+            estado, r = "pronto", "250 Hello"
+        elif cmd.startswith("MAIL FROM:") and estado == "pronto":
+            estado, r = "remetente", "250 Ok"
+        elif cmd.startswith("RCPT TO:") and estado in ("remetente", "destinatario"):
+            if "ninguem@" in cmd:
+                r = "550 mailbox unavailable"
+            else:
+                estado, r = "destinatario", "250 Ok"
+                destinatarios.append(cmd[8:])
+        elif cmd == "DATA" and estado == "destinatario":
+            # simplificação: o 354 e o texto da mensagem foram omitidos
+            r = f"250 Ok: queued para {len(destinatarios)} destinatário(s)"
+            estado, destinatarios = "pronto", []
+        elif cmd == "QUIT":
+            r = "221 Bye"
+        else:
+            r = "503 Bad sequence of commands"
+        respostas.append(f"C: {cmd:30} S: {r}")
+    return respostas
+
+sessao = ["EHLO mta.example.org", "MAIL FROM:&lt;alice@example.org>",
+          "RCPT TO:&lt;bob@example.com>", "DATA", "QUIT"]
+for linha in servidor_smtp(sessao):
+    print(linha)</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seções 3.1 "The application layer", 3.2 "The Domain Name System" e 3.3 "Electronic mail" (pág. 133–148 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 1035 — <a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank" rel="noopener noreferrer">Domain Names: Implementation and Specification</a></li>
+        <li>RFC 3596 — <a href="https://www.rfc-editor.org/rfc/rfc3596" target="_blank" rel="noopener noreferrer">DNS Extensions to Support IP Version 6</a></li>
+        <li>RFC 5952 — <a href="https://www.rfc-editor.org/rfc/rfc5952" target="_blank" rel="noopener noreferrer">A Recommendation for IPv6 Address Text Representation</a> (complemento)</li>
+        <li>RFC 7766 — <a href="https://www.rfc-editor.org/rfc/rfc7766" target="_blank" rel="noopener noreferrer">DNS Transport over TCP</a> e RFC 2136 — <a href="https://www.rfc-editor.org/rfc/rfc2136" target="_blank" rel="noopener noreferrer">Dynamic Updates in the DNS</a> (complemento)</li>
+        <li>RFC 5322 — <a href="https://www.rfc-editor.org/rfc/rfc5322" target="_blank" rel="noopener noreferrer">Internet Message Format</a> e RFC 5598 — <a href="https://www.rfc-editor.org/rfc/rfc5598" target="_blank" rel="noopener noreferrer">Internet Mail Architecture</a></li>
+        <li>RFC 2045 — <a href="https://www.rfc-editor.org/rfc/rfc2045" target="_blank" rel="noopener noreferrer">MIME Part One</a> e RFC 2046 — <a href="https://www.rfc-editor.org/rfc/rfc2046" target="_blank" rel="noopener noreferrer">MIME Part Two: Media Types</a></li>
+        <li>RFC 4648 — <a href="https://www.rfc-editor.org/rfc/rfc4648" target="_blank" rel="noopener noreferrer">The Base16, Base32, and Base64 Data Encodings</a></li>
+        <li>RFC 5321 — <a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener noreferrer">Simple Mail Transfer Protocol</a> e RFC 6409 — <a href="https://www.rfc-editor.org/rfc/rfc6409" target="_blank" rel="noopener noreferrer">Message Submission for Mail</a> (complemento)</li>
+        <li>RFC 4954 — <a href="https://www.rfc-editor.org/rfc/rfc4954" target="_blank" rel="noopener noreferrer">SMTP Service Extension for Authentication</a> e RFC 5068 — <a href="https://www.rfc-editor.org/rfc/rfc5068" target="_blank" rel="noopener noreferrer">Email Submission Operations</a></li>
+        <li>RFC 7208 (SPF), RFC 6376 (DKIM) e RFC 7489 (DMARC) — <a href="https://www.rfc-editor.org/rfc/rfc7208" target="_blank" rel="noopener noreferrer">7208</a>, <a href="https://www.rfc-editor.org/rfc/rfc6376" target="_blank" rel="noopener noreferrer">6376</a>, <a href="https://www.rfc-editor.org/rfc/rfc7489" target="_blank" rel="noopener noreferrer">7489</a> (complemento)</li>
+        <li>RFC 1939 — <a href="https://www.rfc-editor.org/rfc/rfc1939" target="_blank" rel="noopener noreferrer">Post Office Protocol, Version 3</a>, RFC 3501 — <a href="https://www.rfc-editor.org/rfc/rfc3501" target="_blank" rel="noopener noreferrer">IMAP4rev1</a> e RFC 9051 — <a href="https://www.rfc-editor.org/rfc/rfc9051" target="_blank" rel="noopener noreferrer">IMAP4rev2</a></li>
+        <li>RFC 8314 — <a href="https://www.rfc-editor.org/rfc/rfc8314" target="_blank" rel="noopener noreferrer">Use of TLS for Email Submission and Access</a> (complemento)</li>
+        <li>IANA — <a href="https://www.iana.org/assignments/message-headers/message-headers.xhtml" target="_blank" rel="noopener noreferrer">Message Headers</a>, a lista de linhas de cabeçalho citada pelo livro</li>
+        <li>Google — <a href="https://www.google.com/intl/en/ipv6/statistics.html" target="_blank" rel="noopener noreferrer">IPv6 Adoption Statistics</a> (complemento)</li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Domain_Name_System" target="_blank" rel="noopener noreferrer">Domain Name System</a>, <a href="https://pt.wikipedia.org/wiki/MIME" target="_blank" rel="noopener noreferrer">MIME</a>, <a href="https://pt.wikipedia.org/wiki/Base64" target="_blank" rel="noopener noreferrer">Base64</a>, <a href="https://pt.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol" target="_blank" rel="noopener noreferrer">SMTP</a>, <a href="https://pt.wikipedia.org/wiki/Post_Office_Protocol" target="_blank" rel="noopener noreferrer">POP</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-08/index.html" class="text-muted text-decoration-none">← Capítulo 8</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 9</span>
+            <a href="../capitulo-10/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 10 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap9.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>
