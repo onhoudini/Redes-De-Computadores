@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 12 — UDP e TCP | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: o UDP e o seu checksum, o cabeçalho e as opções do TCP, abertura da conexão e SYN flood, transferência e algoritmo de Nagle, escala de janela, cálculo do rto, retransmissão rápida e SACK, e a liberação da conexão.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="12" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. DNS e correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. A web e as chamadas remotas</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Protocolos seguros</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-12/index.html">12. UDP e TCP</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 12 · Parte 2: Protocolos</span>
+        <h1 class="display-5 mb-3">UDP e TCP</h1>
+        <p class="lead mb-4">
+            No Capítulo 4 você montou, peça por peça, um protocolo de transporte confiável. Aqui estão os dois que a
+            Internet usa de verdade: o UDP, que acrescenta pouco mais que portas ao IP, e o TCP, que carrega mais de 90%
+            dos dados da Internet, com todos os detalhes que décadas de uso foram acrescentando.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#udp">1. UDP</a>
+                    <a class="nav-link" href="#tcp-cabecalho">2. Cabeçalho e opções do TCP</a>
+                    <a class="nav-link" href="#abertura">3. Abertura da conexão</a>
+                    <a class="nav-link" href="#transferencia">4. Transferência e Nagle</a>
+                    <a class="nav-link" href="#janelas">5. Janelas grandes</a>
+                    <a class="nav-link" href="#rto">6. O temporizador</a>
+                    <a class="nav-link" href="#retransmissao">7. Retransmissão rápida e SACK</a>
+                    <a class="nav-link" href="#liberacao">8. Liberação da conexão</a>
+                    <a class="nav-link" href="#exercicios-cap12">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Os transportes da Internet</h2>
+    <p>
+        A camada de rede da Internet oferece um serviço sem conexão: identifica cada interface por um endereço IP e
+        entrega pacotes de até 64 KB, mas não garante a entrega, não detecta erros de transmissão e não preserva a ordem
+        (pág. 185 do PDF). Os protocolos de transporte acrescentam o que falta. Os dois mais usados são o
+        <strong>UDP</strong> e o <strong>TCP</strong>. O livro cita outros dois: o <strong>SCTP</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc4960" target="_blank" rel="noopener noreferrer">RFC 4960</a>), usado, por
+        exemplo, na sinalização de voz sobre IP, e o <strong>RTP</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc3550" target="_blank" rel="noopener noreferrer">RFC 3550</a>), usado por
+        aplicações multimídia, que mistura funções de transporte e de codificação. Nenhum dos dois é detalhado.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Descrever o serviço e o cabeçalho do <strong>UDP</strong> e calcular o <strong>checksum da Internet</strong>, com o pseudo-cabeçalho.</li>
+                <li>Ler um <strong>cabeçalho TCP</strong>, com flags e opções, e acompanhar a <strong>abertura</strong> da conexão, inclusive o ataque <strong>SYN flood</strong>.</li>
+                <li>Explicar o <strong>algoritmo de Nagle</strong>, o limite da janela de 16 bits e a <strong>escala de janela</strong>.</li>
+                <li>Calcular o <strong>rto</strong> pelo algoritmo de Jacobson e explicar a <strong>retransmissão rápida</strong> e o <strong>SACK</strong>.</li>
+                <li>Seguir os estados da <strong>liberação</strong> da conexão e justificar o <strong>TIME_WAIT</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Este capítulo aprofunda o <a href="../capitulo-04/index.html">Capítulo 4</a> (serviços de transporte, portas,
+                handshake de três vias, janelas e liberação) e usa o go-back-n e o Selective Repeat do
+                <a href="../capitulo-01/index.html">Capítulo 1</a>. Ele cobre as seções 3.10 a 3.12 do livro
+                (pág. 185–205 do PDF). O controle de congestionamento, seção 3.13, fica para o próximo capítulo do roteiro.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 15 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. UDP -->
+<section id="udp" class="chapter-section" data-conceito="udp" data-titulo="UDP">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">UDP: datagramas com portas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O IP entrega pacotes a um host. Mas num host rodam várias aplicações: o resolvedor DNS, um jogo, uma chamada de
+        voz. Qual o mínimo que o transporte precisa acrescentar para separá-las?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>User Datagram Protocol</strong> (<a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">RFC 768</a>)
+        oferece um serviço sem conexão e não confiável sobre o IP (pág. 185 do PDF):
+    </p>
+    <ul>
+        <li>não entrega SDUs muito grandes, porque não sabe dividi-las e o pacote IP tem no máximo 64 KB;</li>
+        <li>não garante a entrega: SDUs podem se perder ou chegar fora de ordem;</li>
+        <li>não entrega uma SDU corrompida.</li>
+    </ul>
+    <p>
+        A vantagem sobre o IP puro são as <strong>portas</strong>: um servidor UDP registra uma porta, e cada SDU leva a porta
+        de origem e a de destino. Se o cliente usa a porta 1234 e o servidor a 5678, a resposta sai da 5678 para a 1234
+        (Fig. 18, pág. 186 do PDF). O cabeçalho tem só quatro campos de 16 bits (Fig. 19):
+    </p>
+    <pre class="log mb-3">+----------------+----------------+
+|  porta origem  | porta destino  |
++----------------+----------------+
+|    tamanho     |    checksum    |
++----------------+----------------+
+|              dados …            |</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o UDP não entrega SDUs maiores que 65 467 bytes sobre IPv6, porque o cabeçalho IPv6 teria 60 bytes
+        (pág. 185 do PDF). O cabeçalho IPv6 tem <strong>40 bytes</strong>, e o campo de tamanho do IPv6 nem conta o próprio
+        cabeçalho: o limite é 65 535 − 8 = <strong>65 527 bytes</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc8200#section-3" target="_blank" rel="noopener noreferrer">RFC 8200</a>; com
+        "jumbogramas", da RFC 2675, pode ser mais). Com IPv4, a conta do livro está certa: 65 535 − 20 − 8 = 65 507 bytes.
+    </p>
+    <p>
+        As portas são divididas em três faixas: as <strong>privilegiadas</strong>, abaixo de 1024, que no Unix exigem
+        privilégios de administrador e são usadas por servidores conhecidos (DNS, NTP, RPC); as <strong>registradas</strong>,
+        de 1024 a 49151, para servidores, que deveriam registrá-las na IANA; e as <strong>efêmeras</strong>, de 49152 a 65535,
+        que o sistema sorteia para os clientes (pág. 186 do PDF).
+    </p>
+    <p>
+        O <strong>checksum</strong> é calculado sobre um <strong>pseudo-cabeçalho</strong> (endereços de origem e destino,
+        tamanho do pacote em 32 bits e três bytes zero seguidos do número 17, que identifica o UDP) e o segmento inteiro,
+        com o cabeçalho (pág. 186–187 do PDF). Com o pseudo-cabeçalho, um segmento entregue ao host errado é descartado. A
+        soma é a do checksum da Internet: palavras de 16 bits somadas em complemento de um.
+    </p>
+    <p>
+        Usam UDP as aplicações que precisam de pouco atraso ou que recuperam as perdas sozinhas: pedidos e respostas curtos,
+        como o DNS e o RPC (o NFS roda sobre RPC); jogos, que trocam mensagens pequenas o tempo todo; e voz e vídeo
+        interativos, que aceitam no máximo uns 200 ms de atraso (pág. 187 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O pseudo-cabeçalho que o livro descreve é o do IPv6 (RFC 2460, hoje RFC 8200). No IPv4
+        (<a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">RFC 768</a>), ele tem os dois
+        endereços de 32 bits, um byte zero, o número do protocolo e o tamanho do UDP. O algoritmo da soma está na
+        <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">RFC 1071</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="checksum-udp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="108|100|128" data-answer="0" data-explain="O campo de tamanho conta o cabeçalho de 8 bytes e os dados." data-hint="O cabeçalho UDP tem quatro campos de 2 bytes.">
+        <p class="fw-semibold mb-2">Um segmento UDP leva 100 bytes de dados. Quanto vale o campo de tamanho?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque precisa de pouco atraso e recupera as perdas sozinha|Porque o UDP é confiável|Porque o TCP não aceita mensagens pequenas" data-answer="0" data-explain="Esperar retransmissões custaria mais do que perder uma amostra de áudio (pág. 187 do PDF)." data-hint="O que importa mais numa chamada de voz: atraso ou confiabilidade?">
+        <p class="fw-semibold mb-2">Por que uma chamada de voz interativa costuma usar UDP?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>UDP = IP + portas + checksum. Sem confiabilidade, sem ordem, sem divisão de SDUs.</li>
+        <li>Cabeçalho de 8 bytes: portas, tamanho e checksum.</li>
+        <li>O checksum cobre pseudo-cabeçalho, cabeçalho e dados, mas não protege contra erros que se compensam.</li>
+    </ul>
+</section>
+
+<!-- 2. Cabeçalho TCP -->
+<section id="tcp-cabecalho" class="chapter-section" data-conceito="tcp-cabecalho" data-titulo="Cabeçalho e opções do TCP">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">O cabeçalho TCP e as opções</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        E-mail, web, transferência de arquivos, ssh: quase tudo na Internet usa TCP. Vários estudos mediram que ele carrega
+        mais de 90% dos dados da Internet (pág. 187 do PDF). O que vai no cabeçalho de cada segmento?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Transmission Control Protocol</strong> foi definido na
+        <a href="https://www.rfc-editor.org/rfc/rfc793" target="_blank" rel="noopener noreferrer">RFC 793</a>. Muita coisa
+        melhorou desde então, mas uma implementação que só siga a RFC 793 ainda conversa com as atuais. O TCP oferece um
+        fluxo de bytes confiável, orientado a conexão, sobre o IP. O cabeçalho tem 20 bytes, mais as opções (Fig. 20,
+        pág. 188 do PDF):
+    </p>
+    <ul>
+        <li><strong>portas de origem e destino</strong>. Uma conexão é identificada por quatro valores: endereço e porta do
+            cliente, endereço e porta do servidor (Fig. 21);</li>
+        <li><strong>número de sequência</strong> (32 bits), <strong>número de confirmação</strong> (32 bits) e
+            <strong>janela</strong> (16 bits), para a transferência confiável. Cada byte do fluxo consome um número de sequência;</li>
+        <li><strong>flags</strong>: SYN (abertura), FIN (liberação), RST (problemas ou segmento inválido), ACK (o número de
+            confirmação vale), URG (com o ponteiro urgente, quase nunca usado) e PSH (entregar já à aplicação, que na prática
+            as aplicações não controlam);</li>
+        <li><strong>checksum</strong>, como no UDP, com pseudo-cabeçalho;</li>
+        <li><strong>tamanho do cabeçalho</strong> (THL, ou <em>Data Offset</em>), em palavras de 32 bits, num campo de 4 bits;</li>
+        <li><strong>reservado</strong>, hoje usado pela notificação de congestionamento (RFC 3168), e as <strong>opções</strong>.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que, com o THL de 4 bits, o cabeçalho TCP pode ter até 64 bytes (pág. 188 do PDF). O maior valor de 4 bits é
+        15, e 15 × 4 = <strong>60 bytes</strong>: 20 fixos e até 40 de opções
+        (<a href="https://www.rfc-editor.org/rfc/rfc9293#section-3.1" target="_blank" rel="noopener noreferrer">RFC 9293, seção 3.1</a>).
+        O próprio livro usa esse limite de 40 bytes de opções na discussão do SACK.
+    </p>
+    <p>
+        As opções vão no formato <strong>tipo-tamanho-valor</strong>: um byte de tipo, um de tamanho total e o valor. Há duas
+        exceções de um byte só: <strong>0x00</strong>, fim da lista, e <strong>0x01</strong>, No-Operation, usado para alinhar
+        as opções em 32 bits (pág. 193–194 do PDF). A mais importante é o <strong>MSS</strong> (tipo 2, 4 bytes): o maior
+        segmento que quem envia o SYN consegue processar. Sem ela, vale o mínimo de 536 bytes
+        (<a href="https://www.rfc-editor.org/rfc/rfc879" target="_blank" rel="noopener noreferrer">RFC 879</a>). Outras extensões,
+        como as da RFC 1323, só valem se o cliente as propõe no SYN e o servidor as aceita no SYN+ACK.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>O princípio da robustez</strong> (pág. 194 do PDF), atribuído a Jon Postel: "seja liberal no que aceita e
+        conservador no que envia" (<a href="https://www.rfc-editor.org/rfc/rfc1122" target="_blank" rel="noopener noreferrer">RFC 1122</a>).
+        Uma implementação TCP deve aceitar opções que não conhece sem travar, e um servidor não deve usar no SYN+ACK opções
+        que o cliente não propôs.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Desde 2022, a especificação do TCP é a <a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank" rel="noopener noreferrer">RFC 9293</a>,
+        que substituiu a RFC 793 e reuniu as correções acumuladas.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="cabecalho-tcp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Endereço e porta do cliente, endereço e porta do servidor|Só as duas portas|O número de sequência inicial" data-answer="0" data-explain="Duas conexões podem ter a mesma porta de servidor; o que as distingue é o conjunto dos quatro valores (pág. 187–188 do PDF)." data-hint="Veja a Fig. 21.">
+        <p class="fw-semibold mb-2">O que identifica uma conexão TCP?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="36 bytes|16 bytes|32 bytes" data-answer="0" data-explain="THL = 9 palavras de 32 bits = 36 bytes: 20 fixos e 16 de opções." data-hint="Multiplique o THL por 4.">
+        <p class="fw-semibold mb-2">Um segmento tem THL = 9. Qual é o tamanho do cabeçalho?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Portas, sequência, confirmação, THL, flags, janela, checksum, ponteiro urgente e opções.</li>
+        <li>Cabeçalho de 20 a 60 bytes; opções em tipo-tamanho-valor, mais EOL e NOP.</li>
+        <li>MSS anunciado no SYN; padrão de 536 bytes.</li>
+    </ul>
+</section>
+
+<!-- 3. Abertura -->
+<section id="abertura" class="chapter-section" data-conceito="abertura" data-titulo="Abertura da conexão">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Abertura da conexão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O handshake de três vias você já conhece do Capítulo 4. No TCP real, ele também precisa resistir a quem tenta
+        adivinhar números de sequência ou lotar a memória do servidor com conexões pela metade.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Na abertura, os dois lados combinam o número de sequência inicial (ISN) de cada sentido (pág. 189–190 do PDF). O
+        cliente manda um <strong>SYN</strong> com o seu ISN x; o servidor responde <strong>SYN+ACK</strong> com o seu ISN y e
+        confirmação x+1; o cliente responde <strong>ACK</strong> com confirmação y+1. O SYN consome um número de sequência,
+        e os primeiros bytes de dados terão x+1 e y+1. Na RFC 793, o ISN vinha de um contador de 32 bits incrementado a cada
+        4 µs, que dá a volta em algumas horas, muito mais que o tempo de vida máximo de um segmento na Internet (2 minutos).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que esse contador dá a volta em cerca de 4,5 horas (nota de rodapé, pág. 189 do PDF), o valor da RFC 793.
+        A conta dá um pouco mais: 2<sup>32</sup> × 4 µs ≈ 17 180 s, cerca de 4,8 horas.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Calculando o ISN</strong> (pág. 190 do PDF). Com um ISN previsível, um atacante que forja o endereço de um
+        host confiável (antigamente, o rlogin aceitava comandos sem senha vindos de certos endereços) manda um SYN falso e,
+        sem ver a resposta, um ACK com o ISN adivinhado do servidor. Por isso o ISN passou a ter uma parte imprevisível:
+        ISN = M + H(endereços, portas, segredo), em que M é o relógio e H um hash criptográfico
+        (<a href="https://www.rfc-editor.org/rfc/rfc1948" target="_blank" rel="noopener noreferrer">RFC 1948</a>).
+    </div>
+    <p>
+        O servidor pode <strong>recusar</strong> a conexão, se ninguém escuta a porta, por segurança ou por falta de recursos,
+        respondendo com um <strong>RST</strong> que confirma o SYN (Fig. 23). A abertura é uma máquina de quatro estados:
+        Init, SYN Sent, SYN RCVD e Established (Fig. 24). O cliente vai de Init a SYN Sent ao mandar o SYN e a Established ao
+        receber o SYN+ACK; o servidor vai a SYN RCVD ao responder um SYN e a Established ao receber o ACK. Na rara abertura
+        <strong>simultânea</strong>, os dois passam por SYN Sent e SYN RCVD (Fig. 25, pág. 191–192 do PDF).
+    </p>
+    <div class="demo-box" data-sim="fsm-abertura"></div>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Ataques de negação de serviço</strong> (pág. 192–193 do PDF). Cada conexão aberta cria um Transmission Control
+        Block (TCB). Até meados dos anos 1990, as implementações limitavam a cerca de 100 os TCBs em SYN RCVD e descartavam os
+        SYNs além disso. O atacante só precisava mandar algumas centenas de SYNs por segundo, com endereços de origem
+        forjados, e nunca responder: os TCBs ficavam presos por vários segundos, e os clientes legítimos não conseguiam
+        conectar. É o <strong>SYN flood</strong> (<a href="https://www.rfc-editor.org/rfc/rfc4987" target="_blank" rel="noopener noreferrer">RFC 4987</a>),
+        que atingiu o provedor Panix. A defesa são os <strong>SYN cookies</strong>: o servidor não cria o TCB ao receber o
+        SYN; codifica no próprio ISN do SYN+ACK um contador lento e um hash dos endereços, das portas e de um segredo, e só
+        cria o TCB quando o ACK chega e o cookie confere. A desvantagem é a incompatibilidade com algumas opções do TCP; por
+        isso, diz o livro, eles não vêm ligados por padrão.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        No Linux, os SYN cookies vêm ligados por padrão, mas só entram em ação quando a fila de conexões pendentes enche,
+        o que contorna a incompatibilidade com as opções no uso normal
+        (<a href="https://en.wikipedia.org/wiki/SYN_cookies" target="_blank" rel="noopener noreferrer">Wikipedia: SYN cookies</a>).
+    </p>
+    <p>
+        O SYN também pode se perder. O livro diz que o temporizador do primeiro SYN costuma ser de três segundos e dobra a cada
+        retransmissão, até um número máximo de tentativas (pág. 193 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Os 3 segundos vêm da RFC 2988, citada pelo livro. Ela foi substituída em 2011 pela
+        <a href="https://www.rfc-editor.org/rfc/rfc6298" target="_blank" rel="noopener noreferrer">RFC 6298</a>, que reduziu o
+        temporizador inicial para <strong>1 segundo</strong>; se o SYN precisou ser retransmitido, a conexão começa a transferência com 3 s.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização — SYN flood</h3>
+    <div class="demo-box" data-sim="syn-flood"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="x+1|x|y+1" data-answer="0" data-explain="O SYN consome o número x; o primeiro byte de dados usa x+1 (pág. 190 do PDF)." data-hint="O SYN conta como um byte do fluxo.">
+        <p class="fw-semibold mb-2">O SYN do cliente tem seq = x. Qual é o número de sequência do primeiro byte de dados do cliente?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque o atacante não precisa receber as respostas: basta ocupar os TCBs em SYN RCVD|Porque o atacante precisa de muita banda|Porque o servidor responde com RST" data-answer="0" data-explain="Algumas centenas de SYNs por segundo, com origem forjada, bastavam para lotar os 100 TCBs (pág. 192 do PDF)." data-hint="O que o atacante faz depois de mandar o SYN?">
+        <p class="fw-semibold mb-2">Por que o SYN flood funciona com tão poucos pacotes?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>SYN (x) → SYN+ACK (y, ack x+1) → ACK (ack y+1). ISN imprevisível (RFC 1948).</li>
+        <li>Estados: Init, SYN Sent, SYN RCVD, Established. Recusa com RST.</li>
+        <li>SYN flood lota os TCBs em SYN RCVD; SYN cookies evitam guardar estado antes do ACK.</li>
+    </ul>
+</section>
+
+<!-- 4. Transferência e Nagle -->
+<section id="transferencia" class="chapter-section" data-conceito="transferencia" data-titulo="Transferência e Nagle">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Transferência de dados e o algoritmo de Nagle</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Numa sessão ssh, cada tecla é um byte. Mandar cada byte num segmento próprio, com 40 bytes de cabeçalhos TCP e IP,
+        desperdiça a rede; esperar juntar um MSS inteiro deixaria o terminal travado. Quando, então, mandar?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>Três campos do cabeçalho fazem a transferência (pág. 194 do PDF):</p>
+    <ul>
+        <li><strong>número de sequência</strong>: o do primeiro byte de dados do segmento;</li>
+        <li><strong>número de confirmação</strong>: confirmações cumulativas positivas, com o número do próximo byte esperado.
+            Na prática, todos os segmentos, menos o primeiro SYN, levam ACK;</li>
+        <li><strong>janela</strong>: o espaço livre no buffer de recepção, em bytes.</li>
+    </ul>
+    <p>
+        Cada conexão tem um <strong>TCB</strong> com endereços, portas, estado, MSS, os ponteiros snd.nxt (próximo número a
+        enviar), snd.una (o mais antigo ainda não confirmado) e rcv.nxt (próximo esperado), as janelas e os buffers de envio e
+        de recepção. O TCP original combina go-back-n no envio com a recepção do Selective Repeat: guarda os segmentos fora de ordem.
+        Ao enviar, coloca até um MSS de dados, com seq = snd.nxt, e guarda os dados para uma eventual retransmissão. Ao
+        receber um ACK, tira do buffer o que foi confirmado e atualiza snd.una; dados em ordem são entregues e avançam
+        rcv.nxt, e os fora de ordem esperam no buffer (pág. 194–195 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro chama de rcv.wnd a janela anunciada pelo outro lado e a usa para decidir quanto enviar (pág. 195 do PDF). Nas
+        RFCs 793 e 9293, essa janela é a <strong>SND.WND</strong> (a janela de envio, recebida do outro lado), e
+        <strong>RCV.WND</strong> é a janela que este lado anuncia. A ideia é a mesma; só os nomes estão trocados.
+    </p>
+    <p>
+        Quando mandar um segmento foi deixado em aberto pela RFC 793. John Nagle propôs uma regra simples
+        (<a href="https://www.rfc-editor.org/rfc/rfc896" target="_blank" rel="noopener noreferrer">RFC 896</a>, pág. 196 do PDF):
+    </p>
+    <pre class="log mb-3">se janela ≥ MSS e há pelo menos MSS bytes para enviar:
+    envia um segmento de MSS bytes
+senão:
+    se há dados enviados e ainda não confirmados:
+        guarda os dados no buffer até chegar a confirmação
+    senão:
+        envia um segmento com tudo o que está no buffer</pre>
+    <p>
+        A primeira regra garante segmentos cheios nas transferências grandes; a segunda manda no máximo um segmento parcial
+        por RTT. Medições mostram o efeito: 40% a 50% dos pacotes de um enlace costumam ser ACKs puros, e a maior parte dos
+        bytes vai em pacotes grandes, com cerca de 1440 bytes de dados (pág. 196 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Os 1440 bytes valem para IPv6 numa rede Ethernet: 1500 − 40 (IPv6) − 20 (TCP). Com IPv4, o MSS típico é
+        1500 − 20 − 20 = 1460 bytes. Aplicações muito interativas, como jogos, costumam desligar o Nagle com a opção de
+        socket TCP_NODELAY.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="nagle"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Junta o que for digitado num segmento, que sai quando chegar o ACK|Manda cada caractere imediatamente|Espera juntar um MSS inteiro" data-answer="0" data-explain="Com dados ainda não confirmados, o Nagle guarda os novos até o ACK chegar." data-hint="Releia a segunda regra.">
+        <p class="fw-semibold mb-2">Com o Nagle ligado, o que acontece com caracteres digitados enquanto um segmento ainda não foi confirmado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>seq = primeiro byte do segmento; ack cumulativo = próximo byte esperado; janela em bytes.</li>
+        <li>TCB: snd.nxt, snd.una, rcv.nxt, janelas e buffers.</li>
+        <li>Nagle: segmentos cheios quando possível, no máximo um parcial por RTT.</li>
+    </ul>
+</section>
+
+<!-- 5. Janelas -->
+<section id="janelas" class="chapter-section" data-conceito="janelas" data-titulo="Janelas grandes">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Janelas grandes e a escala de janela</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Quando o TCP foi projetado, as redes de longa distância mais rápidas tinham 56 kbit/s. Uma janela de até 65 535 bytes
+        sobrava. E hoje?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Com uma janela fixa, o emissor manda no máximo uma janela por RTT: vazão máxima ≈ janela / RTT. Com 64 KB (pág. 196 do PDF):
+    </p>
+    <table class="table table-sm small w-auto">
+        <thead><tr><th>RTT</th><th>Vazão máxima</th></tr></thead>
+        <tbody><tr><td>1 ms</td><td>524 Mbit/s</td></tr><tr><td>10 ms</td><td>52,4 Mbit/s</td></tr><tr><td>100 ms</td><td>5,24 Mbit/s</td></tr><tr><td>500 ms</td><td>1,05 Mbit/s</td></tr></tbody>
+    </table>
+    <p>
+        A solução, compatível com o TCP antigo, veio na <a href="https://www.rfc-editor.org/rfc/rfc1323" target="_blank" rel="noopener noreferrer">RFC 1323</a>:
+        guardar as janelas no TCB como inteiros de 32 bits e anunciar no cabeçalho a janela deslocada de S bits
+        (janela &gt;&gt; S), com o <strong>fator de escala</strong> S, de 0 a 14, combinado no SYN e no SYN+ACK. Se o servidor
+        não entende a opção, não há escala. Com isso, o buffer de recepção pode chegar a 1 GB, o que permite 8 590 Gbit/s
+        com RTT de 1 ms ou 86 Gbit/s com 100 ms (pág. 196–197 do PDF). As implementações atuais ajustam o tamanho dos buffers
+        sozinhas.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A RFC 1323 foi substituída pela <a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">RFC 7323</a>,
+        de 2014.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="escala-janela"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Cerca de 10,5 Mbit/s|Cerca de 524 Mbit/s|Cerca de 1 Mbit/s" data-answer="0" data-explain="65 535 × 8 / 0,05 s ≈ 10,5 Mbit/s." data-hint="Vazão máxima = janela / RTT.">
+        <p class="fw-semibold mb-2">Sem escala de janela, qual é a vazão máxima de uma conexão TCP com RTT de 50 ms?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Vazão máxima ≈ janela / RTT; 64 KB não bastam em redes rápidas e distantes.</li>
+        <li>Escala de janela: o cabeçalho leva janela &gt;&gt; S, com S até 14, combinado na abertura.</li>
+    </ul>
+</section>
+
+<!-- 6. rto -->
+<section id="rto" class="chapter-section" data-conceito="rto" data-titulo="O temporizador">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">O temporizador de retransmissão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Com um temporizador curto demais, o TCP retransmite o que já tinha chegado; longo demais, fica parado esperando.
+        E o RTT muda entre conexões e até dentro de uma mesma conexão (Fig. 26, pág. 197 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Medir o RTT parece fácil: o tempo entre enviar um segmento e receber a confirmação. Mas, se o segmento foi
+        retransmitido, a confirmação pode ser da primeira transmissão ou da segunda. Karn e Partridge propuseram
+        <strong>ignorar as medidas de segmentos retransmitidos</strong>. A opção <strong>timestamps</strong> da RFC 1323 resolve
+        a ambiguidade de outro jeito: cada segmento leva um TSval, escolhido por quem envia, e um TSecr, o último TSval recebido
+        do outro lado, que volta na confirmação (Figs. 27 e 28, pág. 198 do PDF).
+    </p>
+    <p>
+        A RFC 793 propunha suavizar as medidas, srtt = α·srtt + (1 − α)·rtt com α de 0,8 a 0,9, e usar
+        rto = min(60, max(1, β·srtt)) segundos, com β de 1,3 a 2. Isso não acompanhava as variações do RTT. Van Jacobson
+        propôs um algoritmo melhor, hoje padrão (pág. 199 do PDF):
+    </p>
+    <pre class="log mb-3">primeira medida:   srtt = rtt;  rttvar = rtt / 2
+medidas seguintes: rttvar = (1 − β) · rttvar + β · |srtt − rtt|
+                   srtt   = (1 − α) · srtt   + α · rtt
+sempre:            rto    = srtt + 4 · rttvar           com α = 1/8 e β = 1/4</pre>
+    <p>
+        Com α e β potências de 2, as contas viram deslocamentos de bits, baratos dentro do núcleo do sistema (Fig. 29). Quando
+        o temporizador expira, o TCP retransmite o segmento snd.una e <strong>dobra</strong> o rto (recuo exponencial), até um
+        máximo de pelo menos 60 s; atingido o máximo, a conexão é encerrada (pág. 199 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o rto inicial, antes de qualquer medida, é de 3 segundos (pág. 199 do PDF), como na RFC 2988. A
+        <a href="https://www.rfc-editor.org/rfc/rfc6298" target="_blank" rel="noopener noreferrer">RFC 6298</a>, que a substituiu
+        em 2011, reduziu esse valor para <strong>1 segundo</strong> e recomenda arredondar para cima qualquer rto menor que 1 s.
+        Na ordem das contas, o rttvar usa o srtt <em>antigo</em>, como no quadro acima.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="calculo-rto"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque a confirmação pode ser da primeira transmissão ou da retransmissão|Porque o segmento retransmitido é maior|Porque o receptor não confirma retransmissões" data-answer="0" data-explain="A medida seria ambígua; por isso Karn e Partridge sugeriram ignorá-la (pág. 198 do PDF)." data-hint="Pense na figura com o segmento 123 perdido.">
+        <p class="fw-semibold mb-2">Por que não medir o RTT de um segmento retransmitido?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="2 s|1 s|4 s" data-answer="0" data-explain="Recuo exponencial: a cada expiração, o rto dobra (pág. 199 do PDF)." data-hint="O que acontece com o rto depois de uma expiração?">
+        <p class="fw-semibold mb-2">O rto era 1 s e expirou. Com que rto o segmento retransmitido é vigiado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Medidas de segmentos retransmitidos são ambíguas: ignore-as ou use timestamps.</li>
+        <li>Jacobson: srtt e rttvar com α = 1/8 e β = 1/4; rto = srtt + 4·rttvar.</li>
+        <li>Recuo exponencial a cada expiração; rto inicial de 1 s (RFC 6298).</li>
+    </ul>
+</section>
+
+<!-- 7. Retransmissão rápida e SACK -->
+<section id="retransmissao" class="chapter-section" data-conceito="retransmissao" data-titulo="Retransmissão rápida e SACK">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">ACKs atrasados, retransmissão rápida e SACK</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Perdas isoladas são comuns na Internet. Com o go-back-n puro, o emissor fica parado até o rto expirar, mesmo quando
+        os segmentos seguintes já chegaram. Dá para perceber a perda antes?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Primeiro, as confirmações. O ideal é pegar carona (<em>piggybacking</em>) nos dados do outro sentido, mas poucas
+        aplicações mandam dados nos dois sentidos ao mesmo tempo. Para não mandar um ACK puro a cada segmento, o TCP usa
+        <strong>ACK atrasado</strong>: confirma a cada dois segmentos em ordem ou quando um temporizador curto (uns 50 ms) expira,
+        e confirma <strong>na hora</strong> um segmento fora de ordem (pág. 199–200 do PDF).
+    </p>
+    <p>
+        Esse ACK imediato é a base da <strong>retransmissão rápida</strong>. Quando um segmento isolado se perde, cada segmento
+        seguinte gera um <strong>ACK duplicado</strong>, com o mesmo número de confirmação. Um ACK duplicado sozinho pode ser só
+        reordenação, que é frequente. A heurística: ao receber o <strong>terceiro ACK duplicado</strong>, retransmitir snd.una sem
+        esperar o rto (Figs. 30 e 31, pág. 201–202 do PDF):
+    </p>
+    <pre class="log mb-3">chegada de um ACK:
+    se ack == snd.una:          # ACK duplicado
+        dupacks += 1
+        se dupacks == 3:
+            retransmite o segmento snd.una
+    senão:
+        dupacks = 0
+        processa a confirmação</pre>
+    <p>
+        Ela só funciona com perdas isoladas e janelas grandes o bastante para gerar três duplicados. Para perdas múltiplas, o
+        TCP precisa do Selective Repeat, e o receptor precisa dizer o que já tem: é a opção <strong>SACK</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc2018" target="_blank" rel="noopener noreferrer">RFC 2018</a>), negociada na
+        abertura. Cada bloco SACK indica um trecho recebido fora de ordem, com as bordas esquerda e direita em 32 bits; uma
+        opção com b blocos ocupa 2 + 8b bytes. Como as opções têm no máximo 40 bytes e o SACK costuma vir com os timestamps,
+        cabem em geral três blocos, e o receptor põe primeiro os que mudaram por último (pág. 202 do PDF).
+    </p>
+    <p>
+        O SACK é só uma dica: o emissor só descarta dados confirmados pelo ACK cumulativo, porque o receptor pode jogar fora
+        dados fora de ordem se faltar memória e porque o SACK não é transmitido de forma confiável (pág. 202–203 do PDF).
+    </p>
+    <p>
+        Os timestamps têm outro papel. Com números de sequência de 32 bits, eles dão a volta a cada 4 GB transmitidos, o que, a
+        10 Gbit/s, leva poucos segundos, bem menos que os 2 minutos de vida máxima de um segmento. Um segmento antigo muito
+        atrasado poderia ser confundido com um novo; o timestamp permite descartá-lo
+        (<a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">RFC 7323</a>, pág. 203 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="fast-retransmit"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="26 bytes|24 bytes|32 bytes" data-answer="0" data-explain="2 + 8 × 3 = 26 bytes (pág. 202 do PDF)." data-hint="2 bytes de tipo e tamanho, mais 8 por bloco.">
+        <p class="fw-semibold mb-2">Quantos bytes ocupa uma opção SACK com três blocos?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque um único ACK duplicado pode ser só reordenação|Porque o receptor manda três cópias de cada ACK|Porque o TCP só confirma a cada três segmentos" data-answer="0" data-explain="A reordenação é frequente; três duplicados indicam com mais segurança uma perda (pág. 201 do PDF)." data-hint="O que mais, além de uma perda, gera ACK duplicado?">
+        <p class="fw-semibold mb-2">Por que esperar três ACKs duplicados, e não um?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>ACK atrasado: a cada dois segmentos em ordem; imediato para segmentos fora de ordem.</li>
+        <li>Retransmissão rápida no terceiro ACK duplicado.</li>
+        <li>SACK: blocos recebidos fora de ordem (até três, em geral); o ACK cumulativo continua valendo.</li>
+    </ul>
+</section>
+
+<!-- 8. Liberação -->
+<section id="liberacao" class="chapter-section" data-conceito="liberacao" data-titulo="Liberação da conexão">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">Liberação da conexão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No Capítulo 4 você viu que fechar uma conexão sem perder dados exige cuidado. No TCP, isso vira uma máquina de estados
+        com nomes que aparecem em qualquer ferramenta de diagnóstico: FIN_WAIT, CLOSE_WAIT, TIME_WAIT…
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A liberação <strong>abrupta</strong> usa um segmento com <strong>RST</strong>, enviado quando chega um segmento (sem SYN)
+        para uma conexão que não existe, por extensão quando chega um segmento inválido, ou quando o host precisa fechar a
+        conexão por falta de recursos (pág. 203–204 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Guerras de RST</strong> (pág. 204 do PDF). Para evitar uma troca infinita de RSTs, um TCP nunca responde a um
+        RST com outro RST.
+    </div>
+    <p>
+        A liberação <strong>ordenada</strong> usa o <strong>FIN</strong>, que, como o SYN, consome um número de sequência. Cada
+        lado fecha o próprio sentido (Fig. 33, pág. 204–205 do PDF):
+    </p>
+    <ul>
+        <li>quem <strong>recebe</strong> um FIN confirma-o, vai para <strong>CLOSE_WAIT</strong> (ainda pode enviar), manda o seu
+            FIN quando terminar e vai para <strong>LAST_ACK</strong>; com a confirmação, fecha;</li>
+        <li>quem <strong>manda</strong> o primeiro FIN vai para <strong>FIN_WAIT1</strong>; com a confirmação, vai para
+            <strong>FIN_WAIT2</strong>, onde ainda recebe dados, até chegar o FIN do outro lado; se o FIN do outro chegar antes da
+            confirmação, vai para <strong>CLOSING</strong>;</li>
+        <li>quem manda o <strong>último ACK</strong> fica em <strong>TIME_WAIT</strong> por 2 MSL, mantendo o TCB: se esse ACK
+            se perder e o outro lado retransmitir o FIN, ainda dá para confirmar, e segmentos atrasados não geram RSTs.</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>TIME_WAIT em servidores ocupados</strong> (pág. 205 do PDF). Um servidor web que fecha 10 000 conexões por
+        segundo, cada uma 4 minutos em TIME_WAIT, mantém mais de 2 milhões de TCBs. Algumas implementações preferem fechar com
+        RST e descartar o TCB na hora; se o RST se perde, o outro lado fica com uma conexão que não existe mais.
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="fsm-fechamento"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Quem mandou o último ACK|Quem mandou o primeiro FIN, sempre|Os dois lados, sempre" data-answer="0" data-explain="TIME_WAIT vem depois de enviar o último ACK (pág. 205 do PDF); no fechamento simultâneo, os dois mandam um último ACK." data-hint="Para que serve o TIME_WAIT?">
+        <p class="fw-semibold mb-2">Quem passa pelo estado TIME_WAIT?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Sim: em CLOSE_WAIT, o seu sentido continua aberto|Não: o FIN fecha os dois sentidos|Só depois do TIME_WAIT" data-answer="0" data-explain="Cada FIN fecha só um sentido; em CLOSE_WAIT o host ainda pode enviar (pág. 204 do PDF)." data-hint="Quantos sentidos um FIN fecha?">
+        <p class="fw-semibold mb-2">O servidor recebeu o FIN do cliente. Ele ainda pode enviar dados?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>RST: abrupto, fecha tudo; nunca se responde RST com RST.</li>
+        <li>FIN: cada lado fecha o seu sentido; FIN consome um número de sequência.</li>
+        <li>FIN_WAIT1 → FIN_WAIT2 (ou CLOSING) → TIME_WAIT (2 MSL); CLOSE_WAIT → LAST_ACK.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap12" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> qual é o maior número de bytes de dados que cabe num único datagrama UDP sobre IPv4 (sem fragmentação no destino)?
+            <details><summary>Ver solução</summary><p class="mb-0">65 535 − 20 (IPv4) − 8 (UDP) = 65 507 bytes.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> o SYN tem seq = 1000, e o SYN+ACK, seq = 5000. Quais são os números de confirmação do SYN+ACK e do ACK final?
+            <details><summary>Ver solução</summary><p class="mb-0">SYN+ACK: ack = 1001. ACK final: ack = 5001 (e seq = 1001).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> as duas primeiras medidas de RTT de uma conexão são 200 ms e 200 ms. Calcule srtt, rttvar e rto depois de cada uma.
+            <details><summary>Ver solução</summary><p class="mb-0">Primeira: srtt = 200, rttvar = 100, rto = 600 ms. Segunda: rttvar = 0,75 × 100 + 0,25 × 0 = 75; srtt = 200; rto = 200 + 300 = 500 ms.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> a 10 Gbit/s, em quanto tempo os números de sequência de 32 bits dão a volta?
+            <details><summary>Ver solução</summary><p class="mb-0">2<sup>32</sup> bytes / 1,25 × 10<sup>9</sup> bytes/s ≈ 3,4 s, muito menos que os 2 minutos do MSL. Daí a necessidade dos timestamps.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> com os timestamps (10 bytes, mais 2 de NOPs), quantos blocos SACK cabem nos 40 bytes de opções? E sem eles?
+            <details><summary>Ver solução</summary><p class="mb-0">Com timestamps: sobram 28 bytes; 2 + 8b ≤ 28 dá b = 3. Sem eles: 2 + 8b ≤ 40 dá b = 4.</p></details></li>
+        <li><strong>Desafio:</strong> por que os SYN cookies resolvem o SYN flood, mas não ajudam contra um atacante que completa o handshake de verdade, com o próprio endereço, e depois fica parado?
+            <details><summary>Ver solução</summary><p class="mb-0">Os cookies evitam guardar estado antes do ACK, quando o atacante forja endereços e nunca responde. Quem completa o handshake recebe um TCB legítimo; contra isso o servidor precisa de outras defesas, como limitar conexões por endereço e fechar as ociosas. E esse atacante revela o próprio endereço, o que facilita bloqueá-lo.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Cinco trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. O checksum do UDP</h3>
+    <pre class="code-block"><code>import ipaddress, struct
+
+def soma_internet(dados):
+    """Checksum da Internet (RFC 1071): soma em complemento de um das palavras de 16 bits."""
+    if len(dados) % 2:
+        dados += b"\x00"                               # completa com um byte zero
+    total = 0
+    for i in range(0, len(dados), 2):
+        total += (dados[i] &lt;&lt; 8) | dados[i + 1]
+        total = (total &amp; 0xFFFF) + (total >> 16)       # o "vai um" volta para o começo
+    return total
+
+def checksum_udp(origem, destino, porta_o, porta_d, carga):
+    tamanho = 8 + len(carga)
+    pseudo = (ipaddress.ip_address(origem).packed + ipaddress.ip_address(destino).packed
+              + struct.pack("!I", tamanho) + b"\x00\x00\x00" + bytes([17]))   # pseudo-cabeçalho IPv6
+    cabecalho = struct.pack("!HHHH", porta_o, porta_d, tamanho, 0)           # checksum zerado no cálculo
+    return 0xFFFF - soma_internet(pseudo + cabecalho + carga)
+
+carga = b"OLA"
+ck = checksum_udp("2001:db8::1", "2001:db8::2", 1234, 5678, carga)
+print(f"checksum = 0x{ck:04x}")
+
+def confere(origem, destino, porta_o, porta_d, carga, ck):
+    tamanho = 8 + len(carga)
+    pseudo = (ipaddress.ip_address(origem).packed + ipaddress.ip_address(destino).packed
+              + struct.pack("!I", tamanho) + b"\x00\x00\x00" + bytes([17]))
+    segmento = struct.pack("!HHHH", porta_o, porta_d, tamanho, ck) + carga
+    return soma_internet(pseudo + segmento) == 0xFFFF  # tudo somado dá 0xFFFF se não houve erro
+
+print("intacto:      ", confere("2001:db8::1", "2001:db8::2", 1234, 5678, b"OLA", ck))
+print("um bit trocado:", confere("2001:db8::1", "2001:db8::2", 1234, 5678, b"OLB", ck))</code></pre>
+
+    <h3 class="h6 mt-4">2. Montando e lendo um cabeçalho TCP</h3>
+    <pre class="code-block"><code>import struct
+
+FLAGS = ["FIN", "SYN", "RST", "PSH", "ACK", "URG"]      # bit 0 = FIN, bit 1 = SYN…
+
+def monta_tcp(porta_o, porta_d, seq, ack, flags, janela, opcoes=b""):
+    while len(opcoes) % 4:
+        opcoes += b"\x00"                              # End of option list, até múltiplo de 4 bytes
+    thl = (20 + len(opcoes)) // 4                      # tamanho do cabeçalho em palavras de 32 bits
+    bits = sum(1 &lt;&lt; FLAGS.index(f) for f in flags)
+    return struct.pack("!HHIIBBHHH", porta_o, porta_d, seq, ack, thl &lt;&lt; 4, bits, janela, 0, 0) + opcoes
+
+def le_tcp(seg):
+    porta_o, porta_d, seq, ack, off, bits, janela, ck, urg = struct.unpack("!HHIIBBHHH", seg[:20])
+    thl = (off >> 4) * 4
+    flags = [f for i, f in enumerate(FLAGS) if bits &amp; (1 &lt;&lt; i)]
+    opcoes, i = {}, 20
+    while i &lt; thl:
+        tipo = seg[i]
+        if tipo == 0: break                            # fim das opções
+        if tipo == 1: i += 1; continue                 # No-Operation
+        tam = seg[i + 1]
+        valor = seg[i + 2:i + tam]
+        opcoes[{2: "MSS", 3: "escala", 4: "SACK permitido", 8: "timestamps"}.get(tipo, tipo)] = valor.hex()
+        i += tam
+    return {"portas": (porta_o, porta_d), "seq": seq, "ack": ack, "cabeçalho": thl,
+            "flags": flags, "janela": janela, "opções": opcoes}
+
+mss = bytes([2, 4]) + struct.pack("!H", 1460)          # opção MSS: tipo 2, tamanho 4, valor
+syn = monta_tcp(49152, 80, 1000, 0, ["SYN"], 65535, mss)
+print(syn.hex(" "))
+print(le_tcp(syn))</code></pre>
+
+    <h3 class="h6 mt-4">3. O algoritmo de Nagle</h3>
+    <pre class="code-block"><code>def simula(texto, intervalo, rtt, nagle):
+    """O usuário digita um caractere a cada `intervalo` ms. Devolve os segmentos enviados (instante, dados)."""
+    chegadas = [(i * intervalo, c) for i, c in enumerate(texto)]
+    segmentos, buffer, ack_em, i = [], "", None, 0     # ack_em: quando chega o ACK dos dados pendentes
+    while i &lt; len(chegadas) or buffer:
+        proximo = chegadas[i][0] if i &lt; len(chegadas) else None
+        if ack_em is not None and (proximo is None or ack_em &lt;= proximo):
+            t, ack_em = ack_em, None                   # chegou o ACK: nada mais pendente
+        else:
+            t, c = chegadas[i]                         # o usuário digitou mais um caractere
+            buffer += c
+            i += 1
+        if buffer and (not nagle or ack_em is None):   # sem Nagle, ou nada pendente: envia já
+            segmentos.append((t, buffer))
+            buffer, ack_em = "", t + rtt
+    return segmentos
+
+texto = "ls -la /home/alice\n"
+for nagle in (False, True):
+    segs = simula(texto, 100, 300, nagle)
+    bytes_cab = 40 * len(segs)                         # 20 do TCP + 20 do IPv4 por segmento
+    print(f"Nagle {'ligado ' if nagle else 'desligado'}: {len(segs):2} segmentos, "
+          f"{bytes_cab} bytes de cabeçalho para {len(texto)} de dados")
+    print("   ", [d for _, d in segs])</code></pre>
+
+    <h3 class="h6 mt-4">4. O rto de Jacobson e o da RFC 793</h3>
+    <pre class="code-block"><code>def jacobson(medidas, alfa=1/8, beta=1/4):
+    """RTO de Jacobson (RFC 6298), em ms. Devolve (rtt, srtt, rttvar, rto) a cada medida."""
+    saida, srtt, rttvar = [], None, None
+    for rtt in medidas:
+        if srtt is None:                               # primeira medida
+            srtt, rttvar = rtt, rtt / 2
+        else:
+            rttvar = (1 - beta) * rttvar + beta * abs(srtt - rtt)   # usa o srtt ANTIGO
+            srtt = (1 - alfa) * srtt + alfa * rtt
+        saida.append((rtt, srtt, rttvar, srtt + 4 * rttvar))
+    return saida
+
+def rfc793(medidas, alfa=0.875, fator=2.0):
+    """O cálculo original: srtt suavizado e rto = fator × srtt, entre 1 s e 60 s."""
+    saida, srtt = [], None
+    for rtt in medidas:
+        srtt = rtt if srtt is None else alfa * srtt + (1 - alfa) * rtt
+        saida.append(min(60000, max(1000, fator * srtt)))
+    return saida
+
+medidas = [500, 550, 450, 500, 2000, 2100, 1900, 500, 500]  # o RTT salta de 0,5 s para 2 s e volta
+for (rtt, srtt, var, rto), velho in zip(jacobson(medidas), rfc793(medidas)):
+    alerta = "  &lt;- rto menor que o rtt!" if velho &lt; rtt else ""
+    print(f"rtt={rtt:5}  srtt={srtt:7.1f}  rttvar={var:6.1f}  rto={rto:7.1f}  | RFC 793: {velho:7.1f}{alerta}")</code></pre>
+
+    <h3 class="h6 mt-4">5. ACKs duplicados, retransmissão rápida e SACK</h3>
+    <pre class="code-block"><code>def recepcao(n, perdidos):
+    """O emissor manda os segmentos 1..n (um MSS cada); o receptor responde a cada um com um ACK cumulativo
+    (número do próximo segmento esperado) e com os blocos SACK do que chegou fora de ordem.
+    Simplificação: numera segmentos, não bytes."""
+    recebidos, acks = set(), []
+    for seg in range(1, n + 1):
+        if seg in perdidos:
+            continue                                   # este segmento se perde na rede
+        recebidos.add(seg)
+        proximo = 1
+        while proximo in recebidos:
+            proximo += 1
+        blocos, s = [], proximo + 1
+        while s &lt;= n:                                  # blocos contíguos recebidos depois do buraco
+            if s in recebidos:
+                ini = s
+                while s + 1 in recebidos:
+                    s += 1
+                blocos.append((ini, s))
+            s += 1
+        # primeiro o bloco que acabou de mudar (o que contém seg), depois os mais altos
+        blocos.sort(key=lambda b: (not (b[0] &lt;= seg &lt;= b[1]), -b[0]))
+        acks.append((seg, proximo, blocos[:3]))       # cabem no máximo 3 blocos com timestamps
+    return acks
+
+def retransmissao_rapida(acks, limite=3):
+    dup, ultimo = 0, None
+    for chegou, ack, _ in acks:
+        dup = dup + 1 if ack == ultimo else 0
+        ultimo = ack
+        if dup == limite:
+            return ack                                 # retransmite o segmento esperado
+    return None                                        # vai ter de esperar o temporizador (rto)
+
+for perdidos in ({4}, {9}, {3, 6}):
+    acks = recepcao(10, perdidos)
+    print("perdidos:", sorted(perdidos))
+    for chegou, ack, blocos in acks:
+        print(f"   chegou {chegou:2} -> ACK {ack:2}  SACK {blocos}")
+    print("   retransmissão rápida do segmento:", retransmissao_rapida(acks))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seções 3.10 "Internet transport protocols", 3.11 "The User Datagram Protocol" e 3.12 "The Transmission Control Protocol" (pág. 185–205 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 768 — <a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">User Datagram Protocol</a> e RFC 1071 — <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">Computing the Internet Checksum</a></li>
+        <li>RFC 793 — <a href="https://www.rfc-editor.org/rfc/rfc793" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a> e RFC 9293 — <a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a> (versão atual, complemento)</li>
+        <li>RFC 1122 — <a href="https://www.rfc-editor.org/rfc/rfc1122" target="_blank" rel="noopener noreferrer">Requirements for Internet Hosts</a> e RFC 879 — <a href="https://www.rfc-editor.org/rfc/rfc879" target="_blank" rel="noopener noreferrer">The TCP Maximum Segment Size</a></li>
+        <li>RFC 1948 — <a href="https://www.rfc-editor.org/rfc/rfc1948" target="_blank" rel="noopener noreferrer">Defending Against Sequence Number Attacks</a> e RFC 4987 — <a href="https://www.rfc-editor.org/rfc/rfc4987" target="_blank" rel="noopener noreferrer">TCP SYN Flooding Attacks and Common Mitigations</a></li>
+        <li>RFC 896 — <a href="https://www.rfc-editor.org/rfc/rfc896" target="_blank" rel="noopener noreferrer">Congestion Control in IP/TCP Internetworks (Nagle)</a></li>
+        <li>RFC 1323 — <a href="https://www.rfc-editor.org/rfc/rfc1323" target="_blank" rel="noopener noreferrer">TCP Extensions for High Performance</a> e RFC 7323 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">TCP Extensions for High Performance</a></li>
+        <li>RFC 2988 — <a href="https://www.rfc-editor.org/rfc/rfc2988" target="_blank" rel="noopener noreferrer">Computing TCP's Retransmission Timer</a> e RFC 6298 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc6298" target="_blank" rel="noopener noreferrer">Computing TCP's Retransmission Timer</a></li>
+        <li>RFC 2018 — <a href="https://www.rfc-editor.org/rfc/rfc2018" target="_blank" rel="noopener noreferrer">TCP Selective Acknowledgment Options</a>, RFC 2581 e RFC 5681 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc5681" target="_blank" rel="noopener noreferrer">TCP Congestion Control</a></li>
+        <li>RFC 8200 — <a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">IPv6 Specification</a>, RFC 4960 — <a href="https://www.rfc-editor.org/rfc/rfc4960" target="_blank" rel="noopener noreferrer">SCTP</a> e RFC 3550 — <a href="https://www.rfc-editor.org/rfc/rfc3550" target="_blank" rel="noopener noreferrer">RTP</a></li>
+        <li>IANA — <a href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml" target="_blank" rel="noopener noreferrer">Port Numbers</a> e <a href="https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml" target="_blank" rel="noopener noreferrer">TCP Option Kinds</a>, citadas pelo livro</li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/User_Datagram_Protocol" target="_blank" rel="noopener noreferrer">User Datagram Protocol</a>, <a href="https://pt.wikipedia.org/wiki/Transmission_Control_Protocol" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a>, <a href="https://en.wikipedia.org/wiki/SYN_cookies" target="_blank" rel="noopener noreferrer">SYN cookies</a>, <a href="https://en.wikipedia.org/wiki/Nagle%27s_algorithm" target="_blank" rel="noopener noreferrer">Nagle's algorithm</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-11/index.html" class="text-muted text-decoration-none">← Capítulo 11</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 12</span>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">Todos os capítulos</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap12.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

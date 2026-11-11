@@ -101,7 +101,7 @@
                 if (t.nome === "Cifra" && mallory.input.checked) { enviada = enviada.filter(function (x) { return x !== "cifra-128"; }); comprometido = true; }
                 linhas.push({ t: t, enviada: enviada, escolhido: negocia(enviada, t.s) });
             });
-            tabela.replaceChildren(el("table", { class: "table table-sm small mb-0" },
+            tabela.replaceChildren(el("div", { class: "table-responsive" }, el("table", { class: "table table-sm small mb-0" },
                 el("thead", null, el("tr", null, el("th", null, "Tipo"), el("th", null, "Lista do cliente (preferida primeiro)"), el("th", null, "Lista do servidor"), el("th", null, "Escolhido"))),
                 el("tbody", null, linhas.map(function (l) {
                     return el("tr", null, el("td", null, l.t.nome),
@@ -111,7 +111,7 @@
                         })),
                         el("td", { class: "mono" }, l.t.s.join(", ")),
                         el("td", { class: "mono fw-semibold" }, l.escolhido || "nenhum"));
-                }))));
+                })))));
             if (!comprometido) { u.marca(fb, true, "Sem ataque: em cada tipo vale o primeiro algoritmo do cliente que o servidor aceita, inclusive a cifra-128."); return; }
             if (hash.input.checked) {
                 vistos.detectado = true;
@@ -214,7 +214,7 @@
         }
         function desenha() {
             var m = mensagens();
-            area.replaceChildren(R.diagramaSequencia({ titulo: "Handshake do TLS 1.2 com troca de chaves " + troca.value + ".", colunas: ["Cliente", "Servidor"], eventos: m.slice(0, passo), passo: 30, margem: 160 }));
+            area.replaceChildren(R.diagramaSequencia({ titulo: "Handshake do TLS 1.2 com troca de chaves " + troca.value + ".", colunas: ["Cliente", "Servidor"], eventos: m.slice(0, passo), passo: 30, margem: 150, largura: 820 }));
             explica.textContent = passo ? m[passo - 1].txt : "Clique em \"Próxima mensagem\".";
         }
         function proxima() { if (passo < mensagens().length) passo++; desenha(); }
@@ -436,7 +436,7 @@
         raiz.append(el("div", { class: "small text-muted" }, "Os registros NSEC da zona do livro (pág. 184 do PDF)"), registros,
             u.campo("Consulte um nome", consulta), resposta,
             el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (15 pts): qual registro NSEC prova que cada nome não existe?"),
-            perguntas.map(function (p, i) { return el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-5 mono small" }, p[0]), el("div", { class: "col-sm-7" }, selects[i])); }),
+            el("div", null, perguntas.map(function (p, i) { return el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-5 mono small" }, p[0]), el("div", { class: "col-sm-7" }, selects[i])); })),
             u.botao("Conferir", "btn-primary mt-1", function () {
                 var certas = perguntas.filter(function (p, i) { return selects[i].value === p[1]; }).length;
                 u.marca(fb, certas === 3, certas === 3 ? "Os três certos. aaa.example.org viria antes de alpha: é o último NSEC, que dá a volta, que o cobre." : certas + " de 3 certos. Ordene os nomes e veja entre quais dois cada consulta cairia.");

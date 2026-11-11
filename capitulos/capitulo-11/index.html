@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 11 — Protocolos seguros: ssh, TLS e DNSSEC | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: telnet e ssh, negociação de algoritmos e ataques de rebaixamento, a chave do servidor, HMAC, o handshake e o protocolo de registro do TLS, TLS 1.3 e 0-RTT, envenenamento de cache do DNS e DNSSEC.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="11" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. DNS e correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. A web e as chamadas remotas</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-11/index.html">11. Protocolos seguros</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. UDP e TCP</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 11 · Parte 2: Protocolos</span>
+        <h1 class="display-5 mb-3">Protocolos seguros: ssh, TLS e DNSSEC</h1>
+        <p class="lead mb-4">
+            No Capítulo 8 você viu as ferramentas: cifras, hashes, assinaturas e Diffie-Hellman. Aqui elas viram
+            protocolos de verdade. O ssh substitui o telnet, o TLS protege a web e o e-mail, e o DNSSEC assina as
+            respostas do DNS. Em todos, os detalhes fazem a diferença: a ordem de uma lista, um número de sequência,
+            um resumo assinado.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#telnet">1. telnet</a>
+                    <a class="nav-link" href="#ssh-negociacao">2. ssh: negociação</a>
+                    <a class="nav-link" href="#ssh-chaves">3. ssh: chaves e mensagens</a>
+                    <a class="nav-link" href="#tls-inicio">4. Onde o TLS entra</a>
+                    <a class="nav-link" href="#tls12">5. Handshake do TLS 1.2</a>
+                    <a class="nav-link" href="#registro">6. Protocolo de registro</a>
+                    <a class="nav-link" href="#tls13">7. TLS 1.3</a>
+                    <a class="nav-link" href="#dns-ataques">8. Ataques ao DNS</a>
+                    <a class="nav-link" href="#dnssec">9. DNSSEC</a>
+                    <a class="nav-link" href="#exercicios-cap11">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Da criptografia aos protocolos</h2>
+    <p>
+        Um protocolo seguro precisa negociar algoritmos sem que um atacante escolha os mais fracos, autenticar o
+        outro lado, combinar chaves e proteger cada mensagem contra leitura, alteração e repetição. O livro mostra como
+        três protocolos resolvem isso: o ssh, para acesso remoto; o TLS, para qualquer aplicação sobre TCP; e o DNSSEC,
+        para as respostas do DNS.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar por que o <strong>telnet</strong> foi substituído pelo <strong>ssh</strong> e como o ssh negocia algoritmos sem permitir <strong>ataques de rebaixamento</strong>.</li>
+                <li>Descrever como o cliente ssh confia na <strong>chave do servidor</strong>, como as chaves de sessão são derivadas e o que é um <strong>HMAC</strong>.</li>
+                <li>Acompanhar o <strong>handshake do TLS 1.2</strong>, comparar as trocas RSA e DHE_RSA e explicar o <strong>sigilo futuro</strong>.</li>
+                <li>Explicar como o <strong>protocolo de registro</strong> detecta registros alterados, repetidos ou apagados, e o que o <strong>TLS 1.3</strong> mudou (1-RTT, 0-RTT).</li>
+                <li>Calcular a dificuldade do <strong>envenenamento de cache</strong> do DNS e seguir a <strong>cadeia de confiança do DNSSEC</strong>, inclusive nas respostas negativas (NSEC).</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o <a href="../capitulo-08/index.html">Capítulo 8</a> (Eve, Mallory, chave pública, hashes e
+                Diffie-Hellman) e a mensagem DNS do <a href="../capitulo-09/index.html">Capítulo 9</a>. O capítulo cobre
+                as seções 3.7 a 3.9 do livro (pág. 169–185 do PDF). Os resumos e assinaturas das simulações são
+                simplificados: mostram o mecanismo, mas não têm segurança.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 15 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. telnet -->
+<section id="telnet" class="chapter-section" data-conceito="telnet" data-titulo="telnet">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">Login remoto: telnet</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nos anos 1960 e 1970, um computador central era usado por vários terminais ligados por linhas seriais ou
+        modems. Acessar computadores remotos foi uma das primeiras motivações para criar redes (pág. 169 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O protocolo mais simples para isso é o <strong>telnet</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc854" target="_blank" rel="noopener noreferrer">RFC 854</a>). Ele roda sobre
+        TCP, na <strong>porta 23</strong>, numa conexão bidirecional: vão os caracteres digitados pelo usuário e voltam as
+        saídas dos programas no servidor, com algumas exceções, como caracteres de controle do terminal. O conjunto de
+        caracteres padrão é o ASCII; a <a href="https://www.rfc-editor.org/rfc/rfc5198" target="_blank" rel="noopener noreferrer">RFC 5198</a>
+        permite Unicode.
+    </p>
+    <p>
+        O problema é que <strong>tudo vai em claro</strong>: nome de usuário, senha e comandos. Qualquer um que escute a
+        rede, como a Eve do Capítulo 8, captura as senhas, e há programas que automatizam isso. Por isso o telnet quase
+        não é mais usado: foi substituído pelo ssh (pág. 169 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="telnet-captura"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Tudo vai em claro, inclusive a senha|O telnet não funciona sobre TCP|O telnet só aceita ASCII" data-answer="0" data-explain="Usuário, senha e comandos atravessam a rede sem cifra (pág. 169 do PDF)." data-hint="Pense no que Eve captura.">
+        <p class="fw-semibold mb-2">Qual é o principal problema do telnet?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>telnet: TCP, porta 23, caracteres em claro nos dois sentidos.</li>
+        <li>Quem escuta a rede captura senhas e comandos.</li>
+    </ul>
+</section>
+
+<!-- 2. ssh: negociação -->
+<section id="ssh-negociacao" class="chapter-section" data-conceito="ssh-negociacao" data-titulo="ssh: negociação">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">ssh: negociando os algoritmos</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Algoritmos criptográficos envelhecem: um que hoje é seguro pode ser quebrado daqui a alguns anos. Um protocolo
+        seguro precisa permitir trocar de algoritmo, e isso abre uma porta para o atacante.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>secure shell</strong> (ssh) foi criado por T. Ylönen em meados dos anos 1990 contra a escuta do telnet. A
+        versão original era livre; depois o autor criou uma empresa, e outros programadores continuaram uma versão de código
+        aberto, o <strong>OpenSSH</strong>. Hoje o ssh também transfere arquivos e cria túneis (pág. 169 do PDF).
+    </p>
+    <p>
+        O ssh roda direto sobre TCP. A primeira mensagem de cada lado é uma linha ASCII com a versão do protocolo e do
+        programa, útil para depurar. Depois vem a <strong>SSH_MSG_KEX_INIT</strong>, que negocia quatro tipos de
+        algoritmo (pág. 170 do PDF):
+    </p>
+    <ul>
+        <li><strong>troca de chaves</strong>, <strong>cifra</strong>, <strong>MAC</strong> (código de autenticação de
+            mensagem) e <strong>compressão</strong>.</li>
+    </ul>
+    <p>
+        Para cada tipo, o cliente manda uma lista ordenada dos que aceita, o preferido primeiro, e o servidor compara com a
+        sua; a IANA mantém a lista de nomes. A negociação permite evoluir: um cliente atualizado anuncia um algoritmo novo
+        como preferido, mesmo que o servidor ainda não o conheça. Para a compressão, os dois podem anunciar
+        <code>none</code>.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A regra exata está na <a href="https://www.rfc-editor.org/rfc/rfc4253#section-7.1" target="_blank" rel="noopener noreferrer">RFC 4253, seção 7.1</a>:
+        vale o <strong>primeiro algoritmo da lista do cliente</strong> que também está na lista do servidor. A ordem do
+        servidor não importa. Se não houver algoritmo em comum, a conexão falha.
+    </p>
+    <p>
+        O perigo é o <strong>ataque de rebaixamento</strong> (<em>downgrade</em>). Um cliente aceita uma cifra preferida, com
+        chaves de 128 bits, e uma antiga, de 48 bits, mantida por compatibilidade. Se Mallory apagar a preferida da lista
+        do cliente, o servidor escolhe a antiga, mais fácil de quebrar. O ssh se defende assim: o servidor assina um
+        <strong>hash de todas as mensagens da troca</strong>, inclusive as listas. Se Mallory mexeu numa delas, o hash que
+        o cliente calcula, com o que ele enviou, não bate com o que o servidor assinou, com o que ele recebeu (pág. 171 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="negociacao-ssh"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="aes128-ctr, o primeiro do cliente que o servidor aceita|aes256-gcm, o primeiro do servidor|chacha20, o mais moderno" data-answer="0" data-explain="Vale a ordem do cliente: o primeiro da lista dele que o servidor também tem (RFC 4253, complemento)." data-hint="De quem é a ordem que vale?">
+        <p class="fw-semibold mb-2">O cliente envia [chacha20, aes128-ctr, aes256-gcm]; o servidor aceita [aes256-gcm, aes128-ctr]. Qual cifra é escolhida?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="O servidor assina um hash de todas as mensagens trocadas, e o cliente confere|O cliente cifra a lista de algoritmos|O servidor ignora a ordem da lista" data-answer="0" data-explain="O hash assinado cobre as listas como cada lado as viu; qualquer alteração aparece (pág. 171 do PDF)." data-hint="Releia o segundo ponto sobre a troca de chaves do ssh.">
+        <p class="fw-semibold mb-2">Como o ssh impede o ataque de rebaixamento?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Linhas de versão, depois KEX_INIT com listas ordenadas para quatro tipos de algoritmo.</li>
+        <li>Agilidade de algoritmos é necessária, mas abre espaço para o rebaixamento.</li>
+        <li>Defesa: assinar um hash de todas as mensagens da negociação.</li>
+    </ul>
+</section>
+
+<!-- 3. ssh: chaves -->
+<section id="ssh-chaves" class="chapter-section" data-conceito="ssh-chaves" data-titulo="ssh: chaves e mensagens">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">ssh: a chave do servidor, as chaves de sessão e as mensagens</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No Capítulo 8, você viu que um Diffie-Hellman sem autenticação cai diante de Mallory. Como o cliente ssh sabe que
+        está falando com o servidor certo, se o ssh nem usa certificados?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>Com Diffie-Hellman, a troca de chaves do ssh funciona assim (pág. 170 do PDF):</p>
+    <ul>
+        <li>o cliente sorteia <em>a</em> e envia A = g<sup>a</sup> mod p;</li>
+        <li>o servidor sorteia <em>b</em>, envia B = g<sup>b</sup> mod p, calcula K = A<sup>b</sup> mod p e assina com a
+            sua chave privada hash(V<sub>C</sub> || V<sub>S</sub> || KEX_INIT<sub>C</sub> || KEX_INIT<sub>S</sub> ||
+            chave pública do servidor || A || B || K), em que V são as linhas de versão e KEX_INIT as mensagens de
+            negociação de cada lado;</li>
+        <li>o cliente calcula K = B<sup>a</sup> mod p e confere a assinatura.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        No livro, os cálculos de K estão trocados: o servidor calcularia K = B<sup>a</sup> e o cliente K = A<sup>b</sup>
+        (pág. 170 do PDF). Cada lado só conhece o próprio segredo, então o servidor usa o seu <em>b</em> sobre o A do
+        cliente, e o cliente usa o seu <em>a</em> sobre o B do servidor, como acima. O livro também troca a descrição de
+        V<sub>Client</sub> e V<sub>Server</sub>: V<sub>C</sub> é a linha de versão do cliente
+        (<a href="https://www.rfc-editor.org/rfc/rfc4253#section-8" target="_blank" rel="noopener noreferrer">RFC 4253, seção 8</a>).
+    </p>
+    <p>
+        O servidor <strong>não manda certificado</strong>. O ssh supõe que o cliente guarda as chaves públicas dos poucos
+        servidores que usa. Na primeira conexão, o cliente mostra a <strong>impressão digital</strong> (<em>fingerprint</em>)
+        da chave, que o administrador pode publicar, e o usuário decide se aceita. Se depois a chave recebida não
+        coincidir com a guardada, o aviso é forte: pode ser Mallory no meio, um servidor invadido ou apenas um servidor
+        reinstalado com chave nova (pág. 170–171 do PDF). Um registro DNS também pode publicar a impressão digital
+        (<a href="https://www.rfc-editor.org/rfc/rfc4255" target="_blank" rel="noopener noreferrer">RFC 4255</a>).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Chaves de uso único</strong> (pág. 171 do PDF). O ssh não usa K diretamente. Com a função de hash negociada,
+        ele deriva <strong>seis chaves</strong>: uma para cifrar e uma para autenticar em cada sentido, e uma para
+        inicializar a cifra (IV) em cada sentido. Nunca se usa a mesma chave para dois fins: se cliente e servidor
+        cifrassem com a mesma chave, um atacante poderia devolver ao cliente dados que ele próprio cifrou.
+    </div>
+    <p>
+        Depois disso, as mensagens seguem o <strong>Binary Packet Protocol</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc4253#section-6" target="_blank" rel="noopener noreferrer">RFC 4253</a>, pág. 171–172 do PDF):
+        tamanho (sem contar o MAC e o próprio campo), tamanho do enchimento, dados (comprimidos, se for o caso), pelo menos
+        4 bytes de enchimento aleatório para completar o bloco da cifra e o <strong>MAC</strong>. O MAC é calculado sobre um
+        <strong>contador de mensagens</strong>, que não é transmitido mas é contado nas duas pontas, e a mensagem em claro:
+        mac = MAC(chave, número_de_sequência || mensagem).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>HMAC</strong> (<a href="https://www.rfc-editor.org/rfc/rfc2104" target="_blank" rel="noopener noreferrer">RFC 2104</a>,
+        pág. 172 do PDF). Um MAC ingênuo, H(K, dados), não é seguro. Os protocolos da Internet usam o HMAC, que funciona com
+        qualquer hash H: H[K ⊕ opad, H(K ⊕ ipad, dados)], em que ipad é o byte 0x36 repetido, opad é o byte 0x5C repetido e
+        ⊕ é o ou exclusivo. É mais resistente do que H(K, dados) a alguns ataques, como você viu no Capítulo 8.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o SHA-1 usa blocos de 20 bytes e que ipad e opad têm 20 bytes (pág. 172 do PDF). O SHA-1 produz um
+        resumo de 20 bytes, mas processa <strong>blocos de 64 bytes</strong>, e é esse o tamanho de ipad, de opad e da chave
+        completada com zeros (RFC 2104, seção 2). O mesmo vale para o SHA-256. O exemplo de código 1 confere isso com o
+        módulo <code>hmac</code> do Python.
+    </p>
+    <p>
+        Para autenticar o <strong>usuário</strong>, o ssh aceita nome e senha, que agora vão dentro do canal cifrado, e dois
+        mecanismos de chave pública: o usuário guarda a sua chave pública no servidor e assina uma mensagem com a privada;
+        ou, entre hosts que confiam uns nos outros, como os de um laboratório, o computador onde Alice já entrou assina
+        uma mensagem confirmando isso, e o outro aceita sem pedir a senha de novo (pág. 172 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="chave-servidor"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Comparar a impressão digital mostrada com a publicada pelo administrador, por outro meio|Aceitar, porque o ssh já cifra tudo|Recusar sempre" data-answer="0" data-explain="Na primeira conexão, o cliente ainda não conhece a chave; quem decide é o usuário, e a impressão digital publicada é a referência (pág. 171 do PDF)." data-hint="O que o administrador do servidor pode publicar?">
+        <p class="fw-semibold mb-2">Primeira conexão a um servidor ssh: aparece a impressão digital da chave. O que fazer?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Seis|Duas|Uma" data-answer="0" data-explain="Cifra, MAC e IV, cada um em cada sentido (pág. 171 do PDF)." data-hint="Três usos, dois sentidos.">
+        <p class="fw-semibold mb-2">Quantas chaves o ssh deriva do segredo K?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Diffie-Hellman assinado pelo servidor; o cliente guarda a chave do servidor (sem certificado).</li>
+        <li>Chave diferente da guardada = aviso forte: Mallory, invasão ou reinstalação.</li>
+        <li>Seis chaves derivadas; cada mensagem tem enchimento e MAC com número de sequência; HMAC.</li>
+    </ul>
+</section>
+
+<!-- 4. TLS: onde entra -->
+<section id="tls-inicio" class="chapter-section" data-conceito="tls-inicio" data-titulo="Onde o TLS entra">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">TLS: onde ele entra e como começa</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O ssh resolve o login remoto. Mas a web, o e-mail e muitas outras aplicações também precisam de segurança. Em vez
+        de cada uma inventar a sua, existe uma camada comum.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Transport Layer Security</strong> começou com o nome Secure Socket Layer (SSL), que muita gente ainda usa.
+        Ele serve a qualquer aplicação que use o transporte confiável e roda sobretudo sobre TCP (há variantes para SCTP e
+        para UDP, o DTLS). O TLS cifra e autentica as SDUs da aplicação; o TCP entrega esse fluxo cifrado com
+        confiabilidade. Usam TLS o HTTP (o HTTPS), o SMTP, o POP, o IMAP e protocolos proprietários (pág. 172 do PDF).
+    </p>
+    <p>Há duas formas de começar uma sessão TLS (pág. 173 do PDF):</p>
+    <ol>
+        <li><strong>Uma porta dedicada</strong> para a versão "sobre TLS" do protocolo. Funciona, mas gasta duas portas por
+            aplicação:
+            <table class="table table-sm small mt-2 w-auto">
+                <thead><tr><th>Aplicação</th><th>Porta TCP</th><th>Porta TLS</th></tr></thead>
+                <tbody>
+                    <tr><td>POP3</td><td>110</td><td>995</td></tr>
+                    <tr><td>IMAP</td><td>143</td><td>993</td></tr>
+                    <tr><td>NNTP</td><td>119</td><td>563</td></tr>
+                    <tr><td>HTTP</td><td>80</td><td>443</td></tr>
+                    <tr><td>FTP</td><td>21</td><td>990</td></tr>
+                </tbody>
+            </table></li>
+        <li><strong>Uma mensagem especial</strong> na porta normal. No SMTP, o servidor anuncia <code>250-STARTTLS</code>
+            em resposta ao EHLO; o cliente envia <code>STARTTLS</code>, o servidor responde <code>220 Ready to start TLS</code>,
+            e a sessão TLS começa ali mesmo
+            (<a href="https://www.rfc-editor.org/rfc/rfc3207" target="_blank" rel="noopener noreferrer">RFC 3207</a>).</li>
+    </ol>
+    <p>
+        A sessão tem duas fases: o <strong>handshake</strong>, que negocia os parâmetros e as chaves, e a
+        <strong>transferência de dados</strong>, em que tudo vai cifrado e autenticado. O livro, e este capítulo, tratam do
+        caso da web: o TLS começa logo depois da conexão TCP.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Gasta duas portas por aplicação, e as portas são limitadas|É menos seguro que o STARTTLS|Não funciona com HTTP" data-answer="0" data-explain="Uma porta com e outra sem TLS para cada aplicação não escala (pág. 173 do PDF)." data-hint="Releia o argumento do livro sobre as portas.">
+        <p class="fw-semibold mb-2">Qual é a desvantagem de usar uma porta dedicada para a versão com TLS?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="993|143|995" data-answer="0" data-explain="IMAP: 143 sem TLS, 993 com TLS (pág. 173 do PDF)." data-hint="Veja a tabela.">
+        <p class="fw-semibold mb-2">Em que porta um cliente de e-mail acessa o IMAP direto sobre TLS?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>TLS (ex-SSL): cifra e autentica as SDUs da aplicação, sobre TCP.</li>
+        <li>Porta dedicada (443, 993, 995…) ou STARTTLS na porta normal.</li>
+        <li>Handshake, depois dados cifrados.</li>
+    </ul>
+</section>
+
+<!-- 5. TLS 1.2 -->
+<section id="tls12" class="chapter-section" data-conceito="tls12" data-titulo="Handshake do TLS 1.2">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">O handshake do TLS 1.2</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Antes do primeiro byte da página, o navegador e o servidor precisam concordar nos algoritmos, o navegador precisa
+        ter certeza de que fala com o site certo, e os dois precisam combinar chaves que Eve e Mallory não conheçam.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Esses são os três objetivos do handshake (pág. 173 do PDF). Em resumo: o cliente propõe um nonce aleatório; o
+        servidor responde com o seu nonce e um certificado; o cliente gera um segredo, cifra-o com a chave pública do
+        servidor e manda um <strong>Finished</strong> com um MAC de todas as mensagens; o servidor manda o seu Finished; e
+        os registros cifrados começam. Em detalhe (pág. 174–176 do PDF):
+    </p>
+    <ul>
+        <li><strong>ClientHello</strong>: a versão (1.2 e 1.3 estão em uso; as anteriores, sendo abandonadas), 32 bytes
+            aleatórios, a lista ordenada de <strong>suítes</strong> (ao contrário do ssh, o TLS negocia combinações prontas
+            de algoritmos), a compressão (desligada na prática, por causa de ataques) e as extensões.</li>
+        <li><strong>ServerHello</strong>: a versão e a suíte escolhidas, os 32 bytes do servidor e um Session Id, usado para
+            retomar a sessão depois.</li>
+        <li><strong>Certificate</strong>: a cadeia de certificados que liga o nome do domínio à chave pública do servidor,
+            validada com as chaves das autoridades raiz que o cliente já tem (a infraestrutura de chave pública). Os
+            certificados são codificados em ASN.1.</li>
+        <li><strong>ServerKeyExchange</strong>, se a troca de chaves precisar, e <strong>ServerHelloDone</strong>.</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Server Name Indication</strong> (<a href="https://www.rfc-editor.org/rfc/rfc6066" target="_blank" rel="noopener noreferrer">RFC 6066</a>,
+        pág. 174–175 do PDF). Na extensão SNI, o cliente diz no ClientHello o nome do servidor que quer. É o mesmo motivo do
+        Host: do HTTP (Capítulo 10): um servidor TLS hospeda vários sites e precisa saber qual certificado apresentar. Sem
+        o SNI, cada site com TLS precisaria de um endereço IP próprio.
+    </div>
+    <p>O livro compara duas trocas de chaves (pág. 175 do PDF):</p>
+    <ul>
+        <li><strong>RSA</strong>: o cliente sorteia 48 bytes, cifra-os com a chave pública do certificado e os envia no
+            ClientKeyExchange; o servidor decifra com a privada. Não há ServerKeyExchange.</li>
+        <li><strong>DHE_RSA</strong>: Diffie-Hellman efêmero. O servidor manda os seus parâmetros no ServerKeyExchange,
+            assinados com a chave privada RSA, e o cliente responde com a sua parte no ClientKeyExchange.</li>
+    </ul>
+    <p>
+        A diferença aparece contra Terrence, que gravou seis meses de tráfego do servidor de Bob e depois obtém a chave
+        privada dele. Com RSA, ele decifra todas as sessões gravadas. Com DHE_RSA, ele consegue se passar pelo servidor nas
+        sessões futuras, mas não decifra as passadas.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Sigilo futuro</strong> (<em>Perfect Forward Secrecy</em>, pág. 175–176 do PDF). Um protocolo tem PFS se as chaves
+        de sessões passadas continuam seguras mesmo que a chave privada do servidor vaze. DHE_RSA tem; RSA não. Como o DHE é
+        caro, as implementações preferem ECDHE_RSA ou ECDHE_ECDSA, com curvas elípticas.
+    </div>
+    <p>
+        Para fechar, cada lado manda <strong>ChangeCipherSpec</strong> (a partir daqui, cifro) e <strong>Finished</strong>,
+        a primeira mensagem cifrada, com um resumo de todo o handshake. É ele que confirma que ninguém alterou as mensagens
+        anteriores (pág. 176 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Suítes</strong> (pág. 176 do PDF). O nome diz tudo: <code>TLS_DHE_RSA_WITH_AES_128_GCM_SHA256</code> é troca
+        DHE_RSA, AES de 128 bits no modo GCM para cifrar e SHA-256. NULL indica "nenhum algoritmo":
+        <code>TLS_ECDH_RSA_WITH_NULL_SHA</code> não cifra nada. A lista oficial é mantida pela
+        <a href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4" target="_blank" rel="noopener noreferrer">IANA</a>.
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="handshake-tls"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Troca ECDHE com assinatura RSA, AES de 256 bits em GCM e SHA-384|Troca RSA, AES de 384 bits e SHA-256|Troca ECDHE sem cifra" data-answer="0" data-explain="Troca de chaves e autenticação, depois de WITH a cifra com tamanho e modo, e no fim o hash (pág. 176 do PDF)." data-hint="Leia o nome da esquerda para a direita.">
+        <p class="fw-semibold mb-2">O que significa TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Só as futuras: as passadas usaram segredos efêmeros já descartados|Todas as sessões gravadas|Nenhuma, nem as futuras" data-answer="0" data-explain="Com DHE, a chave privada só assina; ela permite se passar pelo servidor dali para frente, mas não recupera os segredos antigos (pág. 175 do PDF)." data-hint="O que a chave privada faz numa troca DHE_RSA?">
+        <p class="fw-semibold mb-2">Com DHE_RSA, quais sessões Terrence consegue atacar depois de roubar a chave privada?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>ClientHello → ServerHello, Certificate, [ServerKeyExchange], ServerHelloDone → ClientKeyExchange, ChangeCipherSpec, Finished → ChangeCipherSpec, Finished.</li>
+        <li>SNI: o nome do site no ClientHello. Finished: resumo autenticado do handshake.</li>
+        <li>RSA: sem sigilo futuro. (EC)DHE: com sigilo futuro.</li>
+    </ul>
+</section>
+
+<!-- 6. Registro -->
+<section id="registro" class="chapter-section" data-conceito="registro" data-titulo="Protocolo de registro">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">O protocolo de registro</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Com as chaves combinadas, os dados viajam cifrados. Cifrar impede Eve de ler; mas e se Mallory repetir, apagar ou
+        alterar um pedaço?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Depois do handshake, os dados vão em <strong>registros</strong>, com chaves diferentes para cifrar e para autenticar,
+        todas derivadas do segredo comum (<a href="https://www.rfc-editor.org/rfc/rfc5246" target="_blank" rel="noopener noreferrer">RFC 5246</a>).
+        Cada registro tem quatro campos (pág. 176 do PDF):
+    </p>
+    <ul>
+        <li><strong>Type</strong>: application data (dados cifrados, o mais comum), handshake, change_cipher_spec ou alert;</li>
+        <li><strong>Protocol Version</strong>: versão maior e menor;</li>
+        <li><strong>Length</strong>: no máximo 16 384 bytes;</li>
+        <li>os dados cifrados.</li>
+    </ul>
+    <p>
+        No método do exemplo do livro, o TLS primeiro calcula um HMAC sobre o <strong>número de sequência</strong>, o
+        cabeçalho e o texto em claro: MAC(SeqNum, Header, PlainText). O número de sequência aumenta a cada registro e é
+        contado nas duas pontas, sem ser transmitido. É ele que barra a repetição de registros (pág. 177 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>MAC e depois cifra, ou cifra e depois MAC?</strong> (pág. 177 do PDF). Calcular o MAC e cifrar dados e MAC
+        juntos obriga o receptor a decifrar dados possivelmente alterados antes de conferir a autenticidade. É melhor cifrar
+        primeiro e calcular o MAC sobre o cifrado (<em>encrypt-then-MAC</em>,
+        <a href="https://www.rfc-editor.org/rfc/rfc7366" target="_blank" rel="noopener noreferrer">RFC 7366</a>): o receptor
+        confere o MAC antes de decifrar.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que a versão atual do TLS usa "MAC e depois cifra" (pág. 177 do PDF). Isso vale para as suítes de
+        bloco do TLS 1.2. O TLS 1.3, que o próprio livro descreve logo depois, só admite cifras <strong>AEAD</strong>
+        (como AES-GCM e ChaCha20-Poly1305), que cifram e autenticam numa só operação
+        (<a href="https://www.rfc-editor.org/rfc/rfc8446#section-5.2" target="_blank" rel="noopener noreferrer">RFC 8446, seção 5.2</a>).
+        Na mesma página, "AEA" é um erro de digitação de AEAD.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="registro-tls"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O receptor calcula o MAC com outro número de sequência, e ele não confere|O registro repetido chega com o mesmo número de sequência no cabeçalho|O TCP descarta registros repetidos" data-answer="0" data-explain="O número de sequência entra no MAC mas não viaja; o receptor usa o próximo número esperado, e o MAC antigo não bate." data-hint="O número de sequência é transmitido?">
+        <p class="fw-semibold mb-2">Como o receptor TLS percebe que Mallory repetiu um registro inteiro, com o MAC original?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Registro: tipo, versão, tamanho (até 16 384 bytes) e dados.</li>
+        <li>MAC sobre número de sequência + cabeçalho + dados: barra alteração, repetição e remoção.</li>
+        <li>Encrypt-then-MAC é melhor; o TLS 1.3 usa AEAD.</li>
+    </ul>
+</section>
+
+<!-- 7. TLS 1.3 -->
+<section id="tls13" class="chapter-section" data-conceito="tls13" data-titulo="TLS 1.3">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Melhorando o TLS: o TLS 1.3</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No começo, só bancos e lojas usavam TLS. Com processadores mais rápidos, ele passou a proteger tudo. Pela telemetria
+        do Firefox, 30% das páginas eram carregadas por HTTPS em 2013, e 80% em outubro de 2019 (pág. 177 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Medições mostram como o ecossistema mudou (pág. 177 do PDF): o RC4, usado em 60% das conexões em 2012, caiu a partir
+        de 2015; as cifras AEAD passaram de 90%; o TLS 1.0 e 1.1 quase sumiram. Depois das revelações de Snowden, em 2013, a
+        IETF declarou a vigilância em massa um ataque (<a href="https://www.rfc-editor.org/rfc/rfc7258" target="_blank" rel="noopener noreferrer">RFC 7258</a>)
+        e passou a favorecer o sigilo futuro: desde 2014, o ECDHE supera o RSA, e em 2018 estava em mais de 90% das
+        conexões. Iniciativas como o <a href="https://letsencrypt.org" target="_blank" rel="noopener noreferrer">Let's Encrypt</a>
+        tornaram os certificados fáceis e gratuitos.
+    </p>
+    <p>
+        Os objetivos do TLS 1.3 eram simplificar, aumentar a segurança e a privacidade e <strong>reduzir a latência</strong>.
+        Com TLS 1.2, baixar uma página custa no mínimo <strong>quatro RTTs</strong>: um para o TCP, um para ClientHello e
+        ServerHello, um para a troca de chaves e um para o GET e a resposta (pág. 178 do PDF). O TLS 1.3:
+    </p>
+    <ul>
+        <li>tem só cinco suítes (<a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener noreferrer">RFC 8446</a>),
+            e todas as implementações devem aceitar <code>TLS_AES_128_GCM_SHA256</code>;</li>
+        <li>removeu todas as suítes sem sigilo futuro e a compressão;</li>
+        <li>exige Diffie-Hellman com poucos parâmetros possíveis. O cliente <strong>adivinha</strong> os parâmetros do
+            servidor e já manda g<sup>c</sup> no ClientHello; o servidor responde com g<sup>s</sup> e, como já conhece a
+            chave, manda cifrados o certificado, a assinatura do handshake e o Finished. O handshake leva <strong>um RTT</strong>;
+            se o cliente adivinhou errado, o servidor indica os parâmetros certos e perde-se um RTT (pág. 178–179 do PDF);</li>
+        <li>permite o <strong>0-RTT</strong>: se cliente e servidor já combinaram uma chave numa sessão anterior (uma chave
+            pré-compartilhada, guardada em cache), o cliente manda dados cifrados junto com o ClientHello (pág. 179 do PDF).</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Empresas, privacidade e TLS</strong> (pág. 178 do PDF). Algumas empresas, sobretudo financeiras, queriam
+        continuar decifrando o próprio tráfego TLS e pediram à IETF que mantivesse as suítes RSA, sem sigilo futuro. A IETF
+        não aceitou; elas levaram a proposta ao ETSI, que adotou uma variante do TLS 1.3 sem sigilo futuro.
+    </div>
+    <p>
+        Na web, só o servidor apresenta certificado. Em redes corporativas, por exemplo em VPNs, o servidor pode pedir o
+        do cliente com uma mensagem <strong>CertificateRequest</strong>; o cliente responde com o seu certificado e assina o
+        handshake com a sua chave privada (pág. 180–181 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Os dados enviados em 0-RTT não têm proteção contra repetição: Mallory pode gravá-los e reenviá-los ao servidor. Por
+        isso só devem ser usados para pedidos que possam ser repetidos sem dano, os idempotentes do Capítulo 10
+        (<a href="https://www.rfc-editor.org/rfc/rfc8446#section-8" target="_blank" rel="noopener noreferrer">RFC 8446, seção 8</a>).
+        O TLS 1.0 e o 1.1 foram oficialmente abandonados em 2021
+        (<a href="https://www.rfc-editor.org/rfc/rfc8996" target="_blank" rel="noopener noreferrer">RFC 8996</a>).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="rtts-tls"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque o cliente já manda g^c no ClientHello, adivinhando os parâmetros|Porque o TLS 1.3 não autentica o servidor|Porque o TLS 1.3 não usa TCP" data-answer="0" data-explain="Com poucos parâmetros possíveis, o cliente começa o Diffie-Hellman na primeira mensagem (pág. 178–179 do PDF)." data-hint="O que vai no ClientHello do TLS 1.3?">
+        <p class="fw-semibold mb-2">Por que o handshake do TLS 1.3 leva só um RTT?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Uma chave pré-compartilhada de uma sessão anterior|O certificado do servidor|O nome do servidor (SNI)" data-answer="0" data-explain="Sem a chave do Diffie-Hellman ainda, o cliente cifra com uma chave guardada de uma sessão anterior (pág. 179 do PDF)." data-hint="Com que chave o cliente cifra antes de receber o ServerHello?">
+        <p class="fw-semibold mb-2">O que o cliente precisa ter para enviar dados em 0-RTT?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>TLS 1.2: 4 RTTs até a resposta. TLS 1.3: 3. TLS 1.3 com 0-RTT: 2.</li>
+        <li>TLS 1.3: cinco suítes, todas com sigilo futuro e AEAD; sem compressão; certificado cifrado.</li>
+        <li>0-RTT exige uma chave pré-compartilhada e só serve para pedidos idempotentes.</li>
+    </ul>
+</section>
+
+<!-- 8. Ataques ao DNS -->
+<section id="dns-ataques" class="chapter-section" data-conceito="dns-ataques" data-titulo="Ataques ao DNS">
+    <span class="kicker">Conceito 8</span>
+    <h2 class="section-title">Ataques ao DNS</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        As pessoas escolhem os servidores pelo nome. Se o DNS der uma resposta falsa, a conexão vai para o lugar errado,
+        e isso já aconteceu várias vezes (pág. 181 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A <a href="https://www.rfc-editor.org/rfc/rfc3833" target="_blank" rel="noopener noreferrer">RFC 3833</a> analisa as
+        ameaças. O livro discute três (pág. 181–183 do PDF):
+    </p>
+    <ol>
+        <li><strong>Escuta</strong>: quem captura as consultas de Alice descobre os nomes que ela usa. O DNS original não se
+            preocupava com isso.</li>
+        <li><strong>Homem no meio</strong>: Mallory, entre Alice e o resolvedor, troca as respostas. É difícil se o resolvedor
+            está num datacenter protegido, mas fácil se Mallory controla o ponto de acesso Wi-Fi de Alice.</li>
+        <li><strong>Respostas forjadas</strong>, sem estar no caminho. Alice só aceita uma resposta cujo
+            <strong>Identification</strong>, de 16 bits, case com uma consulta pendente. Mallory prevê um nome que Alice vai
+            consultar e manda respostas falsas, cada uma com um ID, esperando que uma chegue antes da verdadeira. São só
+            65 536 IDs, e os enlaces rápidos de hoje dão conta. Ele também precisa forjar o endereço de origem, o que muitas
+            redes ainda permitem. Se o alvo for o resolvedor de uma empresa ou provedor, com TTL longo, o estrago é grande.</li>
+    </ol>
+    <p>
+        Aumentar o campo de ID seria o ideal, mas a mensagem DNS não tem número de versão. A saída foi sortear também a
+        <strong>porta UDP de origem</strong> de cada consulta: o atacante precisa acertar 16 bits de ID e 16 bits de porta,
+        quase 2<sup>32</sup> combinações. A maioria das implementações faz isso (pág. 182 do PDF).
+    </p>
+    <p>
+        Há ainda o envenenamento pelos <strong>registros adicionais</strong>. Mallory controla mallory.net e atrai Alice a
+        www.mallory.net, com spam ou um anúncio. Na resposta, o servidor dele inclui um AAAA para
+        <strong>www.example.net</strong> apontando para um endereço dele. Se a biblioteca de Alice não conferir a resposta,
+        o cache passa a mandar www.example.net para Mallory (pág. 182–183 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Hoje os resolvedores só aceitam registros adicionais do domínio pelo qual o servidor responde (a regra do
+        <em>bailiwick</em>). Em 2008, Dan Kaminsky mostrou como forjar respostas em série para nomes inexistentes, o que
+        tornou o sorteio da porta obrigatório (<a href="https://en.wikipedia.org/wiki/DNS_spoofing" target="_blank" rel="noopener noreferrer">Wikipedia: DNS spoofing</a>).
+        Contra a escuta, o DNS sobre TLS (<a href="https://www.rfc-editor.org/rfc/rfc7858" target="_blank" rel="noopener noreferrer">RFC 7858</a>)
+        e o DNS sobre HTTPS (<a href="https://www.rfc-editor.org/rfc/rfc8484" target="_blank" rel="noopener noreferrer">RFC 8484</a>),
+        que o livro dizia ainda não estarem implantados, já vêm nos principais navegadores e sistemas.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="envenenamento-dns"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque a mensagem DNS não tem número de versão para anunciar um formato novo|Porque o UDP limita o tamanho das mensagens|Porque o ID não é usado pelos resolvedores" data-answer="0" data-explain="Sem versão, não há como os dois lados saberem que o campo mudou (pág. 182 do PDF)." data-hint="O que permitiria mudar o formato de forma compatível?">
+        <p class="fw-semibold mb-2">Por que não se aumentou simplesmente o campo Identification?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Escuta, homem no meio e respostas forjadas.</li>
+        <li>Porta fixa: 2<sup>16</sup> combinações. Porta sorteada: cerca de 2<sup>32</sup>.</li>
+        <li>Registros adicionais de outros domínios não devem ser aceitos.</li>
+    </ul>
+</section>
+
+<!-- 9. DNSSEC -->
+<section id="dnssec" class="chapter-section" data-conceito="dnssec" data-titulo="DNSSEC">
+    <span class="kicker">Conceito 9</span>
+    <h2 class="section-title">DNSSEC</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Sortear portas dificulta o ataque, mas não prova que a resposta é verdadeira. Para isso é preciso assinar os
+        registros.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>DNSSEC</strong> (<a href="https://www.rfc-editor.org/rfc/rfc4033" target="_blank" rel="noopener noreferrer">RFCs 4033</a>,
+        <a href="https://www.rfc-editor.org/rfc/rfc4034" target="_blank" rel="noopener noreferrer">4034</a> e
+        <a href="https://www.rfc-editor.org/rfc/rfc4035" target="_blank" rel="noopener noreferrer">4035</a>) usa chave
+        pública para <strong>autenticar</strong> os registros. Cada zona tem um par de chaves, usado só para assinar. Os
+        registros não são cifrados: o DNSSEC não dá confidencialidade. Ele cria quatro tipos de registro (pág. 183 do PDF):
+    </p>
+    <ul>
+        <li><strong>DNSKEY</strong>: a chave pública da zona, com a identificação do algoritmo;</li>
+        <li><strong>RRSIG</strong>: a assinatura de um conjunto de registros, com o algoritmo, a chave usada, o TTL original
+            e o período de validade;</li>
+        <li><strong>DS</strong>: um resumo da chave pública de uma zona filha, guardado na zona mãe;</li>
+        <li><strong>NSEC</strong>: usado nas respostas negativas.</li>
+    </ul>
+    <p>
+        A confiança parte de uma <strong>âncora</strong>: a chave pública da raiz, obtida fora do DNS. Para validar
+        www.example.org, a resolvedora confere a assinatura do DS de .org com a chave da raiz; confere que a DNSKEY de .org
+        tem o resumo do DS; repete o processo para example.org; e, com a chave de example.org, valida a assinatura do AAAA.
+        Basta haver uma cadeia DS → DNSKEY desde a âncora (pág. 183 do PDF).
+    </p>
+    <p>
+        As assinaturas podem ser feitas <strong>fora de linha</strong>, em outro computador. Isso evita que um atacante force
+        o servidor a fazer muitas assinaturas (negação de serviço) e mantém a chave privada longe do servidor. Por isso o
+        RRSIG guarda o TTL original, já que os caches diminuem o TTL, e um período de validade, que impede que assinaturas
+        antigas fiquem para sempre nos caches quando a chave é trocada (pág. 183–184 do PDF).
+    </p>
+    <p>
+        E como provar que um nome <strong>não existe</strong>, sem assinar em tempo real? Respostas negativas são frequentes,
+        e os resolvedores as guardam em cache (<a href="https://www.rfc-editor.org/rfc/rfc2308" target="_blank" rel="noopener noreferrer">RFC 2308</a>).
+        O <strong>NSEC</strong> usa a ordem dos nomes: cada nome aponta para o seguinte, e o último volta ao primeiro. Na zona
+        do livro, com alpha, beta e gamma, uma consulta por delta recebe "beta NSEC gamma", assinado: entre beta e gamma não
+        há nada. Para pi, que viria depois de gamma, a prova é "gamma NSEC alpha" (pág. 184–185 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Na prática, cada zona costuma ter duas chaves: uma para assinar as próprias chaves (KSK), cujo resumo vai no DS, e
+        outra para assinar os registros (ZSK). A âncora da raiz é publicada pela <a href="https://www.iana.org/dnssec/files" target="_blank" rel="noopener noreferrer">IANA</a>.
+        Seguindo os NSEC, qualquer um lista todos os nomes de uma zona; o NSEC3
+        (<a href="https://www.rfc-editor.org/rfc/rfc5155" target="_blank" rel="noopener noreferrer">RFC 5155</a>) usa resumos dos
+        nomes para dificultar isso.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização — a cadeia de confiança</h3>
+    <div class="demo-box" data-sim="cadeia-dnssec"></div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização — respostas negativas com NSEC</h3>
+    <div class="demo-box" data-sim="nsec"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Não: o DNSSEC autentica, mas não cifra|Sim: os registros vão cifrados|Só as respostas negativas" data-answer="0" data-explain="O DNSSEC não oferece confidencialidade (pág. 183 do PDF); para isso existem o DNS sobre TLS e sobre HTTPS." data-hint="O que o DNSSEC acrescenta aos registros?">
+        <p class="fw-semibold mb-2">O DNSSEC impede Eve de ver quais nomes Alice consulta?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Na zona mãe (.org), assinado pela chave de .org|Na própria zona example.org|Na resolvedora de Alice" data-answer="0" data-explain="O DS fica na zona mãe e certifica a chave da filha (pág. 183 do PDF)." data-hint="Quem certifica a chave de uma zona?">
+        <p class="fw-semibold mb-2">Onde fica o registro DS que certifica a chave de example.org?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>DNSKEY, RRSIG, DS e NSEC; autenticação sem confidencialidade.</li>
+        <li>Cadeia DS → DNSKEY desde a âncora da raiz.</li>
+        <li>Assinaturas fora de linha; NSEC prova que um nome não existe.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap11" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> o cliente ssh envia, para MAC, [hmac-sha2-512, hmac-sha2-256, hmac-sha1]; o servidor aceita [hmac-sha1, hmac-sha2-256]. Qual é escolhido?
+            <details><summary>Ver solução</summary><p class="mb-0">hmac-sha2-256: o primeiro da lista do cliente que o servidor aceita.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> com RTT de 80 ms, quanto tempo leva até a resposta HTTP com TLS 1.2, com TLS 1.3 e com TLS 1.3 em 0-RTT?
+            <details><summary>Ver solução</summary><p class="mb-0">4 × 80 = 320 ms; 3 × 80 = 240 ms; 2 × 80 = 160 ms.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Mallory consegue enviar 4096 respostas falsas por consulta. Qual é a chance de sucesso numa consulta com porta fixa e com porta sorteada?
+            <details><summary>Ver solução</summary><p class="mb-0">Porta fixa: 4096 / 65 536 = 1/16, cerca de 6%. Porta sorteada: 4096 / 2<sup>32</sup> ≈ 0,0001%.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> numa zona com os nomes ana, bia, caio e duda (todos em .example.org), qual NSEC prova que carla.example.org não existe? E zeca.example.org?
+            <details><summary>Ver solução</summary><p class="mb-0">carla fica entre caio e duda: "caio NSEC duda". zeca vem depois de duda: "duda NSEC ana", o registro que dá a volta.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> por que o Finished do TLS precisa cobrir todas as mensagens do handshake, e não só as últimas?
+            <details><summary>Ver solução</summary><p class="mb-0">Porque as primeiras mensagens, como o ClientHello com a lista de suítes, vão em claro e podem ser alteradas por Mallory para forçar uma suíte fraca (rebaixamento). Se o Finished resume tudo, qualquer alteração é detectada, como no hash assinado do ssh.</p></details></li>
+        <li><strong>Desafio:</strong> um servidor usa TLS 1.2 com troca RSA. A empresa grava todo o tráfego para auditoria e guarda a chave privada. Que propriedade de segurança está faltando, e o que mudaria com TLS 1.3?
+            <details><summary>Ver solução</summary><p class="mb-0">Falta o sigilo futuro: quem tiver a chave privada (inclusive um invasor que a roube) decifra todo o tráfego gravado. O TLS 1.3 só tem trocas Diffie-Hellman efêmeras: a chave privada só assina, e o tráfego antigo não pode ser decifrado com ela. Foi por isso que algumas empresas pediram, sem sucesso, que a IETF mantivesse o RSA.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Cinco trechos em Python que rodam no navegador, sem acessar a rede. Os números pequenos servem só para ver os mecanismos. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. HMAC feito à mão</h3>
+    <pre class="code-block"><code>import hashlib, hmac
+
+def hmac_a_mao(chave, dados, H=hashlib.sha256):
+    B = H().block_size                                 # 64 bytes para SHA-1 e SHA-256
+    if len(chave) > B:
+        chave = H(chave).digest()
+    chave = chave.ljust(B, b"\x00")                    # completa a chave até o tamanho do bloco
+    ipad = bytes(b ^ 0x36 for b in chave)
+    opad = bytes(b ^ 0x5C for b in chave)
+    return H(opad + H(ipad + dados).digest()).hexdigest()
+
+chave, msg = b"chave secreta", b"PAGUE 100 A BOB"
+print("à mão:      ", hmac_a_mao(chave, msg))
+print("módulo hmac:", hmac.new(chave, msg, hashlib.sha256).hexdigest())
+print("SHA-1: bloco de", hashlib.sha1().block_size, "bytes, resumo de", hashlib.sha1().digest_size, "bytes")
+
+# por que não basta H(chave + dados)? Um MAC ingênuo:
+print("ingênuo:    ", hashlib.sha256(chave + msg).hexdigest())</code></pre>
+
+    <h3 class="h6 mt-4">2. Negociação do ssh e o rebaixamento</h3>
+    <pre class="code-block"><code>import hashlib
+
+def negocia(cliente, servidor):
+    """RFC 4253: vale o primeiro algoritmo da lista do cliente que o servidor também aceita."""
+    for alg in cliente:
+        if alg in servidor:
+            return alg
+    return None                                        # sem algoritmo em comum: a conexão falha
+
+cliente = ["cifra-128", "cifra-48"]                    # o exemplo do livro: 128 bits preferida, 48 bits antiga
+servidor = ["cifra-48", "cifra-128"]
+print("negociado:", negocia(cliente, servidor))
+
+# Mallory apaga a cifra forte da lista que o cliente enviou
+recebida_pelo_servidor = ["cifra-48"]
+print("com Mallory:", negocia(recebida_pelo_servidor, servidor))
+
+# Defesa do ssh: o servidor assina um hash de TODAS as mensagens que viu, e o cliente compara com o que enviou
+def resumo(*mensagens):
+    return hashlib.sha256("|".join(",".join(m) for m in mensagens).encode()).hexdigest()[:16]
+
+visto_pelo_servidor = resumo(recebida_pelo_servidor, servidor)
+enviado_pelo_cliente = resumo(cliente, servidor)
+print("hash do servidor:", visto_pelo_servidor)
+print("hash do cliente: ", enviado_pelo_cliente)
+print("ataque detectado:", visto_pelo_servidor != enviado_pelo_cliente)</code></pre>
+
+    <h3 class="h6 mt-4">3. Diffie-Hellman do ssh e as seis chaves</h3>
+    <pre class="code-block"><code>import hashlib, random
+
+p, g = 4294967291, 5                                   # primo pequeno, só para o exemplo (o ssh usa 2048 bits ou curvas)
+rnd = random.Random(7)
+a = rnd.randrange(2, p - 1)                            # segredo do cliente
+b = rnd.randrange(2, p - 1)                            # segredo do servidor
+A = pow(g, a, p)                                       # o cliente envia A
+B = pow(g, b, p)                                       # o servidor envia B
+K_servidor = pow(A, b, p)                              # o servidor calcula com o SEU segredo b
+K_cliente = pow(B, a, p)                               # o cliente calcula com o SEU segredo a
+print("A =", A, " B =", B)
+print("mesma chave K?", K_cliente == K_servidor)
+
+# hash da troca: tudo o que foi negociado entra nele (versões, KEXINIT, chave do servidor, A, B, K)
+H = hashlib.sha256(f"SSH-2.0-cliente|SSH-2.0-servidor|kexinit-c|kexinit-s|chave-pub-servidor|{A}|{B}|{K_cliente}".encode()).digest()
+id_sessao = H
+
+# RFC 4253, seção 7.2: seis chaves derivadas de K e H, uma para cada uso
+usos = {"A": "IV cliente→servidor", "B": "IV servidor→cliente",
+        "C": "cifra cliente→servidor", "D": "cifra servidor→cliente",
+        "E": "MAC cliente→servidor", "F": "MAC servidor→cliente"}
+for letra, uso in usos.items():
+    chave = hashlib.sha256(str(K_cliente).encode() + H + letra.encode() + id_sessao).hexdigest()
+    print(f"{letra} {uso:24} {chave[:16]}…")</code></pre>
+
+    <h3 class="h6 mt-4">4. A chance do envenenamento de cache</h3>
+    <pre class="code-block"><code>def chance_por_tentativa(respostas_falsas, porta_aleatoria):
+    """Chance de uma das respostas falsas acertar o ID (e a porta) antes da resposta verdadeira."""
+    espaco = 2**16 * (2**16 if porta_aleatoria else 1)
+    return min(1.0, respostas_falsas / espaco)
+
+def chance_em(tentativas, respostas_falsas, porta_aleatoria):
+    p = chance_por_tentativa(respostas_falsas, porta_aleatoria)
+    return 1 - (1 - p) ** tentativas                   # pelo menos um acerto em várias tentativas
+
+for porta in (False, True):
+    nome = "porta aleatória" if porta else "porta fixa     "
+    for k in (100, 1000, 10000):
+        print(f"{nome} k={k:5}: 1 tentativa {chance_por_tentativa(k, porta):.6f}  "
+              f"100 tentativas {chance_em(100, k, porta):.6f}")</code></pre>
+
+    <h3 class="h6 mt-4">5. NSEC: provando que um nome não existe</h3>
+    <pre class="code-block"><code>def ordem_canonica(nome):
+    """Ordem do DNSSEC (RFC 4034, seção 6.1): compara os rótulos da direita para a esquerda."""
+    return list(reversed(nome.lower().rstrip(".").split(".")))
+
+zona = ["alpha.example.org", "beta.example.org", "gamma.example.org"]   # o exemplo do livro
+zona.sort(key=ordem_canonica)
+
+# cada nome aponta para o seguinte; o último volta para o primeiro
+nsec = {nome: zona[(i + 1) % len(zona)] for i, nome in enumerate(zona)}
+for dono, proximo in nsec.items():
+    print(f"{dono} NSEC {proximo}")
+
+def prova_inexistencia(consulta):
+    """Devolve o registro NSEC que cobre o nome consultado (ou None se o nome existe)."""
+    if consulta in nsec:
+        return None
+    chave = ordem_canonica(consulta)
+    for dono, proximo in nsec.items():
+        depois_do_dono = ordem_canonica(dono) &lt; chave
+        antes_do_proximo = chave &lt; ordem_canonica(proximo)
+        ultimo = ordem_canonica(proximo) &lt;= ordem_canonica(dono)        # o registro que dá a volta
+        if (depois_do_dono and antes_do_proximo) or (ultimo and (depois_do_dono or antes_do_proximo)):
+            return f"{dono} NSEC {proximo}"
+
+for q in ["delta.example.org", "pi.example.org"]:
+    print(q, "->", prova_inexistencia(q))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seções 3.7 "Remote login", 3.8 "Transport Layer Security" e 3.9 "Securing the Domain Name System" (pág. 169–185 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 854 — <a href="https://www.rfc-editor.org/rfc/rfc854" target="_blank" rel="noopener noreferrer">Telnet Protocol Specification</a> e RFC 5198 — <a href="https://www.rfc-editor.org/rfc/rfc5198" target="_blank" rel="noopener noreferrer">Unicode Format for Network Interchange</a></li>
+        <li>RFC 4251 — <a href="https://www.rfc-editor.org/rfc/rfc4251" target="_blank" rel="noopener noreferrer">The Secure Shell (SSH) Protocol Architecture</a>, RFC 4253 — <a href="https://www.rfc-editor.org/rfc/rfc4253" target="_blank" rel="noopener noreferrer">SSH Transport Layer Protocol</a> e RFC 4255 — <a href="https://www.rfc-editor.org/rfc/rfc4255" target="_blank" rel="noopener noreferrer">SSH Key Fingerprints in DNS</a></li>
+        <li>RFC 2104 — <a href="https://www.rfc-editor.org/rfc/rfc2104" target="_blank" rel="noopener noreferrer">HMAC: Keyed-Hashing for Message Authentication</a></li>
+        <li>RFC 5246 — <a href="https://www.rfc-editor.org/rfc/rfc5246" target="_blank" rel="noopener noreferrer">TLS 1.2</a>, RFC 8446 — <a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener noreferrer">TLS 1.3</a> e RFC 8996 — <a href="https://www.rfc-editor.org/rfc/rfc8996" target="_blank" rel="noopener noreferrer">Deprecating TLS 1.0 and TLS 1.1</a> (complemento)</li>
+        <li>RFC 6066 — <a href="https://www.rfc-editor.org/rfc/rfc6066" target="_blank" rel="noopener noreferrer">TLS Extensions (SNI)</a>, RFC 7525 — <a href="https://www.rfc-editor.org/rfc/rfc7525" target="_blank" rel="noopener noreferrer">Recommendations for Secure Use of TLS</a> e RFC 7366 — <a href="https://www.rfc-editor.org/rfc/rfc7366" target="_blank" rel="noopener noreferrer">Encrypt-then-MAC</a></li>
+        <li>RFC 3207 — <a href="https://www.rfc-editor.org/rfc/rfc3207" target="_blank" rel="noopener noreferrer">SMTP over TLS (STARTTLS)</a> e RFC 7258 — <a href="https://www.rfc-editor.org/rfc/rfc7258" target="_blank" rel="noopener noreferrer">Pervasive Monitoring Is an Attack</a></li>
+        <li>RFC 3833 — <a href="https://www.rfc-editor.org/rfc/rfc3833" target="_blank" rel="noopener noreferrer">Threat Analysis of the Domain Name System</a> e RFC 2308 — <a href="https://www.rfc-editor.org/rfc/rfc2308" target="_blank" rel="noopener noreferrer">Negative Caching of DNS Queries</a></li>
+        <li>RFC 4033, 4034 e 4035 — <a href="https://www.rfc-editor.org/rfc/rfc4033" target="_blank" rel="noopener noreferrer">DNSSEC</a> e RFC 5155 — <a href="https://www.rfc-editor.org/rfc/rfc5155" target="_blank" rel="noopener noreferrer">NSEC3</a> (complemento)</li>
+        <li>RFC 7858 — <a href="https://www.rfc-editor.org/rfc/rfc7858" target="_blank" rel="noopener noreferrer">DNS over TLS</a> e RFC 8484 — <a href="https://www.rfc-editor.org/rfc/rfc8484" target="_blank" rel="noopener noreferrer">DNS over HTTPS</a> (complemento)</li>
+        <li>IANA — <a href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4" target="_blank" rel="noopener noreferrer">TLS Cipher Suites</a> e <a href="https://www.iana.org/dnssec/files" target="_blank" rel="noopener noreferrer">âncoras de confiança da raiz</a></li>
+        <li><a href="https://tls13.ulfheim.net/" target="_blank" rel="noopener noreferrer">The Illustrated TLS 1.3 Connection</a>, citado pelo livro, e <a href="https://letsencrypt.org/stats/" target="_blank" rel="noopener noreferrer">estatísticas do Let's Encrypt</a></li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Secure_Shell" target="_blank" rel="noopener noreferrer">Secure Shell</a>, <a href="https://pt.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" rel="noopener noreferrer">Transport Layer Security</a>, <a href="https://en.wikipedia.org/wiki/Forward_secrecy" target="_blank" rel="noopener noreferrer">Forward secrecy</a>, <a href="https://en.wikipedia.org/wiki/DNS_spoofing" target="_blank" rel="noopener noreferrer">DNS spoofing</a>, <a href="https://pt.wikipedia.org/wiki/DNSSEC" target="_blank" rel="noopener noreferrer">DNSSEC</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-10/index.html" class="text-muted text-decoration-none">← Capítulo 10</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 11</span>
+            <a href="../capitulo-12/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 12 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap11.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>
