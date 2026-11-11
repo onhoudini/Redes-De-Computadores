@@ -11,7 +11,7 @@
  */
 window.TUTOR_CONFIG = {
     chave: "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",                                   // cole aqui a chave do OpenRouter (sk-or-v1-...)
-    modelo: "google/gemma-4-26b-a4b-it:free",    // Google: Gemma 4 26B A4B (gratuito)
+    modelo: "z-ai/glm-5.3-flash:floor",    // Google: Gemma 4 26B A4B (gratuito)
     // Modelos tentados, em ordem, se o principal falhar ou estiver sobrecarregado
     // (por exemplo "google/gemma-4-26b-a4b-it", a versão paga do mesmo modelo).
     reservas: [],
