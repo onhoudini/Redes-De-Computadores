@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
 </head>
 <body data-capitulo="3" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
@@ -269,7 +270,15 @@
         comandar impressoras e terminais. <strong>CR</strong> e <strong>LF</strong> terminam uma linha;
         <strong>Bell</strong> faz o terminal apitar. Cada caractere ASCII é um campo de
         <strong>7 bits</strong>, transmitido como um <strong>byte de 8 bits</strong> com o bit mais alto
-        normalmente em 0. Os bytes são sempre enviados a partir do bit <strong>mais significativo</strong>.
+        normalmente em 0. Nos diagramas e nas RFCs, os bits de cada byte são escritos e numerados a
+        partir do <strong>mais significativo</strong>.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que os bytes são "sempre" transmitidos a partir do bit mais significativo
+        (pág. 56 do PDF). Isso vale para a notação usada nos protocolos de aplicação, que só veem
+        bytes. No fio, a ordem dos bits é escolha da camada física: a Ethernet, por exemplo, envia cada
+        byte começando pelo bit <strong>menos</strong> significativo.
     </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
@@ -285,7 +294,7 @@
     <ul class="mb-0">
         <li>ASCII: 7 bits por caractere, enviados em um byte com o bit mais alto em 0.</li>
         <li>CR LF marca o fim de linha nos protocolos de texto da Internet.</li>
-        <li>Bytes saem do bit mais significativo para o menos significativo.</li>
+        <li>Na notação dos protocolos, os bits de um byte são escritos do mais significativo para o menos significativo.</li>
     </ul>
 </section>
 
@@ -324,9 +333,17 @@ password        =  ALPHA *(ALPHA / DIGIT)</pre>
     <ul>
         <li><span class="mono">%x41</span> é o código ASCII 41 em hexadecimal, isto é, a letra A maiúscula.</li>
         <li>Texto entre aspas, como <span class="mono">"user"</span>, <strong>não diferencia maiúsculas</strong>: user, USER e uSeR servem.</li>
-        <li><span class="mono">1*8ALPHA</span> significa de 1 a 8 letras. O nome de usuário <strong>diferencia</strong> maiúsculas, porque não está entre aspas.</li>
+        <li><span class="mono">1*8ALPHA</span> significa de 1 a 8 letras, maiúsculas ou minúsculas: <span class="mono">ALPHA</span> inclui as duas faixas (<span class="mono">%x41-5A</span> e <span class="mono">%x61-7A</span>). O que diferencia maiúsculas em ABNF são os valores numéricos como <span class="mono">%x41</span>, que casam com um único código.</li>
         <li><span class="mono">ALPHA *(ALPHA / DIGIT)</span>: a senha começa com letra e segue com quantas letras ou dígitos quiser. Espaços e caracteres de controle não são permitidos.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que os nomes de usuário diferenciam maiúsculas "porque não estão entre aspas"
+        (pág. 57 do PDF). A gramática não afirma isso: <span class="mono">alice</span> e
+        <span class="mono">Alice</span> são ambos <span class="mono">username</span> válidos. Se eles
+        identificam o mesmo usuário ou não, é uma regra do servidor, que a ABNF não descreve
+        (RFC 5234, seção 2.3).
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">Digite uma linha e veja, regra por regra, onde ela é aceita ou recusada.</p>
@@ -340,7 +357,7 @@ password        =  ALPHA *(ALPHA / DIGIT)</pre>
     <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
     <ul class="mb-0">
         <li>Uma gramática ABNF diz exatamente quais cadeias são válidas.</li>
-        <li>Literais entre aspas não diferenciam maiúsculas; regras como ALPHA, sim.</li>
+        <li>Literais entre aspas não diferenciam maiúsculas; valores como <span class="mono">%x41</span>, sim. ALPHA aceita as duas formas.</li>
         <li><span class="mono">n*m</span> limita repetições; <span class="mono">/</span> indica alternativas.</li>
     </ul>
 </section>
@@ -496,7 +513,7 @@ password        =  ALPHA *(ALPHA / DIGIT)</pre>
     <pre class="code-block"><code>import re
 
 # Gramática da Fig. 37 traduzida para expressões regulares.
-# (?i:user) aceita user, USER, uSeR...; o username diferencia maiúsculas.
+# (?i:user) aceita user, USER, uSeR...; [A-Za-z] aceita letras maiúsculas e minúsculas.
 USERCOMMAND = re.compile(r"(?i:user) ([A-Za-z]{1,8})\r\n")
 PASSWORDCOMMAND = re.compile(r"(?i:pass) ([A-Za-z][A-Za-z0-9]*)\r\n")
 
@@ -596,6 +613,8 @@ print("Desempacotado:", desempacota(msg))</code></pre>
 <script src="../../assets/gamificacao.js"></script>
 <script src="../../assets/sims-cap3.js"></script>
 <script src="../../assets/playground.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 </body>
 </html>

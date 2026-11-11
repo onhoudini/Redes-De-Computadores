@@ -33,6 +33,9 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
   - `sims-capNN.js`: simulações de cada capítulo (caps. 3 em diante).
   - `desafios-cap1.js` e `desafios-cap2.js`: desafios pontuáveis ligados às simulações aprovadas dos caps. 1 e 2.
   - `simulacoes.js`: simulações antigas do cap. 2.
+  - `tutor.js`, `tutor.css` e `tutor-config.js`: tutor de IA (OpenRouter) presente em todos os capítulos. A chave e o modelo ficam em `tutor-config.js`.
+  - `tutor/livro-capNN.txt`: texto da seção do livro enviado ao tutor, com marcações `[pág. N do PDF]`.
+- `ferramentas/extrai_livro.py`: gera os `assets/tutor/livro-capNN.txt` a partir do `livro.pdf`.
 
 ## Regras
 
@@ -57,8 +60,11 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
    - rodapé com capítulo anterior e próximo.
 3. Crie `assets/sims-capNN.js`, com cada simulação registrada por `Redes.registrar` e usada no HTML como `<div data-sim="…">`. Cada desafio de simulação usa `Redes.desafio(raiz, id, pontos, titulo)`.
 4. Escreva os blocos `pre.code-block` e acrescente três desafios por bloco em `desafios["capituloN"]` (`assets/playground.js`). Rode o código com Python local para conferir as respostas.
-5. Ordem dos scripts no fim da página: Bootstrap, `registro.js`, `gamificacao.js`, `sims-capNN.js`, `playground.js`, `livro.js`.
-6. Acrescente o card no `index.html` e o link do capítulo nas navbars e nos rodapés dos outros capítulos.
+5. Ordem dos scripts no fim da página: Bootstrap, `registro.js`, `gamificacao.js`, `sims-capNN.js`, `playground.js`, `tutor-config.js`, `tutor.js`, `livro.js`. No `<head>`, `tutor.css` vem depois de `livro.css`.
+6. Tutor de IA:
+   - acrescente a faixa de páginas do capítulo em `CAPITULOS` (`ferramentas/extrai_livro.py`) e rode `python ferramentas/extrai_livro.py N`;
+   - em `assets/tutor.js`, acrescente o capítulo ao objeto `CAPITULOS` (título no site e seção do livro).
+7. Acrescente o card no `index.html` e o link do capítulo nas navbars e nos rodapés dos outros capítulos.
 
 ## Como verificar
 
@@ -67,6 +73,7 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
 - Faça todas as perguntas e desafios: a pontuação máxima tem que ser alcançável, e o progresso deve continuar depois de recarregar a página.
 - Confira os temas claro e escuro e a largura de 375 px, sem rolagem horizontal.
 - Rode cada bloco Python no editor da página.
+- Abra o tutor e faça uma pergunta de conceito e outra pedindo a resposta de um exercício: a primeira deve citar a página do PDF, e a segunda deve receber dicas em vez da resposta.
 - Ao mexer nos capítulos 1 e 2, compare o texto visível de cada seção antes e depois.
 
 ## Pendências conhecidas

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
     <style>
         .bit-chip {
             display: inline-flex;
@@ -645,6 +646,21 @@
 
     <div class="demo-box mt-4">
         <p class="fw-semibold mb-2">Codificação de linha (exemplo didático)</p>
+        <p class="small">
+            Uma <strong>codificação de linha</strong> diz que sinal representa cada bit. Na
+            <strong>NRZ-L</strong>, o nível alto é 1 e o baixo é 0; na <strong>NRZI</strong>, um 1 inverte o
+            nível e um 0 o mantém. Nas duas, uma longa sequência sem transições deixa o receptor sem
+            referência, e um relógio levemente atrasado passa a ler bits errados. Na
+            <strong>Manchester</strong> (livro, pág. 12 do PDF), cada período de bit é dividido em duas
+            metades: o 1 é alto e depois baixo, e o 0 é baixo e depois alto. Há sempre uma transição no meio
+            do período, que o receptor usa para sincronizar o relógio; o custo é precisar de duas vezes mais variações de sinal por segundo.
+            O livro também cita dois símbolos extras, InvH e InvB, com o mesmo nível nas duas metades, que
+            nunca aparecem dentro de um quadro e servem para marcar início ou fim de quadro.
+        </p>
+        <p class="small text-muted">
+            NRZ-L e NRZI são complemento. A convenção da Manchester segue o livro; a Ethernet usa a
+            convenção oposta (o 1 como transição de baixo para alto).
+        </p>
         <label class="form-label small" for="lineCodeBits">Bits de entrada</label>
         <input id="lineCodeBits" class="form-control form-control-sm" value="10110010" pattern="[01]+" aria-label="Bits para visualizar codificação NRZ, NRZI e Manchester">
         <label class="form-label small mt-2" for="clockDrift">Atraso do relógio do receptor: <span id="clockDriftValue">0</span>%</label>
@@ -685,7 +701,7 @@
                 <h6 class="fw-semibold">🌊 Cabos submarinos de verdade</h6>
                 <p class="small text-muted">
                     Sistemas como o cabo <em>2Africa</em> ou o <em>EllaLink</em> (que liga Brasil e
-                    Europa) usam DWDM para transportar dezenas de terabits por segundo em um único
+                    Europa) usam DWDM para transportar mais de 10 terabits por segundo em um único
                     par de fibras. Consulte o
                     <a href="https://www.submarinecablemap.com/" target="_blank" rel="noopener noreferrer">Submarine Cable Map</a>
                     para explorar rotas e pontos de chegada. Parte significativa do tráfego local
@@ -1445,6 +1461,8 @@ alternating_bit_protocol(["a", "b", "c"])</code></pre>
 <script src="../../assets/gamificacao.js"></script>
 <script src="../../assets/desafios-cap1.js"></script>
 <script src="../../assets/playground.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 
 </body>

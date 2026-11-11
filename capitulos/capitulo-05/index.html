@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
 </head>
 <body data-capitulo="5" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
 
@@ -312,7 +313,11 @@
     <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
     <p>
         Para que todos os programas aceitem os mesmos nomes, a sintaxe precisa ser precisa. A RFC 1035 a
-        define com uma gramática BNF, o mesmo tipo de notação que você viu no Capítulo 3.
+        define com uma gramática BNF. A ideia é a mesma da ABNF do Capítulo 3 (regras de produção), mas a
+        escrita muda: aqui a regra é definida com <span class="mono">::=</span>, as alternativas são
+        separadas por <span class="mono">|</span> e as partes opcionais ficam entre
+        <span class="mono">[ ]</span>; na ABNF são <span class="mono">=</span>, <span class="mono">/</span>
+        e <span class="mono">*</span> (repetição).
     </p>
 
     <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
@@ -336,7 +341,7 @@ digit ::= qualquer um dos dez dígitos de 0 a 9</pre>
         Na BNF da RFC 1035, <span class="mono">" "</span> representa o nome vazio (a raiz). A regra de começar
         com letra foi relaxada pela <a href="https://www.rfc-editor.org/rfc/rfc1123#section-2.1" target="_blank" rel="noopener noreferrer">RFC 1123, seção 2.1</a>,
         que passou a aceitar rótulos começando com dígito (por isso existem nomes como <span class="mono">3com.com</span>).
-        A RFC 1035 também limita cada rótulo a 63 caracteres. O validador abaixo segue a BNF do livro.
+        A RFC 1035 também limita cada rótulo a 63 caracteres e o nome inteiro a 255 octetos. O validador abaixo segue a BNF do livro.
     </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
@@ -373,6 +378,16 @@ digit ::= qualquer um dos dez dígitos de 0 a 9</pre>
         caracteres Unicode podem ser usados, com algumas exceções (o ponto, por exemplo, continua sendo o
         separador). Depois, o nome em Unicode é convertido numa cadeia ASCII com o prefixo
         <span class="mono">xn--</span>. Os detalhes do algoritmo estão nas RFC 3490 e 3492.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A RFC 3490, citada pelo livro, foi substituída em 2010 pela versão conhecida como IDNA2008
+        (<a href="https://www.rfc-editor.org/rfc/rfc5890" target="_blank" rel="noopener noreferrer">RFC 5890</a> a
+        <a href="https://www.rfc-editor.org/rfc/rfc5893" target="_blank" rel="noopener noreferrer">5893</a>),
+        que muda as regras sobre quais caracteres são aceitos. A conversão para ASCII com
+        <span class="mono">xn--</span> continua a ser o Punycode da RFC 3492. O codec
+        <span class="mono">"idna"</span> do Python, usado no exemplo de código desta página, ainda segue a
+        versão antiga.
     </p>
     <p>
         Essa liberdade abriu espaço para o <strong>ataque homógrafo</strong>: dois nomes visualmente
@@ -461,6 +476,15 @@ digit ::= qualquer um dos dez dígitos de 0 a 9</pre>
         <li>os hosts não mandam consultas a servidores no mundo inteiro;</li>
         <li>o resolvedor atende muitos hosts e pode guardar as respostas em <strong>cache</strong>, respondendo rápido às consultas populares e aliviando todos os servidores de DNS.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Só a consulta do host ao resolvedor é recursiva ("me traga a resposta final"). Para percorrer a
+        hierarquia, o resolvedor faz <strong>consultas iterativas</strong>: cada servidor responde com o que
+        sabe, em geral a indicação do próximo servidor a consultar
+        (<a href="https://www.rfc-editor.org/rfc/rfc1034#section-4.3.1" target="_blank" rel="noopener noreferrer">RFC 1034, seção 4.3.1</a>).
+        Cada resposta guardada em cache vale por um tempo limitado, o <strong>TTL</strong>, definido por quem
+        administra o nome.
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <p class="small text-muted">Resolva nomes da Fig. 54 com e sem resolvedor. Depois, ligue o cache e resolva dois nomes do mesmo domínio.</p>
@@ -516,6 +540,12 @@ digit ::= qualquer um dos dez dígitos de 0 a 9</pre>
         pequenas empresas recebem poucos clientes por dia, e dedicar uma máquina a cada um seria desperdício.
         Um único servidor físico atende vários serviços, cada um com seu nome; se um deles ficar popular, o nome
         dele passa a apontar para um conjunto de endereços.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        "Basta atualizar o mapeamento" tem um detalhe: os resolvedores que já guardaram o endereço antigo em
+        cache continuam a usá-lo até o TTL da resposta expirar. Por isso, antes de mudar um servidor de máquina,
+        os administradores costumam reduzir o TTL do nome.
     </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
@@ -624,7 +654,8 @@ for nome in ["www.computer-networking.info", "blog.uclouvain.be", "3com.com",
     <h3 class="h6 mt-4">3. Nomes internacionalizados e homógrafos</h3>
     <pre class="code-block"><code>import unicodedata
 
-# 1. Nomes internacionalizados (RFC 3490): Unicode -> ASCII com prefixo xn--
+# 1. Nomes internacionalizados: Unicode -> ASCII com prefixo xn--
+#    (o codec "idna" do Python segue a RFC 3490; a versão atual é a IDNA2008)
 for nome in ["bücher.example", "são-paulo.example", "例え.jp"]:
     ascii_ = nome.encode("idna").decode("ascii")
     print(f"{nome:20} -> {ascii_}")
@@ -703,8 +734,10 @@ print("Consultas enviadas a servidores de nomes:", r.consultas)</code></pre>
         <li>RFC 1032 — <a href="https://www.rfc-editor.org/rfc/rfc1032" target="_blank" rel="noopener noreferrer">Domain Administrators Guide</a></li>
         <li>RFC 1035 — <a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank" rel="noopener noreferrer">Domain Names — Implementation and Specification</a></li>
         <li>RFC 1123 — <a href="https://www.rfc-editor.org/rfc/rfc1123" target="_blank" rel="noopener noreferrer">Requirements for Internet Hosts</a> (rótulos começando com dígito, complemento)</li>
-        <li>RFC 3490 — <a href="https://www.rfc-editor.org/rfc/rfc3490" target="_blank" rel="noopener noreferrer">Internationalizing Domain Names in Applications</a> e RFC 3492 — <a href="https://www.rfc-editor.org/rfc/rfc3492" target="_blank" rel="noopener noreferrer">Punycode</a></li>
-        <li>RFC 5737 — <a href="https://www.rfc-editor.org/rfc/rfc5737" target="_blank" rel="noopener noreferrer">IPv4 Address Blocks Reserved for Documentation</a> (endereços usados na simulação)</li>
+        <li>RFC 3490 — <a href="https://www.rfc-editor.org/rfc/rfc3490" target="_blank" rel="noopener noreferrer">Internationalizing Domain Names in Applications</a> (citada pelo livro, substituída pela IDNA2008) e RFC 3492 — <a href="https://www.rfc-editor.org/rfc/rfc3492" target="_blank" rel="noopener noreferrer">Punycode</a></li>
+        <li>RFC 5890 — <a href="https://www.rfc-editor.org/rfc/rfc5890" target="_blank" rel="noopener noreferrer">Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework</a> (IDNA2008, complemento)</li>
+        <li>RFC 1034 — <a href="https://www.rfc-editor.org/rfc/rfc1034" target="_blank" rel="noopener noreferrer">Domain Names — Concepts and Facilities</a> (consultas recursivas e iterativas, complemento)</li>
+        <li>RFC 5737 — <a href="https://www.rfc-editor.org/rfc/rfc5737" target="_blank" rel="noopener noreferrer">IPv4 Address Blocks Reserved for Documentation</a> (endereços 203.0.113.x da simulação dos servidores; os endereços 10.x do hosts.txt seguem a rede 10 da antiga ARPANET, e os da árvore de nomes são exemplos na faixa privada 10.0.0.0/8)</li>
         <li>IANA — <a href="https://data.iana.org/TLD/tlds-alpha-by-domain.txt" target="_blank" rel="noopener noreferrer">lista oficial de domínios de topo</a>, citada pelo livro</li>
         <li>InterNIC — <a href="https://www.internic.net/domain/root.zone" target="_blank" rel="noopener noreferrer">cópia da zona raiz</a>, citada pelo livro</li>
         <li>Zakon, R. — <a href="https://www.zakon.org/robert/internet/timeline/" target="_blank" rel="noopener noreferrer">Hobbes' Internet Timeline</a>, fonte do livro para os 500 hosts de 1983</li>
@@ -736,6 +769,8 @@ print("Consultas enviadas a servidores de nomes:", r.consultas)</code></pre>
 <script src="../../assets/gamificacao.js"></script>
 <script src="../../assets/sims-cap5.js"></script>
 <script src="../../assets/playground.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 </body>
 </html>

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../../assets/playground.css">
     <link rel="stylesheet" href="../../assets/capitulo.css">
     <link rel="stylesheet" href="../../assets/livro.css">
+    <link rel="stylesheet" href="../../assets/tutor.css">
     <style>
         .addr-chip {
             display: inline-flex;
@@ -316,6 +317,23 @@
         bits de tamanho fixo. É esse endereço, e não um nome amigável como "servidor-web", que os
         roteadores usam para decidir o próximo salto.
     </p>
+    <p>
+        Cada camada de enlace tem um <strong>tamanho máximo de quadro</strong> (a MTU), e as redes no
+        caminho podem ser diferentes. Na Fig. 24 do livro, A manda um pacote de 900 bytes, mas o enlace entre
+        R1 e R2 só aceita 500. O livro descreve três saídas (págs. 40–41 do PDF):
+    </p>
+    <ul>
+        <li><strong>Recusar e avisar a origem:</strong> R1 descarta o pacote e manda um pacote de controle a A
+            dizendo o tamanho aceito; A reenvia em pacotes menores. Os roteadores ficam simples, mas os hosts
+            precisam guardar o que enviam, e o pacote pode ser reenviado várias vezes se o caminho tiver MTUs
+            cada vez menores. É a solução usada nas redes reais.</li>
+        <li><strong>Fragmentar e remontar a cada enlace:</strong> R1 divide o pacote em dois fragmentos e R2 os
+            junta antes de seguir. Só fragmenta onde precisa, mas exige processamento e memória dos roteadores
+            e aumenta o atraso.</li>
+        <li><strong>Fragmentar e remontar só no destino:</strong> cada fragmento é um pacote válido, com os
+            endereços de origem e destino, e só B junta as partes. É o meio-termo: os roteadores fragmentam,
+            mas não remontam.</li>
+    </ul>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
@@ -420,7 +438,7 @@
                         <rect x="10" y="50" width="80" height="24" fill="#f1e9ff" stroke="#6610f2"/>
                         <text x="50" y="66" text-anchor="middle">label=2 | dado</text>
                     </g>
-                    <text x="10" y="92" font-size="11" fill="#6c757d" font-family="sans-serif">um caminho é reservado antes do envio</text>
+                    <text x="10" y="92" font-size="11" fill="#6c757d" font-family="sans-serif">um caminho é estabelecido antes do envio</text>
                     <text x="10" y="108" font-size="11" fill="#6c757d" font-family="sans-serif">roteadores trocam o rótulo e consultam</text>
                     <text x="10" y="122" font-size="11" fill="#6c757d" font-family="sans-serif">a tabela em O(1)</text>
                     <text x="10" y="148" font-size="11" fill="#6c757d" font-family="sans-serif">✔ busca simples e previsível</text>
@@ -438,6 +456,13 @@
         canal, muito mais curto que um endereço completo. A tecnologia <strong>MPLS</strong>
         (Multiprotocol Label Switching), usada por muitos provedores para dar previsibilidade ao
         tráfego dentro do seu backbone, é um exemplo moderno de comutação por rótulos.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A telefonia clássica usa <strong>comutação de circuitos</strong>: cada ligação ocupa um canal com banda
+        reservada durante toda a conversa. O circuito virtual herda dela a ideia de estabelecer o caminho antes de
+        enviar (por sinalização), mas não precisa reservar recursos: os pacotes de vários circuitos dividem os
+        mesmos enlaces, e a reserva de banda é uma opção da rede, não uma obrigação.
     </p>
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="Um número de circuito (rótulo)|Nada, o roteador adivinha o destino|O endereço de origem apenas" data-answer="0" data-explain="O caminho é sinalizado antes; depois, os pacotes levam só um número de canal, bem mais curto." data-hint="Lembre da analogia com a telefonia.">
@@ -619,6 +644,13 @@
         </li>
     </ul>
     <p>
+        As duas técnicas resolvem o caso de dois vizinhos, mas <strong>não evitam todos os casos</strong> de
+        contagem ao infinito. O livro mostra uma rede de quatro roteadores em que, depois da falha do enlace
+        A–B, a rota para A continua circulando num ciclo de três roteadores, e a métrica cresce até o infinito
+        (págs. 48–49 do PDF). O split horizon não impede isso porque a rota volta por um terceiro roteador, e
+        não pelo vizinho de quem foi aprendida.
+    </p>
+    <p>
         O protocolo <strong>RIP</strong> (Routing Information Protocol) é o exemplo histórico mais
         conhecido de roteamento por vetor de distância, ainda usado hoje em redes pequenas ou como
         material didático por sua simplicidade.
@@ -699,6 +731,22 @@
         <strong>OSPF</strong> (Open Shortest Path First) e <strong>IS-IS</strong> são os protocolos
         de estado de enlace mais usados hoje dentro de redes corporativas e de provedores.
     </p>
+    <p>
+        Três detalhes fazem a inundação funcionar (livro, págs. 50–54 do PDF):
+    </p>
+    <ul>
+        <li><strong>Número de sequência:</strong> cada LSP tem um número de sequência, e um roteador só
+            guarda e repassa um LSP mais novo que o que já tem. A ARPANET usava 6 bits, e a comparação
+            entre números que dão a volta foi uma das causas da queda total da rede em 27 de outubro de 1980;
+            os protocolos atuais usam 32 bits.</li>
+        <li><strong>Idade:</strong> quem gera o LSP define o seu tempo de vida, e todos os roteadores o
+            decrementam; ao chegar a zero, o LSP é descartado. Assim, o LSP de um roteador que falhou não
+            fica para sempre nas bases de dados.</li>
+        <li><strong>Verificação nos dois sentidos</strong> (<em>two-way connectivity check</em>): um enlace
+            só entra no grafo se os LSPs dos <em>dois</em> roteadores o anunciarem. Basta um LSP para
+            espalhar uma falha, e um roteador que caiu, por não anunciar mais os próprios enlaces, sai do
+            grafo.</li>
+    </ul>
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz mt-4" data-options="Só para o vizinho de menor custo|Para todas as interfaces, exceto aquela por onde ele chegou|Somente de volta ao roteador de origem" data-answer="1" data-explain="Assim todo roteador recebe o LSP e monta o mesmo mapa da rede." data-hint="O objetivo é que todos os roteadores recebam o LSP.">
         <p class="fw-semibold mb-2">Autoavaliação: Na inundação de LSPs, para onde um roteador retransmite um LSP novo?</p>
@@ -756,8 +804,9 @@
                     Dentro de uma única rede (um "sistema autônomo"), protocolos como OSPF cuidam do
                     roteamento interno. Entre provedores diferentes, quem manda é o BGP, um
                     protocolo de vetor de caminho que anuncia a rota completa de sistemas
-                    autônomos, não apenas um custo — assim cada provedor decide sozinho em quem
-                    confiar.
+                    autônomos, não apenas um custo. Com o caminho completo, cada provedor aplica as
+                    próprias políticas (por exemplo, preferir rotas aprendidas de clientes) e detecta laços:
+                    uma rota cujo caminho já contém o seu próprio sistema autônomo é descartada.
                     Para consultar informações públicas de roteamento, veja o
                     <a href="https://bgp.he.net/" target="_blank" rel="noopener noreferrer">BGP Toolkit</a>
                     ou o <a href="https://stat.ripe.net/" target="_blank" rel="noopener noreferrer">RIPEstat</a>;
@@ -1276,6 +1325,8 @@ for destino, (custo, caminho) in dijkstra(grafo, "E").items():
 <script src="../../assets/desafios-cap2.js"></script>
 <script src="../../assets/playground.js"></script>
 <script src="../../assets/simulacoes.js"></script>
+<script src="../../assets/tutor-config.js"></script>
+<script src="../../assets/tutor.js"></script>
 <script src="../../assets/livro.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
