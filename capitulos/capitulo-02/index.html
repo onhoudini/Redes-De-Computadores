@@ -326,7 +326,7 @@
         <li><strong>Recusar e avisar a origem:</strong> R1 descarta o pacote e manda um pacote de controle a A
             dizendo o tamanho aceito; A reenvia em pacotes menores. Os roteadores ficam simples, mas os hosts
             precisam guardar o que enviam, e o pacote pode ser reenviado várias vezes se o caminho tiver MTUs
-            cada vez menores. É a solução usada nas redes reais.</li>
+            cada vez menores. O livro diz que é a solução usada nas redes reais (pág. 41 do PDF).</li>
         <li><strong>Fragmentar e remontar a cada enlace:</strong> R1 divide o pacote em dois fragmentos e R2 os
             junta antes de seguir. Só fragmenta onde precisa, mas exige processamento e memória dos roteadores
             e aumenta o atraso.</li>
@@ -334,6 +334,15 @@
             endereços de origem e destino, e só B junta as partes. É o meio-termo: os roteadores fragmentam,
             mas não remontam.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Na prática, a escolha depende do protocolo. O IPv4 permite que os roteadores fragmentem e que só o
+        destino remonte (a terceira saída), mas os hosts costumam evitar a fragmentação descobrindo a MTU do
+        caminho, o que corresponde à primeira saída
+        (<a href="https://www.rfc-editor.org/rfc/rfc1191" target="_blank" rel="noopener noreferrer">RFC 1191</a>).
+        No IPv6, os roteadores nunca fragmentam: descartam o pacote e avisam a origem, como na primeira saída
+        (<a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">RFC 8200</a>).
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
     <figure class="diagram">
