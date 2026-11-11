@@ -18,8 +18,8 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
 | 8 — Segurança de redes | 2.8 Network security | pronto |
 | 9 — DNS e correio eletrônico | 3.1–3.3 (133–148) | pronto |
 | 10 — A web e as chamadas remotas | 3.4–3.6 (148–169) | pronto |
-| 11 — Protocolos seguros: ssh, TLS e DNSSEC | 3.7–3.9 (169–185) | planejado |
-| 12 — UDP e TCP | 3.10–3.12 (185–205) | planejado |
+| 11 — Protocolos seguros: ssh, TLS e DNSSEC | 3.7–3.9 (169–185) | pronto |
+| 12 — UDP e TCP | 3.10–3.12 (185–205) | pronto |
 | 13 a 16 (roteiro) | 3.13 congestionamento; 3.14 IPv6; 3.15–3.17 roteamento; 3.18 enlace | a fazer |
 
 ### Estrutura

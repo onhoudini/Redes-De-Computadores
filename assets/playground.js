@@ -307,6 +307,60 @@
                 {"nivel": "Intermediário", "texto": "Troque as duas chamadas finais por atende(deposito, lembra_ids=True). Qual é o saldo?", "resposta": "150: o segundo pedido, com o mesmo id 7, recebe a resposta guardada, sem depositar de novo."},
                 {"nivel": "Desafio", "texto": "Com lembra_ids=True, o que acontece se o depósito usar o id 1, já usado pelo sum?", "resposta": "O servidor devolve a resposta antiga do sum ({\"result\": 4, \"id\": 1}) e não deposita: o saldo continua 100. Os ids precisam ser únicos para cada pedido novo."}
             ]
+        ],
+        "capitulo11": [
+            [
+                {"nivel": "Aquecimento", "texto": "Rode hmac_a_mao com H=hashlib.sha1 e compare com hmac.new(chave, msg, hashlib.sha1). Os dois batem? Com que tamanho de bloco a chave foi completada?", "resposta": "Batem. A chave foi completada até 64 bytes (hashlib.sha1().block_size). O livro fala em blocos de 20 bytes, mas 20 é o tamanho do resumo do SHA-1, não do bloco."},
+                {"nivel": "Intermediário", "texto": "Use uma chave de 100 bytes (b\"k\" * 100). O que a função faz com ela, e o resultado ainda bate com o módulo?", "resposta": "Como passa do tamanho do bloco (64), a chave é primeiro resumida com H (vira 32 bytes) e depois completada com zeros. O resultado bate com hmac.new, porque a RFC 2104 manda fazer exatamente isso."},
+                {"nivel": "Desafio", "texto": "Calcule o HMAC de b\"PAGUE 900 A BOB\" com a mesma chave. Quantos dos 64 dígitos hexadecimais continuam iguais, na mesma posição, em relação ao de \"PAGUE 100 A BOB\"?", "resposta": "Só 4, o que se espera do acaso (64 / 16). Mudar um caractere muda o HMAC inteiro, e sem a chave Mallory não consegue calcular o novo valor."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Sem Mallory, o que é negociado se o servidor aceitar só [\"cifra-48\"]?", "resposta": "cifra-48: é o primeiro da lista do cliente que o servidor aceita. Não há ataque; o cliente aceitava essa cifra, e o hash confere."},
+                {"nivel": "Intermediário", "texto": "O que devolvem negocia([\"zlib\", \"none\"], [\"none\"]) e negocia([\"a\"], [\"b\"])?", "resposta": "\"none\" (sem compressão, como na nota do livro) e None: sem algoritmo em comum, a conexão falha."},
+                {"nivel": "Desafio", "texto": "Em vez de apagar, Mallory inverte a lista do cliente para [\"cifra-48\", \"cifra-128\"]. O que é negociado, e o hash detecta?", "resposta": "cifra-48 (agora é a primeira da lista recebida pelo servidor). O hash detecta: a lista que o servidor viu é diferente da que o cliente enviou, então os resumos não batem."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Imprima K_cliente. Qual é o segredo combinado?", "resposta": "3475115478 (com a semente 7). Ele nunca passou pela rede: só A e B passaram."},
+                {"nivel": "Intermediário", "texto": "Troque a semente do random.Random para 8. O que muda?", "resposta": "Tudo: a, b, A, B, K e as seis chaves. Cada sessão gera segredos novos; é isso que faz a troca ser efêmera."},
+                {"nivel": "Desafio", "texto": "Calcule pow(A, a, p), como diria o livro para o servidor. Dá K? Por quê?", "resposta": "Não: dá 2281168136, diferente de K. Elevar A = g^a ao próprio a dá g^(a²). O certo é combinar o valor do OUTRO lado com o PRÓPRIO segredo: o servidor faz A^b e o cliente faz B^a."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Quanto vale chance_por_tentativa(32768, False)?", "resposta": "0.5: com metade dos 65 536 IDs, a chance é de 50% numa consulta."},
+                {"nivel": "Intermediário", "texto": "Com porta fixa e 1000 respostas falsas por tentativa, quantas tentativas Mallory precisa para passar de 50%?", "resposta": "46 (um laço com while chance_em(n, 1000, False) < 0.5: n += 1 confirma)."},
+                {"nivel": "Desafio", "texto": "E com porta aleatória e 10 000 respostas falsas por tentativa?", "resposta": "297 705 tentativas, cerca de 300 mil. Sortear a porta multiplica o trabalho por 65 536."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Qual NSEC prova que aaa.example.org não existe?", "resposta": "gamma.example.org NSEC alpha.example.org: aaa viria antes de alpha, e é o último registro, que dá a volta, que cobre esse intervalo."},
+                {"nivel": "Intermediário", "texto": "Acrescente \"delta.example.org\" à zona. Que registros NSEC aparecem, e o que a consulta por delta devolve agora?", "resposta": "alpha → beta, beta → delta, delta → gamma, gamma → alpha. A consulta por delta devolve None: o nome existe."},
+                {"nivel": "Desafio", "texto": "Qual NSEC prova que www.beta.example.org não existe (na zona original)?", "resposta": "beta.example.org NSEC gamma.example.org. Na ordem canônica, os nomes abaixo de beta vêm logo depois de beta e antes de gamma."}
+            ]
+        ],
+        "capitulo12": [
+            [
+                {"nivel": "Aquecimento", "texto": "Calcule o checksum para as cargas b\"ABCD\" e b\"CDAB\". O que você nota?", "resposta": "Os dois dão 0x04db. A soma não depende da ordem das palavras de 16 bits: trocar \"AB\" e \"CD\" de lugar não é detectado."},
+                {"nivel": "Intermediário", "texto": "Chame confere com a origem \"2001:db8::9\", a carga b\"OLA\" e o checksum calculado para \"2001:db8::1\". O que acontece, e por quê?", "resposta": "Devolve False: o endereço de origem entra no pseudo-cabeçalho, então um segmento com outro endereço não passa na conferência."},
+                {"nivel": "Desafio", "texto": "Ache uma carga de 3 bytes, diferente de b\"OLA\", que passe em confere com o checksum de b\"OLA\".", "resposta": "Por exemplo b\"PL@\": o primeiro byte sobe 1 (O → P) e o terceiro desce 1 (A → @). Os dois estão na metade alta das palavras de 16 bits (\"OL\" e \"A\" + zero), então os erros se compensam na soma."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Qual é o THL do segmento syn e quantos bytes ele tem?", "resposta": "THL = 6 (o 6 de 0x60), ou seja, 24 bytes: 20 fixos e 4 da opção MSS."},
+                {"nivel": "Intermediário", "texto": "Monte a resposta do servidor: portas trocadas, seq 5000, ack 1001, flags SYN e ACK. Quanto vale o byte das flags (o 14º byte, índice 13), em hexadecimal?", "resposta": "0x12: SYN é o bit 1 (0x02) e ACK o bit 4 (0x10)."},
+                {"nivel": "Desafio", "texto": "Acrescente a opção de escala de janela, bytes([1, 3, 3, 7]) (um NOP e a opção tipo 3, tamanho 3, valor 7), depois do MSS. Qual é o novo THL, e o que le_tcp mostra nas opções?", "resposta": "THL = 7 (28 bytes, com 8 de opções) e {'MSS': '05b4', 'escala': '07'}: o NOP é pulado, e a escala 7 multiplica a janela anunciada por 2^7."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Com RTT de 50 ms e o Nagle ligado, quantos segmentos saem? Por quê?", "resposta": "19, um por caractere: o ACK chega antes de o próximo caractere ser digitado (a cada 100 ms), então nunca há dados pendentes."},
+                {"nivel": "Intermediário", "texto": "Qual é o menor RTT, entre os múltiplos de 50 ms, em que o Nagle manda no máximo 5 segmentos?", "resposta": "500 ms (com 400 ms ainda são 6)."},
+                {"nivel": "Desafio", "texto": "Com RTT de 1000 ms, quais segmentos saem e quando?", "resposta": "Três: 'l' em 0 ms, 's -la /ho' em 1000 ms e 'me/alice\n' em 2000 ms. Um segmento parcial por RTT, como diz a segunda regra."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Qual é o rto de Jacobson depois da primeira medida (500 ms)? Por que é tão maior que o RTT?", "resposta": "1500 ms = 500 + 4 × 250. Na primeira medida, rttvar começa em rtt / 2: o algoritmo ainda não conhece a variação e é cauteloso."},
+                {"nivel": "Intermediário", "texto": "Em quais medidas o rto da RFC 793 fica menor que o RTT medido? O que isso causaria?", "resposta": "Na 5ª (2000 ms, rto 1373,8) e na 6ª (2100 ms, rto 1727,1). O emissor retransmitiria segmentos que ainda estavam a caminho. O rto de Jacobson (2557 e 3679) acompanha o salto."},
+                {"nivel": "Desafio", "texto": "Qual é o último rto de jacobson([100, 100, 100, 300])?", "resposta": "409,375 ms: srtt = 125 e rttvar ≈ 71,09. O salto de 100 para 300 aumenta muito o rttvar, que pesa 4 vezes no rto."}
+            ],
+            [
+                {"nivel": "Aquecimento", "texto": "Perdendo só o segmento 4, depois da chegada de qual segmento acontece a retransmissão rápida?", "resposta": "Do 7: o segmento 3 gera o ACK 4 normal; o 5, o 6 e o 7 geram três ACKs 4 duplicados."},
+                {"nivel": "Intermediário", "texto": "Por que perder o segmento 9 não dispara a retransmissão rápida?", "resposta": "Depois dele só chega o 10, que gera um único ACK duplicado. O emissor espera o rto, a menos que mande mais dados que gerem outros duplicados."},
+                {"nivel": "Desafio", "texto": "Com perdidos = {2, 4, 6, 8}, o que o último ACK informa, e qual segmento é retransmitido rapidamente?", "resposta": "ACK 2 com SACK [(9, 10), (7, 7), (5, 5)]: há quatro blocos, mas só cabem três, e vai primeiro o que mudou por último. A retransmissão rápida reenvia o 2; os outros buracos o emissor descobre pelos blocos SACK."}
+            ]
         ]
     };
 
