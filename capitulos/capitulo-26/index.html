@@ -327,10 +327,17 @@
         <li><strong>CRC de 32 bits</strong>, que pega muito mais erros que o checksum da Internet usado pelo IP, UDP e TCP.</li>
     </ol>
     <p>
-        Os 1500 bytes bastavam para os 554 bytes da Ethernet experimental da Xerox e os 572 que a RFC 1122 exigia para o IPv4, sem
-        exigir muita memória das placas. Medições mostraram que o CSMA/CD alcança uma utilização muito alta com quadros grandes (Fig. 81).
-        O IPv6 tem um EtherType próprio porque alguns equipamentos não conferiam o campo de versão e tratariam pacotes IPv6 como IPv4
-        (pág. 259–260 do PDF).
+        Os 1500 bytes bastavam para os 554 bytes da Ethernet experimental da Xerox e para os datagramas de 576 bytes que a RFC 1122
+        exige que todo host IPv4 aceite, sem exigir muita memória das placas. Medições mostraram que o CSMA/CD alcança uma utilização
+        muito alta com quadros grandes (Fig. 81). O IPv6 tem um EtherType próprio porque alguns equipamentos não conferiam o campo
+        de versão e tratariam pacotes IPv6 como IPv4 (pág. 259–260 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que a RFC 1122 exigia uma MTU mínima de 572 bytes (pág. 260 do PDF). O valor da norma é 576: pela
+        <a href="https://www.rfc-editor.org/rfc/rfc1122#section-3.3.2" target="_blank" rel="noopener noreferrer">RFC 1122, seção 3.3.2</a>,
+        todo host precisa conseguir remontar datagramas IPv4 de até 576 bytes. O argumento do livro continua valendo: 1500 bytes
+        cobrem esse mínimo com folga.
     </p>
     <div class="nota-livro small mb-3">
         <span class="extra-tag">Nota do livro</span><br>

@@ -327,8 +327,10 @@
     <p class="nota-livro small">
         <span class="extra-tag">Complemento</span><br>
         O livro só detalha os dois primeiros critérios. A lista completa, na <a href="https://www.rfc-editor.org/rfc/rfc4271#section-9.1.2.2" target="_blank" rel="noopener noreferrer">RFC 4271, seção 9.1.2.2</a>,
-        continua com: menor MED (entre rotas do mesmo AS vizinho), rotas aprendidas por eBGP antes das aprendidas por iBGP, menor
-        custo IGP até o nexthop e, por fim, um desempate pelo identificador do roteador. A simulação e o exemplo de código seguem essa ordem.
+        continua com: menor ORIGIN (rotas de origem IGP antes das de origem EGP, e estas antes das INCOMPLETE), menor MED (entre
+        rotas do mesmo AS vizinho), rotas aprendidas por eBGP antes das aprendidas por iBGP, menor custo IGP até o nexthop e, por
+        fim, um desempate pelo identificador do roteador. A simulação e o exemplo de código seguem essa ordem, sem o ORIGIN, que é
+        o mesmo em todas as rotas dos exemplos.
     </p>
 
     <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
