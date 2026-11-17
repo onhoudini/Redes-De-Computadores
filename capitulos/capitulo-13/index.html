@@ -236,8 +236,16 @@
         Com o <strong>pipelining</strong>, o navegador manda vários pedidos sem esperar as respostas. No exemplo do livro,
         cinco objetos de 100 bytes, com 1 Gbit/s e 100 ms de atraso em cada sentido: um de cada vez, são 5 × 200 ms =
         1 s; com pipelining, as cinco respostas chegam depois de cerca de 200 ms (pág. 161 do PDF). Mas o pipelining só
-        serve para pedidos <strong>idempotentes</strong>, que não dependem dos anteriores. Foi difícil para os navegadores
-        respeitar essa regra, e poucos o implementaram.
+        serve para pedidos <strong>idempotentes</strong>, que podem ser repetidos sem mudar o resultado. Foi difícil para os
+        navegadores respeitar essa regra, e poucos o implementaram (pág. 162 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro define idempotente como um pedido que "não depende de nenhum dos pedidos anteriores do pipeline" (pág. 162 do PDF).
+        A definição do padrão é outra: um pedido é idempotente quando enviá-lo várias vezes tem o mesmo efeito que enviá-lo uma vez
+        (<a href="https://www.rfc-editor.org/rfc/rfc9110#section-9.2.2" target="_blank" rel="noopener noreferrer">RFC 9110, seção 9.2.2</a>).
+        GET, HEAD, PUT e DELETE são idempotentes; POST não é. É isso que importa no pipelining: se a conexão cair, o cliente reenvia
+        os pedidos que ficaram sem resposta, e só pode fazer isso sem dano se eles forem idempotentes.
     </p>
     <div class="demo-box" data-sim="pipelining"></div>
     <p>
@@ -304,7 +312,7 @@
     <div class="demo-box" data-sim="hol-http2"></div>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
-    <div class="demo-box mini-quiz" data-options="Só para pedidos idempotentes, que não dependem dos anteriores|Só para pedidos POST|Para qualquer pedido, sem restrição" data-answer="0" data-explain="Pela RFC 7230, citada pelo livro, o pipelining só serve para pedidos idempotentes (pág. 162 do PDF)." data-hint="Releia a limitação do pipelining.">
+    <div class="demo-box mini-quiz" data-options="Só para pedidos idempotentes, que podem ser repetidos sem mudar o resultado|Só para pedidos POST|Para qualquer pedido, sem restrição" data-answer="0" data-explain="Pela RFC 7230, citada pelo livro, o pipelining só serve para pedidos idempotentes (pág. 162 do PDF): se a conexão cair, o cliente reenvia os que ficaram sem resposta." data-hint="Releia a limitação do pipelining.">
         <p class="fw-semibold mb-2">Para quais pedidos o pipelining pode ser usado?</p>
     </div>
     <div class="demo-box mini-quiz" data-options="Ímpar|Par|Zero" data-answer="0" data-explain="Os identificadores ímpares são do cliente, e os pares, do servidor (pág. 163 do PDF)." data-hint="Quem abre o stream é o cliente.">

@@ -465,7 +465,7 @@ Entrada 0x14fb   8 bits 00010100 11111011   6 bits 000101 001111 101100  Decimal
     <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
     <p>
         O <strong>Simple Mail Transfer Protocol</strong> (<a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener noreferrer">RFC 5321</a>)
-        é cliente-servidor. A especificação distingue cinco tipos de processo (pág. 144 do PDF):
+        é cliente-servidor. A especificação distingue quatro tipos de processo (pág. 144 do PDF):
     </p>
     <ul>
         <li><strong>MUA</strong> (<em>Mail User Agent</em>): o cliente de e-mail ou o webmail, onde a mensagem é escrita;</li>
@@ -473,6 +473,11 @@ Entrada 0x14fb   8 bits 00010100 11111011   6 bits 000101 001111 101100  Decimal
         <li><strong>MTA</strong> (<em>Transmission</em>): transmite a mensagem, direto ou por MTAs intermediários, até o MTA do domínio de destino;</li>
         <li><strong>MDA</strong> (<em>Delivery</em>): guarda a mensagem para o MUA do destinatário.</li>
     </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro anuncia "cinco tipos de processo" (pág. 144 do PDF), mas descreve só quatro: MUA, MSA, MTA e MDA. São esses os
+        quatro agentes que aparecem no caminho de uma mensagem.
+    </p>
     <p>
         O SMTP é usado entre MUA e MSA, entre MSA e MTA e entre MTAs. Ele roda sobre o fluxo de bytes (TCP), e os
         servidores escutam na <strong>porta 25</strong>. Cada comando é uma linha ASCII terminada por CR LF; cada
