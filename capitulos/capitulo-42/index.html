@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 42 — Prática: explorando os protocolos de roteamento | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Seção 4.16: OSPFv3 e RIPng no IPMininet, com as capturas do livro; eBGP numa Internet de três domínios, a dinâmica das sessões e os exercícios com redes de cinco a nove domínios.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="42" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 42 · Parte 3: Prática · Seção 4.16</span>
+        <h1 class="display-5 mb-3">Prática: explorando os protocolos de roteamento</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você acompanha OSPFv3, RIPng e BGP rodando no IPMininet: lê as saídas do FRRouting e as capturas do livro, prevê caminhos assimétricos e analisa redes BGP com problemas.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#ospf">1. OSPFv3 no IPMininet</a>
+                    <a class="nav-link" href="#ospf-pacotes">2. Os pacotes do OSPFv3</a>
+                    <a class="nav-link" href="#ripng">3. RIPng</a>
+                    <a class="nav-link" href="#bgp-tres">4. eBGP com três domínios</a>
+                    <a class="nav-link" href="#bgp-dinamica">5. A dinâmica do BGP</a>
+                    <a class="nav-link" href="#exercicios-bgp">6. Os exercícios de BGP</a>
+                    <a class="nav-link" href="#exercicios-cap42">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Os protocolos de roteamento na prática</h2>
+    <p>
+        A seção 4.16 do livro é um roteiro com o IPMininet e o FRRouting: OSPFv3, RIPng e BGP em redes pequenas, com saídas de comandos e capturas de pacotes, e cinco
+        exercícios de BGP no fim (pág. 353–384 do PDF). Os scripts e as capturas estão no repositório público
+        <a href="https://github.com/cnp3/ebook/tree/master/exercises" target="_blank" rel="noopener noreferrer">cnp3/ebook</a>. O formato das atividades está explicado no
+        <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Ler as saídas do <strong>FRRouting</strong> e as capturas de <strong>OSPFv3</strong>, <strong>RIPng</strong> e <strong>BGP</strong>, campo a campo.</li>
+                <li>Prever <strong>caminhos BGP</strong> a partir das políticas, e o efeito de <strong>falhas</strong> e de mudanças de política no alcance dos hosts.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o RIP e o OSPF do <a href="../capitulo-24/index.html">Capítulo 24</a>, o BGP do <a href="../capitulo-25/index.html">Capítulo 25</a> e as
+                relações comerciais do <a href="../capitulo-41/index.html">Capítulo 41</a>. O capítulo cobre a seção 4.16 do livro (pág. 353–384 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. OSPFv3 no IPMininet -->
+<section id="ospf" class="chapter-section" data-conceito="ospf" data-titulo="OSPFv3 no IPMininet">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">OSPFv3 numa rede de três roteadores</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No OSPF, cada roteador conhece a topologia inteira e calcula com Dijkstra os caminhos de menor custo; o custo de cada enlace é configurado pelo operador.
+        Veja o <a href="../capitulo-24/index.html#ospf">OSPF no Capítulo 24</a> e o traceroute6 no <a href="../capitulo-40/index.html#ipmininet">Capítulo 40</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.16.1">
+        A seção 4.16 usa o IPMininet para ver os protocolos de roteamento funcionando, sobre os daemons do FRRouting (pág. 353 do PDF). O primeiro script cria a
+        rede da Fig. 12: o host a ligado a r1, o host b ligado a r3 e os três roteadores em triângulo, com custos 1 (r1–r2), 5 (r1–r3) e 3 (r2–r3), e com as interfaces
+        para os hosts marcadas como passivas (<code>igp_passive=True</code>), sem Hello nelas. O livro diz que o traceroute6 confirma os caminhos esperados pelos
+        custos, mas a saída impressa vai de r1 direto a r3 (pág. 354–355 do PDF):
+    </p>
+<pre class="log small">mininet> a traceroute6 2001:db8:1341:3::B
+traceroute to 2001:db8:1341:3::B (2001:db8:1341:3::b) from 2001:db8:1341:1::a, 30 hops max, 24 byte packets
+ 1  2001:db8:1341:1::1 (2001:db8:1341:1::1)  0.203 ms  0.061 ms  0.045 ms
+ 2  2001:db8:1341:13::3 (2001:db8:1341:13::3)  0.064 ms  0.055 ms  0.049 ms
+ 3  2001:db8:1341:3::b (2001:db8:1341:3::b)  0.231 ms  0.057 ms  0.05 ms</pre>
+    <p>No daemon <code>ospf6d</code> de r1 (senha <code>zebra</code>), o livro mostra os vizinhos e a base de dados (pág. 356–357 do PDF), aqui resumida:</p>
+<pre class="log small">r1> show ipv6 ospf6 neighbor
+Neighbor ID     Pri    DeadTime    State/IfState         Duration I/F[State]
+0.0.0.3          10    00:00:02          Full/DR         14:44:44 r1-eth0[BDR]
+0.0.0.4          10    00:00:02          Full/DR         14:44:48 r1-eth1[BDR]
+r1> show ipv6 ospf6 database
+        Area Scoped Link State Database (Area 0.0.0.0)
+Type LSId           AdvRouter       Age   SeqNum                        Payload
+Rtr  0.0.0.0        0.0.0.2        1037 80000020                0.0.0.3/0.0.0.2
+Rtr  0.0.0.0        0.0.0.2        1037 80000020                0.0.0.4/0.0.0.2
+Rtr  0.0.0.0        0.0.0.3        1033 80000020                0.0.0.3/0.0.0.2
+Rtr  0.0.0.0        0.0.0.3        1033 80000020                0.0.0.4/0.0.0.3
+Rtr  0.0.0.0        0.0.0.4        1033 80000020                0.0.0.4/0.0.0.2
+Rtr  0.0.0.0        0.0.0.4        1033 80000020                0.0.0.4/0.0.0.3
+Net  0.0.0.2        0.0.0.3        1038 8000001e                        0.0.0.3
+Net  0.0.0.2        0.0.0.3        1038 8000001e                        0.0.0.2
+Net  0.0.0.2        0.0.0.4        1043 8000001e                        0.0.0.4
+Net  0.0.0.2        0.0.0.4        1043 8000001e                        0.0.0.2
+Net  0.0.0.3        0.0.0.4        1033 8000001e                        0.0.0.4
+Net  0.0.0.3        0.0.0.4        1033 8000001e                        0.0.0.3
+INP  0.0.0.0        0.0.0.2        1037 80000022           2001:db8:1341:1::/64
+INP  0.0.0.2        0.0.0.3        1038 8000001e          2001:db8:1341:12::/64
+INP  0.0.0.0        0.0.0.4        1033 80000022           2001:db8:1341:3::/64
+INP  0.0.0.2        0.0.0.4        1043 8000001e          2001:db8:1341:13::/64
+INP  0.0.0.3        0.0.0.4        1033 8000001e          2001:db8:1341:23::/64
+(seguem os Link-LSAs de cada interface)</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O script passa os custos como <code>igp_cost=…</code>, mas o IPMininet lê o parâmetro <code>igp_metric</code> (veja
+        <a href="https://github.com/cnp3/ipmininet/blob/master/ipmininet/link.py" target="_blank" rel="noopener noreferrer">ipmininet/link.py</a>), e o custo de
+        um enlace sem esse parâmetro é 1. Com todos os custos em 1, o caminho direto r1–r3 é o mais curto, e é ele que aparece no traceroute6 do livro. Com os custos
+        1, 5 e 3 de fato aplicados, o caminho seria r1 → r2 → r3.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ospf-custos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Com 1, 5 e 3, o caminho de r1 até r3 por r2 custa 1 + 3 = 4, menos que os 5 do enlace direto. O traceroute6 de a até b mostraria r1 (1::1), r2 (12::2),
+                r3 (23::3) e b. Cada roteador responde com o endereço da interface pela qual ele volta até a origem: r3 volta a a por r2, então usa 23::3.</li>
+            <li>A base de dados tem 11 LSAs de área, como diz <code>show ipv6 ospf6</code>: 3 Router-LSAs (um por roteador, listado uma vez por enlace), 3 Network-LSAs
+                (um por enlace entre roteadores, originado pelo roteador designado, DR, do enlace) e 5 Intra-Area-Prefix-LSAs, com os cinco prefixos /64. Os enlaces
+                são Ethernet, então o OSPF elege um DR em cada um; r1 é o BDR nos dois enlaces dele.</li>
+            <li>Para rodar em casa, o script <a href="https://github.com/cnp3/ebook/blob/master/exercises/ipmininet_scripts/ospf6.py" target="_blank" rel="noopener noreferrer">ospf6.py</a>
+                está no repositório público do livro; troque <code>igp_cost</code> por <code>igp_metric</code> para ver o efeito dos custos.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Não envia nem aceita Hello nela|Não encaminha pacotes por ela|Não anuncia o prefixo dela" data-answer="0" data-explain="Uma interface passiva só leva a hosts: o roteador não procura vizinhos OSPF nela, mas continua anunciando o prefixo e encaminhando por ela." data-hint="O que um host faria com um Hello do OSPF?">
+        <p class="fw-semibold mb-2">O que muda numa interface marcada como passiva no OSPF?</p>
+    </div>
+</section>
+
+<!-- 2. Os pacotes do OSPFv3 -->
+<section id="ospf-pacotes" class="chapter-section" data-conceito="ospf-pacotes" data-titulo="Os pacotes do OSPFv3">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Hello, Database Description, LS Request e LS Update</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Num protocolo de estado de enlace, os roteadores descobrem os vizinhos com Hello e depois sincronizam as bases de dados. Veja o
+        <a href="../capitulo-24/index.html#ospf">OSPF no Capítulo 24</a> e o encapsulamento IPv6 no <a href="../capitulo-22/index.html#cabecalho">Capítulo 22</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.16.1-capturas">
+        As capturas do tcpdump em cada roteador mostram os pacotes do OSPFv3 (pág. 353–358 do PDF). O primeiro que r1 recebe é um Hello de r2: a origem é o endereço
+        link-local de r2 (fe80::68bc:b4ff:fe19:42b7), o destino é ff02::5, o endereço multicast reservado ao OSPFv3, o Hop Limit é 1 e o Next Header é 89. O Hello
+        traz o Hello Interval, de 1 s, e o Router Dead Interval, de 3 s: sem Hello por 3 s, o roteador considera o enlace fora do ar. Depois vêm os Database
+        Description, que anunciam o conteúdo da base de dados; r2 pede o que não conhece com um LS Request, recebe um LS Update e confirma com um LS Acknowledge.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        As capturas <code>ospf6-r1-trace.pcap</code> e as outras estão no repositório público
+        <a href="https://github.com/cnp3/ebook/tree/master/exercises/traces" target="_blank" rel="noopener noreferrer">cnp3/ebook</a> e abrem no Wireshark. Nas figuras do
+        livro, o pacote LS Acknowledge não aparece.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ospf-pacotes"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Um Hello do OSPFv3 tem 16 bytes de cabeçalho OSPF e 20 de corpo, mais 4 bytes por vizinho já visto (o Router ID dele): 36 bytes, ou 90 no quadro com
+                14 de Ethernet e 40 de IPv6. Quando r1 e r2 se veem, o Hello passa a listar o vizinho e cresce para 94 bytes. É assim que um roteador sabe que o outro o
+                ouviu: ele aparece na lista.</li>
+            <li>Um Database Description sem LSAs tem 16 + 12 = 28 bytes de OSPFv3 (pacote 9, 82 bytes no quadro). O pacote 20 tem 168: (168 − 28) / 20 = 7 cabeçalhos de
+                LSA, e o LS Update do pacote 23 leva 7 LSAs completos.</li>
+            <li>Hello e LS Update vão para ff02::5 com Hop Limit 1: não passam de um enlace. Os Database Description e os LS Request vão para o link-local do vizinho, com
+                Hop Limit 64, mas também não saem do enlace, porque endereços link-local não são roteados.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="ff02::5, com Hop Limit 1|O endereço global do vizinho, com Hop Limit 64|ff02::1, para todos os nós" data-answer="0" data-explain="O Hello vai ao grupo multicast dos roteadores OSPF (ff02::5) e só deve alcançar o próprio enlace, por isso o Hop Limit 1." data-hint="Pacote 1 da captura.">
+        <p class="fw-semibold mb-2">Para onde vai um Hello do OSPFv3?</p>
+    </div>
+</section>
+
+<!-- 3. RIPng -->
+<section id="ripng" class="chapter-section" data-conceito="ripng" data-titulo="RIPng">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">As mensagens do RIPng</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O RIP é um protocolo de vetor de distância: cada roteador manda aos vizinhos a sua tabela, com uma métrica por destino, e 16 significa infinito. Veja o
+        <a href="../capitulo-24/index.html#rip">RIP no Capítulo 24</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.16.2">
+        O mesmo IPMininet roda o RIPng na rede da Fig. 12 (o script desliga o OSPF com <code>RouterConfig</code> e acrescenta o daemon <code>RIPng</code>). As mensagens
+        vão em UDP, na porta 521. Com as rotas distribuídas, <code>ping6all</code> funciona, e os traceroute6 seguem r1 → r3 nos dois sentidos. A RFC 2080 define dois
+        tipos de mensagem: os pedidos (Request) e as respostas (Response), com a tabela do roteador. Ao iniciar, o roteador manda um pedido do seu link-local para
+        ff02::9, o endereço multicast reservado ao RIPng; quem recebe um pedido responde ao link-local de quem pediu. Depois, cada roteador manda o seu vetor de
+        distância, sem ser pedido, para ff02::9, periodicamente (pág. 358–362 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro escreve "endereço multicast IPv7 ff02::9"; o certo é IPv6. A captura <code>ripng-r2-trace.pcap</code> também está no repositório
+        <a href="https://github.com/cnp3/ebook/tree/master/exercises/traces" target="_blank" rel="noopener noreferrer">cnp3/ebook</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ripng-captura"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>O quadro tem 14 bytes de Ethernet, 40 de IPv6, 8 de UDP e 4 de cabeçalho RIPng (comando, versão e 2 reservados), mais 20 bytes por entrada (prefixo de
+                16 bytes, route tag, tamanho do prefixo e métrica). Então 86 bytes = 1 entrada, 126 = 3, 146 = 4 e 166 = 5.</li>
+            <li>O pedido inicial tem uma entrada só, ::/0 com métrica 16: pela RFC 2080, é o pedido da tabela inteira. A resposta (pacote 3) vai em unicast para o link-local
+                de quem pediu; as respostas periódicas vão para ff02::9.</li>
+            <li>Na resposta do pacote 3, r2 anuncia 12::/64 com métrica 1 (rede ligada a ele) e 3::/64 e 13::/64 com métrica 2 (um roteador adiante). As respostas
+                periódicas de r2 saem em 4,6 s, 20,4 s e 47,4 s: a RFC 2080 manda repetir a cada 30 s, com um desvio aleatório de até 15 s para mais ou para menos, para
+                que os roteadores não se sincronizem. Mudanças na tabela também disparam respostas fora do ciclo.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="UDP, porta 521|TCP, porta 179|Direto sobre o IPv6, Next Header 89" data-answer="0" data-explain="O RIPng usa UDP na porta 521; TCP na porta 179 é o BGP, e o Next Header 89 é o OSPF." data-hint="O filtro do tcpdump no script.">
+        <p class="fw-semibold mb-2">Como o RIPng transporta as suas mensagens?</p>
+    </div>
+</section>
+
+<!-- 4. eBGP com três domínios -->
+<section id="bgp-tres" class="chapter-section" data-conceito="bgp-tres" data-titulo="eBGP com três domínios">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Loc-RIB e caminhos numa Internet de três domínios</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O BGP escolhe entre as rotas de um prefixo pela local-pref, que traduz as relações comerciais, e depois pelo AS-path mais curto. Veja o
+        <a href="../capitulo-25/index.html#bgp-decisao">processo de decisão no Capítulo 25</a> e as relações no <a href="../capitulo-41/index.html#relacoes">Capítulo 41</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.16.3">
+        Na Fig. 13, AS1 é cliente de AS2, AS2 é cliente de AS3, e AS1 e AS3 são pares. Cada AS tem um roteador e um host: AS<em>n</em> anuncia 2001:cafe:<em>n</em>::/48,
+        e o host h<em>n</em> tem o endereço 2001:cafe:<em>n</em>:1::1<em>n</em>. O IPMininet monta as sessões eBGP com <code>ebgp_session(…, link_type=CLIENT_PROVIDER)</code>
+        e <code>SHARE</code>, que configuram as políticas. Logo depois de iniciar, <code>ping6all</code> falha, porque o BGP ainda não trocou as mensagens; depois de um
+        tempo, tudo funciona (pág. 362–368 do PDF).
+    </p>
+    <p data-livro="4.16.3-traceroute">
+        O livro pede: antes de rodar o traceroute6, pense nas políticas e tente prever a saída. Os caminhos impressos são assimétricos: h1 vai a h3 direto, mas h3 volta a
+        h1 por AS2; h1 vai a h2 passando por AS3, e h2 volta direto. Na Loc-RIB de as1 (<code>show bgp ipv6</code>), a rota para 2001:cafe:2::/48 aprendida de as3, com
+        AS-path 3 2 e local-pref 150, vence a aprendida direto de as2, com local-pref 100 (pág. 368–373 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="bgp-tres-as"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>O <code>ebgp_session</code> do IPMininet dá local-pref 200 às rotas aprendidas de clientes, 150 às de pares e 100 às de provedores, e só exporta aos clientes
+                as rotas aprendidas de pares e provedores (veja o código de
+                <a href="https://github.com/cnp3/ipmininet/blob/master/ipmininet/router/config/bgp.py" target="_blank" rel="noopener noreferrer">ipmininet/router/config/bgp.py</a>).</li>
+            <li>AS1 prefere o par AS3 (150) ao provedor AS2 (100): por isso vai a AS2 passando por AS3, num caminho mais longo. AS3 prefere o cliente AS2 (200) ao par AS1
+                (150): por isso volta a AS1 passando por AS2. AS2 vai a AS1 direto, pelo cliente. As quatro saídas de traceroute6 do livro batem com essas escolhas.</li>
+            <li>Os endereços do traceroute6 também confirmam: cada roteador responde pela interface por onde volta até a origem. No caminho de h1 a h3, as3 aparece como
+                2001:cafe:2:23::3, o endereço do enlace com AS2, porque é por ali que as3 manda pacotes para h1.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="A local-pref maior|O AS-path mais curto|O menor número de AS" data-answer="0" data-explain="A local-pref vem antes do tamanho do AS-path no processo de decisão; é por ela que AS1 aceita um caminho mais longo pelo par." data-hint="150 contra 100.">
+        <p class="fw-semibold mb-2">Por que as1 prefere a rota com AS-path 3 2 à rota com AS-path 2?</p>
+    </div>
+</section>
+
+<!-- 5. A dinâmica do BGP -->
+<section id="bgp-dinamica" class="chapter-section" data-conceito="bgp-dinamica" data-titulo="A dinâmica do BGP">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">OPEN, UPDATE, KEEPALIVE e uma sessão desligada</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma sessão BGP é uma conexão TCP (porta 179) que começa com OPEN e depois leva UPDATEs, que anunciam e retiram rotas, e KEEPALIVEs. Veja as
+        <a href="../capitulo-25/index.html#bgp-sessao">sessões e mensagens BGP no Capítulo 25</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.16.3-dinamica">
+        Com atrasos nos enlaces e o tcpdump ligado, o livro examina a sessão entre AS1 e AS2. Depois do three-way handshake, cada lado manda um OPEN com o seu número de
+        AS, o seu identificador (32 bits, no formato de um endereço IPv4) e o Hold Time, o maior intervalo permitido entre duas mensagens; um roteador deve mandar
+        KEEPALIVE a cada um terço do Hold Time. Um UPDATE de AS2 anuncia 2001:cafe:2::/48 a AS1. Em seguida, o livro entra no bgpd de as2, no modo privilegiado
+        (<code>enable</code>), e desliga a sessão com AS3 (<code>configure terminal</code>, <code>router bgp 2</code>, <code>neighbor 2001:cafe:2:23::3 shutdown</code>): a
+        sessão fica <code>Idle (Admin)</code>, e h2 e h3 deixam de se alcançar. Com <code>no neighbor 2001:cafe:2:23::3 shutdown</code>, tudo volta (pág. 369–377 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que os KEEPALIVE vão a cada 30 segundos, mas a saída de <code>show bgp ipv6 neighbors</code> impressa na mesma página mostra
+        <code>Hold time is 180, keepalive interval is 60 seconds</code>, que é o um terço do Hold Time. A figura do OPEN não aparece: o PDF repete a mesma captura do
+        UPDATE nas pág. 378 e 379. Na lista de capturas, <code>bgp-as2-trace.pcap</code> aparece duas vezes; a terceira é <code>bgp-as3-trace.pcap</code>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="bgp-dinamica"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>O UPDATE tem 19 bytes de cabeçalho BGP (marcador de 16, tamanho e tipo), 2 do tamanho das rotas retiradas (0), 2 do tamanho dos atributos e 69 de atributos:
+                92 bytes. Os prefixos IPv6 não vão no campo NLRI do BGP original, mas dentro do atributo MP_REACH_NLRI (RFC 4760), com o next hop global e o link-local.</li>
+            <li>Com a sessão AS2–AS3 desligada, AS2 retira de AS1 a rota de AS3, e AS3 retira de AS1 a rota de AS2. AS1 não repassa rotas entre o provedor AS2 e o par AS3,
+                então h2 e h3 ficam sem caminho, como no <code>ping6all</code> do livro.</li>
+            <li>Os scripts e as capturas estão no repositório <a href="https://github.com/cnp3/ebook/tree/master/exercises" target="_blank" rel="noopener noreferrer">cnp3/ebook</a>;
+                o bgpd do FRRouting aceita os mesmos comandos (<a href="https://docs.frrouting.org/en/latest/bgp.html" target="_blank" rel="noopener noreferrer">documentação</a>).</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Num UPDATE, na lista de rotas retiradas|Num OPEN novo|Num KEEPALIVE" data-answer="0" data-explain="O UPDATE serve tanto para anunciar quanto para retirar rotas; o OPEN só abre a sessão, e o KEEPALIVE só a mantém viva." data-hint="O UPDATE tem o campo Withdrawn Routes.">
+        <p class="fw-semibold mb-2">Como um roteador BGP avisa que uma rota deixou de valer?</p>
+    </div>
+</section>
+
+<!-- 6. Exercícios -->
+<section id="exercicios-bgp" class="chapter-section" data-conceito="exercicios-bgp" data-titulo="Os exercícios de BGP">
+    <span class="kicker">Atividade 6</span>
+    <h2 class="section-title">Redes com problemas para analisar e corrigir</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        As regras de exportação podem deixar domínios sem caminho entre si, mesmo com a rede física ligada. Veja as regras e os exemplos no
+        <a href="../capitulo-41/index.html#relacoes">Capítulo 41</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.16.4-Q1">Numa Internet de 5 domínios (ebgp-bug.py), com um host por AS: AS2, AS3 e AS5 são clientes de AS1; AS3 é cliente de AS4; AS2 = AS3,
+            AS2 = AS4 e AS4 = AS5 são pares. O <code>ping6all</code> mostra que h1 e h4 não se alcançam. Dá para resolver mudando a política de um único enlace
+            interdomínio? Justifique.</li>
+        <li data-livro="4.16.4-Q2">Numa variante com um enlace a mais, AS2 = AS5, e com AS4 cliente de AS3, todos os hosts se alcançam. Desenhe a rede e preveja como ela
+            reage à queda de cada enlace cliente-provedor: que mensagens BGP são trocadas, e como fica o alcance dos hosts, quando cai (a) AS1–AS2, (b) AS1–AS3,
+            (c) AS1–AS5 e (d) AS3–AS4?</li>
+        <li data-livro="4.16.4-Q3">Na rede da Fig. 14, com nove domínios, AS9 anuncia p9 e AS2 anuncia p2. Qual é a Loc-RIB de (a) AS6 para p9 e (b) AS9 para p2? Indique a
+            melhor rota.</li>
+        <li data-livro="4.16.4-Q4">Na rede da Fig. 15, AS1 anuncia p1 e AS2 anuncia p2. Qual é a Loc-RIB de (a) AS6 para p1 e (b) AS8 para p2? Indique a melhor rota.</li>
+        <li data-livro="4.16.4-Q5">Na rede da Fig. 16 (ebgp-bug-3.py), (a) os hosts de AS5 não alcançam os de AS8. Que caminho seguem os pacotes (b) de AS1 até AS8, (c) de
+            AS8 até AS1, (d) de AS8 até AS2 e (e) de AS2 até AS7? (f) Desligado o enlace AS3–AS4, que hosts AS1, AS5 e AS6 ainda alcançam (pág. 377–380 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="bgp-exercicios"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1.</strong> AS1 só tem clientes (AS2, AS3 e AS5), e cada um deles conhece AS4 por um par (AS2, AS5) ou pelo provedor (AS3), rotas que não se
+                anunciam a outro provedor. AS4 conhece AS1 só por meio de pares (AS2, AS5) e de um cliente (AS3), que não repassam rotas de provedores. Basta pôr AS4 numa
+                relação cliente-provedor com um caminho até AS1: inverter AS3–AS4 (AS4 cliente de AS3), tornar AS4 cliente de AS2 ou de AS5, ou, menos natural, tornar
+                AS1 cliente de AS2, AS3 ou AS5. Transformar um enlace em par não resolve.</li>
+            <li><strong>Q2.</strong> Em cada queda, a sessão do enlace cai, e os roteadores dos dois lados retiram as rotas aprendidas por ela, avisando os vizinhos que as
+                tinham recebido com UPDATEs (retiradas, ou anúncios de rotas novas). (a) Sem AS1–AS2, AS1 retira p2 de AS3 e AS5: h1 e h2 se perdem, porque AS2 só tem
+                pares além de AS1. (b) Sem AS1–AS3, perdem-se h1–h3, h1–h4 e h3–h5. (c) Sem AS1–AS5, perdem-se h1–h5 e h3–h5. (d) Sem AS3–AS4, perdem-se h1–h4 e h3–h4.
+                Abra a simulação para ver a lista de UPDATEs de cada caso.</li>
+            <li><strong>Q3.</strong> (a) AS6 recebe p9 do par AS7 (AS-path 7 9) e do par AS8 (8 1 9); a melhor é a de AS7, mais curta. O cliente AS5 e o par AS3 não lhe
+                anunciam p9, porque o aprenderam de provedores. (b) AS9 recebe p2 dos dois provedores: de AS7 (7 5 4 3 2) e de AS1 (1 8 6 5 4 3 2); a melhor é a de AS7.</li>
+            <li><strong>Q4.</strong> (a) AS6 só recebe p1 do par AS8 (8 1). (b) AS8 só recebe p2 do par AS6 (6 5 4 3 2); AS7 aprendeu p2 do provedor AS5 e não o anuncia ao
+                par AS8.</li>
+            <li><strong>Q5.</strong> (a) AS5 só conhece AS8 por caminhos que não podem ser anunciados a ele, e vice-versa. (b) AS1 → AS3 → AS4 → AS7 → AS8. (c) AS8 → AS7 →
+                AS4 → AS3 → AS1 (a rota do cliente AS7 vence a do par AS6). (d) AS8 → AS7 → AS4 → AS3 → AS1 → AS2. (e) AS2 → AS5 → AS6 → AS7: as duas rotas vêm de
+                provedores, e a de AS5 é mais curta. (f) Sem AS3–AS4, AS1 só alcança AS2 e AS3; AS5 alcança AS2, AS4, AS6 e AS7; AS6 alcança AS2, AS4, AS5, AS7 e AS8.</li>
+            <li>Os empates (mesma local-pref e mesmo tamanho) não aparecem nessas respostas; na simulação, são desfeitos pelo menor número de AS.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Não: o par não repassa a rota do outro lado|Sim: qualquer enlace novo resolve|Sim: pares trocam todas as rotas" data-answer="0" data-explain="Um par só anuncia as próprias rotas e as dos clientes; rotas de provedores e de outros pares não passam por ele. Por isso transformar enlaces em pares não conserta a Q1." data-hint="O que um par exporta?">
+        <p class="fw-semibold mb-2">Na Q1, transformar o enlace AS3–AS4 num acordo de par resolve o problema?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap42" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Um Hello do OSPFv3 lista dois vizinhos. Quantos bytes tem o quadro Ethernet?
+            <details><summary>Ver solução</summary><p class="mb-0">14 + 40 + 16 + 20 + 2 × 4 = 98 bytes: Ethernet, IPv6, cabeçalho OSPF, corpo do Hello e 4 bytes por vizinho.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Na Fig. 12, com os custos 1, 5 e 3 aplicados, o enlace r1–r2 cai. Que caminho o OSPF passa a usar de a até b, e em quanto tempo r1 percebe a queda se nenhum aviso chegar?
+            <details><summary>Ver solução</summary><p class="mb-0">a → r1 → r3 → b, pelo enlace direto de custo 5. Sem aviso da camada de enlace, r1 percebe quando o Router Dead Interval de 3 s passa sem Hello de r2.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Na Fig. 13, se AS1 e AS3 virassem cliente e provedor (AS1 cliente de AS3), que caminho h1 usaria até h2?
+            <details><summary>Ver solução</summary><p class="mb-0">As duas rotas para AS2 viriam de provedores (local-pref 100): direto por AS2 (AS-path 2) ou por AS3 (3 2). O AS-path mais curto vence: h1 iria direto a AS2.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Na Q2 dos exercícios, por que a queda de AS1–AS3 corta h3 de h5, se AS3 e AS5 continuam ligados a AS1 e AS3 tem o cliente AS4, par de AS5?
+            <details><summary>Ver solução</summary><p class="mb-0">AS3 só alcançava AS5 pelo provedor AS1. Depois da queda, AS4 conhece AS5 pelo par AS5, mas não anuncia essa rota ao provedor AS3; e AS2, par de AS3 e de AS5, não repassa rotas entre pares. Sem cliente ou provedor no meio, não há caminho.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Dijkstra na rede da Fig. 12</h3>
+    <pre class="code-block"><code>import heapq
+
+# Dijkstra na rede da Fig. 12 (pág. 350): custos de cada enlace entre roteadores.
+def spf(custos, origem):
+    viz = {}
+    for (x, y), c in custos.items():
+        viz.setdefault(x, []).append((y, c))
+        viz.setdefault(y, []).append((x, c))
+    dist, anterior, fila = {origem: 0}, {}, [(0, origem)]
+    while fila:
+        d, n = heapq.heappop(fila)
+        if d &gt; dist[n]:
+            continue
+        for v, c in viz[n]:
+            if d + c &lt; dist.get(v, float("inf")):
+                dist[v], anterior[v] = d + c, n
+                heapq.heappush(fila, (d + c, v))
+    return dist, anterior
+
+def caminho(anterior, origem, destino):
+    cam = [destino]
+    while cam[-1] != origem:
+        cam.append(anterior[cam[-1]])
+    return cam[::-1]
+
+for nome, custos in [("script (1, 5, 3)", {("r1", "r2"): 1, ("r1", "r3"): 5, ("r2", "r3"): 3}),
+                     ("como o IPMininet aplicou", {("r1", "r2"): 1, ("r1", "r3"): 1, ("r2", "r3"): 1})]:
+    dist, ant = spf(custos, "r1")
+    print(nome, "-&gt;", caminho(ant, "r1", "r3"), "custo", dist["r3"])</code></pre>
+    <h3 class="h6 mt-4">2. A Loc-RIB de as1</h3>
+    <pre class="code-block"><code># A Loc-RIB de as1 na Fig. 13 (pág. 365), com as políticas do IPMininet:
+# local-pref 200 para rotas de clientes, 150 de pares e 100 de provedores.
+LOCAL_PREF = {"cliente": 200, "par": 150, "provedor": 100}
+
+# rotas recebidas por as1: prefixo -&gt; lista de (vizinho, relação, AS-path)
+RECEBIDAS = {
+    "2001:cafe:2::/48": [("as3", "par", [3, 2]), ("as2", "provedor", [2])],
+    "2001:cafe:3::/48": [("as2", "provedor", [2, 3]), ("as3", "par", [3])],
+}
+
+def melhor(rotas):
+    # maior local-pref; depois, o AS-path mais curto
+    return max(rotas, key=lambda r: (LOCAL_PREF[r[1]], -len(r[2])))
+
+for prefixo, rotas in RECEBIDAS.items():
+    m = melhor(rotas)
+    for r in rotas:
+        marca = "*&gt;" if r == m else "* "
+        print(marca, prefixo, r[0], LOCAL_PREF[r[1]], " ".join(map(str, r[2])), "i")</code></pre>
+    <h3 class="h6 mt-4">3. Montando o UPDATE byte a byte</h3>
+    <pre class="code-block"><code>import ipaddress, struct
+
+# O UPDATE de AS2 para AS1 (pág. 374 do livro): anuncia 2001:cafe:2::/48.
+prefixo = ipaddress.IPv6Network("2001:cafe:2::/48")
+nh = ipaddress.IPv6Address("2001:cafe:1:12::2").packed + ipaddress.IPv6Address("fe80::1").packed
+
+nlri = bytes([prefixo.prefixlen]) + prefixo.network_address.packed[:(prefixo.prefixlen + 7) // 8]
+mp = struct.pack("!HBB", 2, 1, len(nh)) + nh + b"\x00" + nlri          # AFI IPv6, SAFI unicast
+atributos = (struct.pack("!BBH", 0x90, 14, len(mp)) + mp                 # MP_REACH_NLRI (tamanho estendido)
+             + struct.pack("!BBBB", 0x40, 1, 1, 0)                        # ORIGIN = IGP
+             + struct.pack("!BBH", 0x50, 2, 6) + struct.pack("!BBI", 2, 1, 2)   # AS_PATH: AS_SEQUENCE com o AS 2
+             + struct.pack("!BBBI", 0x80, 4, 4, 0))                       # MULTI_EXIT_DISC = 0
+corpo = struct.pack("!H", 0) + struct.pack("!H", len(atributos)) + atributos
+msg = b"\xff" * 16 + struct.pack("!HB", 19 + len(corpo), 2) + corpo
+
+print("MP_REACH_NLRI:", len(mp), "bytes; atributos:", len(atributos), "; mensagem:", len(msg))
+print(msg[:24].hex(" "))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.16 "Exploring routing protocols" (pág. 353–384 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>Os scripts e as capturas do livro — repositório <a href="https://github.com/cnp3/ebook/tree/master/exercises" target="_blank" rel="noopener noreferrer">cnp3/ebook</a>; IPMininet — <a href="https://ipmininet.readthedocs.io/" target="_blank" rel="noopener noreferrer">documentação</a> e <a href="https://github.com/cnp3/ipmininet" target="_blank" rel="noopener noreferrer">código</a></li>
+        <li>RFC 5340 — <a href="https://www.rfc-editor.org/rfc/rfc5340" target="_blank" rel="noopener noreferrer">OSPF for IPv6</a> e RFC 2080 — <a href="https://www.rfc-editor.org/rfc/rfc2080" target="_blank" rel="noopener noreferrer">RIPng for IPv6</a></li>
+        <li>RFC 4271 — <a href="https://www.rfc-editor.org/rfc/rfc4271" target="_blank" rel="noopener noreferrer">A Border Gateway Protocol 4 (BGP-4)</a> e RFC 4760 — <a href="https://www.rfc-editor.org/rfc/rfc4760" target="_blank" rel="noopener noreferrer">Multiprotocol Extensions for BGP-4</a></li>
+        <li>FRRouting — <a href="https://docs.frrouting.org/en/latest/" target="_blank" rel="noopener noreferrer">documentação</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-41/index.html" class="text-muted text-decoration-none">← Capítulo 41</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 42</span>
+            <a href="../capitulo-43/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 43 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap42.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

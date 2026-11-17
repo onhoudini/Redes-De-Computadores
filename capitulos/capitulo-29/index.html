@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 29 — Prática: sockets | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Usar a API de sockets: socket, bind, sendto, recvfrom e connect, com endereços IPv6. Codificar mensagens binárias na ordem da rede e montar um cliente e um servidor UDP.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="29" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 29 · Parte 3: Prática · Seção 4.3</span>
+        <h1 class="display-5 mb-3">Prática: sockets</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você usa a API de sockets para escrever um cliente e um servidor que trocam datagramas, monta endereços IPv6 na memória e codifica mensagens binárias na ordem da rede.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#sockets">1. A API de sockets</a>
+                    <a class="nav-link" href="#socket-ipv6">2. Um socket IPv6</a>
+                    <a class="nav-link" href="#ordem-bytes">3. A ordem dos bytes</a>
+                    <a class="nav-link" href="#calculadora">4. A calculadora</a>
+                    <a class="nav-link" href="#exercicios-cap29">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios com sockets</h2>
+    <p>
+        A seção 4.3 do livro mostra a API de sockets em C e pede programas que a usem (pág. 279–286 do PDF). Os programas
+        em C aparecem como estão no livro; no navegador, os mesmos passos rodam numa rede simulada. O formato das atividades
+        está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Usar a <strong>API de sockets</strong>: socket, bind, sendto, recvfrom e connect, com endereços IPv6.</li>
+                <li>Codificar mensagens binárias na <strong>ordem da rede</strong> e montar um cliente e um servidor UDP.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o serviço sem conexão do <a href="../capitulo-04/index.html">Capítulo 4</a>, o UDP do
+                <a href="../capitulo-19/index.html">Capítulo 19</a> e os endereços IPv6 do
+                <a href="../capitulo-22/index.html">Capítulo 22</a>. O capítulo cobre a seção 4.3 do livro (pág. 279–286 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Sockets -->
+<section id="sockets" class="chapter-section" data-conceito="sockets" data-titulo="A API de sockets">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">A API de sockets</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O serviço sem conexão tem duas primitivas: DATA.request(destino, mensagem), para enviar, e DATA.indication(mensagem), para
+        entregar a mensagem à aplicação. O ponto de acesso ao serviço é por onde elas passam. Veja o
+        <a href="../capitulo-04/index.html#sem-conexao">serviço sem conexão no Capítulo 4</a> e o
+        <a href="../capitulo-19/index.html#udp">UDP no Capítulo 19</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.3.1">
+        Um <strong>socket</strong> é uma ferramenta do sistema operacional para dois processos se comunicarem, no mesmo computador
+        (Fig. 1) ou em computadores diferentes, através da rede (Fig. 2). Para o programa, ele é um descritor de arquivo, como um
+        cano por onde os processos trocam bytes; para receber, um processo precisa estar ligado a um endereço que o outro conheça.
+        A API veio do Unix BSD e serviu de modelo para quase todas as outras; o livro usa a versão em C (pág. 279–280 do PDF). Ela é
+        de baixo nível: para, por exemplo, buscar uma página web, há bibliotecas bem mais simples.
+    </p>
+    <ul>
+        <li><strong>sendto</strong> manda um buffer a um endereço de socket. O endereço é um <code>struct sockaddr *</code>
+            genérico, por isso a mesma função serve para sockets locais e de rede (pág. 280–281 do PDF).</li>
+        <li><strong>bind</strong> atribui um endereço ao socket; depois, <strong>recv</strong> ou <strong>read</strong> recebem o
+            que chegar. <strong>recvfrom</strong> também devolve o endereço de quem mandou (pág. 281–282 do PDF).</li>
+        <li><strong>connect</strong> liga o socket a um endereço remoto: daí em diante, <code>send</code> e <code>write</code> não
+            precisam do destino, e o socket só recebe mensagens desse endereço (pág. 283 do PDF).</li>
+    </ul>
+    <p>O exemplo do livro que envia "hello" (pág. 281 do PDF):</p>
+    <pre class="log mb-3">int send_hello_to_peer(int sock, struct sockaddr *peer_addr, size_t peer_addr_len) {
+    ssize_t sent = sendto(sock, "hello", strlen("hello"), 0, peer_addr, peer_addr_len);
+    if (sent == -1) {
+        printf("could not send the message, error: %s\n", strerror(errno));
+        return errno;
+    }
+    return 0;
+}</pre>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Endereço implícito</strong> (pág. 281–282 do PDF). Dependendo da família de endereços, o sistema pode atribuir um
+        endereço a um socket sem bind na primeira chamada a write, send ou sendto. <strong>Cuidado com o buffer</strong>: os
+        exemplos usam um vetor de char, mas ele não contém uma string; pela rede passam valores binários quaisquer, e o byte \0 não
+        marca o fim dos dados.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro associa DATA.request(destino, mensagem) ao método <code>send</code> (pág. 280 do PDF). Como a primitiva leva o
+        destino, a chamada correspondente é <strong>sendto</strong>, que o próprio livro usa logo depois; <code>send</code> só
+        funciona num socket já conectado. E a função <code>bind_and_receive_from_peer_with_addr</code> da pág. 282 usa
+        <code>local_addr</code> e <code>local_addr_len</code> sem recebê-los como parâmetros: só compila se eles forem passados,
+        como na versão anterior da função.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="socket-udp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. O que acontece em cada chamada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a explicação</summary>
+        <ul class="mt-2 mb-0">
+            <li>Se A chama sendto antes de B fazer bind, o datagrama chega a uma porta sem dono e é descartado. O UDP não avisa o
+                emissor: sendto devolve 5, os bytes que entregou ao sistema.</li>
+            <li>A não precisa de bind: no primeiro envio, o sistema escolhe para ele uma porta livre (a "porta efêmera").</li>
+            <li>B só consegue responder porque <strong>recvfrom</strong> devolve o endereço de quem mandou; com recv, ele receberia
+                os dados sem saber a quem responder.</li>
+            <li>write sem connect falha com EDESTADDRREQ: o socket não tem destino. Depois de connect, A também passa a ignorar
+                datagramas de outros endereços.</li>
+            <li>Um read com a fila vazia não falha: num programa de verdade, ele fica <strong>bloqueado</strong> até chegar um
+                datagrama.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O endereço de socket de quem enviou|O tamanho máximo da mensagem|A garantia de entrega" data-answer="0" data-explain="recvfrom preenche peer_addr com o endereço do remetente, que pode ser usado para responder (pág. 282 do PDF)." data-hint="O que o servidor precisa saber para responder?">
+        <p class="fw-semibold mb-2">O que recvfrom devolve a mais que recv?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Erro: o socket não tem destino (EDESTADDRREQ)|O sistema escolhe um destino ao acaso|A mensagem vai para todos os processos" data-answer="0" data-explain="Sem connect, o socket não tem endereço remoto; send e write não têm para onde mandar os dados (pág. 283 do PDF)." data-hint="write não tem parâmetro de destino.">
+        <p class="fw-semibold mb-2">O que acontece com um write num socket UDP que não passou por connect?</p>
+    </div>
+</section>
+
+<!-- 2. Socket IPv6 -->
+<section id="socket-ipv6" class="chapter-section" data-conceito="socket-ipv6" data-titulo="Um socket IPv6">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Um socket IPv6</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um endereço IPv6 identifica uma interface de um computador, e uma porta identifica um programa nele. Veja os
+        <a href="../capitulo-22/index.html#enderecos">endereços IPv6 no Capítulo 22</a> e as
+        <a href="../capitulo-04/index.html#portas">portas no Capítulo 4</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.3.4">
+        A chamada <code>socket(AF_INET6, SOCK_DGRAM, 0)</code> cria um socket para endereços IPv6 (<code>AF_INET6</code>) com
+        mensagens não confiáveis (<code>SOCK_DGRAM</code>): cada mensagem enviada chega inteira ou não chega. O endereço ::1
+        identifica o próprio computador. Para chegar a um programa, são precisos o endereço IPv6 do computador e a porta do programa,
+        guardados numa <code>struct sockaddr_in6</code> (pág. 283–284 do PDF):
+    </p>
+    <pre class="log mb-3">struct sockaddr_in6 peer_addr;
+memset(&amp;peer_addr, 0, sizeof(peer_addr));             // zera a estrutura
+peer_addr.sin6_family = AF_INET6;                     // um endereço IPv6
+peer_addr.sin6_port = htons(55555);                   // a porta, na ordem da rede
+inet_pton(AF_INET6, "::1", &amp;peer_addr.sin6_addr);     // o endereço do computador</pre>
+    <p>
+        A função <code>create_socket_and_send_message</code> junta tudo: cria o socket, monta o endereço, chama
+        <code>send_hello_to_peer</code> e fecha o socket com <code>close</code>. A função de envio não muda: ela serve para qualquer
+        família de endereços (pág. 284–285 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Na pág. 284 do PDF, duas frases aparecem cortadas no fim da linha: "IPv6 addresses have a" e "In order to identify a
+        specific program". As listas que vêm em seguida completam a ideia: exemplos de endereços (::1 e o do servidor do livro) e
+        os dois dados que identificam um programa, o endereço IPv6 do computador e a porta.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="sockaddr-in6"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a explicação</summary>
+        <p class="mt-2 mb-2">
+            A porta e o endereço vão para os cabeçalhos dos pacotes, e o núcleo espera recebê-los na <strong>ordem da rede</strong>.
+            Num PC x86, que é little-endian, a CPU grava 55555 (0xd903) como 03 d9; o <code>htons</code> inverte os bytes para
+            d9 03. Sem ele, o núcleo leria 0x03d9 = 985. A família fica na ordem da CPU, porque nunca sai do computador: só diz ao
+            núcleo como interpretar o resto da estrutura. O endereço já sai de <code>inet_pton</code> na ordem certa.
+        </p>
+        <p class="mb-0">
+            No desafio, 10000 = 0x2710: sem <code>htons</code>, a CPU grava 10 27, e o servidor fica na porta 0x1027 = 4135. Os
+            clientes que procuram a porta 10000 não o encontram.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O endereço IPv6 do computador e a porta do programa|Só o endereço IPv6|O nome do processo" data-answer="0" data-explain="Um endereço IPv6 costuma identificar um computador; para chegar a um programa é preciso a porta (pág. 284 do PDF)." data-hint="Vários programas rodam no mesmo computador.">
+        <p class="fw-semibold mb-2">O que identifica um programa que recebe datagramas num computador?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque a porta vai para os cabeçalhos na rede, e a família só é usada dentro do computador|Porque a família tem só 8 bits|Porque o htons só funciona com portas" data-answer="0" data-explain="Campos que viajam pela rede usam a ordem da rede; a família só orienta o núcleo local." data-hint="Qual dos dois campos aparece num pacote?">
+        <p class="fw-semibold mb-2">Por que o exemplo converte a porta com htons, mas não a família?</p>
+    </div>
+</section>
+
+<!-- 3. Ordem dos bytes -->
+<section id="ordem-bytes" class="chapter-section" data-conceito="ordem-bytes" data-titulo="A ordem dos bytes">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">A ordem dos bytes e o formato das mensagens</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Os protocolos binários, como o TCP, definem os campos do cabeçalho bit a bit. Veja o
+        <a href="../capitulo-20/index.html#tcp-cabecalho">cabeçalho do TCP no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.3.5">
+        Para trocar inteiros de 16 ou 32 bits, não dá para mandar o campo como ele está na memória: há CPUs que guardam primeiro o
+        byte mais significativo e CPUs que guardam primeiro o menos significativo. Cohen chamou a primeira ordem de
+        <strong>big-endian</strong> e a segunda de <strong>little-endian</strong>, numa discussão que virou quase religiosa
+        (<a href="https://www.rfc-editor.org/ien/ien137.txt" target="_blank" rel="noopener noreferrer">IEN 137</a>). A Internet escolheu
+        o big-endian, a <strong>ordem da rede</strong>, e as bibliotecas trazem funções de conversão, como <code>htonl</code> e
+        <code>ntohl</code> (pág. 285 do PDF).
+    </p>
+    <p>
+        As especificações desenham as mensagens em linhas de 32 bits, com a posição dos bits em cima e o bit de ordem mais alta na
+        posição 0. A Fig. 3 é um exemplo, e a mensagem é transmitida a partir da linha de cima (pág. 285–286 do PDF):
+    </p>
+    <pre class="log mb-3"> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      First field  (16 bits)   |A|B|C|D|E|F|G|H|   Second      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      field (24 bits)          |  First Byte   | Second Byte   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</pre>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ordem-bytes"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a explicação</summary>
+        <p class="mt-2 mb-0">
+            Em 00 50 41 00 01 bb 0a 0b, os dois primeiros bytes formam o primeiro campo, 0x0050 = 80. O terceiro, 0x41 = 01000001,
+            são as flags: a primeira posição é A, então estão ligadas B e H. O segundo campo ocupa o último byte da primeira linha e os
+            dois primeiros da segunda: 0x0001bb = 443. Os dois bytes finais valem 10 e 11. Em Python, <code>struct.unpack("!HB", …)</code>
+            lê os dois primeiros campos; o <code>!</code> pede a ordem da rede (veja o bloco 5).
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="12 34|34 12|21 43" data-answer="0" data-explain="Na ordem da rede, o byte mais significativo vai primeiro (pág. 285 do PDF)." data-hint="Big-endian: o byte mais significativo primeiro.">
+        <p class="fw-semibold mb-2">Em que ordem vão pela rede os bytes do valor de 16 bits 0x1234?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Big-endian|Little-endian|Depende da CPU de quem envia" data-answer="0" data-explain="A RFC 791 chama a ordem big-endian de ordem da rede, e os campos dos protocolos da Internet a usam (pág. 285 do PDF)." data-hint="É a ordem da rede.">
+        <p class="fw-semibold mb-2">Que ordem de bytes a Internet escolheu para os campos dos protocolos?</p>
+    </div>
+</section>
+
+<!-- 4. Calculadora -->
+<section id="calculadora" class="chapter-section" data-conceito="calculadora" data-titulo="A calculadora">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">O cliente e o servidor da calculadora</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O UDP entrega datagramas inteiros, sem conexão e sem garantia: um datagrama pode se perder sem que ninguém seja avisado.
+        Veja o <a href="../capitulo-19/index.html#udp">UDP no Capítulo 19</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.3.6-Q1">
+        Para se preparar para implementar um protocolo de transporte, implemente em Linux um cliente e um servidor
+        (pág. 286 do PDF):
+    </p>
+    <ul>
+        <li>embrulhe <code>create_and_send_message</code> num executável <code>client</code> que leia os argumentos (a função
+            <code>getopt(3)</code> ajuda);</li>
+        <li>embrulhe <code>recv_and_handle_message</code> num executável <code>server</code>;</li>
+        <li>observe os pacotes com o wireshark ou o tcpdump na interface de loopback (<code>lo</code>), filtrando a porta UDP 10000.</li>
+    </ul>
+    <pre class="log mb-3"># o servidor na porta 10000 (portas baixas são privilegiadas), em segundo plano
+$ ./server :: 10000 &amp;
+# uma soma, com o resultado como inteiro
+$ ./client -op + ::1 10000 1 3 5 7 9
+Result: 25
+# um produto, com o resultado como texto
+$ ./client -op * -s ::1 10000 1 3 5 7 9
+Result: 945</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro diz que o protocolo foi descrito "nas tarefas acima", mas elas estavam no INGInious e não aparecem no PDF. Para
+        o exercício ter um formato concreto, este site define um, com tudo na ordem da rede:
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm small">
+            <thead><tr><th>Mensagem</th><th>Campos</th></tr></thead>
+            <tbody>
+                <tr><td>Pedido</td><td>operação (1 byte: "+" ou "*"), flags (1 byte; bit 0 = resposta em texto), quantidade N (16 bits), N inteiros de 32 bits com sinal</td></tr>
+                <tr><td>Resposta</td><td>estado (1 byte: 0 = ok, 1 = pedido inválido, 2 = o resultado não cabe em 32 bits), tipo (1 byte: 0 = inteiro, 1 = texto), tamanho do resultado (16 bits), resultado (inteiro de 32 bits ou caracteres ASCII)</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="calculadora-udp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2">
+            O bloco 5 dos exemplos de código implementa o pedido, o servidor e o cliente em Python. Em C, o laço do servidor fica
+            assim (com os <code>#include</code> e o tratamento de erros omitidos):
+        </p>
+        <pre class="log mb-2">int sock = socket(AF_INET6, SOCK_DGRAM, 0);
+struct sockaddr_in6 local;
+memset(&amp;local, 0, sizeof(local));
+local.sin6_family = AF_INET6;
+local.sin6_port = htons(10000);
+local.sin6_addr = in6addr_any;                        // "::": todas as interfaces
+bind(sock, (struct sockaddr *) &amp;local, sizeof(local));
+for (;;) {
+    uint8_t pedido[2500], resposta[2500];
+    struct sockaddr_storage cliente;
+    socklen_t tam = sizeof(cliente);
+    ssize_t n = recvfrom(sock, pedido, sizeof(pedido), 0, (struct sockaddr *) &amp;cliente, &amp;tam);
+    // decodifica: pedido[0] = operação, pedido[1] = flags, ntohs() na quantidade, ntohl() em cada número
+    size_t r = calcula(pedido, n, resposta);           // monta a resposta, com htons() e htonl()
+    sendto(sock, resposta, r, 0, (struct sockaddr *) &amp;cliente, tam);
+}</pre>
+        <p class="mb-2">
+            Para ver os datagramas: <code>sudo tcpdump -i lo -n udp port 10000</code>. No exemplo -op * -s, o pedido tem 24 bytes de
+            dados (4 de cabeçalho e 5 × 4 de números) e a resposta, 7 (4 de cabeçalho e os 3 caracteres de "945").
+        </p>
+        <p class="mb-0">
+            Falta uma coisa que os capítulos anteriores ensinaram: como o UDP não é confiável, um cliente que espera a resposta com
+            <code>recv</code> pode ficar bloqueado para sempre se o pedido ou a resposta se perderem. Um cliente robusto usa um
+            temporizador (por exemplo, com <code>setsockopt</code> e <code>SO_RCVTIMEO</code>) e reenvia o pedido. Como somar duas vezes
+            o mesmo pedido não muda o resultado, reenviar é seguro.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Para saber o endereço e a porta do cliente e poder responder|Porque recv não funciona com UDP|Para receber mensagens maiores" data-answer="0" data-explain="O servidor atende vários clientes num só socket; recvfrom diz quem mandou cada pedido (pág. 282 do PDF)." data-hint="O servidor não fez connect com ninguém.">
+        <p class="fw-semibold mb-2">Por que o servidor da calculadora usa recvfrom, e não recv?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Fica esperando para sempre, a menos que use um temporizador e reenvie o pedido|Recebe um erro do UDP|O sistema reenvia o pedido sozinho" data-answer="0" data-explain="O UDP não confirma nem retransmite; a recuperação fica com a aplicação." data-hint="O UDP avisa o emissor quando um datagrama se perde?">
+        <p class="fw-semibold mb-2">Se o datagrama do pedido se perder, o que acontece com um cliente que só chama recv?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap29" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Intermediário:</strong> como vão pela rede os bytes do valor de 32 bits 0x0a000001? E como ficam na memória de uma CPU little-endian?
+            <details><summary>Ver solução</summary><p class="mb-0">Na rede, 0a 00 00 01; na memória little-endian, 01 00 00 0a. É o que <code>htonl</code> corrige antes de enviar.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> um cliente manda um datagrama UDP para uma porta onde ninguém escuta. O que sendto devolve? E se o socket estiver conectado?
+            <details><summary>Ver solução</summary><p class="mb-0">sendto devolve o número de bytes enviados: o UDP não sabe se alguém recebeu. O destino costuma responder com um ICMP "porta inalcançável". Num socket conectado, o Linux repassa esse aviso, e a chamada seguinte ao socket falha com ECONNREFUSED; num socket não conectado, o aviso é ignorado.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> um servidor UDP faz bind na porta 10000 e espera em recvfrom. Dois clientes mandam pedidos quase juntos. Como o servidor sabe para quem mandar cada resposta?
+            <details><summary>Ver solução</summary><p class="mb-0">O recvfrom devolve, junto com os dados, o endereço e a porta de quem enviou. O servidor passa esse endereço ao sendto da resposta, sem precisar de uma conexão.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Dois trechos em Python que rodam no navegador, sem acessar a rede. O Pyodide não abre sockets de verdade, então o bloco 1 usa um sistema operacional de mentira, em memória, com o mesmo comportamento das chamadas do livro. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Sockets UDP num sistema simulado</h3>
+    <pre class="code-block"><code>import ipaddress
+import struct
+
+class SistemaOperacional:
+    """Um sistema de mentira, em memória: o Pyodide não abre sockets de verdade."""
+    def __init__(self):
+        self.portas, self.efemera = {}, 49152
+    def porta_livre(self):
+        self.efemera += 1
+        return self.efemera
+
+so = SistemaOperacional()
+
+class Socket:
+    """Imita um socket(AF_INET6, SOCK_DGRAM, 0): datagramas inteiros, sem garantia de entrega."""
+    def __init__(self):
+        self.local, self.remoto, self.fila = None, None, []
+    def bind(self, endereco):
+        if endereco in so.portas:
+            raise OSError("EADDRINUSE: endereço já em uso")
+        self.local = endereco
+        so.portas[endereco] = self
+    def connect(self, endereco):
+        self.remoto = endereco                         # daqui em diante: send() e só recebe dele
+    def sendto(self, dados, destino):
+        if self.local is None:
+            self.bind(("::1", so.porta_livre()))       # endereço atribuído implicitamente (nota da pág. 281)
+        alvo = so.portas.get(destino)
+        if alvo and alvo.remoto in (None, self.local): # um socket conectado ignora os outros remetentes
+            alvo.fila.append((bytes(dados), self.local))
+        return len(dados)                              # o UDP não avisa se ninguém recebeu
+    def send(self, dados):
+        if self.remoto is None:
+            raise OSError("EDESTADDRREQ: socket não conectado")
+        return self.sendto(dados, self.remoto)
+    def recvfrom(self, tamanho):
+        if not self.fila:
+            raise BlockingIOError("nada para ler: um recv de verdade ficaria bloqueado")
+        dados, origem = self.fila.pop(0)
+        return dados[:tamanho], origem
+    def recv(self, tamanho):
+        return self.recvfrom(tamanho)[0]
+
+servidor = Socket()
+servidor.bind(("::1", 55555))
+cliente = Socket()
+cliente.sendto(b"hello", ("::1", 55555))               # create_socket_and_send_message, pág. 284-285
+dados, quem = servidor.recvfrom(2500)
+print("servidor recebeu", dados, "de", quem)
+servidor.sendto(b"ola", quem)                          # responde a quem mandou, graças ao recvfrom
+print("cliente recebeu", cliente.recv(2500))
+
+intruso = Socket()
+cliente.connect(("::1", 55555))
+intruso.sendto(b"spam", cliente.local)                 # ignorado: o cliente está conectado ao servidor
+servidor.sendto(b"de novo", cliente.local)
+print("depois do connect, o cliente lê", cliente.recv(2500))
+
+# a struct sockaddr_in6 do Linux, com os seus 28 bytes: família na ordem da CPU, porta e endereço na ordem da rede
+sockaddr = struct.pack("&lt;H", 10) + struct.pack("!HI", 55555, 0) + ipaddress.IPv6Address("::1").packed + struct.pack("&lt;I", 0)
+print(len(sockaddr), "bytes:", sockaddr.hex(" "))</code></pre>
+
+    <h3 class="h6 mt-4">2. A ordem da rede e o protocolo da calculadora</h3>
+    <pre class="code-block"><code>import struct
+
+# a mensagem da Fig. 3 (pág. 285-286): campo de 16 bits, oito flags A-H, campo de 24 bits e dois bytes
+def fig3(primeiro, flags, segundo, byte1, byte2):
+    return struct.pack("!HB", primeiro, int(flags, 2)) + segundo.to_bytes(3, "big") + bytes([byte1, byte2])
+
+m = fig3(0x1234, "10000001", 0xABCDEF, 7, 255)
+print("Fig. 3 na ordem da rede:", m.hex(" "))
+print("0x1234 na memória de uma CPU little-endian:", (0x1234).to_bytes(2, "little").hex(" "))
+
+# o protocolo da calculadora (o formato é deste site: o livro não o define)
+# pedido:   operação (1 byte, '+' ou '*'), flags (1 byte; bit 0 = resposta em texto), N (16 bits), N inteiros de 32 bits
+# resposta: estado (1 byte: 0 = ok, 1 = pedido inválido, 2 = não cabe em 32 bits), tipo (1 byte, 0 = inteiro, 1 = texto), tamanho (16 bits), resultado
+def pedido(op, numeros, texto=False):
+    return struct.pack(f"!cBH{len(numeros)}i", op.encode(), int(texto), len(numeros), *numeros)
+
+def servidor(msg):
+    op, flags, n = struct.unpack("!cBH", msg[:4])
+    if op not in (b"+", b"*") or len(msg) != 4 + 4 * n:
+        return struct.pack("!BBH", 1, 0, 0)                     # estado 1: pedido inválido
+    numeros = struct.unpack(f"!{n}i", msg[4:])
+    r = 0 if op == b"+" else 1
+    for x in numeros:
+        r = r + x if op == b"+" else r * x
+    if flags &amp; 1:
+        corpo = str(r).encode("ascii")
+        return struct.pack("!BBH", 0, 1, len(corpo)) + corpo
+    if not -2**31 &lt;= r &lt; 2**31:
+        return struct.pack("!BBH", 2, 0, 0)                     # estado 2: o resultado não cabe em 32 bits
+    return struct.pack("!BBHi", 0, 0, 4, r)
+
+def cliente(op, numeros, texto=False):
+    p = pedido(op, numeros, texto)
+    resp = servidor(p)                                          # no exercício do livro, isso iria num datagrama UDP
+    estado, tipo, tam = struct.unpack("!BBH", resp[:4])
+    if estado:
+        resultado = f"erro {estado}"
+    else:
+        resultado = resp[4:].decode("ascii") if tipo == 1 else struct.unpack("!i", resp[4:])[0]
+    print(f"pedido {p.hex(' ')}\n  resposta {resp.hex(' ')} -&gt; Result: {resultado}")
+
+cliente("+", [1, 3, 5, 7, 9])               # ./client -op + ::1 10000 1 3 5 7 9
+cliente("*", [1, 3, 5, 7, 9], texto=True)   # ./client -op * -s ::1 10000 1 3 5 7 9</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.3 "Using sockets for inter-process communication" (pág. 279–286 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 768 — <a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">User Datagram Protocol</a> e RFC 3493 — <a href="https://www.rfc-editor.org/rfc/rfc3493" target="_blank" rel="noopener noreferrer">Basic Socket Interface Extensions for IPv6</a> (a struct sockaddr_in6)</li>
+        <li>IEN 137 — Cohen, D. <a href="https://www.rfc-editor.org/ien/ien137.txt" target="_blank" rel="noopener noreferrer">On Holy Wars and a Plea for Peace</a> (1980), a origem de big-endian e little-endian</li>
+        <li>Páginas de manual do Linux: <a href="https://man7.org/linux/man-pages/man2/socket.2.html" target="_blank" rel="noopener noreferrer">socket(2)</a>, <a href="https://man7.org/linux/man-pages/man2/bind.2.html" target="_blank" rel="noopener noreferrer">bind(2)</a>, <a href="https://man7.org/linux/man-pages/man2/sendto.2.html" target="_blank" rel="noopener noreferrer">sendto(2)</a>, <a href="https://man7.org/linux/man-pages/man2/recvfrom.2.html" target="_blank" rel="noopener noreferrer">recvfrom(2)</a>, <a href="https://man7.org/linux/man-pages/man2/connect.2.html" target="_blank" rel="noopener noreferrer">connect(2)</a>, <a href="https://man7.org/linux/man-pages/man7/ipv6.7.html" target="_blank" rel="noopener noreferrer">ipv6(7)</a>, <a href="https://man7.org/linux/man-pages/man3/byteorder.3.html" target="_blank" rel="noopener noreferrer">byteorder(3)</a> e <a href="https://man7.org/linux/man-pages/man3/getopt.3.html" target="_blank" rel="noopener noreferrer">getopt(3)</a></li>
+        <li>Documentação do Python — <a href="https://docs.python.org/3/library/struct.html" target="_blank" rel="noopener noreferrer">struct</a>, <a href="https://docs.python.org/3/library/zlib.html" target="_blank" rel="noopener noreferrer">zlib</a> e <a href="https://docs.python.org/3/library/hashlib.html" target="_blank" rel="noopener noreferrer">hashlib</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Endianness" target="_blank" rel="noopener noreferrer">Endianness</a> e <a href="https://en.wikipedia.org/wiki/Berkeley_sockets" target="_blank" rel="noopener noreferrer">Berkeley sockets</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-28/index.html" class="text-muted text-decoration-none">← Capítulo 28</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 29</span>
+            <a href="../capitulo-30/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 30 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap29.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

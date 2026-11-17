@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 43 — Prática: Spanning Tree e VLANs | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.17: a spanning tree do 802.1d, as tabelas depois de uma falha, backbones em malha e STP por VLAN, traceroute por switches e roteadores, VLANs e o STP no IPMininet.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="43" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 43 · Parte 3: Prática · Seção 4.17</span>
+        <h1 class="display-5 mb-3">Prática: Spanning Tree e VLANs</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você calcula spanning trees porta a porta, vê o que muda numa falha, compara switches e roteadores num backbone e acompanha um traceroute pelas camadas.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#arvore">1. A árvore do 802.1d</a>
+                    <a class="nav-link" href="#falha">2. Falha e tabelas</a>
+                    <a class="nav-link" href="#malha">3. Malha e STP por VLAN</a>
+                    <a class="nav-link" href="#camadas">4. Traceroute pelas camadas</a>
+                    <a class="nav-link" href="#vlans">5. VLANs e duas interfaces</a>
+                    <a class="nav-link" href="#ipmininet">6. STP no IPMininet</a>
+                    <a class="nav-link" href="#exercicios-cap43">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre redes locais</h2>
+    <p>
+        A seção 4.17, a última do livro, tem oito exercícios sobre o Spanning Tree e as VLANs e um roteiro do STP no IPMininet (pág. 384–392 do PDF). As redes são as das
+        figuras do livro. O formato das atividades está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Calcular a <strong>spanning tree</strong> do 802.1d, com o papel de cada porta, e o efeito de uma <strong>falha</strong> nas tabelas dos switches.</li>
+                <li>Comparar <strong>switches</strong> e <strong>roteadores</strong>, explicar <strong>VLANs</strong> e seguir um traceroute pelas camadas de enlace e de rede.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o Spanning Tree e as VLANs do <a href="../capitulo-26/index.html">Capítulo 26</a> e o traceroute6 do
+                <a href="../capitulo-40/index.html">Capítulo 40</a>. O capítulo cobre a seção 4.17 do livro (pág. 384–392 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. A árvore do 802.1d -->
+<section id="arvore" class="chapter-section" data-conceito="arvore" data-titulo="A árvore do 802.1d">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">Calculando a spanning tree</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No 802.1d, o switch de menor identificador vira a raiz; cada outro switch escolhe como porta raiz a de menor custo até ela; em cada LAN, a porta do switch
+        mais perto da raiz é a designada; as outras portas ficam bloqueadas. Os empates se desfazem pelo identificador do switch e depois pelo da porta. Veja o
+        <a href="../capitulo-26/index.html">Spanning Tree no Capítulo 26</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.17-Q1">Na rede de switches da Fig. 1, que spanning tree o 802.1d calcula, supondo que todos os enlaces têm custo 1? Indique o estado de cada
+            porta.</li>
+        <li data-livro="4.17-Q3" value="3">Calcule a spanning tree da rede da figura seguinte, com S2, S4, S5, S9 e S10 (pág. 384–385 do PDF).</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Os exercícios chamam as figuras de Fig. 1 a Fig. 5, mas no PDF elas aparecem numeradas como Figs. 17 a 21 ("Fig. 17: Fig. 1. …"). Aqui, ficam os nomes do
+        enunciado. A rede da Q3 não tem número no PDF.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="stp-exercicio"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1.</strong> S3 é a raiz, e as portas dele (S3.1 e S3.2) são designadas. S6, S12 e S17 ficam a custo 1, com portas raiz S6.2, S12.1 e S17.1; S10 e
+                S11 ficam a custo 2, com portas raiz S10.1 e S11.2. S11 empata entre a LAN D e a LAN F (custo 2 pelas duas, com S6 como switch designado nas duas) e
+                desempata pela porta de S6: S6.1 tem número menor que S6.3. Nas LANs, são designadas S17.2 (B), S10.2 (C: S10 e S11 empatam no custo 2, e vence o
+                menor ID), S6.3 (D) e S6.1 (F: S6 e S12 empatam no custo 1, e vence S6). Ficam bloqueadas S11.1, S11.3 e S12.2; todas as outras portas encaminham.</li>
+            <li><strong>Q3.</strong> S2 é a raiz; S9 e S10 ficam a custo 1. S5 chega a custo 2 por S9 ou por S10 e escolhe S9, de menor ID; S4 chega a custo 2 por S10. As duas
+                outras portas de S5 ficam bloqueadas: no enlace S5–S10, S10 (custo 1) é o designado; no S5–S4, S4 e S5 empatam no custo 2, e vence S4. A árvore usa
+                S2–S9, S2–S10, S9–S5 e S10–S4.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Ele vira o designado da LAN|Os dois ficam bloqueados|A porta de maior número vence" data-answer="0" data-explain="Com custos iguais até a raiz, o desempate é pelo identificador do switch: o menor vira o designado, e a porta do outro fica bloqueada." data-hint="Lembre a LAN C.">
+        <p class="fw-semibold mb-2">Dois switches de uma LAN estão à mesma distância da raiz. O que acontece com o de menor ID?</p>
+    </div>
+</section>
+
+<!-- 2. Tabelas depois da falha -->
+<section id="falha" class="chapter-section" data-conceito="falha" data-titulo="Falha e tabelas">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">A LAN entre S3 e S12 falha</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um switch aprende por qual porta alcança cada endereço MAC olhando os quadros que chegam. Quando a árvore muda, parte dessas entradas fica errada. Veja o
+        aprendizado de endereços no <a href="../capitulo-26/index.html">Capítulo 26</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.17-Q2">
+        Na rede da Fig. 1, a LAN entre os switches S3 e S12 falha. Como os switches devem atualizar as suas tabelas de portas e endereços depois da falha (pág. 384 do
+        PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="tabelas-pos-falha"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>S12 deixa de receber BPDUs pela S12.1 e passa a usar a S12.2, antes bloqueada, como porta raiz (custo 2, pela LAN F e S6). A porta passa por listening e
+                learning antes de encaminhar (15 s em cada estado, o forward delay). Os outros switches mantêm os mesmos papéis.</li>
+            <li>As tabelas: S12 precisa trocar a porta de todas as estações, que agora ficam atrás da S12.2; nos outros switches, só ficam erradas as entradas das estações
+                que estavam na LAN E. O 802.1d não sabe quais entradas mudaram: o switch que percebe a mudança manda um BPDU de notificação (TCN) rumo à raiz, e a raiz
+                avisa a todos (flag Topology Change). Enquanto isso dura, cada switch reduz o tempo de vida das entradas de 300 s para o forward delay, e as entradas
+                antigas expiram e são reaprendidas pelos próximos quadros.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Encurtando o tempo de vida das entradas depois do aviso de mudança|Apagando a tabela a cada BPDU|Copiando a tabela da raiz" data-answer="0" data-explain="Com o Topology Change, as entradas passam a expirar em 15 s, e o aprendizado normal refaz a tabela com as portas novas." data-hint="O aviso de mudança vem num BPDU.">
+        <p class="fw-semibold mb-2">Como os switches se livram das entradas antigas depois de uma mudança na árvore?</p>
+    </div>
+</section>
+
+<!-- 3. Malha e STP por VLAN -->
+<section id="malha" class="chapter-section" data-conceito="malha" data-titulo="Malha e STP por VLAN">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Um backbone em malha: switches, roteadores e uma árvore por VLAN</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma spanning tree usa só n − 1 enlaces para n switches; um protocolo de roteamento como o OSPF pode usar todos, inclusive vários caminhos de mesmo custo. Veja o
+        <a href="../capitulo-24/index.html#ospf">OSPF no Capítulo 24</a> e as VLANs no <a href="../capitulo-26/index.html">Capítulo 26</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="4">
+        <li data-livro="4.17-Q4">Muitas redes de empresas têm um núcleo de equipamentos ligados em malha completa, como na Fig. 2. Quais as vantagens e as desvantagens de
+            usar switches Ethernet ou roteadores IP com OSPF nesse núcleo?</li>
+        <li data-livro="4.17-Q8" value="8">A maioria dos switches comerciais roda o Spanning Tree separadamente em cada VLAN. Quais as vantagens de ter uma spanning tree por
+            VLAN (pág. 385–386 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="malha-stp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q4.</strong> Com switches, a configuração é mínima, os hosts se movem sem trocar de endereço e tudo é um só domínio de broadcast. Mas a spanning tree
+                deixa 7 dos 14 enlaces parados, os caminhos podem ser mais longos que o necessário, a convergência depois de uma falha leva dezenas de segundos no 802.1d,
+                e os broadcasts (e um laço acidental) atingem a rede inteira. Com roteadores e OSPF, todos os enlaces são usados, com caminhos de menor custo e divisão
+                por caminhos de mesmo custo, a convergência é mais rápida e cada sub-rede limita os broadcasts; em troca, é preciso um plano de endereços, configuração
+                em cada equipamento, e um host que muda de sub-rede muda de endereço.</li>
+            <li><strong>Q8.</strong> Com uma árvore por VLAN, cada VLAN pode ter outra raiz, e os enlaces bloqueados numa servem na outra: o tráfego se divide e mais enlaces
+                trabalham (11 dos 14, com raízes em S1 e S2). Uma falha ou mudança numa VLAN também não recalcula as árvores das outras. O custo é mais BPDUs e mais estado
+                em cada switch.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="7|10|8" data-answer="0" data-explain="Uma árvore com 8 nós tem 7 arestas; os outros enlaces ficam bloqueados, qualquer que seja a raiz." data-hint="n − 1.">
+        <p class="fw-semibold mb-2">Quantos enlaces uma spanning tree de 8 switches usa?</p>
+    </div>
+</section>
+
+<!-- 4. traceroute por switches e roteadores -->
+<section id="camadas" class="chapter-section" data-conceito="camadas" data-titulo="Traceroute pelas camadas">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Quadros, pacotes e segmentos de um traceroute</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um switch encaminha quadros sem mexer neles; um roteador tira o pacote do quadro, decrementa o hop limit e o põe num quadro novo. Veja o encapsulamento no
+        <a href="../capitulo-07/index.html">Capítulo 7</a>, o traceroute6 no <a href="../capitulo-40/index.html#pacotes-ipv6">Capítulo 40</a> e o Neighbor Discovery no
+        <a href="../capitulo-22/index.html#icmpv6">Capítulo 22</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.17-Q5">
+        Na rede da Fig. 3, o host H0 faz um traceroute até H1 (pelo nome) através de switches (S1 a S4) e roteadores (R0 a R3); um resolvedor DNS está ligado a S3.
+        Explique em detalhe os quadros, os pacotes e os segmentos trocados desde que a rede foi ligada. Você pode escolher os endereços (pág. 385–386 do PDF).
+    </p>
+    <p class="small">
+        A rede: H0–S1; S1–S2 e S1–S3; S2–S4 e S3–S4; o resolvedor em S3; S4–R0; R0–R1 e R0–R2; R1–R3 e R2–R3; R3–H1. Na simulação, os endereços são ilustrativos:
+        2001:db8:a::/64 na rede de H0, 2001:db8:b::/64 na de H1 e um /64 em cada enlace entre roteadores.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="camadas-traceroute"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Ao ligar: os switches trocam BPDUs até formar a árvore (uma porta bloqueada no laço S1–S2–S4–S3), e os roteadores trocam Hello e rotas até que todos saibam
+                chegar às duas redes de hosts.</li>
+            <li>H0 recebe o Router Advertisement de R0, forma o seu endereço e o testa (DAD). Para resolver "H1", descobre o MAC do resolvedor por Neighbor Solicitation e
+                Advertisement e manda a consulta AAAA em UDP; a resposta traz o endereço de H1. Depois, descobre o MAC de R0, o roteador padrão.</li>
+            <li>Cada sonda é um segmento UDP com porta de destino alta, num pacote IPv6 de H0 para H1, com hop limit 1, 2, 3… Entre H0 e R0, o quadro tem origem H0 e destino
+                R0 e atravessa S1, S2 e S4 sem mudar. Cada roteador decrementa o hop limit; quem o zera devolve um Time Exceeded. Em cada trecho entre roteadores, o quadro é
+                novo (MACs do trecho), mas os endereços IPv6 de origem e de destino da sonda não mudam. Na quarta sonda, H1 responde com Destination Unreachable (porta
+                inalcançável), e o traceroute termina. Os switches nunca aparecem na saída.</li>
+            <li>Cada resposta ICMPv6 faz o caminho inverso, e o traceroute ainda pode pedir ao resolvedor o nome de cada endereço (PTR). Os roteadores também precisam
+                descobrir, por Neighbor Discovery, o MAC do próximo salto em cada enlace (R3 descobre o de H1, por exemplo).</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O MAC de destino do quadro|O endereço IPv6 de destino|A porta UDP de destino" data-answer="0" data-explain="A cada roteador, o pacote ganha um quadro novo, com os MACs do próximo trecho; os endereços IPv6 e as portas da sonda continuam os mesmos." data-hint="O que um roteador reescreve?">
+        <p class="fw-semibold mb-2">O que muda na sonda de um trecho entre roteadores para o seguinte, além do hop limit?</p>
+    </div>
+</section>
+
+<!-- 5. VLANs e hosts com duas interfaces -->
+<section id="vlans" class="chapter-section" data-conceito="vlans" data-titulo="VLANs e duas interfaces">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">VLANs diferentes e hosts com duas interfaces</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Cada VLAN é um domínio de broadcast separado: o switch só repassa um quadro entre portas da mesma VLAN, e um trunk leva várias VLANs com etiquetas 802.1Q. Veja
+        as VLANs no <a href="../capitulo-26/index.html">Capítulo 26</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="6">
+        <li data-livro="4.17-Q6">Na rede da Fig. 4, H0 está numa porta da VLAN 10 e H1 numa porta da VLAN 100 do mesmo switch. H0 consegue se comunicar com H1, e vice-versa?
+            Explique, e acrescente o que for preciso para que se comuniquem.</li>
+        <li data-livro="4.17-Q7">Na rede da Fig. 5, H0 e H1 têm duas interfaces cada, uma ligada ao switch S0 e outra ao S1, e há um enlace entre S0 e S1. Esse enlace chega
+            a ser usado? Em que condições? Dê uma resposta completa (pág. 385–387 do PDF).</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="vlan-comunica"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q6.</strong> Não: as duas portas estão em VLANs diferentes, e nenhum quadro passa de uma para a outra, nem o Neighbor Solicitation. É preciso um
+                roteador (ou um switch de camada 3) com uma interface em cada VLAN, por exemplo numa porta trunk, e uma sub-rede IPv6 em cada VLAN, com o roteador como
+                gateway dos dois hosts. Pôr as duas portas na mesma VLAN também resolveria, mas desfaz a separação.</li>
+            <li><strong>Q7.</strong> Hosts não repassam quadros entre as suas interfaces, então não formam laço: os switches só veem o enlace S0–S1, e o 802.1d não o
+                bloqueia. Ele é usado quando a origem e o destino estão em switches diferentes: por exemplo, se H0 manda pela interface ligada a S0 para o endereço da
+                interface de H1 ligada a S1 (as quatro interfaces na mesma sub-rede), ou se o enlace entre H1 e S0 cai e o tráfego para H1 precisa chegar a S1. Se todo o
+                tráfego sair e chegar pelas interfaces do mesmo switch, o enlace fica ocioso. Se um host fizesse bridge entre as duas interfaces, haveria um laço, e o
+                STP bloquearia uma porta (possivelmente a do enlace S0–S1).</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Não: hosts não repassam quadros entre as interfaces|Sim: há dois caminhos entre S0 e S1|Sim: toda rede com dois switches forma um laço" data-answer="0" data-explain="Um host comum termina os quadros que recebe; sem repasse entre as interfaces, o único caminho entre S0 e S1 é o enlace direto." data-hint="Um host faz bridge?">
+        <p class="fw-semibold mb-2">Na Fig. 5, os hosts com duas interfaces formam um laço que o STP precisa cortar?</p>
+    </div>
+</section>
+
+<!-- 6. STP no IPMininet -->
+<section id="ipmininet" class="chapter-section" data-conceito="ipmininet" data-titulo="STP no IPMininet">
+    <span class="kicker">Atividade 6</span>
+    <h2 class="section-title">O Spanning Tree em switches Linux</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O identificador de um switch junta a prioridade, nos bits mais altos, e um endereço MAC; um BPDU de configuração traz a raiz, o custo até ela, o switch que o
+        envia e a porta. Veja o Spanning Tree no <a href="../capitulo-26/index.html">Capítulo 26</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.17.2">
+        O IPMininet configura o Spanning Tree em hosts Linux que fazem papel de switches (o script <code>stp.py</code>, pág. 387–388 do PDF). Na rede da Fig. 22, cada
+        switch s<em>n</em> tem prioridade <em>n</em>, que vai nos bits mais altos do identificador; todos os enlaces custam 1. Com <code>brctl showstp</code>, s3 aparece como
+        a raiz (bridge id 0003.f63545ab5f79, path cost 0, portas s3-eth1 e s3-eth2 designadas e encaminhando). Em s9, a raiz está a custo 1, a porta raiz é a s9-eth1, a
+        s9-eth3 é designada, e a s9-eth2 está bloqueada, com s7 (0007.2a6f5ef34984) como switch designado do enlace. O <code>brctl showmacs</code> lista os MACs aprendidos
+        em cada porta, e a captura mostra o primeiro BPDU de s3 (pág. 388–391 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        No script, s3 recebe <code>lo_addresses=["2001:1::4/64"]</code>, o mesmo endereço de s4; pelo padrão dos outros, seria <code>2001:1::3/64</code>. O texto também
+        escreve <code>brtcl(8)</code> para o comando <code>brctl</code>. A captura <code>stp-s3-trace.pcap</code> está no repositório
+        <a href="https://github.com/cnp3/ebook/tree/master/exercises/traces" target="_blank" rel="noopener noreferrer">cnp3/ebook</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="stp-ipmininet"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Com prioridades 3, 4, 6, 7 e 9, s3 vira a raiz. s7 e s9 ficam a custo 1; no enlace s9–s7, os dois empatam, e s7, de menor ID, é o designado: a s9-eth2 bloqueia,
+                como na saída do livro. s6 chega à raiz a custo 2 por s9 (porta s6-eth1); s4 chega a custo 2 por s7 (porta s4-eth2); no enlace s4–s6, os dois empatam no custo
+                2, e s4 é o designado, então a s6-eth2 bloqueia.</li>
+            <li>O BPDU tem 35 bytes. O Wireshark mostra a prioridade como 0 e a System ID Extension como 3: no 802.1D-2004, os 16 bits de prioridade se dividem em 4 bits de
+                prioridade (múltiplos de 4096) e 12 bits de extensão, que o 802.1Q usa para o número da VLAN. O brctl grava o valor 3 inteiro nesses 16 bits, e ele cai na
+                parte da extensão.</li>
+            <li>Na tabela de s9, as entradas com <code>is local? yes</code> são os MACs das próprias portas de s9; as outras foram aprendidas e expiram depois de 300 s sem
+                quadros (o ageing time).</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="A cada 2 s (Hello Time)|A cada 15 s (Forward Delay)|A cada 20 s (Max Age)" data-answer="0" data-explain="A raiz manda BPDUs a cada Hello Time, 2 s; o Max Age (20 s) é quanto uma informação vale sem ser renovada, e o Forward Delay (15 s) é a duração de cada estado intermediário." data-hint="Veja os campos do BPDU.">
+        <p class="fw-semibold mb-2">De quanto em quanto tempo a raiz manda BPDUs de configuração?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap43" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Numa rede de 12 switches ligados por 20 enlaces ponto a ponto, quantos enlaces a spanning tree deixa bloqueados?
+            <details><summary>Ver solução</summary><p class="mb-0">9: a árvore usa 12 − 1 = 11 enlaces, e os outros 20 − 11 = 9 ficam com uma porta bloqueada.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Na Fig. 1, se S12 recebesse um identificador menor que o de S3, quem seria a raiz e o que aconteceria com a porta S12.2?
+            <details><summary>Ver solução</summary><p class="mb-0">S12 seria a raiz, com as duas portas designadas: S12.2 passaria a encaminhar, porque a raiz é designada em todas as LANs dela.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Na Q3, se o enlace S2–S9 cair, qual passa a ser a porta raiz de S9?
+            <details><summary>Ver solução</summary><p class="mb-0">A do enlace com S5. S9 só alcança a raiz por S5, que chega a ela por S10 (S5 → S10 → S2), com custo 3 para S9.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Um switch com prioridade 32768 e MAC 00:00:00:00:00:01 disputa a raiz com outro de prioridade 4096 e MAC ff:ff:ff:ff:ff:ff. Quem vence, e por quê?
+            <details><summary>Ver solução</summary><p class="mb-0">O de prioridade 4096: a prioridade fica nos bits mais altos do identificador e é comparada antes do MAC, que só desempata prioridades iguais.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. O 802.1d na rede da Fig. 22</h3>
+    <pre class="code-block"><code># 802.1d na rede da Fig. 22 (pág. 387): (switch, porta) dos dois lados de cada enlace, custo 1.
+ENLACES = [((3, 2), (7, 1)), ((3, 1), (9, 1)), ((6, 2), (4, 1)), ((6, 1), (9, 3)), ((7, 3), (4, 2)), ((9, 2), (7, 2))]
+PRIO = {3: 3, 4: 4, 6: 6, 7: 7, 9: 9}          # o ID do switch é a prioridade (o MAC só desempataria)
+CUSTO = 1
+
+sw = sorted(PRIO)
+melhor = {s: (PRIO[s], 0, PRIO[s]) for s in sw}  # (raiz, custo até a raiz, eu)
+porta_raiz = {}
+for _ in range(10):
+    for s in sw:
+        cands = [((PRIO[s], 0, PRIO[s], 0, 0), None)]
+        for a, b in ENLACES:
+            for eu, viz in ((a, b), (b, a)):
+                if eu[0] == s:
+                    r, c, _ = melhor[viz[0]]
+                    cands.append(((r, c + CUSTO, PRIO[viz[0]], viz[1], eu[1]), eu[1]))
+        v, p = min(cands)
+        melhor[s], porta_raiz[s] = (v[0], v[1], PRIO[s]), p
+
+for s in sw:
+    rp = f"eth{porta_raiz[s]}" if porta_raiz[s] else "nenhuma (é a raiz)"
+    print(f"s{s}: raiz {melhor[s][0]}, custo {melhor[s][1]}, porta raiz {rp}")
+for a, b in ENLACES:
+    desig = min((a, b), key=lambda x: (melhor[x[0]][1], PRIO[x[0]], x[1]))
+    outro = b if desig == a else a
+    estado = "raiz" if porta_raiz[outro[0]] == outro[1] else "bloqueada"
+    print(f"s{a[0]}-s{b[0]}: designada s{desig[0]}-eth{desig[1]}; s{outro[0]}-eth{outro[1]} {estado}")</code></pre>
+    <h3 class="h6 mt-4">2. O BPDU de s3 byte a byte</h3>
+    <pre class="code-block"><code>import struct
+
+# O primeiro BPDU de s3 (pág. 391 do PDF), montado e lido de volta com struct.
+mac_s3 = bytes.fromhex("f63545ab5f79")
+def bridge_id(prioridade, extensao, mac):
+    return struct.pack("!H", (prioridade &lt;&lt; 12) | extensao) + mac   # 4 bits de prioridade + 12 de extensão
+
+bpdu = (struct.pack("!HBBB", 0, 0, 0, 0)                 # protocolo, versão, tipo (configuração), flags
+        + bridge_id(0, 3, mac_s3) + struct.pack("!I", 0)  # raiz e custo até ela
+        + bridge_id(0, 3, mac_s3) + struct.pack("!H", 0x8002)
+        + struct.pack("!HHHH", 0, 20 * 256, 2 * 256, 15 * 256))   # tempos em 1/256 s
+
+print(len(bpdu), "bytes:", bpdu.hex(" "))
+pid, ver, tipo, flags = struct.unpack("!HBBB", bpdu[:5])
+raiz, custo = bpdu[5:13], struct.unpack("!I", bpdu[13:17])[0]
+prio16 = struct.unpack("!H", raiz[:2])[0]
+print("prioridade", prio16 &gt;&gt; 12, "extensão", prio16 &amp; 0xFFF, "MAC", raiz[2:].hex(":"), "custo", custo)
+idade, max_age, hello, fwd = struct.unpack("!HHHH", bpdu[27:35])
+print("max age", max_age / 256, "hello", hello / 256, "forward delay", fwd / 256)</code></pre>
+    <h3 class="h6 mt-4">3. Uma sonda, trecho a trecho</h3>
+    <pre class="code-block"><code># Uma sonda do traceroute, trecho a trecho, na rede da Fig. 3 (endereços ilustrativos).
+TRECHOS = [("H0-S1", "H0", "R0"), ("S1-S2", "H0", "R0"), ("S2-S4", "H0", "R0"), ("S4-R0", "H0", "R0"),
+           ("R0-R1", "R0", "R1"), ("R1-R3", "R1", "R3"), ("R3-H1", "R3", "H1")]
+ROTEADORES = {"R0", "R1", "R3"}
+
+def sonda(hop_limit):
+    h = hop_limit
+    for trecho, mac_o, mac_d in TRECHOS:
+        quem_envia = mac_o
+        if quem_envia in ROTEADORES and trecho.startswith(quem_envia):
+            h -= 1                                   # o roteador decrementa antes de repassar
+            if h == 0:
+                return f"{quem_envia} devolve Time Exceeded"
+        print(f"  {trecho:6} quadro {mac_o}-&gt;{mac_d}  pacote H0-&gt;H1  hop limit {h}")
+    return "H1 devolve Destination Unreachable (porta)"
+
+for hl in (1, 2, 3, 4):
+    print("sonda com hop limit", hl)
+    print("  -&gt;", sonda(hl))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.17 "Local Area Networks: The Spanning Tree Protocol and Virtual LANs" (pág. 384–392 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Spanning_Tree_Protocol" target="_blank" rel="noopener noreferrer">Spanning Tree Protocol</a> e <a href="https://en.wikipedia.org/wiki/IEEE_802.1Q" target="_blank" rel="noopener noreferrer">IEEE 802.1Q</a> (as normas IEEE completas não são abertas)</li>
+        <li>Os scripts e as capturas do livro — repositório <a href="https://github.com/cnp3/ebook/tree/master/exercises" target="_blank" rel="noopener noreferrer">cnp3/ebook</a> e IPMininet — <a href="https://ipmininet.readthedocs.io/" target="_blank" rel="noopener noreferrer">documentação</a></li>
+        <li>RFC 4861 — <a href="https://www.rfc-editor.org/rfc/rfc4861" target="_blank" rel="noopener noreferrer">Neighbor Discovery for IPv6</a> e RFC 4862 — <a href="https://www.rfc-editor.org/rfc/rfc4862" target="_blank" rel="noopener noreferrer">IPv6 Stateless Address Autoconfiguration</a></li>
+        <li>Página de manual — <a href="https://man7.org/linux/man-pages/man8/brctl.8.html" target="_blank" rel="noopener noreferrer">brctl(8)</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-42/index.html" class="text-muted text-decoration-none">← Capítulo 42</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 43</span>
+            <a href="../glossario/index.html" class="text-muted text-decoration-none">Próximo: Glossário →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap43.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

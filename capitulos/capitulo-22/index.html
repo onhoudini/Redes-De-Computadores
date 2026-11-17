@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 22 — A camada de rede: IPv6 e ICMPv6 | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: tipos de enlace, endereçamento IPv6 e maior prefixo, endereços especiais e multicast, o cabeçalho IPv6 e as extensões, fragmentação, ICMPv6 e Path MTU Discovery, EUI-64, descoberta de vizinhos e SLAAC.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="22" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 22 · Parte 2: Protocolos · Seção 3.14</span>
+        <h1 class="display-5 mb-3">A camada de rede: IPv6 e ICMPv6</h1>
+        <p class="lead mb-4">
+            No Capítulo 2 você viu como uma rede encaminha pacotes. Aqui está o protocolo de rede que o livro escolhe para a
+            Internet: o IPv6, com endereços de 128 bits, um cabeçalho simples, fragmentação só na origem, mensagens de
+            controle ICMPv6 e hosts que configuram o próprio endereço sem ajuda de ninguém.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#enlaces">1. Rede e enlaces</a>
+                    <a class="nav-link" href="#enderecos">2. Endereçamento IPv6</a>
+                    <a class="nav-link" href="#especiais">3. Endereços especiais</a>
+                    <a class="nav-link" href="#cabecalho">4. O cabeçalho IPv6</a>
+                    <a class="nav-link" href="#fragmentacao">5. Fragmentação</a>
+                    <a class="nav-link" href="#icmpv6">6. ICMPv6</a>
+                    <a class="nav-link" href="#subrede">7. A sub-rede IPv6</a>
+                    <a class="nav-link" href="#exercicios-cap22">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">De rede em rede, até o destino</h2>
+    <p>
+        O objetivo da camada de rede é permitir que hosts ligados a redes diferentes troquem informação passando por
+        sistemas intermediários, os <strong>roteadores</strong>. A unidade de informação é o <strong>pacote</strong>
+        (pág. 213 do PDF). O livro descreve o IPv6; o IPv4 aparece só nas comparações.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Distinguir os <strong>tipos de enlace</strong> (ponto a ponto, LAN, NBMA) e o papel da <strong>MTU</strong>.</li>
+                <li>Ler a estrutura de um <strong>endereço IPv6</strong> e aplicar a regra do <strong>maior prefixo</strong>.</li>
+                <li>Reconhecer os <strong>endereços especiais</strong> (link-local, loopback, ULA, multicast).</li>
+                <li>Ler o <strong>cabeçalho IPv6</strong>, seguir a cadeia de extensões e calcular a <strong>fragmentação</strong>.</li>
+                <li>Explicar o <strong>ICMPv6</strong>, o <strong>Path MTU Discovery</strong>, a <strong>descoberta de vizinhos</strong> e o <strong>SLAAC</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o encaminhamento, o TTL e a MTU do <a href="../capitulo-02/index.html">Capítulo 2</a> e a notação IPv6
+                do <a href="../capitulo-09/index.html">Capítulo 9</a>. O capítulo cobre a seção 3.14 do livro
+                (pág. 213–236 do PDF). Os exemplos usam os endereços do livro ou o bloco de documentação 2001:db8::/32.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 15 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Enlaces -->
+<section id="enlaces" class="chapter-section" data-conceito="enlaces" data-titulo="Rede e enlaces">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">A camada de rede e os tipos de enlace</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Antes de olhar o IP, o livro olha para baixo: o que a camada de enlace oferece à camada de rede? A resposta muda de
+        uma tecnologia para outra, e o IP precisa conviver com todas.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>O livro trata dos enlaces sem conexão, os mais usados, de três tipos (Figs. 38–40, pág. 214–215 do PDF):</p>
+    <ul>
+        <li><strong>Ponto a ponto</strong>: dois sistemas ligados diretamente, como no PPP
+            (<a href="https://www.rfc-editor.org/rfc/rfc1661" target="_blank" rel="noopener noreferrer">RFC 1661</a>). O serviço pode
+            ser não confiável, sobre fibras e pares trançados com poucos erros, ou confiável, com retransmissões, comum em redes
+            sem fio.</li>
+        <li><strong>LAN</strong> (rede local): qualquer par de dispositivos troca quadros diretamente. Cada dispositivo tem um
+            endereço de enlace único, em geral um <strong>endereço MAC</strong> de 48 bits, e há endereços de
+            <strong>broadcast</strong> (todos) e <strong>multicast</strong> (um grupo).</li>
+        <li><strong>NBMA</strong> (<em>Non-Broadcast Multi-Access</em>): liga vários dispositivos como uma LAN, mas só oferece
+            unicast, sem broadcast nem multicast.</li>
+    </ul>
+    <p>
+        Nenhum enlace manda quadros de tamanho ilimitado, e há mais de uma dúzia de tamanhos máximos diferentes. A camada de rede
+        tem de lidar com essa heterogeneidade (pág. 215 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="tipos-enlace"></div>
+    <p class="small text-muted">Baseado nas Figs. 39 e 40 e no texto das págs. 214–215 do PDF.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="NBMA|LAN|Ponto a ponto" data-answer="0" data-explain="NBMA identifica cada dispositivo por um endereço, como uma LAN, mas só tem unicast (pág. 215 do PDF)." data-hint="Qual tipo não tem broadcast nem multicast?">
+        <p class="fw-semibold mb-2">Uma rede liga vários dispositivos, cada um com seu endereço, mas não oferece broadcast. Que tipo é?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Ponto a ponto, LAN (unicast, broadcast, multicast) e NBMA (só unicast).</li>
+        <li>Cada enlace tem um tamanho máximo de quadro.</li>
+    </ul>
+</section>
+
+<!-- 2. Endereçamento -->
+<section id="enderecos" class="chapter-section" data-conceito="enderecos" data-titulo="Endereçamento IPv6">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Endereçamento IPv6 e o maior prefixo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No fim dos anos 1980, os roteadores tinham uma CPU e até 1 MB de memória, e as tabelas cresciam depressa. Em 1990,
+        previa-se o fim dos endereços classe B do IPv4 para 1994 (pág. 215 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        As soluções de curto prazo foram o CIDR e o NAT (vários hosts dividindo um endereço IPv4 público). Em paralelo, a IETF
+        pediu propostas para o IP da próxima geração (IPng) e escolheu a SIPP; como a versão 5 já era de um protocolo
+        experimental, o sucessor do IPv4 virou o <strong>IPv6</strong>: endereços de 128 bits, cabeçalho simples para hardware,
+        autoconfiguração e segurança (pág. 215 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>O tamanho do endereço</strong> (pág. 216 do PDF). Todos concordavam que 32 bits eram pouco. A SIPP propunha 64 bits
+        (4 bilhões de vezes o IPv4, cabendo nos registradores dos processadores de 64 bits); a TUBA reaproveitava os endereços
+        de 20 bytes do ISO CLNP. 128 bits foi o meio-termo: cerca de 3,4 × 10<sup>38</sup> endereços, ou 6,67 × 10<sup>23</sup>
+        por metro quadrado da Terra, contra 8 por quilômetro quadrado no IPv4.
+    </div>
+    <p>
+        Um endereço <strong>unicast</strong> identifica uma interface (um host com Ethernet e WiFi tem dois). Ele tem três partes
+        (Fig. 41, pág. 217 do PDF):
+    </p>
+    <ol>
+        <li>o <strong>prefixo global de roteamento</strong>, do provedor dono do bloco;</li>
+        <li>o <strong>identificador de sub-rede</strong>, um cliente ou uma rede desse provedor;</li>
+        <li>o <strong>identificador de interface</strong>, hoje sempre de 64 bits.</li>
+    </ol>
+    <p>
+        Os roteadores não podem guardar uma rota por host; os endereços são distribuídos em blocos, conforme a posição na
+        rede, para que uma rota cubra muitos hosts. A IANA distribui blocos de 2000::/3 aos registros regionais (RIPE, ARIN,
+        AfriNIC…), que os repassam aos provedores, que os repassam aos clientes. Tamanhos típicos: /32 para um provedor, /48
+        para uma empresa, /56 para sites pequenos, /64 para um usuário (pág. 218 do PDF). Endereços <strong>independentes do
+        provedor</strong> (PI) acompanham a empresa se ela trocar de provedor; os <strong>agregáveis pelo provedor</strong> (PA)
+        precisam ser trocados.
+    </p>
+    <p>
+        Com vários blocos aninhados, um roteador pode ter várias rotas para um destino. Desde a
+        <a href="https://www.rfc-editor.org/rfc/rfc1519" target="_blank" rel="noopener noreferrer">RFC 1519</a>, vale a do
+        <strong>maior prefixo</strong>. A Belnet anuncia 2001:6a8::/32, que inclui a UCLouvain (2001:6a8:3080::/48); se a
+        UCLouvain contratar outro provedor, quem conhece as duas rotas usa a /48, mais específica. A rota ::/0 casa com tudo:
+        é a <strong>rota padrão</strong> (pág. 218–219 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="maior-prefixo"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Pela rota 2001:6a8:3080::/48, a de maior prefixo|Pela rota 2001:6a8::/32, a mais antiga|Pela rota padrão ::/0" data-answer="0" data-explain="As três casam, e vence a mais específica, /48 (pág. 219 do PDF)." data-hint="Qual das rotas que casam tem o prefixo mais longo?">
+        <p class="fw-semibold mb-2">Na tabela do livro, por onde sai um pacote para 2001:6a8:3080::1234?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="/48|/32|/64" data-answer="0" data-explain="/32 para provedores, /48 para empresas, /64 para um usuário (pág. 218 do PDF)." data-hint="Veja a lista de tamanhos típicos.">
+        <p class="fw-semibold mb-2">Qual é o tamanho típico do bloco IPv6 de uma empresa?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>128 bits: prefixo global, sub-rede e identificador de interface de 64 bits.</li>
+        <li>Distribuição hierárquica: IANA → RIR → provedor → cliente; PI e PA.</li>
+        <li>Maior prefixo vence; ::/0 é a rota padrão.</li>
+    </ul>
+</section>
+
+<!-- 3. Especiais -->
+<section id="especiais" class="chapter-section" data-conceito="especiais" data-titulo="Endereços especiais">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Endereços especiais e multicast</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nem todo endereço IPv6 serve para atravessar a Internet. Alguns só valem dentro de um enlace, outros dentro de uma
+        empresa, outros apontam para um grupo inteiro de receptores.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>ULA</strong>, <em>Unique Local Unicast</em> (fc00::/7,
+            <a href="https://www.rfc-editor.org/rfc/rfc4193" target="_blank" rel="noopener noreferrer">RFC 4193</a>): para empresas
+            que usam IPv6 sem se ligar à Internet, como os endereços privados do IPv4 (RFC 1918), mas com muito mais espaço.</li>
+        <li><strong>::1</strong>: o loopback, uma interface lógica sempre ativa. <strong>::</strong>: o endereço não
+            especificado, usado como origem por quem ainda não tem endereço.</li>
+        <li><strong>Link-local</strong> (fe80::/10, Fig. 42): fe80::/64 seguido do identificador de interface. Serve para falar
+            dentro do enlace, inclusive na autoconfiguração; nenhum roteador encaminha pacotes com esses endereços
+            (pág. 219 do PDF).</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Todo host IPv6 tem vários endereços</strong> (pág. 220 do PDF): pelo menos o link-local e, em geral, um global
+        por interface. Todas as pilhas IPv6 precisam lidar com isso.
+    </div>
+    <p>
+        Um endereço <strong>multicast</strong> identifica um grupo: a rede entrega cada pacote a todos os membros, e os
+        roteadores replicam o pacote só onde há membros. O endereço começa com 8 bits 1 (ff), seguidos de 4 bits de
+        <strong>flags</strong> (permanente ou temporário), 4 bits de <strong>escopo</strong>, que limita até onde o pacote vai,
+        e 112 bits de grupo (Fig. 43). Todos os hosts estão no grupo <strong>ff02::1</strong>, e todos os roteadores no
+        <strong>ff02::2</strong> (pág. 220–221 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Os valores do escopo estão na <a href="https://www.rfc-editor.org/rfc/rfc4291#section-2.7" target="_blank" rel="noopener noreferrer">RFC 4291, seção 2.7</a>:
+        1 = interface, 2 = enlace, 4 = administração, 5 = site, 8 = organização e e = global. Por isso ff02::1 fica no enlace e
+        ff0e::… é global. A arquitetura de endereços que o livro cita (RFC 3513) foi substituída pela RFC 4291.
+    </p>
+    <p>
+        Além de unicast e multicast, o IPv6 tem endereços <strong>anycast</strong> (pág. 216 do PDF). O glossário do livro define
+        anycast como o modo em que a informação sai de uma origem e chega a <strong>um</strong> receptor de um grupo
+        (pág. 393 do PDF): o mesmo endereço é configurado em vários lugares, e o pacote vai para um só deles.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Pela <a href="https://www.rfc-editor.org/rfc/rfc4291#section-2.6" target="_blank" rel="noopener noreferrer">RFC 4291, seção 2.6</a>,
+        um endereço anycast sai do espaço unicast e não tem formato próprio: é um endereço unicast atribuído a várias interfaces,
+        e o roteamento entrega o pacote à mais próxima segundo as métricas. É assim que vários servidores raiz do DNS atendem,
+        com o mesmo endereço, em dezenas de países.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="tipo-endereco"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Não: pacotes com endereço link-local não são encaminhados por roteadores|Sim, como qualquer endereço|Só se o destino for multicast" data-answer="0" data-explain="O uso de endereços link-local fica restrito ao enlace (pág. 219 do PDF)." data-hint="O nome diz até onde o endereço vale.">
+        <p class="fw-semibold mb-2">Um roteador encaminha para outra rede um pacote com destino fe80::1?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Um só dos membros, em geral o mais próximo|Todos os membros do grupo|Todos os hosts do enlace" data-answer="0" data-explain="Multicast entrega a todos os membros; anycast entrega a um receptor do grupo (pág. 393 do PDF), escolhido pelo roteamento (RFC 4291)." data-hint="Compare com o multicast: quantos recebem?">
+        <p class="fw-semibold mb-2">Um pacote enviado a um endereço anycast chega a quem?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Unicast (uma interface), multicast (todos do grupo) e anycast (um do grupo).</li>
+        <li>ULA (fc00::/7), loopback (::1), não especificado (::) e link-local (fe80::/10).</li>
+        <li>Multicast: ff + flags + escopo + grupo; ff02::1 todos os hosts, ff02::2 todos os roteadores.</li>
+    </ul>
+</section>
+
+<!-- 4. Cabeçalho -->
+<section id="cabecalho" class="chapter-section" data-conceito="cabecalho" data-titulo="O cabeçalho IPv6">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">O cabeçalho IPv6 e as extensões</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Um roteador de alta capacidade processa milhões de pacotes por segundo. Cada campo a menos no cabeçalho é trabalho a
+        menos em cada pacote.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>O cabeçalho IPv6 tem 40 bytes e, além dos endereços de origem e destino, seis campos (Fig. 44, pág. 221 do PDF):</p>
+    <ul>
+        <li><strong>Version</strong> (4 bits): 6;</li>
+        <li><strong>Traffic Class</strong> (8 bits): o tipo de serviço, incluindo os bits ECT e CE do ECN (Capítulo 21);</li>
+        <li><strong>Flow Label</strong> (20 bits): pensado para marcar pacotes de um mesmo fluxo; o uso ainda é incerto (RFC 6437);</li>
+        <li><strong>Payload Length</strong> (16 bits): o tamanho do que vem depois do cabeçalho, até 65 535 bytes;</li>
+        <li><strong>Next Header</strong> (8 bits): o que vem a seguir, por exemplo 6 (TCP), 17 (UDP), 58 (ICMPv6) ou uma extensão;</li>
+        <li><strong>Hop Limit</strong> (8 bits): decrementado por roteador; evita que pacotes circulem para sempre.</li>
+    </ul>
+    <p>
+        Não há <strong>checksum</strong>: o enlace e o transporte já verificam erros, e recalcular um checksum em cada roteador
+        custaria caro para pouco ganho (no IPv4, cada roteador atualiza o checksum ao decrementar o TTL). O Next Header permite
+        uma <strong>cadeia de cabeçalhos</strong>: Hop-by-Hop Options (processado por roteadores e hosts), Destination Options,
+        Routing, Fragment, e os do IPsec, AH e ESP (pág. 222–223 do PDF).
+    </p>
+    <p>
+        O Hop-by-Hop usa o formato tipo-tamanho-valor; os dois bits mais altos do tipo dizem o que faz um nó que não conhece a
+        opção: 00 pula, 01 descarta, 10 e 11 descartam e avisam a origem por ICMP. Exemplos: o <strong>jumbograma</strong>, para
+        pacotes de mais de 65 535 bytes (RFC 2675), e o <strong>router alert</strong> (RFC 2711). O Routing Header tipo 0, que
+        indicava roteadores a visitar, foi retirado da especificação por problemas de segurança
+        (<a href="https://www.rfc-editor.org/rfc/rfc5095" target="_blank" rel="noopener noreferrer">RFC 5095</a>, pág. 223 e 227 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o campo Hdr Ext Len do Hop-by-Hop dá o tamanho do cabeçalho de opções em bytes (pág. 223 do PDF). Ele é
+        medido em <strong>unidades de 8 bytes</strong>, sem contar os primeiros 8: Hdr Ext Len = 0 significa um cabeçalho de
+        8 bytes (<a href="https://www.rfc-editor.org/rfc/rfc8200#section-4.3" target="_blank" rel="noopener noreferrer">RFC 8200, seção 4.3</a>).
+        A RFC 8200 substituiu a RFC 2460, citada pelo livro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="cabecalho-ipv6"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque enlace e transporte já detectam erros, e recalcular em cada roteador custaria caro|Porque o IPv6 é sempre cifrado|Porque o Flow Label substitui o checksum" data-answer="0" data-explain="O ganho de detectar erros dentro dos roteadores foi considerado pequeno (pág. 222 do PDF)." data-hint="Quem mais verifica erros no caminho?">
+        <p class="fw-semibold mb-2">Por que o cabeçalho IPv6 não tem checksum?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="44|6|58" data-answer="0" data-explain="O cabeçalho de fragmento tem Next Header 44 (pág. 225 do PDF)." data-hint="Veja a lista de números do Next Header.">
+        <p class="fw-semibold mb-2">Um pacote IPv6 fragmentado tem qual valor no Next Header do cabeçalho principal?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>40 bytes: versão, classe, rótulo de fluxo, tamanho da carga, próximo cabeçalho, limite de saltos e endereços.</li>
+        <li>Sem checksum; extensões encadeadas pelo Next Header.</li>
+    </ul>
+</section>
+
+<!-- 5. Fragmentação -->
+<section id="fragmentacao" class="chapter-section" data-conceito="fragmentacao" data-titulo="Fragmentação">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Fragmentação no IPv6</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A <strong>MTU</strong> de uma interface é o maior pacote, com cabeçalho, que ela consegue mandar. O IPv6 permite pacotes
+        de 64 KB, mas a Ethernet aceita 1500 bytes, e o caminho pode ter enlaces ainda menores (Fig. 47, pág. 224 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <table class="table table-sm small w-auto">
+        <thead><tr><th>Enlace</th><th>MTU (pág. 224 do PDF)</th></tr></thead>
+        <tbody><tr><td>Ethernet</td><td>1500</td></tr><tr><td>WiFi</td><td>2272</td></tr><tr><td>ATM (AAL5)</td><td>9180</td></tr><tr><td>802.15.4</td><td>102 ou 81</td></tr><tr><td>Token Ring</td><td>4464</td></tr><tr><td>FDDI</td><td>4352</td></tr></tbody>
+    </table>
+    <p>
+        No IPv4, hosts e roteadores fragmentavam; fragmentar nos roteadores se mostrou caro. No IPv6, <strong>só a origem
+        fragmenta</strong>. Um roteador que recebe um pacote grande demais o descarta e avisa a origem por ICMPv6 (pág. 224 do
+        PDF). Cada fragmento é um pacote IPv6 com um <strong>cabeçalho de fragmento</strong> de 8 bytes (Next Header 44, Fig. 48):
+    </p>
+    <ul>
+        <li><strong>Next Header</strong>: o que vem depois (por exemplo, UDP);</li>
+        <li><strong>Fragment Offset</strong> (13 bits): a posição dos dados no pacote original, em <strong>unidades de 8 bytes</strong>;</li>
+        <li><strong>M</strong> (<em>more</em>): 1 em todos os fragmentos menos o último;</li>
+        <li><strong>Identification</strong> (32 bits): a que pacote o fragmento pertence, sem repetir para o mesmo destino
+            durante um MSL.</li>
+    </ul>
+    <p>
+        O destino junta os fragmentos com a mesma identificação, usa o offset para posicioná-los e o fragmento com M = 0 para
+        saber o tamanho total. Se algum faltar quando um temporizador expirar, descarta todos (pág. 225–226 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O pseudo-código de fragmentação do livro (pág. 225–226 do PDF) tem três erros: avança com <code>payload[maxpayload+1:]</code>,
+        o que pula um byte a cada fragmento (o certo é <code>payload[maxpayload:]</code>); põe <code>plen=mtu</code>, mas o Payload
+        Length não conta o cabeçalho IPv6 de 40 bytes e precisa contar o de fragmento; e calcula os dados por fragmento como
+        múltiplo de 8 de <code>mtu − 40</code>, esquecendo os 8 bytes do cabeçalho de fragmento. O exemplo de código 4 traz a
+        versão corrigida.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Compressão de cabeçalhos</strong> (pág. 226–227 do PDF). Em enlaces lentos, com pacotes pequenos como os de voz, os
+        40 bytes do IPv6 pesam. Há compressão genérica no enlace, compressão dos cabeçalhos IP e TCP aproveitando a repetição
+        entre pacotes do mesmo fluxo (RFC 5795) e codificações compactas do IPv6 para redes como a 802.15.4 (RFC 4944).
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="fragmentos-ipv6"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Descarta o pacote e manda à origem um ICMPv6 Packet Too Big|Fragmenta o pacote|Corta o pacote no tamanho da MTU" data-answer="0" data-explain="No IPv6, só a origem fragmenta (pág. 224 do PDF)." data-hint="Quem pode fragmentar no IPv6?">
+        <p class="fw-semibold mb-2">O que faz um roteador IPv6 que recebe um pacote maior que a MTU do enlace de saída?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Só a origem fragmenta; cada fragmento leva um cabeçalho de 8 bytes (Next Header 44).</li>
+        <li>Offset em unidades de 8 bytes; M = 0 no último; Identification de 32 bits.</li>
+    </ul>
+</section>
+
+<!-- 6. ICMPv6 -->
+<section id="icmpv6" class="chapter-section" data-conceito="icmpv6" data-titulo="ICMPv6">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">ICMPv6</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Quando um roteador descarta um pacote, a origem precisa saber por quê: não há rota? O pacote é grande demais? Os saltos
+        acabaram?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>ICMPv6</strong> (<a href="https://www.rfc-editor.org/rfc/rfc4443" target="_blank" rel="noopener noreferrer">RFC 4443</a>)
+        viaja dentro do IPv6 com Next Header 58. A mensagem tem um tipo de 8 bits, um código e um checksum de 16 bits, e o corpo
+        traz uma cópia do pacote com problema (Fig. 51). As mensagens de erro (pág. 227–228 do PDF):
+    </p>
+    <ul>
+        <li><strong>1, Destination Unreachable</strong>, com os códigos 0 (sem rota), 1 (proibido por um firewall), 2 (fora do
+            escopo da origem), 3 (endereço inalcançável) e 4 (porta inalcançável, enviado pelo destino);</li>
+        <li><strong>2, Packet Too Big</strong>, com a MTU do enlace de saída;</li>
+        <li><strong>3, Time Exceeded</strong>: código 0, o Hop Limit chegou a zero; código 1, o destino não conseguiu remontar os fragmentos;</li>
+        <li><strong>4, Parameter Problem</strong>: campo errado no cabeçalho (código 0) ou Next Header/opção desconhecidos (1 e 2).</li>
+    </ul>
+    <p>
+        Com o Packet Too Big, a origem descobre a maior MTU do caminho: é o <strong>Path MTU Discovery</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc1981" target="_blank" rel="noopener noreferrer">RFC 1981</a>). O TCP aproveita
+        isso para ajustar o MSS e não depender de fragmentação: perder um fragmento obriga a retransmitir o segmento inteiro, e a
+        remontagem traz problemas de desempenho e de segurança (pág. 228–229 do PDF).
+    </p>
+    <p>
+        As mensagens informativas são o <strong>Echo Request</strong> e o <strong>Echo Reply</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc4443" target="_blank" rel="noopener noreferrer">RFC 4443</a>), usados pelo
+        <code>ping6</code> para testar se um destino responde. Todo host deveria responder a um Echo Request, mas, depois dos
+        problemas de segurança que afetaram as pilhas TCP/IP, muitas implementações permitem desligar essa resposta
+        (pág. 229 do PDF). O exemplo do livro:
+    </p>
+    <pre class="log mb-3">#ping6 www.ietf.org
+PING6(56=40+8+8 bytes) 2001:6a8:3080:2:3403:bbf4:edae:afc3 --> 2001:1890:123a::1:1e
+16 bytes from 2001:1890:123a::1:1e, icmp_seq=0 hlim=49 time=156.905 ms
+16 bytes from 2001:1890:123a::1:1e, icmp_seq=1 hlim=49 time=155.618 ms
+…
+16 bytes from 2001:1890:123a::1:1e, icmp_seq=7 hlim=49 time=155.869 ms
+^C
+--- www.ietf.org ping6 statistics ---
+8 packets transmitted, 8 packets received, 0.0% packet loss
+round-trip min/avg/max/std-dev = 155.325/155.810/156.905/0.447 ms</pre>
+    <p>
+        Cada linha é um Echo Reply: o <code>icmp_seq</code> é o número de sequência do pedido, o <code>hlim</code> é o Hop Limit
+        com que a resposta chegou e o <code>time</code> é o RTT. Os 56 bytes são 40 de cabeçalho IPv6, 8 de cabeçalho ICMPv6 e
+        8 de dados.
+    </p>
+    <p>
+        O <code>traceroute6</code> mostra o caminho até o destino. Ele usa as mensagens Time Exceeded: manda um pacote com Hop Limit
+        1, depois com 2, e assim por diante, e cada roteador que descarta um pacote por Hop Limit esgotado devolve um ICMPv6 com
+        o cabeçalho e os primeiros bytes do pacote. Você já viu essa ideia no Capítulo 2. No exemplo do livro, são três medidas
+        por salto (pág. 229–230 do PDF):
+    </p>
+    <pre class="log mb-3">#traceroute6 www.ietf.org
+traceroute6 to www.ietf.org (2001:1890:1112:1::20) from 2001:6a8:3080:2:217:f2ff:fed6:65c0, 30 hops max, 12 byte packets
+ 1  2001:6a8:3080:2::1  13.821 ms  0.301 ms  0.324 ms
+ 2  2001:6a8:3000:8000::1  0.651 ms  0.51 ms  0.495 ms
+ 3  10ge.cr2.bruvil.belnet.net  3.402 ms  3.34 ms  3.33 ms
+ 4  10ge.cr2.brueve.belnet.net  3.668 ms  3.988 ms  3.699 ms
+ 5  belnet.rt1.ams.nl.geant2.net  10.598 ms  7.214 ms  10.082 ms
+ 6  so-7-0-0.rt2.cop.dk.geant2.net  20.19 ms  20.002 ms  20.064 ms
+ 7  kbn-ipv6-b1.ipv6.telia.net  21.078 ms  20.868 ms  20.864 ms
+ 8  s-ipv6-b1-link.ipv6.telia.net  31.312 ms  31.113 ms  31.411 ms
+ 9  s-ipv6-b1-link.ipv6.telia.net  61.986 ms  61.988 ms  61.994 ms
+10  2001:1890:61:8909::1  121.716 ms  121.779 ms  121.177 ms
+11  2001:1890:61:9117::2  203.709 ms  203.305 ms  203.07 ms
+12  mail.ietf.org  204.172 ms  203.755 ms  203.748 ms</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Os nomes dos roteadores contam o caminho: a rede da UCLouvain (saltos 1 e 2), a Belnet (3 e 4), a rede acadêmica
+        europeia GÉANT em Amsterdã e Copenhague (5 e 6), a Telia (7 a 9) e a rede do 2001:1890::/32, onde estava o servidor
+        da IETF (10 a 12). Os saltos de 62 para 122 ms e de 122 para 203 ms são enlaces de longa distância. O livro abreviou o
+        salto 4, em que as três respostas vieram do mesmo roteador; aqui as linhas foram reagrupadas.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Limitação de taxa do ICMP</strong> (pág. 230 do PDF). Os chips que encaminham pacotes na velocidade da linha não
+        geram ICMP: chamam a CPU do roteador, bem mais lenta. Para protegê-la, os roteadores limitam a taxa de mensagens ICMP, e
+        nem todo pacote com erro gera uma. Pelo mesmo motivo, opções Hop-by-Hop são desaconselhadas.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O exemplo do livro usa um enlace de 1200 bytes, e o próprio livro o chama de acadêmico: o IPv6 exige que todo enlace
+        aceite pelo menos <strong>1280 bytes</strong> (<a href="https://www.rfc-editor.org/rfc/rfc8200#section-5" target="_blank" rel="noopener noreferrer">RFC 8200, seção 5</a>).
+        Se um firewall bloquear os Packet Too Big, o Path MTU Discovery falha em silêncio: pacotes grandes somem e os pequenos
+        passam. Por isso não se deve filtrar todo o ICMPv6.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="pmtud"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Tipo 3, Time Exceeded, código 0|Tipo 1, Destination Unreachable|Tipo 2, Packet Too Big" data-answer="0" data-explain="O roteador que zera o Hop Limit devolve Time Exceeded com código 0 (pág. 228 do PDF)." data-hint="Que mensagem o traceroute espera?">
+        <p class="fw-semibold mb-2">Que mensagem um roteador devolve quando o Hop Limit de um pacote chega a zero?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Destination Unreachable, código 4 (porta inalcançável)|Time Exceeded, código 1|Parameter Problem, código 0" data-answer="0" data-explain="O pacote chegou, mas nenhuma aplicação escuta a porta (pág. 228 do PDF)." data-hint="O pacote chegou ao destino certo.">
+        <p class="fw-semibold mb-2">Um datagrama UDP chega a um host onde nenhuma aplicação escuta a porta. Que ICMPv6 o host devolve?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Erros: 1 Destination Unreachable, 2 Packet Too Big, 3 Time Exceeded, 4 Parameter Problem. Informativas: Echo.</li>
+        <li>Packet Too Big permite o Path MTU Discovery; o TCP ajusta o MSS.</li>
+        <li>Roteadores limitam a taxa de ICMP.</li>
+    </ul>
+</section>
+
+<!-- 7. Sub-rede -->
+<section id="subrede" class="chapter-section" data-conceito="subrede" data-titulo="A sub-rede IPv6">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">A sub-rede IPv6: MAC, EUI-64 e descoberta de vizinhos</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A maioria dos hosts está numa LAN, como uma Ethernet ou uma rede WiFi. Para mandar um pacote ao vizinho, o host precisa
+        do endereço MAC dele. E, para começar, precisa do próprio endereço IPv6.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Cada interface de LAN tem um endereço MAC único, gravado no hardware, e o quadro leva MAC de origem, MAC de destino e a
+        indicação do protocolo de rede. O <strong>broadcast</strong> entrega a todos, inclusive a quem não fala IPv6; o
+        <strong>multicast</strong> só a quem se inscreveu no grupo, e é o que o IPv6 usa (pág. 230–231 do PDF).
+    </p>
+    <p>
+        O <strong>EUI-64</strong> transforma o MAC de 48 bits num identificador de interface de 64 bits: inverte o bit
+        <strong>U/L</strong> (universal ou local) e insere <strong>ff:fe</strong> no meio (Figs. 52–53,
+        <a href="https://www.rfc-editor.org/rfc/rfc4291#appendix-A" target="_blank" rel="noopener noreferrer">RFC 4291, apêndice A</a>).
+        O host A do livro, de MAC 00:23:45:67:89:ab, ganha o link-local fe80::223:45ff:fe67:89ab (pág. 231–232 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que os endereços MAC são distribuídos em blocos de 2<sup>20</sup> (pág. 231 do PDF). O identificador da
+        empresa (OUI) tem 24 bits, e cada bloco tem 2<sup>24</sup> endereços, cerca de 16 milhões, como o próprio livro diz na
+        pág. 259 (<a href="https://en.wikipedia.org/wiki/Organizationally_unique_identifier" target="_blank" rel="noopener noreferrer">Wikipedia: OUI</a>).
+    </p>
+    <p>
+        Para achar o MAC de um vizinho, o IPv6 usa o <strong>Neighbor Discovery Protocol</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc4861" target="_blank" rel="noopener noreferrer">RFC 4861</a>), parte do ICMPv6:
+        um <strong>Neighbor Solicitation</strong> (NS) multicast pergunta "quem tem este endereço?", e o dono responde com um
+        <strong>Neighbor Advertisement</strong> (NA) unicast com o seu MAC, que vai para a tabela NDP. O NS também detecta
+        <strong>endereços duplicados</strong> (DAD): antes de usar um endereço, o host pergunta por ele, com origem ::; se alguém
+        responder, o endereço é recusado (pág. 232–233 do PDF).
+    </p>
+    <p>
+        Na <strong>autoconfiguração sem estado</strong> (SLAAC,
+        <a href="https://www.rfc-editor.org/rfc/rfc4862" target="_blank" rel="noopener noreferrer">RFC 4862</a>), o host forma o
+        link-local, confere com DAD e espera um <strong>Router Advertisement</strong>, que os roteadores mandam a ff02::1 cerca de
+        cada 30 s, ou pede um com um <strong>Router Solicitation</strong>. O RA traz o hop limit padrão, os bits M e O (há
+        informação no DHCPv6), o tempo de vida do roteador, a MTU e a opção de <strong>prefixo</strong>, com tempos de vida que
+        ajudam a renumerar a rede. O host junta o prefixo ao seu identificador e confere o novo endereço com DAD
+        (Figs. 55–56, pág. 233–234 do PDF).
+    </p>
+    <p>
+        Os tempos de vida da opção de prefixo, <strong>Valid Lifetime</strong> e <strong>Preferred Lifetime</strong>, servem para
+        trocar o prefixo de uma sub-rede sem atrapalhar os hosts, o chamado problema da <strong>renumeração</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc7010" target="_blank" rel="noopener noreferrer">RFC 7010</a>). O cenário do livro
+        (pág. 234 do PDF): uma pequena empresa com uma só sub-rede e SLAAC troca de provedor. O roteador passa a anunciar dois
+        prefixos, o antigo com tempo de vida curto, para os hosts deixarem de usá-lo, e o novo com tempo de vida longo. Depois
+        de algum tempo, o roteador para de anunciar o antigo, os hosts o abandonam e o prefixo volta ao primeiro provedor. Em
+        redes grandes, renumerar continua difícil.
+    </p>
+    <div class="demo-box mini-quiz" data-options="Anunciando o prefixo antigo com tempo de vida curto e o novo com tempo de vida longo|Desligando todos os hosts e trocando o prefixo de uma vez|Configurando o novo endereço à mão em cada host" data-answer="0" data-explain="Com dois prefixos anunciados, os hosts migram sozinhos para o novo, e o antigo expira (pág. 234 do PDF)." data-hint="Para que servem os tempos de vida da opção de prefixo?">
+        <p class="fw-semibold mb-2">Uma pequena empresa com SLAAC troca de provedor. Como mudar o prefixo sem parar a rede?</p>
+    </div>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Router Advertisements e Hop Limit</strong> (pág. 234–235 do PDF). O RA não deve sair do enlace, mas vai com Hop
+        Limit 255, e não 1. Assim, o host confere que o valor ainda é 255: um RA vindo de fora teria passado por um roteador e
+        chegaria com 254 ou menos (RFC 5082).
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro manda o Router Solicitation para FF01::2 (pág. 235 do PDF). O grupo de todos os roteadores do enlace é
+        <strong>ff02::2</strong>, como o próprio livro escreve na pág. 221; ff01::2 tem escopo de interface e não sairia do host.
+    </p>
+    <p>
+        Com dois roteadores na sub-rede, o roteador padrão que recebe um pacote que deveria ter ido ao outro manda ao host um
+        <strong>Redirect</strong>, e o host cria uma rota temporária (Fig. 57). A alternativa ao SLAAC é o <strong>DHCP</strong>,
+        em que um servidor distribui endereços de um conjunto e os empresta por tempo limitado (pág. 235–236 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Ao descrever o DHCP para IPv6, o livro mistura o DHCP do IPv4 (pág. 235–236 do PDF): diz que o servidor escuta na porta 67
+        e que a resposta traz a máscara de sub-rede e o roteador padrão. No <strong>DHCPv6</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc8415" target="_blank" rel="noopener noreferrer">RFC 8415</a>, que substituiu a
+        RFC 3315), os servidores escutam na porta UDP <strong>547</strong> (os clientes, na 546), e o prefixo da sub-rede e o
+        roteador padrão vêm dos Router Advertisements, não do DHCPv6.
+    </p>
+    <p>
+        O SLAAC e o DHCPv6 podem levar mais do que o prefixo e o endereço. A RFC 6106 define opções do Neighbor Discovery que
+        trazem o endereço do resolvedor DNS recursivo e a lista de sufixos de busca. Também dá para combinar os dois: o SLAAC
+        distribui os prefixos, e uma variante <strong>sem estado</strong> do DHCPv6 (RFC 3736) distribui só as informações de DNS
+        (pág. 236 do PDF).
+    </p>
+    <p>
+        O Hop Limit 255 impede uma família de ataques ao ICMPv6, mas não todos. O NDP pode ser protegido com endereços gerados
+        criptograficamente (<strong>CGA</strong>, RFC 3972) e com o <strong>SEND</strong>, <em>Secure Neighbor Discovery</em>
+        (RFC 3971); o livro deixa a segurança do IPv6 fora do escopo (pág. 235 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        As opções de DNS da RFC 6106 estão hoje na <a href="https://www.rfc-editor.org/rfc/rfc8106" target="_blank" rel="noopener noreferrer">RFC 8106</a>,
+        e o DHCPv6 sem estado da RFC 3736 foi incorporado à <a href="https://www.rfc-editor.org/rfc/rfc8415" target="_blank" rel="noopener noreferrer">RFC 8415</a>.
+        O SEND (<a href="https://www.rfc-editor.org/rfc/rfc3971" target="_blank" rel="noopener noreferrer">RFC 3971</a>) quase não é
+        implantado; nas LANs, a defesa comum contra RAs falsos é o switch filtrar anúncios nas portas de hosts, o
+        <em>RA Guard</em> (<a href="https://www.rfc-editor.org/rfc/rfc6105" target="_blank" rel="noopener noreferrer">RFC 6105</a>).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Um identificador fixo, derivado do MAC, permite rastrear um host por onde ele for. Por isso as extensões de privacidade,
+        hoje na <a href="https://www.rfc-editor.org/rfc/rfc8981" target="_blank" rel="noopener noreferrer">RFC 8981</a> (que
+        substituiu a RFC 4941 citada pelo livro), geram identificadores aleatórios, e os sistemas atuais quase não usam mais o
+        EUI-64 nos endereços globais.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização — EUI-64</h3>
+    <div class="demo-box" data-sim="eui64"></div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização — DAD e SLAAC</h3>
+    <div class="demo-box" data-sim="ndp-slaac"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Para o host conferir que o anúncio foi gerado no próprio enlace|Para o anúncio chegar a toda a Internet|Por engano da especificação" data-answer="0" data-explain="Um pacote que atravessou um roteador chegaria com Hop Limit menor que 255 (pág. 234–235 do PDF)." data-hint="O que acontece com o Hop Limit a cada roteador?">
+        <p class="fw-semibold mb-2">Por que o Router Advertisement vai com Hop Limit 255?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Que o endereço já está em uso por outro host|Que o roteador aceitou o endereço|Que o prefixo expirou" data-answer="0" data-explain="Na detecção de endereço duplicado, qualquer resposta significa que o endereço já tem dono (pág. 233 do PDF)." data-hint="Quem responde a um NS sobre um endereço?">
+        <p class="fw-semibold mb-2">Durante o DAD, o host recebe um Neighbor Advertisement. O que isso significa?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Pelo SLAAC, com os prefixos nos RAs, e pelo DHCPv6 sem estado, com o DNS|Só pelo DHCPv6 com estado|Pelo SLAAC, que nunca transporta informações de DNS" data-answer="0" data-explain="A RFC 3736 define o DHCPv6 sem estado para distribuir o DNS enquanto o SLAAC distribui os prefixos; a RFC 6106 também permite levar o resolvedor nos próprios RAs (pág. 236 do PDF)." data-hint="O livro fala em combinar os dois mecanismos.">
+        <p class="fw-semibold mb-2">Numa rede que usa SLAAC, como o host pode descobrir o resolvedor DNS sem um servidor DHCPv6 com estado?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>EUI-64: inverte o bit U/L e insere ff:fe.</li>
+        <li>NDP: NS multicast e NA unicast; DAD antes de usar um endereço.</li>
+        <li>SLAAC: link-local, RS/RA com o prefixo, endereço global e DAD; Hop Limit 255.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap22" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> escreva na forma compacta o prefixo 2001:0db8:0000:cd30:0000:0000:0000:0000/60.
+            <details><summary>Ver solução</summary><p class="mb-0">2001:db8:0:cd30::/60, uma das três formas equivalentes do livro (pág. 216 do PDF).</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> na tabela do livro, por onde sai um pacote para 2001:6a8:3080:2::7? E para 2a02:2788:1::1?
+            <details><summary>Ver solução</summary><p class="mb-0">O primeiro casa com ::/0, 2001:6a8::/32 e 2001:6a8:3080::/48: sai por fe80::bad:cafe. O segundo só casa com ::/0 (o /64 é 2a02:2788:2c4:16f::/64): sai por fe80::dead:beef.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> uma origem precisa mandar 3000 bytes de dados (depois do cabeçalho IPv6) por um enlace de MTU 1280. Quantos fragmentos, com que offsets e quantos dados no último?
+            <details><summary>Ver solução</summary><p class="mb-0">Cada fragmento leva 8 × ⌊(1280 − 48) / 8⌋ = 1232 bytes. Três fragmentos: offsets 0, 154 e 308; o último leva 3000 − 2464 = 536 bytes, com M = 0.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> calcule o identificador EUI-64 e o endereço link-local do host B do livro, de MAC 00:34:56:78:9a:bc.
+            <details><summary>Ver solução</summary><p class="mb-0">234:56ff:fe78:9abc; link-local fe80::234:56ff:fe78:9abc.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> para qual grupo multicast vai o Neighbor Solicitation que procura fe80::234:56ff:fe78:9abc?
+            <details><summary>Ver solução</summary><p class="mb-0">ff02::1:ff78:9abc: ff02::1:ff seguido dos 24 bits finais (78:9a:bc).</p></details></li>
+        <li><strong>Desafio:</strong> um administrador bloqueia todo o ICMPv6 no firewall da empresa. Páginas pequenas abrem, mas downloads grandes travam. Explique.
+            <details><summary>Ver solução</summary><p class="mb-0">Os roteadores IPv6 não fragmentam: descartam os pacotes grandes demais e avisam a origem com Packet Too Big. Sem esse aviso, a origem continua mandando segmentos do tamanho máximo, que somem num enlace de MTU menor (um "buraco negro" de MTU). As respostas pequenas cabem e passam. Bloquear também os NS, NA e RA quebraria a própria rede local.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Cinco trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. O maior prefixo, com a tabela do livro</h3>
+    <pre class="code-block"><code>import ipaddress
+
+# a tabela de rotas do livro (pág. 219)
+tabela = [("::/0", "fe80::dead:beef"), ("::1/128", "::1"), ("2a02:2788:2c4:16f::/64", "eth0"),
+          ("2001:6a8:3080::/48", "fe80::bad:cafe"), ("2001:6a8:2d80::/48", "fe80::bad:bad"),
+          ("2001:6a8::/32", "fe80::aaaa:bbbb")]
+rotas = [(ipaddress.ip_network(p), via) for p, via in tabela]
+
+def encaminha(destino):
+    d = ipaddress.ip_address(destino)
+    casam = [(rede, via) for rede, via in rotas if d in rede]
+    rede, via = max(casam, key=lambda r: r[0].prefixlen)     # o maior prefixo vence
+    return [str(r) for r, _ in casam], rede, via
+
+for destino in ["2a02:2788:2c4:16f::1", "2001:6a8:3080::1234", "2001:1890:123a::1:1e", "2001:6a8:3880:40::2"]:
+    casam, rede, via = encaminha(destino)
+    print(f"{destino:24} casa com {casam} -> {rede} via {via}")</code></pre>
+
+    <h3 class="h6 mt-4">2. Classificando endereços</h3>
+    <pre class="code-block"><code>import ipaddress
+
+ESCOPOS = {1: "interface", 2: "enlace", 4: "administração", 5: "site", 8: "organização", 0xE: "global"}
+
+def classifica(texto):
+    a = ipaddress.IPv6Address(texto)
+    if a == ipaddress.IPv6Address("::"):
+        return "não especificado (::)"
+    if a.is_loopback:
+        return "loopback (::1)"
+    if a.is_multicast:
+        escopo = a.packed[1] &amp; 0x0F                    # os 4 bits baixos do 2º byte
+        return f"multicast, escopo {ESCOPOS.get(escopo, escopo)}"
+    if a.is_link_local:
+        return "unicast link-local (fe80::/10)"
+    if a in ipaddress.IPv6Network("fc00::/7"):
+        return "unicast local único, ULA (fc00::/7)"
+    if a in ipaddress.IPv6Network("2000::/3"):
+        return "unicast global (2000::/3)"
+    return "outro"
+
+for t in ["::", "::1", "fe80::219:e3ff:fed7:1204", "ff02::1", "ff02::2", "ff05::101", "ff0e::1",
+          "fd12:3456:789a::1", "2001:6a8:3080::1234"]:
+    print(f"{t:26} {classifica(t)}")</code></pre>
+
+    <h3 class="h6 mt-4">3. Montando e lendo o cabeçalho IPv6</h3>
+    <pre class="code-block"><code>import struct, ipaddress
+
+def monta_ipv6(classe, fluxo, tam_carga, prox, saltos, origem, destino):
+    primeira = (6 &lt;&lt; 28) | (classe &lt;&lt; 20) | fluxo       # versão (4 bits), classe (8), rótulo de fluxo (20)
+    return (struct.pack("!IHBB", primeira, tam_carga, prox, saltos)
+            + ipaddress.IPv6Address(origem).packed + ipaddress.IPv6Address(destino).packed)
+
+def le_ipv6(dados):
+    primeira, tam_carga, prox, saltos = struct.unpack("!IHBB", dados[:8])
+    return {"versão": primeira >> 28, "classe": (primeira >> 20) &amp; 0xFF, "fluxo": primeira &amp; 0xFFFFF,
+            "carga": tam_carga, "próximo": prox, "saltos": saltos,
+            "origem": str(ipaddress.IPv6Address(dados[8:24])),
+            "destino": str(ipaddress.IPv6Address(dados[24:40]))}
+
+PROXIMO = {0: "Hop-by-Hop", 6: "TCP", 17: "UDP", 43: "Routing", 44: "Fragment", 58: "ICMPv6", 60: "Destination Options"}
+
+cab = monta_ipv6(0, 0x12345, 20, 6, 64, "2001:db8::1", "2001:db8::2")
+print(len(cab), "bytes:", cab.hex(" "))
+campos = le_ipv6(cab)
+print(campos, "->", PROXIMO[campos["próximo"]])</code></pre>
+
+    <h3 class="h6 mt-4">4. Fragmentação na origem (o pseudo-código do livro, corrigido)</h3>
+    <pre class="code-block"><code>def fragmenta(tam_carga, mtu, ident=7):
+    """Fragmentação do IPv6 na origem (o pseudo-código da pág. 225, corrigido).
+    tam_carga: bytes depois do cabeçalho IPv6 de 40 bytes. Devolve os fragmentos."""
+    if 40 + tam_carga &lt;= mtu:
+        return [{"plen": tam_carga, "offset": 0, "M": 0, "dados": tam_carga}]   # cabe sem fragmentar
+    max_dados = 8 * ((mtu - 40 - 8) // 8)           # múltiplo de 8, descontando o cabeçalho de fragmento
+    fragmentos, pos = [], 0
+    while pos &lt; tam_carga:
+        dados = min(max_dados, tam_carga - pos)
+        ultimo = pos + dados >= tam_carga
+        fragmentos.append({"id": ident, "offset": pos // 8, "M": 0 if ultimo else 1,
+                           "dados": dados, "plen": 8 + dados})     # Payload Length conta o cabeçalho de fragmento
+        pos += dados
+    return fragmentos
+
+for f in fragmenta(3000, 1280):
+    print(f, "-> pacote de", 40 + f["plen"], "bytes")</code></pre>
+
+    <h3 class="h6 mt-4">5. EUI-64 e o grupo solicited-node</h3>
+    <pre class="code-block"><code>import ipaddress
+
+def eui64(mac):
+    """Identificador de 64 bits a partir do MAC (RFC 4291, apêndice A): inverte o bit U/L e insere ff:fe no meio."""
+    b = bytes(int(x, 16) for x in mac.split(":"))
+    b = bytes([b[0] ^ 0x02]) + b[1:3] + b"\xff\xfe" + b[3:]
+    return b
+
+def endereco(prefixo, mac):
+    rede = ipaddress.IPv6Network(prefixo)
+    return ipaddress.IPv6Address(rede.network_address.packed[:8] + eui64(mac))
+
+def solicited_node(addr):
+    """Grupo multicast usado pelo Neighbor Solicitation: ff02::1:ff + os 24 bits finais do endereço."""
+    a = ipaddress.IPv6Address(addr).packed
+    return ipaddress.IPv6Address(bytes.fromhex("ff0200000000000000000001ff") + a[13:])
+
+for nome, mac in [("A", "00:23:45:67:89:ab"), ("B", "00:34:56:78:9a:bc")]:   # os hosts do livro (pág. 227)
+    ll = endereco("fe80::/64", mac)
+    glob = endereco("2001:db8:1234:5678::/64", mac)
+    print(f"{nome}: link-local {ll}  global {glob}")
+    print(f"   Neighbor Solicitation para {solicited_node(glob)}")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.14 "The network layer" (pág. 213–236 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 2460 e RFC 8200 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">Internet Protocol, Version 6 (IPv6) Specification</a></li>
+        <li>RFC 3513 e RFC 4291 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc4291" target="_blank" rel="noopener noreferrer">IP Version 6 Addressing Architecture</a>, RFC 4193 — <a href="https://www.rfc-editor.org/rfc/rfc4193" target="_blank" rel="noopener noreferrer">Unique Local IPv6 Unicast Addresses</a> e RFC 1519 — <a href="https://www.rfc-editor.org/rfc/rfc1519" target="_blank" rel="noopener noreferrer">CIDR</a></li>
+        <li>RFC 5095 — <a href="https://www.rfc-editor.org/rfc/rfc5095" target="_blank" rel="noopener noreferrer">Deprecation of Type 0 Routing Headers in IPv6</a></li>
+        <li>RFC 4443 — <a href="https://www.rfc-editor.org/rfc/rfc4443" target="_blank" rel="noopener noreferrer">ICMPv6</a> e RFC 1981 — <a href="https://www.rfc-editor.org/rfc/rfc1981" target="_blank" rel="noopener noreferrer">Path MTU Discovery for IPv6</a></li>
+        <li>RFC 4861 — <a href="https://www.rfc-editor.org/rfc/rfc4861" target="_blank" rel="noopener noreferrer">Neighbor Discovery for IPv6</a> e RFC 4862 — <a href="https://www.rfc-editor.org/rfc/rfc4862" target="_blank" rel="noopener noreferrer">IPv6 Stateless Address Autoconfiguration</a></li>
+        <li>RFC 4941 e RFC 8981 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc8981" target="_blank" rel="noopener noreferrer">Temporary Address Extensions for SLAAC</a> (complemento)</li>
+        <li>RFC 3315 e RFC 8415 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc8415" target="_blank" rel="noopener noreferrer">DHCP for IPv6</a> e RFC 5082 — <a href="https://www.rfc-editor.org/rfc/rfc5082" target="_blank" rel="noopener noreferrer">Generalized TTL Security Mechanism</a></li>
+        <li>RFC 1661 — <a href="https://www.rfc-editor.org/rfc/rfc1661" target="_blank" rel="noopener noreferrer">The Point-to-Point Protocol (PPP)</a></li>
+        <li>IANA — <a href="https://www.iana.org/assignments/ipv6-multicast-addresses/ipv6-multicast-addresses.xhtml" target="_blank" rel="noopener noreferrer">IPv6 Multicast Address Space</a> e <a href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml" target="_blank" rel="noopener noreferrer">Protocol Numbers</a>, citadas pelo livro</li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/IPv6" target="_blank" rel="noopener noreferrer">IPv6</a>, <a href="https://en.wikipedia.org/wiki/Neighbor_Discovery_Protocol" target="_blank" rel="noopener noreferrer">Neighbor Discovery Protocol</a>, <a href="https://en.wikipedia.org/wiki/Path_MTU_Discovery" target="_blank" rel="noopener noreferrer">Path MTU Discovery</a>, <a href="https://en.wikipedia.org/wiki/Organizationally_unique_identifier" target="_blank" rel="noopener noreferrer">Organizationally unique identifier</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-21/index.html" class="text-muted text-decoration-none">← Capítulo 21</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 22</span>
+            <a href="../capitulo-23/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 23 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap22.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

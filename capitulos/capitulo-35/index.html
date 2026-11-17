@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 35 — Prática: HTTP | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.9: conexões no HTTP/1.0, 1.1 e 2, pedidos à mão com o cabeçalho Host, o trace do curl, a negociação de idioma e páginas montadas por vários servidores.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="35" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 35 · Parte 3: Prática · Seção 4.9</span>
+        <h1 class="display-5 mb-3">Prática: HTTP</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você manda pedidos HTTP digitados à mão, descobre por que o cabeçalho Host é obrigatório, lê o que o curl troca com um servidor e calcula quanto cada versão do HTTP gasta em idas e voltas.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#versoes">1. As versões do HTTP</a>
+                    <a class="nav-link" href="#telnet-host">2. Telnet e o cabeçalho Host</a>
+                    <a class="nav-link" href="#curl">3. O trace do curl</a>
+                    <a class="nav-link" href="#idioma">4. Accept-Language</a>
+                    <a class="nav-link" href="#servidores">5. Uma página, vários servidores</a>
+                    <a class="nav-link" href="#exercicios-cap35">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre o HTTP</h2>
+    <p>
+        A seção 4.9 do livro tem exercícios com telnet e curl sobre o HTTP (pág. 314–315 do PDF). Os servidores desta página são simulados, com
+        nomes de exemplo; os comandos para a rede real estão nas resoluções. O formato das atividades está explicado no
+        <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Comparar o uso de conexões no <strong>HTTP/1.0, 1.1 e 2</strong> e montar pedidos à mão, com e sem o cabeçalho <strong>Host</strong>.</li>
+                <li>Ler os cabeçalhos de um pedido e de uma resposta e explicar a <strong>negociação de conteúdo</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o HTTP do <a href="../capitulo-12/index.html">Capítulo 12</a> e o HTTP/2 e os caches do
+                <a href="../capitulo-13/index.html">Capítulo 13</a>. O capítulo cobre a seção 4.9 do livro (pág. 314–315 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Versões -->
+<section id="versoes" class="chapter-section" data-conceito="versoes" data-titulo="As versões do HTTP">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">HTTP/1.0, HTTP/1.1 e HTTP/2</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No HTTP/1.0, cada objeto usa uma conexão TCP nova. O HTTP/1.1 mantém a conexão aberta (persistente) e permite mandar vários pedidos
+        sem esperar as respostas (pipelining). O HTTP/2 multiplexa vários pedidos e respostas numa só conexão. Veja as
+        <a href="../capitulo-12/index.html#persistente">conexões persistentes no Capítulo 12</a> e o <a href="../capitulo-13/index.html#http2">HTTP/2 no Capítulo 13</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        A seção começa assim: uma diferença importante entre o HTTP/1.0, o HTTP/1.1 e o HTTP/2.0 é o uso que fazem das conexões de transporte;
+        responda às três perguntas abaixo para confirmar que entendeu (pág. 314 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        As três perguntas não estão no PDF: eram exercícios interativos do INGInious. Esta atividade as substitui por uma conta de tempos de
+        ida e volta, que não está no livro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="versoes-http"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Com n objetos: o HTTP/1.0, sem paralelismo, gasta 2 RTT por objeto (abertura da conexão e pedido), 2n ao todo. O HTTP/1.1 persistente
+            abre uma vez e faz um pedido por RTT: 1 + n. Com pipelining ou HTTP/2, depois da página (1 + 1), os pedidos das imagens vão todos juntos:
+            mais 1 RTT. Na prática, os navegadores também abrem várias conexões em paralelo no HTTP/1.x, e o TLS soma 1 ou 2 RTT por conexão (veja o
+            <a href="../capitulo-16/index.html">Capítulo 16</a>), o que torna ainda mais caro abrir uma conexão por objeto.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Uma só, para todos os objetos|Uma por objeto|Uma por imagem e outra para a página" data-answer="0" data-explain="O HTTP/2 multiplexa todos os pedidos e respostas de um mesmo servidor numa única conexão." data-hint="Pense em multiplexação.">
+        <p class="fw-semibold mb-2">Quantas conexões TCP o HTTP/2 usa para buscar uma página e as suas imagens num mesmo servidor?</p>
+    </div>
+</section>
+
+<!-- 2. Telnet -->
+<section id="telnet-host" class="chapter-section" data-conceito="telnet-host" data-titulo="Telnet e o cabeçalho Host">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Testando um servidor web à mão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um pedido HTTP/1.x é texto: a linha de pedido (método, caminho e versão), os cabeçalhos e uma linha em branco. Vários sites podem dividir
+        o mesmo endereço IP; o cabeçalho <code>Host:</code> diz qual deles o cliente quer. Veja o <a href="../capitulo-12/index.html#http">HTTP no Capítulo 12</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.9-Q1">Quem administra servidores web quer verificar se eles estão funcionando. Como o HTTP usa TCP na porta 80, o mais
+            simples é abrir uma conexão nessa porta e ver se o servidor a aceita. Mas, como o HTTP/1.x é em ASCII, também é fácil baixar uma página e
+            comparar com a esperada. Use telnet ou ncat para verificar se há um servidor web em www.computer-networking.info. (O pedido mínimo é
+            <code>GET / HTTP/1.0</code> seguido de CRLF e de uma linha em branco.)</li>
+        <li data-livro="4.9-Q3" value="3">O HTTP/1.1, especificado na RFC 2616, obriga o cliente a incluir o cabeçalho Host: em todos os pedidos. O
+            HTTP/1.0 não define esse cabeçalho, mas a maioria das implementações o aceita. Com telnet e curl, baixe a primeira página de
+            https://www.computer-networking.info com e sem o cabeçalho Host:. Explique a diferença (pág. 314 do PDF).</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O próprio livro avisa, em nota, que o site passou a usar HTTPS (porta 443). Um telnet comum não fala TLS: para a porta 443, use
+        <code>openssl s_client -connect www.computer-networking.info:443</code> ou o curl. A RFC 2616 foi substituída pela RFC 9110 e pela
+        RFC 9112, que mantêm a regra do Host.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="telnet-http"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1:</strong> <code>telnet www.computer-networking.info 80</code>, depois <code>GET / HTTP/1.0</code> e uma linha em branco. Hoje o
+                servidor responde com um redirecionamento (301 ou 302) para o https, o que já prova que ele está no ar. Um script de monitoração faria o
+                mesmo pedido e conferiria o código e parte do conteúdo.</li>
+            <li><strong>Q3:</strong> com <code>GET / HTTP/1.1</code> sem Host, um servidor conforme responde <strong>400 Bad Request</strong>. Com HTTP/1.0 sem
+                Host, ele responde com o site padrão daquele endereço, que pode não ser o pedido. Com o Host certo, vem a página do site. O motivo é a
+                hospedagem virtual: vários sites no mesmo endereço IP, e só o Host os distingue.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Porque vários sites podem dividir o mesmo endereço IP|Porque o TCP precisa do nome do servidor|Porque o DNS não funciona sem ele" data-answer="0" data-explain="Com hospedagem virtual, o servidor só sabe qual site o cliente quer pelo cabeçalho Host." data-hint="Um endereço, muitos sites.">
+        <p class="fw-semibold mb-2">Por que o HTTP/1.1 tornou o cabeçalho Host obrigatório?</p>
+    </div>
+</section>
+
+<!-- 3. curl -->
+<section id="curl" class="chapter-section" data-conceito="curl" data-titulo="O trace do curl">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">O que o curl manda e recebe</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Os cabeçalhos de um pedido dizem ao servidor quem pede e o que aceita; os da resposta descrevem o corpo (tipo, tamanho) e como guardá-lo
+        em cache. Veja o <a href="../capitulo-12/index.html#http">HTTP no Capítulo 12</a> e os <a href="../capitulo-13/index.html#caches">caches no Capítulo 13</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.9-Q2">
+        Em vez de telnet na porta 80, use uma ferramenta de linha de comando como o curl. Com a opção <code>--trace-ascii arquivo</code>, ele guarda
+        tudo o que trocou com o servidor. Qual versão do HTTP o seu curl usa? Você consegue explicar os cabeçalhos que o curl põe no pedido? E os da
+        resposta (pág. 314 do PDF)?
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        No PDF, as opções do curl aparecem com um traço só (<code>-trace-ascii</code>, <code>-http2</code>), efeito da tipografia, que junta os dois
+        hífens. No terminal, elas têm dois: <code>--trace-ascii</code>, <code>--http2</code>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="curl-trace"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Rode <code>curl --trace-ascii t.txt http://www.computer-networking.info/</code> e abra t.txt. Para http://, o curl usa HTTP/1.1; para
+            https://, costuma negociar HTTP/2 durante o TLS. No pedido, ele põe Host, User-Agent e Accept. Na resposta, procure a linha de estado,
+            Date, Server, Content-Type, Content-Length (ou Transfer-Encoding: chunked, quando o tamanho não é conhecido de antemão) e os cabeçalhos de
+            cache. Os valores exatos dependem do servidor e do dia.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Transfer-Encoding: chunked|Content-Type|Accept" data-answer="0" data-explain="Com chunked, o corpo vai em pedaços, cada um com o seu tamanho, e um pedaço vazio marca o fim." data-hint="O corpo vai em pedaços.">
+        <p class="fw-semibold mb-2">Sem Content-Length, como o servidor HTTP/1.1 indica onde o corpo termina, mantendo a conexão aberta?</p>
+    </div>
+</section>
+
+<!-- 4. Idioma -->
+<section id="idioma" class="chapter-section" data-conceito="idioma" data-titulo="Accept-Language">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Pedindo a página noutro idioma</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Na negociação de conteúdo, o cliente diz o que prefere (idiomas, tipos, codificações), com pesos q de 0 a 1, e o servidor escolhe a melhor
+        versão que tem. Veja o <a href="../capitulo-12/index.html#http">HTTP no Capítulo 12</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.9-Q4">
+        O cabeçalho Accept-Language permite indicar o idioma preferido. Por exemplo, <code>curl -HAccept-Language:en http://www.google.be</code>
+        pede a página em inglês. O Google dá uma página diferente em francês (fr) e em valão (wa)? E www.uclouvain.be (como a página é grande, use
+        diff para comparar as versões) (pág. 315 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="accept-language"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            O servidor compara o pedido com as versões que tem, em ordem de peso, e devolve Content-Language e Vary: Accept-Language (o Vary avisa os
+            caches de que a resposta depende desse cabeçalho). Sites grandes costumam ter francês; valão, quase nunca, e aí o servidor cai num padrão.
+            Muitos sites hoje escolhem o idioma por cookie, pela URL ou pela localização, e ignoram o Accept-Language. Compare em casa com
+            <code>curl -s -H "Accept-Language: fr" URL &gt; fr.html</code>, o mesmo com wa e <code>diff fr.html wa.html</code>.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Vary: Accept-Language|Content-Length|Cache-Control: no-store" data-answer="0" data-explain="Vary diz aos caches que a mesma URL tem respostas diferentes conforme o Accept-Language do pedido." data-hint="O cabeçalho que fala com os caches sobre variações.">
+        <p class="fw-semibold mb-2">Que cabeçalho da resposta avisa os caches de que a página muda conforme o idioma pedido?</p>
+    </div>
+</section>
+
+<!-- 5. Vários servidores -->
+<section id="servidores" class="chapter-section" data-conceito="servidores" data-titulo="Uma página, vários servidores">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Tamanho, IPv6, HTTP/2 e páginas espalhadas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma página web costuma juntar objetos de vários servidores: imagens num servidor estático, bibliotecas e fontes em CDNs, anúncios e
+        contadores de terceiros. Cada nome precisa de uma consulta DNS e, em geral, de uma conexão. Veja os <a href="../capitulo-13/index.html#caches">caches e CDNs no Capítulo 13</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="5">
+        <li data-livro="4.9-Q5">Compare o tamanho das páginas http://www.yahoo.com e http://www.google.com baixando-as com o curl.</li>
+        <li data-livro="4.9-Q6">A extensão ipvfoo do Chrome mostra se um site usa IPv6 ou IPv4 e quais sites foram contatados para montar uma página.
+            Alguns sites se espalham por dezenas de servidores. Você acha um?</li>
+        <li data-livro="4.9-Q7">Alguns sites são alcançáveis por IPv4 e IPv6, outros só por IPv4. Com as opções -6 e -4 do curl, verifique se
+            www.computer-networking.info é alcançável pelos dois e se o site da sua universidade já tem IPv6.</li>
+        <li data-livro="4.9-Q8">O curl tem opções para forçar uma versão do HTTP: --http0.9, --http1.0, --http1.1 e --http2. Com a última, verifique se o
+            seu site favorito aceita HTTP/2.0 (pág. 315 do PDF).</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro termina a seção com capturas de pacotes de várias versões do HTTP para analisar no Wireshark; elas eram do INGInious e não fazem parte
+        do PDF.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="servidores-pagina"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q5:</strong> <code>curl -sL URL | wc -c</code> conta os bytes da página (o -L segue redirecionamentos). O HTML principal é só o começo:
+                as imagens e os scripts vêm em pedidos separados.</li>
+            <li><strong>Q6:</strong> no exemplo da simulação, a página fala com 6 servidores, 2 deles só por IPv4. Portais de notícias reais passam facilmente de
+                dezenas, por causa de anúncios e rastreadores.</li>
+            <li><strong>Q7:</strong> <code>curl -6 -I URL</code> e <code>curl -4 -I URL</code>: se o -6 falhar com "Could not resolve host" ou sem rota, o site
+                (ou a sua rede) não tem IPv6. <code>dig -t AAAA nome</code> mostra se o nome tem endereço IPv6.</li>
+            <li><strong>Q8:</strong> <code>curl -sI --http2 https://site</code> e veja a primeira linha: "HTTP/2 200" confirma o HTTP/2. Sem TLS, o curl tentaria o
+                HTTP/2 em texto claro, que quase nenhum servidor aceita.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Pelo registro AAAA do nome no DNS|Pela porta 443|Pelo cabeçalho Host" data-answer="0" data-explain="Um nome alcançável por IPv6 tem pelo menos um registro AAAA; sem ele, o cliente só tem endereços IPv4." data-hint="Que tipo de registro guarda um endereço IPv6?">
+        <p class="fw-semibold mb-2">Como saber, pelo DNS, se um site pode ser alcançado por IPv6?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap35" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Escreva o menor pedido HTTP/1.1 válido para a página inicial de www.example.com.
+            <details><summary>Ver solução</summary><p class="mb-0"><code>GET / HTTP/1.1</code>, <code>Host: www.example.com</code> e uma linha em branco, cada linha terminada em CRLF.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Uma página tem 10 objetos e o RTT é de 40 ms. Quanto tempo leva com HTTP/1.0 e com HTTP/1.1 persistente, contando só os RTTs?
+            <details><summary>Ver solução</summary><p class="mb-0">HTTP/1.0: 2 × 10 = 20 RTT = 800 ms. HTTP/1.1 persistente: 1 + 10 = 11 RTT = 440 ms.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Um pedido traz Accept-Language: de, fr;q=0.5. O servidor tem en e fr. Que versão ele devolve?
+            <details><summary>Ver solução</summary><p class="mb-0">fr: não há alemão, e fr é a próxima preferência com peso maior que zero.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Por que o HTTP/2 com TLS 1.3 ainda gasta pelo menos 2 RTT antes da primeira resposta, e o que o TLS 1.3 com 0-RTT muda?
+            <details><summary>Ver solução</summary><p class="mb-0">1 RTT para abrir o TCP e 1 para o handshake TLS 1.3, que já leva o pedido junto da sua conclusão: a resposta chega no fim do segundo RTT. Com 0-RTT, numa conexão retomada, o pedido vai no primeiro voo do TLS, e só sobra o RTT do TCP (veja o Capítulo 16).</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Hospedagem virtual e o cabeçalho Host</h3>
+    <pre class="code-block"><code># Um servidor HTTP com dois sites no mesmo endereço (hospedagem virtual).
+SITES = {"www.example.com": "&lt;html&gt;&lt;title&gt;Example Com&lt;/title&gt;&lt;/html&gt;",
+         "docs.example.org": "&lt;html&gt;&lt;title&gt;Documentação&lt;/title&gt;&lt;/html&gt;"}
+
+def servidor(pedido):
+    linhas = pedido.split("\r\n")
+    metodo, caminho, versao = linhas[0].split()
+    cabecalhos = {}
+    for l in linhas[1:]:
+        if not l:
+            break                                    # linha em branco: fim dos cabeçalhos
+        nome, valor = l.split(":", 1)
+        cabecalhos[nome.strip().lower()] = valor.strip()
+    host = cabecalhos.get("host")
+    if versao == "HTTP/1.1" and host is None:
+        return "HTTP/1.1 400 Bad Request\r\n\r\n"
+    corpo = SITES.get(host, SITES["www.example.com"])   # sem Host conhecido: o site padrão
+    return f"HTTP/1.1 200 OK\r\nContent-Length: {len(corpo.encode())}\r\n\r\n{corpo}"
+
+for pedido in ["GET / HTTP/1.0\r\n\r\n",
+               "GET / HTTP/1.1\r\n\r\n",
+               "GET / HTTP/1.1\r\nHost: docs.example.org\r\n\r\n"]:
+    resposta = servidor(pedido)
+    print(repr(pedido.split("\r\n")[0]), "-&gt;", resposta.split("\r\n")[0], "|", resposta.split("\r\n\r\n")[1])</code></pre>
+    <h3 class="h6 mt-4">2. RTTs em cada versão</h3>
+    <pre class="code-block"><code># Tempos de ida e volta para buscar uma página com n objetos (só RTTs, sem tempo de transmissão).
+def rtts(versao, n, tls=0):
+    """tls: RTTs a mais por conexão (1 no TLS 1.3, 2 no TLS 1.2)."""
+    if versao == "HTTP/1.0":                  # uma conexão por objeto, uma de cada vez
+        return n * (2 + tls)
+    if versao == "HTTP/1.1":                  # conexão persistente, um pedido por vez
+        return 1 + tls + n
+    return 1 + tls + 1 + (1 if n &gt; 1 else 0)  # HTTP/2: a página, depois todas as imagens juntas
+
+RTT = 50
+for n in (1, 5, 20):
+    linha = ", ".join(f"{v}: {rtts(v, n) * RTT} ms" for v in ("HTTP/1.0", "HTTP/1.1", "HTTP/2"))
+    print(f"{n:2} objetos -&gt; {linha}")
+print("com TLS 1.3, 5 objetos:", {v: rtts(v, 5, tls=1) * RTT for v in ("HTTP/1.0", "HTTP/1.1", "HTTP/2")})</code></pre>
+    <h3 class="h6 mt-4">3. Negociação de idioma</h3>
+    <pre class="code-block"><code># Negociação de idioma: Accept-Language com pesos q (RFC 9110, seção 12.5.4).
+def preferencias(cabecalho):
+    prefs = []
+    for item in cabecalho.split(","):
+        partes = [p.strip() for p in item.split(";")]
+        q = 1.0
+        for p in partes[1:]:
+            if p.startswith("q="):
+                q = float(p[2:])
+        if partes[0] and q &gt; 0:
+            prefs.append((q, partes[0].lower()))
+    return [tag for q, tag in sorted(prefs, key=lambda x: -x[0])]
+
+def escolhe(cabecalho, disponiveis, padrao):
+    for tag in preferencias(cabecalho):
+        for d in disponiveis:
+            if tag in (d, "*") or d.split("-")[0] == tag:
+                return d
+    return padrao
+
+DISP = ["en", "fr", "nl"]
+for cab in ["fr", "wa", "wa, fr;q=0.8, en;q=0.9", "de;q=0.5, nl;q=0.4"]:
+    print(f"{cab!r:28} -&gt; {escolhe(cab, DISP, 'en')}")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.9 "The HyperText Transfer Protocol" (pág. 314–315 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 9110 — <a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener noreferrer">HTTP Semantics</a> e RFC 9112 — <a href="https://www.rfc-editor.org/rfc/rfc9112" target="_blank" rel="noopener noreferrer">HTTP/1.1</a> (que substituíram a RFC 2616 citada pelo livro)</li>
+        <li>RFC 9113 — <a href="https://www.rfc-editor.org/rfc/rfc9113" target="_blank" rel="noopener noreferrer">HTTP/2</a> e RFC 4647 — <a href="https://www.rfc-editor.org/rfc/rfc4647" target="_blank" rel="noopener noreferrer">Matching of Language Tags</a></li>
+        <li>Documentação do curl — <a href="https://curl.se/docs/manpage.html" target="_blank" rel="noopener noreferrer">curl.1 the man page</a> (--trace-ascii, -4, -6, --http2)</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-34/index.html" class="text-muted text-decoration-none">← Capítulo 34</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 35</span>
+            <a href="../capitulo-36/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 36 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap35.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

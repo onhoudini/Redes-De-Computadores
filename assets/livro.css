@@ -130,3 +130,35 @@ html[data-theme="dark"] .ttl-router { fill: #22344a; stroke: #6ea8fe; }
 html[data-theme="dark"] .ttl-router-label { fill: #e9ecef; }
 html[data-theme="dark"] .ttl-link { stroke: #adb5bd; }
 html[data-theme="dark"] #ttlArrowHead { fill: #adb5bd; }
+
+/* Tema claro: cores com pelo menos 4,5:1 sobre os fundos do site (#fff, #f8f9fa, #f1f3f5 e os tons claros dos chips). */
+html:not([data-theme="dark"]) {
+    --bs-link-color: #0a58ca;
+    --bs-link-color-rgb: 10, 88, 202;
+    --bs-link-hover-color: #084298;
+    --bs-link-hover-color-rgb: 8, 66, 152;
+    --bs-secondary-color: #565e64;
+    --bs-code-color: #b02a6b;
+}
+html:not([data-theme="dark"]) .btn-outline-secondary { --bs-btn-color: #495057; }
+html:not([data-theme="dark"]) .btn-outline-primary { --bs-btn-color: #0a58ca; }
+html:not([data-theme="dark"]) .btn-outline-danger { --bs-btn-color: #b02a37; }
+html:not([data-theme="dark"]) .btn-outline-success { --bs-btn-color: #146c43; }
+html:not([data-theme="dark"]) .text-success { color: #146c43 !important; }
+html:not([data-theme="dark"]) .text-danger { color: #b02a37 !important; }
+html:not([data-theme="dark"]) .kicker { color: #0a58ca; }
+html:not([data-theme="dark"]) .toc .nav-link:not(.active),
+html:not([data-theme="dark"]) .gami-rotulo,
+html:not([data-theme="dark"]) .gami-toc-resumo,
+html:not([data-theme="dark"]) blockquote.quote { color: #565e64; }
+html:not([data-theme="dark"]) .bit-chip { color: #0a58ca; }
+html:not([data-theme="dark"]) svg text[fill="#0d6efd"] { fill: #0a58ca; }
+html:not([data-theme="dark"]) svg text[fill="#198754"] { fill: #146c43; }
+html:not([data-theme="dark"]) svg text[fill="#dc3545"] { fill: #b02a37; }
+html:not([data-theme="dark"]) svg text[fill="#997404"],
+figure.diagram svg text[fill="#997404"] { fill: #7a5c03; }
+html:not([data-theme="dark"]) svg text[fill="#6c757d"] { fill: #565e64; }
+html:not([data-theme="dark"]) .bit-mask { color: #0a58ca; }
+html:not([data-theme="dark"]) .bit-free,
+html:not([data-theme="dark"]) .bit-dot { color: #565e64; }
+html:not([data-theme="dark"]) .ttl-router-label { fill: #0a58ca; }

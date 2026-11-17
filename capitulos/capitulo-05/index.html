@@ -41,12 +41,49 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
                     <ul class="dropdown-menu dropdown-menu-lg-end">
-                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. DNS e correio eletrônico</a></li>
-                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. A web e as chamadas remotas</a></li>
-                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Protocolos seguros</a></li>
-                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. UDP e TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
                     </ul>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
                 <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
             </ul>
         </div>
@@ -160,24 +197,10 @@
         esse campo não precisa ser longo. Os <strong>números de porta</strong> têm o papel equivalente na
         camada de transporte: permitem multiplexar os dados de vários processos de aplicação.
     </p>
-    <figure class="diagram">
-        <svg viewBox="0 0 640 190" class="sim-svg w-100" style="max-height:220px" role="img" aria-label="Um pacote chega a um host; o campo de protocolo escolhe o protocolo de transporte e a porta escolhe a aplicação.">
-            <title>Dois níveis de multiplexação: o campo de protocolo do pacote escolhe entre o transporte confiável e o sem conexão; a porta do segmento escolhe a aplicação.</title>
-            <g font-size="12" text-anchor="middle">
-                <rect class="camada" x="230" y="140" width="180" height="34" rx="5"/><text x="320" y="162">Rede (endereço do host)</text>
-                <rect class="camada" x="90" y="80" width="200" height="34" rx="5"/><text x="190" y="102">Transporte confiável</text>
-                <rect class="camada" x="350" y="80" width="200" height="34" rx="5"/><text x="450" y="102">Transporte sem conexão</text>
-                <line class="linha" x1="300" y1="140" x2="200" y2="114"/><line class="linha" x1="340" y1="140" x2="440" y2="114"/>
-                <text x="320" y="128" font-size="11">campo de protocolo</text>
-                <rect class="no" x="40" y="16" width="110" height="30" rx="5"/><text x="95" y="36">aplicação, porta 80</text>
-                <rect class="no" x="170" y="16" width="120" height="30" rx="5"/><text x="230" y="36">aplicação, porta 25</text>
-                <rect class="no" x="390" y="16" width="120" height="30" rx="5"/><text x="450" y="36">aplicação, porta 53</text>
-                <line class="linha" x1="170" y1="80" x2="95" y2="46"/><line class="linha" x1="210" y1="80" x2="230" y2="46"/><line class="linha" x1="450" y1="80" x2="450" y2="46"/>
-                <text x="590" y="36" font-size="11">portas</text>
-            </g>
-        </svg>
-        <figcaption>Dois níveis de multiplexação dentro de um host. Ilustração do texto do livro (pág. 76); os números de porta são exemplos.</figcaption>
-    </figure>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="demultiplexa"></div>
+    <p class="small text-muted">Dois níveis de multiplexação dentro de um host. Ilustração do texto do livro (pág. 76); os números de porta são exemplos.</p>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz" data-options="Porque só existem poucos protocolos de transporte|Porque o endereço do host já identifica o protocolo|Porque o protocolo é sempre o mesmo em toda a Internet" data-answer="0" data-explain="Com poucos protocolos de transporte para distinguir, bastam poucos bits." data-hint="O livro justifica o tamanho do campo pela quantidade de valores que ele precisa distinguir.">
@@ -218,6 +241,10 @@
         ou em registradores. Do mesmo jeito, como os nomes estão num nível acima dos endereços, os endereços
         viram meros identificadores técnicos, que podem mudar à vontade. <strong>Só os nomes são estáveis.</strong>
     </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="indirecao"></div>
+    <p class="small text-muted">Ilustra o nível de indireção descrito no livro (pág. 76 do PDF). Os endereços são do bloco reservado para documentação (RFC 5737).</p>
 
     <h3 class="h5 mt-4 mb-3">4. Prática</h3>
     <div class="demo-box mini-quiz" data-options="O endereço, porque é o que a rede usa|O nome, porque o endereço pode mudar sem que os usuários percebam|Os dois mudam juntos sempre" data-answer="1" data-explain="Os endereços viram identificadores técnicos que podem mudar; só os nomes são estáveis." data-hint="Pense na analogia com as variáveis de um programa.">

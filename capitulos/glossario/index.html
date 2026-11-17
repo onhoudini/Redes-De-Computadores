@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Glossário | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: o glossário do livro (seção 5.1), traduzido, com links para os capítulos onde cada termo é explicado.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Apêndice · Seção 5.1</span>
+        <h1 class="display-5 mb-3">Glossário</h1>
+        <p class="lead mb-0">
+            Os termos do glossário do livro, traduzidos, em ordem alfabética, com o capítulo do site onde cada um é explicado.
+        </p>
+    </div>
+</header>
+
+<div class="container">
+<div class="row justify-content-center">
+<div class="col-lg-9">
+
+<section class="chapter-section">
+    <p>
+        A seção 5.1 do livro tem 101 verbetes (pág. 393–398 do PDF). Três pares repetem o mesmo termo ("ftp" e "FTP", "VNC" e "vnc", "MIME" e "MIME document") e
+        foram reunidos, o que dá 98 verbetes aqui. Os termos ficam em inglês, como no livro, com a tradução entre parênteses quando ela é usada nos capítulos.
+        As correções e as atualizações aparecem em notas.
+    </p>
+    <div class="row g-2 align-items-end mb-2">
+        <div class="col-sm-8">
+            <label for="busca-glossario" class="form-label small mb-1">Buscar um termo ou uma palavra da definição</label>
+            <input type="search" id="busca-glossario" class="form-control" autocomplete="off" placeholder="por exemplo: roteamento">
+        </div>
+        <div class="col-sm-4">
+            <p class="small text-muted mb-1" id="contagem-glossario" aria-live="polite"></p>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-1 mb-3" role="group" aria-label="Filtrar por letra">
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="" aria-pressed="true">Todas</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="A" aria-pressed="false">A</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="B" aria-pressed="false">B</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="C" aria-pressed="false">C</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="D" aria-pressed="false">D</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="E" aria-pressed="false">E</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="F" aria-pressed="false">F</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="H" aria-pressed="false">H</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="I" aria-pressed="false">I</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="L" aria-pressed="false">L</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="M" aria-pressed="false">M</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="N" aria-pressed="false">N</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="O" aria-pressed="false">O</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="P" aria-pressed="false">P</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="R" aria-pressed="false">R</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="S" aria-pressed="false">S</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="T" aria-pressed="false">T</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="U" aria-pressed="false">U</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="V" aria-pressed="false">V</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="W" aria-pressed="false">W</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm letra" data-letra="X" aria-pressed="false">X</button>
+    </div>
+
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-A">A</h2>
+    <div class="verbete mb-3" id="g-address" data-letra="A">
+        <h3 class="h6 mb-1">address (endereço)</h3>
+        <p class="mb-1">Sequência de bits que identifica uma interface de rede na camada de rede ou na de enlace. A maioria dos endereços tem tamanho fixo: 32 bits no IPv4, 128 no IPv6, 48 no Ethernet e em outras redes locais parecidas.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a> <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-aimd" data-letra="A">
+        <h3 class="h6 mb-1">AIMD</h3>
+        <p class="mb-1"><em>Additive Increase, Multiplicative Decrease</em> (aumento aditivo, diminuição multiplicativa). Algoritmo de adaptação de taxa usado, entre outros, pelo TCP: o host aumenta a taxa de transmissão de forma aditiva enquanto a rede não está congestionada e a reduz de forma multiplicativa quando detecta congestionamento.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-06/index.html" class="badge text-bg-light border text-decoration-none">Cap. 6</a> <a href="../capitulo-21/index.html" class="badge text-bg-light border text-decoration-none">Cap. 21</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-anycast" data-letra="A">
+        <h3 class="h6 mb-1">anycast</h3>
+        <p class="mb-1">Modo de transmissão em que uma informação vai de uma origem para um receptor qualquer de um grupo definido.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-api" data-letra="A">
+        <h3 class="h6 mb-1">API</h3>
+        <p class="mb-1"><em>Application Programming Interface</em>, interface de programação de aplicações.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-29/index.html" class="badge text-bg-light border text-decoration-none">Cap. 29</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-arp" data-letra="A">
+        <h3 class="h6 mb-1">ARP</h3>
+        <p class="mb-1">O <em>Address Resolution Protocol</em> é usado por equipamentos IPv4 para descobrir o endereço de camada de enlace que corresponde a um endereço IPv4 da rede local. Está definido na RFC 826. No IPv6, o papel é do Neighbor Discovery.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-26/index.html" class="badge text-bg-light border text-decoration-none">Cap. 26</a> <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-arpanet" data-letra="A">
+        <h3 class="h6 mb-1">ARPANET</h3>
+        <p class="mb-1">A rede da <em>Advanced Research Project Agency</em> (ARPA), construída nos Estados Unidos por cientistas da computação com recursos da ARPA, do Departamento de Defesa americano. É considerada a avó da Internet atual.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ascii" data-letra="A">
+        <h3 class="h6 mb-1">ASCII</h3>
+        <p class="mb-1">O <em>American Standard Code for Information Interchange</em> é um esquema de codificação que dá uma representação binária a cada caractere. A tabela ASCII tem caracteres imprimíveis e de controle, em 7 bits, e só os necessários para escrever em inglês. Outros conjuntos, como o Unicode, vieram depois para cobrir todas as línguas escritas.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-03/index.html" class="badge text-bg-light border text-decoration-none">Cap. 3</a> <a href="../capitulo-11/index.html" class="badge text-bg-light border text-decoration-none">Cap. 11</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-asn-1" data-letra="A">
+        <h3 class="h6 mb-1">ASN.1</h3>
+        <p class="mb-1">A <em>Abstract Syntax Notation One</em>, criada pela ISO e pela ITU-T, é uma notação padronizada e flexível para descrever estruturas de dados a representar, codificar, transmitir e decodificar entre aplicações. Foi pensada para a camada de apresentação do modelo OSI, mas hoje aparece em outros protocolos, como o SNMP.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-07/index.html" class="badge text-bg-light border text-decoration-none">Cap. 7</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-atm" data-letra="A">
+        <h3 class="h6 mb-1">ATM</h3>
+        <p class="mb-1"><em>Asynchronous Transfer Mode</em>, tecnologia de rede de circuitos virtuais com células de tamanho fixo.</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-B">B</h2>
+    <div class="verbete mb-3" id="g-bgp" data-letra="B">
+        <h3 class="h6 mb-1">BGP</h3>
+        <p class="mb-1">O <em>Border Gateway Protocol</em> é o protocolo de roteamento interdomínio usado na Internet.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-25/index.html" class="badge text-bg-light border text-decoration-none">Cap. 25</a> <a href="../capitulo-41/index.html" class="badge text-bg-light border text-decoration-none">Cap. 41</a> <a href="../capitulo-42/index.html" class="badge text-bg-light border text-decoration-none">Cap. 42</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-bnf" data-letra="B">
+        <h3 class="h6 mb-1">BNF</h3>
+        <p class="mb-1">A <em>Backus-Naur Form</em> é uma forma de descrever uma linguagem com regras sintáticas e léxicas. É muito usada para definir linguagens de programação, mas também as mensagens trocadas por aplicações em rede. A RFC 5234 explica como escrever uma BNF para especificar um protocolo da Internet.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-broadcast" data-letra="B">
+        <h3 class="h6 mb-1">broadcast</h3>
+        <p class="mb-1">Modo de transmissão em que a mesma informação é enviada a todos os nós da rede.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-26/index.html" class="badge text-bg-light border text-decoration-none">Cap. 26</a> <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-C">C</h2>
+    <div class="verbete mb-3" id="g-cidr" data-letra="C">
+        <h3 class="h6 mb-1">CIDR</h3>
+        <p class="mb-1"><em>Classless Inter-Domain Routing</em>, a arquitetura atual de alocação de endereços IPv4, definida nas RFCs 1518 e 4632.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-D">D</h2>
+    <div class="verbete mb-3" id="g-dial-up-line" data-letra="D">
+        <h3 class="h6 mb-1">dial-up line (linha discada)</h3>
+        <p class="mb-1">Sinônimo de linha telefônica comum, que pode discar para qualquer número.</p>
+    </div>
+    <div class="verbete mb-3" id="g-dns" data-letra="D">
+        <h3 class="h6 mb-1">DNS</h3>
+        <p class="mb-1">O <em>Domain Name System</em> é uma base de dados distribuída que os hosts consultam para traduzir nomes em endereços IP. Está definido na RFC 1035 (e na RFC 1034).</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-10/index.html" class="badge text-bg-light border text-decoration-none">Cap. 10</a> <a href="../capitulo-17/index.html" class="badge text-bg-light border text-decoration-none">Cap. 17</a> <a href="../capitulo-33/index.html" class="badge text-bg-light border text-decoration-none">Cap. 33</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-E">E</h2>
+    <div class="verbete mb-3" id="g-ebgp" data-letra="E">
+        <h3 class="h6 mb-1">eBGP</h3>
+        <p class="mb-1">Sessão BGP entre dois roteadores diretamente ligados que pertencem a sistemas autônomos diferentes. Também chamada de sessão BGP externa.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-25/index.html" class="badge text-bg-light border text-decoration-none">Cap. 25</a> <a href="../capitulo-42/index.html" class="badge text-bg-light border text-decoration-none">Cap. 42</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-egp" data-letra="E">
+        <h3 class="h6 mb-1">EGP</h3>
+        <p class="mb-1"><em>Exterior Gateway Protocol</em>. Sinônimo de protocolo de roteamento interdomínio.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-23/index.html" class="badge text-bg-light border text-decoration-none">Cap. 23</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-eigrp" data-letra="E">
+        <h3 class="h6 mb-1">EIGRP</h3>
+        <p class="mb-1">O <em>Enhanced Interior Gateway Routing Protocol</em> é um protocolo de roteamento intradomínio, de origem proprietária, comum em redes de empresas. Usa o algoritmo DUAL.</p>
+    </div>
+    <div class="verbete mb-3" id="g-ethernet" data-letra="E">
+        <h3 class="h6 mb-1">Ethernet</h3>
+        <p class="mb-1">A tecnologia de rede local mais usada.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-26/index.html" class="badge text-bg-light border text-decoration-none">Cap. 26</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-F">F</h2>
+    <div class="verbete mb-3" id="g-file-transfer" data-letra="F">
+        <h3 class="h6 mb-1">file transfer (transferência de arquivos)</h3>
+        <p class="mb-1">Serviço que permite enviar ou receber um arquivo de um servidor distante pela rede. O FTP foi um serviço popular; hoje foi substituído pelo HTTP/HTTPS ou por protocolos mais seguros, como o SFTP (<em>SSH File Transfer Protocol</em>).</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-12/index.html" class="badge text-bg-light border text-decoration-none">Cap. 12</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-frame" data-letra="F">
+        <h3 class="h6 mb-1">frame (quadro)</h3>
+        <p class="mb-1">A unidade de transferência de informação na camada de enlace.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-01/index.html" class="badge text-bg-light border text-decoration-none">Cap. 1</a> <a href="../capitulo-26/index.html" class="badge text-bg-light border text-decoration-none">Cap. 26</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-frame-relay" data-letra="F">
+        <h3 class="h6 mb-1">Frame Relay</h3>
+        <p class="mb-1">Tecnologia de rede de longa distância com circuitos virtuais, oferecida por operadoras de telecomunicações.</p>
+    </div>
+    <div class="verbete mb-3" id="g-ftp" data-letra="F">
+        <h3 class="h6 mb-1">FTP</h3>
+        <p class="mb-1">O <em>File Transfer Protocol</em>, definido na RFC 959, foi o protocolo padrão de fato para trocar arquivos na Internet até a adoção ampla do HTTP.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-12/index.html" class="badge text-bg-light border text-decoration-none">Cap. 12</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro tem dois verbetes, "ftp" e "FTP", reunidos aqui.</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-H">H</h2>
+    <div class="verbete mb-3" id="g-hosts-txt" data-letra="H">
+        <h3 class="h6 mb-1">hosts.txt</h3>
+        <p class="mb-1">O arquivo original com a lista de todos os hosts da Internet. Foi abandonado, mas os sistemas Unix ainda mantêm um <code>/etc/hosts</code> local com pares de nomes e endereços IP; o formato está em <a href="https://man7.org/linux/man-pages/man5/hosts.5.html" target="_blank" rel="noopener noreferrer">hosts(5)</a>.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-html" data-letra="H">
+        <h3 class="h6 mb-1">HTML</h3>
+        <p class="mb-1">A <em>HyperText Markup Language</em> especifica a estrutura e a sintaxe dos documentos trocados na web. É mantida pelo W3C (hoje, junto com o WHATWG).</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-12/index.html" class="badge text-bg-light border text-decoration-none">Cap. 12</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-http" data-letra="H">
+        <h3 class="h6 mb-1">HTTP</h3>
+        <p class="mb-1">O <em>HyperText Transfer Protocol</em>, o protocolo da web.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-12/index.html" class="badge text-bg-light border text-decoration-none">Cap. 12</a> <a href="../capitulo-13/index.html" class="badge text-bg-light border text-decoration-none">Cap. 13</a> <a href="../capitulo-35/index.html" class="badge text-bg-light border text-decoration-none">Cap. 35</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro escreve "HyperText Transport Protocol" e cita a RFC 2616. O nome certo é Transfer, e a RFC 2616 foi substituída: hoje o HTTP é definido nas RFCs 9110 (semântica), 9111 (caches), 9112 (HTTP/1.1), 9113 (HTTP/2) e 9114 (HTTP/3).</p>
+    </div>
+    <div class="verbete mb-3" id="g-hub" data-letra="H">
+        <h3 class="h6 mb-1">hub</h3>
+        <p class="mb-1">Um relé que opera na camada física.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-26/index.html" class="badge text-bg-light border text-decoration-none">Cap. 26</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-I">I</h2>
+    <div class="verbete mb-3" id="g-iana" data-letra="I">
+        <h3 class="h6 mb-1">IANA</h3>
+        <p class="mb-1">A <em>Internet Assigned Numbers Authority</em> coordena a raiz do DNS, o endereçamento IP e outros recursos dos protocolos da Internet.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a> <a href="../capitulo-34/index.html" class="badge text-bg-light border text-decoration-none">Cap. 34</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ibgp" data-letra="I">
+        <h3 class="h6 mb-1">iBGP</h3>
+        <p class="mb-1">Sessão BGP entre dois roteadores do mesmo sistema autônomo. Também chamada de sessão BGP interna.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-25/index.html" class="badge text-bg-light border text-decoration-none">Cap. 25</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-icann" data-letra="I">
+        <h3 class="h6 mb-1">ICANN</h3>
+        <p class="mb-1">A <em>Internet Corporation for Assigned Names and Numbers</em> coordena a alocação de nomes de domínio, endereços IP, números de AS e parâmetros de protocolos, além da operação e da evolução dos servidores raiz do DNS.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ietf" data-letra="I">
+        <h3 class="h6 mb-1">IETF</h3>
+        <p class="mb-1">A <em>Internet Engineering Task Force</em> é uma organização sem fins lucrativos que desenvolve os padrões dos protocolos da Internet, principalmente das camadas de transporte e de rede, mas também de vários protocolos de aplicação. O trabalho é feito em grupos de trabalho, quase todo por e-mail, com três reuniões por ano, e qualquer pessoa pode participar. Veja <a href="https://www.ietf.org" target="_blank" rel="noopener noreferrer">ietf.org</a>.</p>
+    </div>
+    <div class="verbete mb-3" id="g-igp" data-letra="I">
+        <h3 class="h6 mb-1">IGP</h3>
+        <p class="mb-1"><em>Interior Gateway Protocol</em>. Sinônimo de protocolo de roteamento intradomínio.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-23/index.html" class="badge text-bg-light border text-decoration-none">Cap. 23</a> <a href="../capitulo-24/index.html" class="badge text-bg-light border text-decoration-none">Cap. 24</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-igrp" data-letra="I">
+        <h3 class="h6 mb-1">IGRP</h3>
+        <p class="mb-1">O <em>Interior Gateway Routing Protocol</em> é um protocolo de roteamento intradomínio proprietário, de vetor de distância, com várias métricas por rota. Foi substituído pelo EIGRP.</p>
+    </div>
+    <div class="verbete mb-3" id="g-imap" data-letra="I">
+        <h3 class="h6 mb-1">IMAP</h3>
+        <p class="mb-1">O <em>Internet Message Access Protocol</em> é um protocolo de aplicação que permite a um cliente acessar e manipular os e-mails guardados num servidor. Com o IMAP, as mensagens ficam no servidor, sem precisar ser baixadas.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-11/index.html" class="badge text-bg-light border text-decoration-none">Cap. 11</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro cita a RFC 3501 (IMAP4rev1); a versão atual é a RFC 9051 (IMAP4rev2).</p>
+    </div>
+    <div class="verbete mb-3" id="g-internet" data-letra="I">
+        <h3 class="h6 mb-1">Internet</h3>
+        <p class="mb-1">Com inicial maiúscula, a internet pública: uma rede formada por redes diferentes que rodam IPv4 ou IPv6.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-02/index.html" class="badge text-bg-light border text-decoration-none">Cap. 2</a> <a href="../capitulo-23/index.html" class="badge text-bg-light border text-decoration-none">Cap. 23</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-internet" data-letra="I">
+        <h3 class="h6 mb-1">internet</h3>
+        <p class="mb-1">Uma inter-rede, isto é, uma rede formada por redes diferentes. A Internet, com I maiúsculo, é a rede global que usamos hoje, mas outras inter-redes existiram no passado.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-02/index.html" class="badge text-bg-light border text-decoration-none">Cap. 2</a> <a href="../capitulo-23/index.html" class="badge text-bg-light border text-decoration-none">Cap. 23</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-inverse-query" data-letra="I">
+        <h3 class="h6 mb-1">inverse query (consulta reversa)</h3>
+        <p class="mb-1">Para servidores e resolvedores DNS, a consulta pelo nome de domínio que corresponde a um endereço IP.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-10/index.html" class="badge text-bg-light border text-decoration-none">Cap. 10</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O que o livro descreve é a resolução reversa: uma consulta comum por um registro PTR (em ip6.arpa ou in-addr.arpa). No DNS, "inverse query" (IQUERY) era outro mecanismo, abandonado pela RFC 3425.</p>
+    </div>
+    <div class="verbete mb-3" id="g-ip" data-letra="I">
+        <h3 class="h6 mb-1">IP</h3>
+        <p class="mb-1"><em>Internet Protocol</em>, o nome genérico do protocolo da camada de rede na pilha TCP/IP. O IPv4 é o mais usado, e o IPv6 está sendo implantado no mundo todo.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ipv4" data-letra="I">
+        <h3 class="h6 mb-1">IPv4</h3>
+        <p class="mb-1">A versão 4 do Internet Protocol, o protocolo de rede sem conexão usado na maior parte da Internet. Os endereços IPv4 têm 32 bits.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ipv6" data-letra="I">
+        <h3 class="h6 mb-1">IPv6</h3>
+        <p class="mb-1">A versão 6 do Internet Protocol, o protocolo de rede sem conexão que deve substituir o IPv4. Os endereços IPv6 têm 128 bits.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a> <a href="../capitulo-40/index.html" class="badge text-bg-light border text-decoration-none">Cap. 40</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-is-is" data-letra="I">
+        <h3 class="h6 mb-1">IS-IS</h3>
+        <p class="mb-1"><em>Intermediate System to Intermediate System</em>. Protocolo de roteamento intradomínio de estado de enlace, criado para o protocolo CLNP da ISO e estendido para o IPv4 e o IPv6. É comum em redes de provedores. Está definido na norma ISO 10589.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-23/index.html" class="badge text-bg-light border text-decoration-none">Cap. 23</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-isn" data-letra="I">
+        <h3 class="h6 mb-1">ISN</h3>
+        <p class="mb-1">O <em>Initial Sequence Number</em> de uma conexão TCP é o número de sequência escolhido pelo cliente (ou pelo servidor) e posto no segmento SYN (ou SYN+ACK) durante a abertura da conexão.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a> <a href="../capitulo-38/index.html" class="badge text-bg-light border text-decoration-none">Cap. 38</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-iso" data-letra="I">
+        <h3 class="h6 mb-1">ISO</h3>
+        <p class="mb-1">A <em>International Organization for Standardization</em>, sediada em Genebra, desenvolve normas sobre os mais variados assuntos. Representantes dos países votam para aprovar ou rejeitar as normas, e a maior parte do trabalho é feita em grupos de especialistas. Veja <a href="https://www.iso.org" target="_blank" rel="noopener noreferrer">iso.org</a>.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-07/index.html" class="badge text-bg-light border text-decoration-none">Cap. 7</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro diz que a ISO é uma agência das Nações Unidas. Não é: a ISO é uma organização não governamental independente, formada pelos órgãos nacionais de normalização. A agência da ONU é a ITU.</p>
+    </div>
+    <div class="verbete mb-3" id="g-iso-3166" data-letra="I">
+        <h3 class="h6 mb-1">ISO-3166</h3>
+        <p class="mb-1">Norma ISO que define códigos para os países e as suas subdivisões, como os de duas letras usados nos ccTLDs.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-isp" data-letra="I">
+        <h3 class="h6 mb-1">ISP</h3>
+        <p class="mb-1"><em>Internet Service Provider</em>, provedor de acesso: uma rede que oferece acesso à Internet aos seus clientes.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-23/index.html" class="badge text-bg-light border text-decoration-none">Cap. 23</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-itu" data-letra="I">
+        <h3 class="h6 mb-1">ITU</h3>
+        <p class="mb-1">A <em>International Telecommunication Union</em> é a agência das Nações Unidas que desenvolve normas para as telecomunicações. Foi criada para padronizar o sistema telefônico e depois passou a cuidar também das redes de dados. O trabalho é feito sobretudo por especialistas de operadoras e fabricantes. Veja <a href="https://www.itu.int" target="_blank" rel="noopener noreferrer">itu.int</a>.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-07/index.html" class="badge text-bg-light border text-decoration-none">Cap. 7</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ixp" data-letra="I">
+        <h3 class="h6 mb-1">IXP</h3>
+        <p class="mb-1"><em>Internet eXchange Point</em>, ponto de troca de tráfego: um lugar onde roteadores de domínios diferentes se ligam à mesma rede local para estabelecer sessões de peering e trocar pacotes. Uma lista parcial está na <a href="https://en.wikipedia.org/wiki/List_of_Internet_exchange_points_by_size" target="_blank" rel="noopener noreferrer">Wikipedia</a>.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-25/index.html" class="badge text-bg-light border text-decoration-none">Cap. 25</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-L">L</h2>
+    <div class="verbete mb-3" id="g-lan" data-letra="L">
+        <h3 class="h6 mb-1">LAN</h3>
+        <p class="mb-1"><em>Local Area Network</em>, rede local.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-26/index.html" class="badge text-bg-light border text-decoration-none">Cap. 26</a> <a href="../capitulo-43/index.html" class="badge text-bg-light border text-decoration-none">Cap. 43</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-leased-line" data-letra="L">
+        <h3 class="h6 mb-1">leased line (linha dedicada)</h3>
+        <p class="mb-1">Linha telefônica disponível permanentemente entre duas pontas.</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-M">M</h2>
+    <div class="verbete mb-3" id="g-man" data-letra="M">
+        <h3 class="h6 mb-1">MAN</h3>
+        <p class="mb-1"><em>Metropolitan Area Network</em>, rede metropolitana.</p>
+    </div>
+    <div class="verbete mb-3" id="g-mime" data-letra="M">
+        <h3 class="h6 mb-1">MIME</h3>
+        <p class="mb-1">As <em>Multipurpose Internet Mail Extensions</em>, definidas na RFC 2045, são extensões ao formato das mensagens de e-mail que permitem usar caracteres fora do ASCII. Uma mensagem MIME pode ter várias partes, cada uma num formato. Um documento MIME é um documento codificado nesse formato.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-11/index.html" class="badge text-bg-light border text-decoration-none">Cap. 11</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro tem dois verbetes, "MIME" e "MIME document", reunidos aqui.</p>
+    </div>
+    <div class="verbete mb-3" id="g-minicomputer" data-letra="M">
+        <h3 class="h6 mb-1">minicomputer (minicomputador)</h3>
+        <p class="mb-1">Sistema multiusuário típico das décadas de 1960 e 1970, que atendia departamentos. Veja o <a href="https://en.wikipedia.org/wiki/Minicomputer" target="_blank" rel="noopener noreferrer">artigo da Wikipedia</a>.</p>
+    </div>
+    <div class="verbete mb-3" id="g-modem" data-letra="M">
+        <h3 class="h6 mb-1">modem</h3>
+        <p class="mb-1">Um modem (modulador-demodulador) codifica (ou decodifica) informação digital modulando (ou demodulando) um sinal analógico. É usado para transmitir dados por linhas telefônicas e por rádio. Veja a <a href="https://en.wikipedia.org/wiki/Modem" target="_blank" rel="noopener noreferrer">Wikipedia</a>.</p>
+    </div>
+    <div class="verbete mb-3" id="g-mss" data-letra="M">
+        <h3 class="h6 mb-1">MSS</h3>
+        <p class="mb-1">Opção do TCP, mandada nos segmentos SYN, que indica o <em>Maximum Segment Size</em>, o maior segmento que a entidade TCP consegue receber.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a> <a href="../capitulo-21/index.html" class="badge text-bg-light border text-decoration-none">Cap. 21</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-multicast" data-letra="M">
+        <h3 class="h6 mb-1">multicast</h3>
+        <p class="mb-1">Modo de transmissão em que uma informação é enviada de forma eficiente a todos os receptores de um grupo.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-N">N</h2>
+    <div class="verbete mb-3" id="g-nameserver" data-letra="N">
+        <h3 class="h6 mb-1">nameserver (servidor de nomes)</h3>
+        <p class="mb-1">Servidor que implementa o protocolo DNS e responde a consultas sobre os nomes do seu próprio domínio.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-10/index.html" class="badge text-bg-light border text-decoration-none">Cap. 10</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-nat" data-letra="N">
+        <h3 class="h6 mb-1">NAT</h3>
+        <p class="mb-1">Um <em>Network Address Translator</em> é um middlebox que traduz os endereços dos pacotes IP.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-nbma" data-letra="N">
+        <h3 class="h6 mb-1">NBMA</h3>
+        <p class="mb-1">Uma rede <em>Non-Broadcast Multiple Access</em> liga vários hosts e roteadores, mas não oferece um jeito eficiente de mandar um quadro a todos eles. As sub-redes ATM são um exemplo.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro expande a sigla como "Non Broadcast Mode Multiple Access"; o nome usual é Non-Broadcast Multiple Access.</p>
+    </div>
+    <div class="verbete mb-3" id="g-network-byte-order" data-letra="N">
+        <h3 class="h6 mb-1">network-byte order (ordem de bytes da rede)</h3>
+        <p class="mb-1">Os protocolos da Internet transportam sequências de bytes, o que basta para caracteres ASCII. A ordem de bytes da rede é a codificação big-endian dos inteiros de 16 e de 32 bits. Veja <a href="https://en.wikipedia.org/wiki/Endianness" target="_blank" rel="noopener noreferrer">Endianness</a>.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-29/index.html" class="badge text-bg-light border text-decoration-none">Cap. 29</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-nfs" data-letra="N">
+        <h3 class="h6 mb-1">NFS</h3>
+        <p class="mb-1">O <em>Network File System</em>, definido na RFC 1094 (e em versões posteriores, como a RFC 7530).</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-14/index.html" class="badge text-bg-light border text-decoration-none">Cap. 14</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ntp" data-letra="N">
+        <h3 class="h6 mb-1">NTP</h3>
+        <p class="mb-1">O <em>Network Time Protocol</em>, que sincroniza os relógios pela rede.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-19/index.html" class="badge text-bg-light border text-decoration-none">Cap. 19</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro cita a RFC 1305 (NTPv3); a versão atual é a RFC 5905 (NTPv4).</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-O">O</h2>
+    <div class="verbete mb-3" id="g-osi" data-letra="O">
+        <h3 class="h6 mb-1">OSI</h3>
+        <p class="mb-1"><em>Open Systems Interconnection</em>. Conjunto de normas de rede desenvolvidas pela ISO, entre elas o modelo de referência OSI, de 7 camadas.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-07/index.html" class="badge text-bg-light border text-decoration-none">Cap. 7</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ospf" data-letra="O">
+        <h3 class="h6 mb-1">OSPF</h3>
+        <p class="mb-1"><em>Open Shortest Path First</em>. Protocolo de roteamento intradomínio de estado de enlace, comum em redes de empresas e de provedores. Está definido nas RFCs 2328 (IPv4) e 5340 (IPv6).</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-24/index.html" class="badge text-bg-light border text-decoration-none">Cap. 24</a> <a href="../capitulo-42/index.html" class="badge text-bg-light border text-decoration-none">Cap. 42</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-P">P</h2>
+    <div class="verbete mb-3" id="g-packet" data-letra="P">
+        <h3 class="h6 mb-1">packet (pacote)</h3>
+        <p class="mb-1">A unidade de transferência de informação na camada de rede.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-02/index.html" class="badge text-bg-light border text-decoration-none">Cap. 2</a> <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-pbl" data-letra="P">
+        <h3 class="h6 mb-1">PBL</h3>
+        <p class="mb-1"><em>Problem-based learning</em>, aprendizagem baseada em problemas: uma forma de ensinar a partir de problemas.</p>
+    </div>
+    <div class="verbete mb-3" id="g-pop" data-letra="P">
+        <h3 class="h6 mb-1">POP</h3>
+        <p class="mb-1">O <em>Post Office Protocol</em>, definido na RFC 1939, é um protocolo de aplicação que permite a um cliente baixar as mensagens de e-mail guardadas num servidor.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-11/index.html" class="badge text-bg-light border text-decoration-none">Cap. 11</a> <a href="../capitulo-34/index.html" class="badge text-bg-light border text-decoration-none">Cap. 34</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-R">R</h2>
+    <div class="verbete mb-3" id="g-remote-login" data-letra="R">
+        <h3 class="h6 mb-1">remote login (login remoto)</h3>
+        <p class="mb-1">Serviço que permite a um usuário entrar num servidor distante pela rede. O telnet (RFC 854) e o rlogin do BSD (RFC 1282) foram populares, mas foram abandonados por falta de segurança e substituídos pelo ssh.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-15/index.html" class="badge text-bg-light border text-decoration-none">Cap. 15</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-resolver" data-letra="R">
+        <h3 class="h6 mb-1">resolver (resolvedor)</h3>
+        <p class="mb-1">Servidor que implementa o protocolo DNS e resolve consultas. Costuma atender um conjunto de clientes (por exemplo, todos os hosts de um campus ou os clientes de um provedor): faz as consultas aos servidores de nomes em nome deles e guarda as respostas no seu cache. Precisa conhecer os endereços dos servidores raiz.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-10/index.html" class="badge text-bg-light border text-decoration-none">Cap. 10</a> <a href="../capitulo-33/index.html" class="badge text-bg-light border text-decoration-none">Cap. 33</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-rip" data-letra="R">
+        <h3 class="h6 mb-1">RIP</h3>
+        <p class="mb-1"><em>Routing Information Protocol</em>. Protocolo de roteamento intradomínio de vetor de distância, às vezes usado em redes de empresas. Está definido na RFC 2453 (e, para o IPv6, o RIPng, na RFC 2080).</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-24/index.html" class="badge text-bg-light border text-decoration-none">Cap. 24</a> <a href="../capitulo-42/index.html" class="badge text-bg-light border text-decoration-none">Cap. 42</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-rir" data-letra="R">
+        <h3 class="h6 mb-1">RIR</h3>
+        <p class="mb-1"><em>Regional Internet Registry</em>. Organização que administra endereços IP e números de AS por delegação da IANA.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-root-nameserver" data-letra="R">
+        <h3 class="h6 mb-1">root nameserver (servidor raiz)</h3>
+        <p class="mb-1">Servidor de nomes responsável pela raiz da hierarquia de nomes de domínio. Há 13 identidades de servidor raiz (de a.root-servers.net a m.root-servers.net), operadas por 12 organizações, cada uma com muitas instâncias pelo mundo em anycast; todo resolvedor precisa conhecer os seus endereços. Veja <a href="https://root-servers.org/" target="_blank" rel="noopener noreferrer">root-servers.org</a>.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-10/index.html" class="badge text-bg-light border text-decoration-none">Cap. 10</a> <a href="../capitulo-33/index.html" class="badge text-bg-light border text-decoration-none">Cap. 33</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>No livro, a frase fica incompleta ("There are currently a dozen root nameservers and each DNS resolver"). O número exato de identidades é 13.</p>
+    </div>
+    <div class="verbete mb-3" id="g-round-trip-time" data-letra="R">
+        <h3 class="h6 mb-1">round-trip-time (RTT, tempo de ida e volta)</h3>
+        <p class="mb-1">O atraso entre o envio de um segmento e a chegada da confirmação correspondente, num protocolo de transporte.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-04/index.html" class="badge text-bg-light border text-decoration-none">Cap. 4</a> <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-router" data-letra="R">
+        <h3 class="h6 mb-1">router (roteador)</h3>
+        <p class="mb-1">Um relé que opera na camada de rede.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-02/index.html" class="badge text-bg-light border text-decoration-none">Cap. 2</a> <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-rpc" data-letra="R">
+        <h3 class="h6 mb-1">RPC</h3>
+        <p class="mb-1">Chamada de procedimento remoto. Há vários tipos; o mecanismo da RFC 5531 é usado por aplicações como o NFS.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-14/index.html" class="badge text-bg-light border text-decoration-none">Cap. 14</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-S">S</h2>
+    <div class="verbete mb-3" id="g-sdu" data-letra="S">
+        <h3 class="h6 mb-1">SDU</h3>
+        <p class="mb-1"><em>Service Data Unit</em>, unidade de dados de serviço: a informação que uma camada recebe da camada de cima para transportar (para a camada de aplicação, os dados trocados entre as aplicações).</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-07/index.html" class="badge text-bg-light border text-decoration-none">Cap. 7</a> <a href="../capitulo-04/index.html" class="badge text-bg-light border text-decoration-none">Cap. 4</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro define a SDU só como a informação trocada entre aplicações; no modelo de camadas, cada camada tem a sua SDU, os dados que recebe da camada de cima.</p>
+    </div>
+    <div class="verbete mb-3" id="g-segment" data-letra="S">
+        <h3 class="h6 mb-1">segment (segmento)</h3>
+        <p class="mb-1">A unidade de transferência de informação na camada de transporte.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-04/index.html" class="badge text-bg-light border text-decoration-none">Cap. 4</a> <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-smtp" data-letra="S">
+        <h3 class="h6 mb-1">SMTP</h3>
+        <p class="mb-1">O <em>Simple Mail Transfer Protocol</em>, o protocolo de envio de e-mail entre servidores.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-11/index.html" class="badge text-bg-light border text-decoration-none">Cap. 11</a> <a href="../capitulo-34/index.html" class="badge text-bg-light border text-decoration-none">Cap. 34</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro cita a RFC 821; a especificação atual é a RFC 5321.</p>
+    </div>
+    <div class="verbete mb-3" id="g-snmp" data-letra="S">
+        <h3 class="h6 mb-1">SNMP</h3>
+        <p class="mb-1">O <em>Simple Network Management Protocol</em> é um protocolo de gerência para redes TCP/IP.</p>
+    </div>
+    <div class="verbete mb-3" id="g-socket" data-letra="S">
+        <h3 class="h6 mb-1">socket</h3>
+        <p class="mb-1">API de baixo nível, criada no Unix de Berkeley, para programar clientes e servidores.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-29/index.html" class="badge text-bg-light border text-decoration-none">Cap. 29</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-spoofed-packet" data-letra="S">
+        <h3 class="h6 mb-1">spoofed packet (pacote falsificado)</h3>
+        <p class="mb-1">Um pacote cujo emissor pôs como endereço de origem um endereço que não é o seu.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-08/index.html" class="badge text-bg-light border text-decoration-none">Cap. 8</a> <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-ssh" data-letra="S">
+        <h3 class="h6 mb-1">ssh</h3>
+        <p class="mb-1">O <em>Secure Shell</em>; o seu protocolo de transporte está definido na RFC 4253.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-15/index.html" class="badge text-bg-light border text-decoration-none">Cap. 15</a> <a href="../capitulo-36/index.html" class="badge text-bg-light border text-decoration-none">Cap. 36</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-standard-query" data-letra="S">
+        <h3 class="h6 mb-1">standard query (consulta padrão)</h3>
+        <p class="mb-1">Para servidores e resolvedores DNS, uma consulta por um registro A ou AAAA, que normalmente devolve um endereço IP.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-10/index.html" class="badge text-bg-light border text-decoration-none">Cap. 10</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>No DNS, "standard query" (o código QUERY) é qualquer consulta comum, por qualquer tipo de registro, e não só A ou AAAA.</p>
+    </div>
+    <div class="verbete mb-3" id="g-switch" data-letra="S">
+        <h3 class="h6 mb-1">switch</h3>
+        <p class="mb-1">Um relé que opera na camada de enlace.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-26/index.html" class="badge text-bg-light border text-decoration-none">Cap. 26</a> <a href="../capitulo-43/index.html" class="badge text-bg-light border text-decoration-none">Cap. 43</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-syn-cookie" data-letra="S">
+        <h3 class="h6 mb-1">SYN cookie</h3>
+        <p class="mb-1">Técnica para calcular o número de sequência inicial (ISN) do SYN+ACK a partir dos dados da conexão e de um segredo, de modo que o servidor não precise guardar estado para as conexões meio abertas e resista a um SYN flood.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O verbete do livro para no começo da frase ("a technique used to compute the initial sequence number"); o resto da definição vem da seção 3.12 do livro.</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-T">T</h2>
+    <div class="verbete mb-3" id="g-tcb" data-letra="T">
+        <h3 class="h6 mb-1">TCB</h3>
+        <p class="mb-1">O <em>Transmission Control Block</em> é o conjunto de variáveis que uma implementação do TCP mantém para cada conexão estabelecida.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-tcp" data-letra="T">
+        <h3 class="h6 mb-1">TCP</h3>
+        <p class="mb-1">O <em>Transmission Control Protocol</em> é o protocolo de transporte da pilha TCP/IP que oferece, sobre o IP, um serviço confiável e orientado a conexão de fluxo de bytes.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-20/index.html" class="badge text-bg-light border text-decoration-none">Cap. 20</a> <a href="../capitulo-21/index.html" class="badge text-bg-light border text-decoration-none">Cap. 21</a> <a href="../capitulo-39/index.html" class="badge text-bg-light border text-decoration-none">Cap. 39</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-tcp-ip" data-letra="T">
+        <h3 class="h6 mb-1">TCP/IP</h3>
+        <p class="mb-1">Refere-se aos protocolos TCP e IP e, por extensão, à pilha de protocolos da Internet.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-07/index.html" class="badge text-bg-light border text-decoration-none">Cap. 7</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-telnet" data-letra="T">
+        <h3 class="h6 mb-1">telnet</h3>
+        <p class="mb-1">O protocolo telnet, definido na RFC 854.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-15/index.html" class="badge text-bg-light border text-decoration-none">Cap. 15</a> <a href="../capitulo-36/index.html" class="badge text-bg-light border text-decoration-none">Cap. 36</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-tld" data-letra="T">
+        <h3 class="h6 mb-1">TLD</h3>
+        <p class="mb-1">Domínio de primeiro nível. Há dois tipos: os ccTLDs correspondem a códigos de país de duas letras da ISO-3166, e os gTLDs são os genéricos, sem país.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-05/index.html" class="badge text-bg-light border text-decoration-none">Cap. 5</a> <a href="../capitulo-33/index.html" class="badge text-bg-light border text-decoration-none">Cap. 33</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-tls" data-letra="T">
+        <h3 class="h6 mb-1">TLS</h3>
+        <p class="mb-1">O <em>Transport Layer Security</em> é um protocolo criptográfico que dá segurança às comunicações das aplicações da Internet. Roda sobre o serviço de transporte.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-16/index.html" class="badge text-bg-light border text-decoration-none">Cap. 16</a> <a href="../capitulo-36/index.html" class="badge text-bg-light border text-decoration-none">Cap. 36</a></p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro cita a RFC 5246 (TLS 1.2); a versão atual é o TLS 1.3, da RFC 8446. O livro também diz que uma descrição detalhada está fora do seu escopo, mas a seção 3.8 trata do TLS.</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-U">U</h2>
+    <div class="verbete mb-3" id="g-udp" data-letra="U">
+        <h3 class="h6 mb-1">UDP</h3>
+        <p class="mb-1">O <em>User Datagram Protocol</em> é o protocolo de transporte da pilha TCP/IP que oferece um serviço não confiável e sem conexão, com um mecanismo para detectar dados corrompidos.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-19/index.html" class="badge text-bg-light border text-decoration-none">Cap. 19</a> <a href="../capitulo-29/index.html" class="badge text-bg-light border text-decoration-none">Cap. 29</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-unicast" data-letra="U">
+        <h3 class="h6 mb-1">unicast</h3>
+        <p class="mb-1">Modo de transmissão em que uma informação vai de uma origem para um único destinatário.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-22/index.html" class="badge text-bg-light border text-decoration-none">Cap. 22</a></p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-V">V</h2>
+    <div class="verbete mb-3" id="g-vnc" data-letra="V">
+        <h3 class="h6 mb-1">VNC</h3>
+        <p class="mb-1"><em>Virtual Network Computing</em>: aplicação em rede que permite acessar a interface gráfica de outro computador a distância. Veja a <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing" target="_blank" rel="noopener noreferrer">Wikipedia</a>.</p>
+        <p class="nota-livro small mb-0 mt-2"><span class="extra-tag">Nota</span><br>O livro tem um verbete "VNC" vazio e outro "vnc" com a definição, reunidos aqui.</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-W">W</h2>
+    <div class="verbete mb-3" id="g-w3c" data-letra="W">
+        <h3 class="h6 mb-1">W3C</h3>
+        <p class="mb-1">O <em>World Wide Web Consortium</em> foi criado para padronizar os protocolos e os mecanismos da web; trata, portanto, de uma parte da camada de aplicação. Veja <a href="https://www.w3.org" target="_blank" rel="noopener noreferrer">w3.org</a>.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-12/index.html" class="badge text-bg-light border text-decoration-none">Cap. 12</a></p>
+    </div>
+    <div class="verbete mb-3" id="g-wan" data-letra="W">
+        <h3 class="h6 mb-1">WAN</h3>
+        <p class="mb-1"><em>Wide Area Network</em>, rede de longa distância.</p>
+    </div>
+    <h2 class="h4 mt-4 mb-2 letra-glossario" id="letra-X">X</h2>
+    <div class="verbete mb-3" id="g-x-25" data-letra="X">
+        <h3 class="h6 mb-1">X.25</h3>
+        <p class="mb-1">Tecnologia de rede de longa distância com circuitos virtuais, oferecida por operadoras de telecomunicações.</p>
+    </div>
+    <div class="verbete mb-3" id="g-x11" data-letra="X">
+        <h3 class="h6 mb-1">X11</h3>
+        <p class="mb-1">O sistema X Window e os seus protocolos, a base das interfaces gráficas em rede do Unix.</p>
+    </div>
+    <div class="verbete mb-3" id="g-xml" data-letra="X">
+        <h3 class="h6 mb-1">XML</h3>
+        <p class="mb-1">A <em>eXtensible Markup Language</em> é um formato de texto flexível, derivado do SGML. Foi criada para a publicação eletrônica e hoje é usada por muitas aplicações que trocam dados estruturados. As especificações são mantidas por grupos de trabalho do W3C.</p>
+        <p class="small mb-0">Explicado em: <a href="../capitulo-14/index.html" class="badge text-bg-light border text-decoration-none">Cap. 14</a></p>
+    </div>
+    <p class="text-muted mt-3 d-none" id="vazio-glossario">Nenhum verbete encontrado.</p>
+</section>
+
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências e licença</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 5.1 "Glossary" (pág. 393–398 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>Adaptado de <em>Computer Networking: Principles, Protocols and Practice</em>, © 2011–2021 Olivier Bonaventure, Université catholique de Louvain, e colaboradores, sob a licença <a href="https://creativecommons.org/licenses/by/3.0/deed.pt-br" target="_blank" rel="noopener noreferrer">Creative Commons Atribuição 3.0 (CC BY 3.0)</a> (pág. 7 do PDF).</li>
+    </ul>
+</section>
+
+</div>
+</div>
+</div>
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-43/index.html" class="text-muted text-decoration-none">← Capítulo 43</a>
+            <span class="text-muted">Redes de Computadores — Glossário</span>
+            <a href="../../index.html#capitulos" class="text-muted text-decoration-none">Todos os capítulos</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/glossario.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

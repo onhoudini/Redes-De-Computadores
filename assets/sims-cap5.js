@@ -590,3 +590,130 @@
         desenha();
     });
 }());
+
+/* Etapa "3. Visualização" dos conceitos enderecos e nomes (pág. 76 do PDF). */
+(function () {
+    "use strict";
+    var R = window.Redes;
+    var u = R.util, el = u.el, s = u.svg;
+    function escolha(rotulo, lista) {
+        return el("select", { class: "form-select form-select-sm", "aria-label": rotulo },
+            el("option", { value: "" }, "escolha…"), lista.map(function (o) { return el("option", { value: o[0] }, o[1]); }));
+    }
+
+    /* ---------- Dois níveis de multiplexação ---------- */
+    var APLICACOES = [
+        { id: "a80", transporte: "confiavel", porta: 80, x: 40, w: 110 },
+        { id: "a25", transporte: "confiavel", porta: 25, x: 170, w: 120 },
+        { id: "a53", transporte: "semconexao", porta: 53, x: 390, w: 120 }
+    ];
+    var TRANSPORTES = { confiavel: { nome: "Transporte confiável", x: 90 }, semconexao: { nome: "Transporte sem conexão", x: 350 } };
+    function demultiplexa(transporte, porta) {
+        var a = APLICACOES.find(function (x) { return x.transporte === transporte && x.porta === Number(porta); });
+        return a ? a.id : null;
+    }
+    R.demultiplexa = demultiplexa;
+
+    R.registrar("demultiplexa", function (raiz) {
+        var desenho = s("svg", { viewBox: "0 0 640 200", class: "sim-svg w-100", style: "max-height:230px", role: "img",
+            "aria-label": "Um pacote chega a um host; o campo de protocolo escolhe o protocolo de transporte e a porta escolhe a aplicação." });
+        var proto = escolha("Campo de protocolo do pacote", [["confiavel", "transporte confiável"], ["semconexao", "transporte sem conexão"]]);
+        var porta = escolha("Porta de destino do segmento", [["80", "80"], ["25", "25"], ["53", "53"]]);
+        proto.value = "confiavel"; porta.value = "80";
+        var saida = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
+
+        function desenha() {
+            var t = proto.value, p = Number(porta.value), alvo = demultiplexa(t, p);
+            var g = s("g", { "font-size": 12, "text-anchor": "middle" });
+            g.append(s("rect", { x: 0, y: 0, width: 640, height: 200, style: "fill: var(--bs-body-bg)" }));
+            g.append(s("rect", { class: "camada no-ativo", x: 230, y: 150, width: 180, height: 34, rx: 5 }), s("text", { x: 320, y: 172 }, "Rede (endereço do host)"));
+            Object.keys(TRANSPORTES).forEach(function (k) {
+                var tr = TRANSPORTES[k], ativo = k === t;
+                g.append(s("line", { class: ativo ? "linha-ativa" : "linha", x1: k === "confiavel" ? 300 : 340, y1: 150, x2: tr.x + 100 + (k === "confiavel" ? 10 : -10), y2: 116 }));
+                g.append(s("rect", { class: ativo ? "no no-ativo" : "camada", x: tr.x, y: 82, width: 200, height: 34, rx: 5 }), s("text", { x: tr.x + 100, y: 104 }, tr.nome));
+            });
+            g.append(s("text", { x: 320, y: 136, "font-size": 11 }, "campo de protocolo"));
+            APLICACOES.forEach(function (a) {
+                var ativo = a.id === alvo;
+                var x1 = a.transporte === "confiavel" ? (a.porta === 80 ? 170 : 210) : 450;
+                g.append(s("line", { class: ativo ? "linha-ativa" : "linha", x1: x1, y1: 82, x2: a.x + a.w / 2, y2: 48 }));
+                g.append(s("rect", { class: ativo ? "no no-ativo" : "no", x: a.x, y: 18, width: a.w, height: 30, rx: 5 }), s("text", { x: a.x + a.w / 2, y: 38 }, "aplicação, porta " + a.porta));
+            });
+            g.append(s("text", { x: 590, y: 38, "font-size": 11 }, "portas"));
+            desenho.replaceChildren(s("title", null, "Dois níveis de multiplexação: o campo de protocolo do pacote escolhe entre o transporte confiável e o sem conexão; a porta do segmento escolhe a aplicação."), g);
+            saida.textContent = alvo
+                ? "O campo de protocolo leva o segmento ao " + TRANSPORTES[t].nome.toLowerCase() + ", e a porta " + p + " o entrega à aplicação que a usa."
+                : "O campo de protocolo leva o segmento ao " + TRANSPORTES[t].nome.toLowerCase() + ", mas nenhuma aplicação usa a porta " + p + " nesse protocolo: não há para quem entregar. Cada protocolo de transporte tem as suas portas.";
+        }
+        proto.addEventListener("change", desenha);
+        porta.addEventListener("change", desenha);
+
+        var PERG = [["semconexao", 53, "a53"], ["confiavel", 25, "a25"], ["confiavel", 53, "nenhuma"]];
+        var NOMES = { semconexao: "sem conexão", confiavel: "confiável" };
+        var DESTINOS = [["a80", "aplicação da porta 80"], ["a25", "aplicação da porta 25"], ["a53", "aplicação da porta 53"], ["nenhuma", "nenhuma aplicação"]];
+        var selects = PERG.map(function (q) { return escolha("Destino do segmento " + NOMES[q[0]] + " para a porta " + q[1], DESTINOS); });
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "demultiplexa", 10, "Entregar segmentos à aplicação certa");
+        raiz.append(
+            el("div", { class: "row g-2" }, el("div", { class: "col-sm-6" }, u.campo("Campo de protocolo do pacote", proto)), el("div", { class: "col-sm-6" }, u.campo("Porta de destino do segmento", porta))),
+            desenho, saida,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts): no host da figura, a quem vai cada segmento? Responda sem usar os controles acima."),
+            el("div", null, PERG.map(function (q, i) {
+                return el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-6 small" }, "Pacote para o transporte " + NOMES[q[0]] + ", porta " + q[1]), el("div", { class: "col-sm-6" }, selects[i]));
+            })),
+            u.botao("Conferir", "btn-primary mt-1", function () {
+                var certas = PERG.filter(function (q, i) { return selects[i].value === q[2]; }).length;
+                u.marca(fb, certas === 3, certas === 3
+                    ? "Isso. O último não tem destino: a porta 53 deste host só existe no transporte sem conexão."
+                    : certas + " de 3. Primeiro o campo de protocolo escolhe o transporte; só depois a porta escolhe a aplicação.");
+                if (certas === 3) concluir();
+            }), fb);
+        desenha();
+    });
+
+    /* ---------- Nomes como nível de indireção ---------- */
+    var ENDERECOS = ["192.0.2.10", "198.51.100.7", "203.0.113.25"];
+    function alcanca(cliente, enderecoAtual, guardado) {
+        return cliente === "nome" ? true : guardado === enderecoAtual;
+    }
+    R.alcancaPorNome = alcanca;
+
+    R.registrar("indirecao", function (raiz) {
+        var atual = 0;
+        var guardado = ENDERECOS[0];
+        var tabela = el("div");
+        var log = el("ul", { class: "log mt-2", "aria-live": "polite" });
+        function linha(texto, ok) { log.prepend(el("li", { class: ok === undefined ? null : ok ? "text-success" : "text-danger" }, texto)); }
+        function mostra() {
+            tabela.replaceChildren(el("div", { class: "table-responsive" }, el("table", { class: "table table-sm small mb-0" },
+                el("thead", null, el("tr", null, el("th", null, "Quem"), el("th", null, "O que guardou"), el("th", null, "Endereço que usa agora"))),
+                el("tbody", null,
+                    el("tr", null, el("td", null, "Serviço de nomes"), el("td", { class: "mono" }, "servidor.example → " + ENDERECOS[atual]), el("td", { class: "mono" }, "—")),
+                    el("tr", null, el("td", null, "Cliente A"), el("td", { class: "mono" }, "o endereço " + guardado), el("td", { class: "mono" }, guardado)),
+                    el("tr", null, el("td", null, "Cliente B"), el("td", { class: "mono" }, "o nome servidor.example"), el("td", { class: "mono" }, ENDERECOS[atual] + " (perguntado agora)"))))));
+        }
+        var muda = u.botao("Mudar o servidor de máquina", "btn-outline-primary", function () {
+            atual = (atual + 1) % ENDERECOS.length;
+            linha("O servidor passou para " + ENDERECOS[atual] + ". O serviço de nomes foi atualizado.");
+            mostra();
+        });
+        var conecta = u.botao("Os dois clientes se conectam", "btn-primary", function () {
+            var a = alcanca("endereco", ENDERECOS[atual], guardado), b = alcanca("nome", ENDERECOS[atual], guardado);
+            linha("Cliente B: pergunta o endereço de servidor.example, recebe " + ENDERECOS[atual] + " e conecta.", b);
+            linha("Cliente A: tenta " + guardado + (a ? " e conecta." : ", onde o servidor não está mais. Falha."), a);
+        });
+        var PERG = escolha("Quem alcança o servidor depois da troca", [["a", "só o cliente A"], ["b", "só o cliente B"], ["ambos", "os dois"], ["nenhum", "nenhum"]]);
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "indirecao", 10, "Nomes como nível de indireção");
+        raiz.append(el("p", { class: "small mb-2" }, "O cliente A anotou o endereço do servidor; o cliente B guardou só o nome e pergunta o endereço ao serviço de nomes a cada conexão. Mude o servidor de máquina e conecte os dois."),
+            tabela, el("div", { class: "d-flex flex-wrap gap-2 mt-2" }, muda, conecta), log,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts): o servidor muda de endereço e o serviço de nomes é atualizado. Quem continua alcançando o servidor?"),
+            PERG, u.botao("Conferir", "btn-primary mt-2", function () {
+                var ok = PERG.value === "b";
+                u.marca(fb, ok, ok ? "Isso: o nome é estável, o endereço é só um identificador técnico que pode mudar." : "Não. Quem guardou o endereço continua usando o antigo; quem guardou o nome descobre o novo.");
+                if (ok) concluir();
+            }), fb);
+        mostra();
+        linha("Servidor em " + ENDERECOS[0] + ".");
+    });
+}());

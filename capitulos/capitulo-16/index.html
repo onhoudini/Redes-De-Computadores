@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 16 — Transport Layer Security (TLS) | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Explicar onde o TLS entra e como o cliente autentica o servidor. Acompanhar o handshake do TLS 1.2, comparar as trocas RSA e DHE_RSA e explicar o sigilo futuro. Explicar como o protocolo de registro detecta registros alterados, repetidos ou apagados. Comparar o TLS 1.3 (1-RTT e 0-RTT) com o TLS 1.2.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="16" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 16 · Parte 2: Protocolos · Seção 3.8</span>
+        <h1 class="display-5 mb-3">Transport Layer Security (TLS)</h1>
+        <p class="lead mb-4">
+            O TLS protege a web, o e-mail e quase tudo o que roda sobre TCP. Este capítulo acompanha o handshake do TLS 1.2, compara as trocas de chaves, mostra como o protocolo de registro detecta mensagens alteradas, repetidas ou apagadas e o que o TLS 1.3 mudou.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#tls-inicio">1. Onde o TLS entra</a>
+                    <a class="nav-link" href="#tls12">2. Handshake do TLS 1.2</a>
+                    <a class="nav-link" href="#registro">3. Protocolo de registro</a>
+                    <a class="nav-link" href="#tls13">4. TLS 1.3</a>
+                    <a class="nav-link" href="#exercicios-cap16">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Um canal seguro sobre o TCP</h2>
+    <p>
+        O TLS fica entre a aplicação e o TCP (pág. 172 do PDF). Ele autentica o servidor com um certificado, combina
+        chaves de sessão e protege cada registro. O livro detalha o TLS 1.2 e mostra como o TLS 1.3 encurtou o handshake.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar onde o <strong>TLS</strong> entra e como o cliente autentica o servidor.</li>
+                <li>Acompanhar o <strong>handshake do TLS 1.2</strong>, comparar as trocas RSA e DHE_RSA e explicar o <strong>sigilo futuro</strong>.</li>
+                <li>Explicar como o <strong>protocolo de registro</strong> detecta registros alterados, repetidos ou apagados.</li>
+                <li>Comparar o <strong>TLS 1.3</strong> (1-RTT e 0-RTT) com o TLS 1.2.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise as cifras, os certificados e o Diffie-Hellman do <a href="../capitulo-08/index.html">Capítulo 8</a> e o HMAC
+                do <a href="../capitulo-15/index.html">Capítulo 15</a>. O capítulo cobre a seção 3.8 do livro
+                (pág. 172–181 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. TLS: onde entra -->
+<section id="tls-inicio" class="chapter-section" data-conceito="tls-inicio" data-titulo="Onde o TLS entra">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">TLS: onde ele entra e como começa</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O ssh resolve o login remoto. Mas a web, o e-mail e muitas outras aplicações também precisam de segurança. Em vez
+        de cada uma inventar a sua, existe uma camada comum.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Transport Layer Security</strong> começou com o nome Secure Socket Layer (SSL), que muita gente ainda usa.
+        Ele serve a qualquer aplicação que use o transporte confiável e roda sobretudo sobre TCP (há variantes para SCTP e
+        para UDP, o DTLS). O TLS cifra e autentica as SDUs da aplicação; o TCP entrega esse fluxo cifrado com
+        confiabilidade. Usam TLS o HTTP (o HTTPS), o SMTP, o POP, o IMAP e protocolos proprietários (pág. 172 do PDF).
+    </p>
+    <p>Há duas formas de começar uma sessão TLS (pág. 173 do PDF):</p>
+    <ol>
+        <li><strong>Uma porta dedicada</strong> para a versão "sobre TLS" do protocolo. Funciona, mas gasta duas portas por
+            aplicação:
+            <table class="table table-sm small mt-2 w-auto">
+                <thead><tr><th>Aplicação</th><th>Porta TCP</th><th>Porta TLS</th></tr></thead>
+                <tbody>
+                    <tr><td>POP3</td><td>110</td><td>995</td></tr>
+                    <tr><td>IMAP</td><td>143</td><td>993</td></tr>
+                    <tr><td>NNTP</td><td>119</td><td>563</td></tr>
+                    <tr><td>HTTP</td><td>80</td><td>443</td></tr>
+                    <tr><td>FTP</td><td>21</td><td>990</td></tr>
+                </tbody>
+            </table></li>
+        <li><strong>Uma mensagem especial</strong> na porta normal. No SMTP, o servidor anuncia <code>250-STARTTLS</code>
+            em resposta ao EHLO; o cliente envia <code>STARTTLS</code>, o servidor responde <code>220 Ready to start TLS</code>,
+            e a sessão TLS começa ali mesmo
+            (<a href="https://www.rfc-editor.org/rfc/rfc3207" target="_blank" rel="noopener noreferrer">RFC 3207</a>).</li>
+    </ol>
+    <p>
+        A sessão tem duas fases: o <strong>handshake</strong>, que negocia os parâmetros e as chaves, e a
+        <strong>transferência de dados</strong>, em que tudo vai cifrado e autenticado. O livro, e este capítulo, tratam do
+        caso da web: o TLS começa logo depois da conexão TCP.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="porta-ou-starttls"></div>
+    <p class="small text-muted">As duas formas de começar uma sessão TLS (pág. 173 do PDF); a troca do STARTTLS segue a RFC 3207.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Gasta duas portas por aplicação, e as portas são limitadas|É menos seguro que o STARTTLS|Não funciona com HTTP" data-answer="0" data-explain="Uma porta com e outra sem TLS para cada aplicação não escala (pág. 173 do PDF)." data-hint="Releia o argumento do livro sobre as portas.">
+        <p class="fw-semibold mb-2">Qual é a desvantagem de usar uma porta dedicada para a versão com TLS?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="993|143|995" data-answer="0" data-explain="IMAP: 143 sem TLS, 993 com TLS (pág. 173 do PDF)." data-hint="Veja a tabela.">
+        <p class="fw-semibold mb-2">Em que porta um cliente de e-mail acessa o IMAP direto sobre TLS?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>TLS (ex-SSL): cifra e autentica as SDUs da aplicação, sobre TCP.</li>
+        <li>Porta dedicada (443, 993, 995…) ou STARTTLS na porta normal.</li>
+        <li>Handshake, depois dados cifrados.</li>
+    </ul>
+</section>
+
+<!-- 2. TLS 1.2 -->
+<section id="tls12" class="chapter-section" data-conceito="tls12" data-titulo="Handshake do TLS 1.2">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">O handshake do TLS 1.2</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Antes do primeiro byte da página, o navegador e o servidor precisam concordar nos algoritmos, o navegador precisa
+        ter certeza de que fala com o site certo, e os dois precisam combinar chaves que Eve e Mallory não conheçam.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Esses são os três objetivos do handshake (pág. 173 do PDF). Em resumo: o cliente propõe um nonce aleatório; o
+        servidor responde com o seu nonce e um certificado; o cliente gera um segredo, cifra-o com a chave pública do
+        servidor e manda um <strong>Finished</strong> com um MAC de todas as mensagens; o servidor manda o seu Finished; e
+        os registros cifrados começam. Em detalhe (pág. 174–176 do PDF):
+    </p>
+    <ul>
+        <li><strong>ClientHello</strong>: a versão (1.2 e 1.3 estão em uso; as anteriores, sendo abandonadas), 32 bytes
+            aleatórios, a lista ordenada de <strong>suítes</strong> (ao contrário do ssh, o TLS negocia combinações prontas
+            de algoritmos), a compressão (desligada na prática, por causa de ataques) e as extensões.</li>
+        <li><strong>ServerHello</strong>: a versão e a suíte escolhidas, os 32 bytes do servidor e um Session Id, usado para
+            retomar a sessão depois.</li>
+        <li><strong>Certificate</strong>: a cadeia de certificados que liga o nome do domínio à chave pública do servidor,
+            validada com as chaves das autoridades raiz que o cliente já tem (a infraestrutura de chave pública). Os
+            certificados são codificados em ASN.1.</li>
+        <li><strong>ServerKeyExchange</strong>, se a troca de chaves precisar, e <strong>ServerHelloDone</strong>.</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Server Name Indication</strong> (<a href="https://www.rfc-editor.org/rfc/rfc6066" target="_blank" rel="noopener noreferrer">RFC 6066</a>,
+        pág. 174–175 do PDF). Na extensão SNI, o cliente diz no ClientHello o nome do servidor que quer. É o mesmo motivo do
+        Host: do HTTP (Capítulo 12): um servidor TLS hospeda vários sites e precisa saber qual certificado apresentar. Sem
+        o SNI, cada site com TLS precisaria de um endereço IP próprio.
+    </div>
+    <p>O livro compara duas trocas de chaves (pág. 175 do PDF):</p>
+    <ul>
+        <li><strong>RSA</strong>: o cliente sorteia 48 bytes, cifra-os com a chave pública do certificado e os envia no
+            ClientKeyExchange; o servidor decifra com a privada. Não há ServerKeyExchange.</li>
+        <li><strong>DHE_RSA</strong>: Diffie-Hellman efêmero. O servidor manda os seus parâmetros no ServerKeyExchange,
+            assinados com a chave privada RSA, e o cliente responde com a sua parte no ClientKeyExchange.</li>
+    </ul>
+    <p>
+        A diferença aparece contra Terrence, que gravou seis meses de tráfego do servidor de Bob e depois obtém a chave
+        privada dele. Com RSA, ele decifra todas as sessões gravadas. Com DHE_RSA, ele consegue se passar pelo servidor nas
+        sessões futuras, mas não decifra as passadas.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Sigilo futuro</strong> (<em>Perfect Forward Secrecy</em>, pág. 175–176 do PDF). Um protocolo tem PFS se as chaves
+        de sessões passadas continuam seguras mesmo que a chave privada do servidor vaze. DHE_RSA tem; RSA não. Como o DHE é
+        caro, as implementações preferem ECDHE_RSA ou ECDHE_ECDSA, com curvas elípticas.
+    </div>
+    <p>
+        Para fechar, cada lado manda <strong>ChangeCipherSpec</strong> (a partir daqui, cifro) e <strong>Finished</strong>,
+        a primeira mensagem cifrada, com um resumo de todo o handshake. É ele que confirma que ninguém alterou as mensagens
+        anteriores (pág. 176 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Suítes</strong> (pág. 176 do PDF). O nome diz tudo: <code>TLS_DHE_RSA_WITH_AES_128_GCM_SHA256</code> é troca
+        DHE_RSA, AES de 128 bits no modo GCM para cifrar e SHA-256. NULL indica "nenhum algoritmo":
+        <code>TLS_ECDH_RSA_WITH_NULL_SHA</code> não cifra nada. A lista oficial é mantida pela
+        <a href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4" target="_blank" rel="noopener noreferrer">IANA</a>.
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="handshake-tls"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Troca ECDHE com assinatura RSA, AES de 256 bits em GCM e SHA-384|Troca RSA, AES de 384 bits e SHA-256|Troca ECDHE sem cifra" data-answer="0" data-explain="Troca de chaves e autenticação, depois de WITH a cifra com tamanho e modo, e no fim o hash (pág. 176 do PDF)." data-hint="Leia o nome da esquerda para a direita.">
+        <p class="fw-semibold mb-2">O que significa TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Só as futuras: as passadas usaram segredos efêmeros já descartados|Todas as sessões gravadas|Nenhuma, nem as futuras" data-answer="0" data-explain="Com DHE, a chave privada só assina; ela permite se passar pelo servidor dali para frente, mas não recupera os segredos antigos (pág. 175 do PDF)." data-hint="O que a chave privada faz numa troca DHE_RSA?">
+        <p class="fw-semibold mb-2">Com DHE_RSA, quais sessões Terrence consegue atacar depois de roubar a chave privada?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>ClientHello → ServerHello, Certificate, [ServerKeyExchange], ServerHelloDone → ClientKeyExchange, ChangeCipherSpec, Finished → ChangeCipherSpec, Finished.</li>
+        <li>SNI: o nome do site no ClientHello. Finished: resumo autenticado do handshake.</li>
+        <li>RSA: sem sigilo futuro. (EC)DHE: com sigilo futuro.</li>
+    </ul>
+</section>
+
+<!-- 3. Registro -->
+<section id="registro" class="chapter-section" data-conceito="registro" data-titulo="Protocolo de registro">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">O protocolo de registro</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Com as chaves combinadas, os dados viajam cifrados. Cifrar impede Eve de ler; mas e se Mallory repetir, apagar ou
+        alterar um pedaço?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Depois do handshake, os dados vão em <strong>registros</strong>, com chaves diferentes para cifrar e para autenticar,
+        todas derivadas do segredo comum (<a href="https://www.rfc-editor.org/rfc/rfc5246" target="_blank" rel="noopener noreferrer">RFC 5246</a>).
+        Cada registro tem quatro campos (pág. 176 do PDF):
+    </p>
+    <ul>
+        <li><strong>Type</strong>: application data (dados cifrados, o mais comum), handshake, change_cipher_spec ou alert;</li>
+        <li><strong>Protocol Version</strong>: versão maior e menor;</li>
+        <li><strong>Length</strong>: no máximo 16 384 bytes;</li>
+        <li>os dados cifrados.</li>
+    </ul>
+    <p>
+        No método do exemplo do livro, o TLS primeiro calcula um HMAC sobre o <strong>número de sequência</strong>, o
+        cabeçalho e o texto em claro: MAC(SeqNum, Header, PlainText). O número de sequência aumenta a cada registro e é
+        contado nas duas pontas, sem ser transmitido. É ele que barra a repetição de registros (pág. 177 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>MAC e depois cifra, ou cifra e depois MAC?</strong> (pág. 177 do PDF). Calcular o MAC e cifrar dados e MAC
+        juntos obriga o receptor a decifrar dados possivelmente alterados antes de conferir a autenticidade. É melhor cifrar
+        primeiro e calcular o MAC sobre o cifrado (<em>encrypt-then-MAC</em>,
+        <a href="https://www.rfc-editor.org/rfc/rfc7366" target="_blank" rel="noopener noreferrer">RFC 7366</a>): o receptor
+        confere o MAC antes de decifrar.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que a versão atual do TLS usa "MAC e depois cifra" (pág. 177 do PDF). Isso vale para as suítes de
+        bloco do TLS 1.2. O TLS 1.3, que o próprio livro descreve logo depois, só admite cifras <strong>AEAD</strong>
+        (como AES-GCM e ChaCha20-Poly1305), que cifram e autenticam numa só operação
+        (<a href="https://www.rfc-editor.org/rfc/rfc8446#section-5.2" target="_blank" rel="noopener noreferrer">RFC 8446, seção 5.2</a>).
+        Na mesma página, "AEA" é um erro de digitação de AEAD.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="registro-tls"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O receptor calcula o MAC com outro número de sequência, e ele não confere|O registro repetido chega com o mesmo número de sequência no cabeçalho|O TCP descarta registros repetidos" data-answer="0" data-explain="O número de sequência entra no MAC mas não viaja; o receptor usa o próximo número esperado, e o MAC antigo não bate." data-hint="O número de sequência é transmitido?">
+        <p class="fw-semibold mb-2">Como o receptor TLS percebe que Mallory repetiu um registro inteiro, com o MAC original?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Registro: tipo, versão, tamanho (até 16 384 bytes) e dados.</li>
+        <li>MAC sobre número de sequência + cabeçalho + dados: barra alteração, repetição e remoção.</li>
+        <li>Encrypt-then-MAC é melhor; o TLS 1.3 usa AEAD.</li>
+    </ul>
+</section>
+
+<!-- 4. TLS 1.3 -->
+<section id="tls13" class="chapter-section" data-conceito="tls13" data-titulo="TLS 1.3">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Melhorando o TLS: o TLS 1.3</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No começo, só bancos e lojas usavam TLS. Com processadores mais rápidos, ele passou a proteger tudo. Pela telemetria
+        do Firefox, 30% das páginas eram carregadas por HTTPS em 2013, e 80% em outubro de 2019 (pág. 177 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Medições mostram como o ecossistema mudou (pág. 177 do PDF): o RC4, usado em 60% das conexões em 2012, caiu a partir
+        de 2015; as cifras AEAD passaram de 90%; o TLS 1.0 e 1.1 quase sumiram. Depois das revelações de Snowden, em 2013, a
+        IETF declarou a vigilância em massa um ataque (<a href="https://www.rfc-editor.org/rfc/rfc7258" target="_blank" rel="noopener noreferrer">RFC 7258</a>)
+        e passou a favorecer o sigilo futuro: desde 2014, o ECDHE supera o RSA, e em 2018 estava em mais de 90% das
+        conexões. Iniciativas como o <a href="https://letsencrypt.org" target="_blank" rel="noopener noreferrer">Let's Encrypt</a>
+        tornaram os certificados fáceis e gratuitos.
+    </p>
+    <p>
+        Os objetivos do TLS 1.3 eram simplificar, aumentar a segurança e a privacidade e <strong>reduzir a latência</strong>.
+        Com TLS 1.2, baixar uma página custa no mínimo <strong>quatro RTTs</strong>: um para o TCP, um para ClientHello e
+        ServerHello, um para a troca de chaves e um para o GET e a resposta (pág. 178 do PDF). O TLS 1.3:
+    </p>
+    <ul>
+        <li>tem só cinco suítes (<a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener noreferrer">RFC 8446</a>),
+            e todas as implementações devem aceitar <code>TLS_AES_128_GCM_SHA256</code>;</li>
+        <li>removeu todas as suítes sem sigilo futuro e a compressão;</li>
+        <li>exige Diffie-Hellman com poucos parâmetros possíveis. O cliente <strong>adivinha</strong> os parâmetros do
+            servidor e já manda g<sup>c</sup> no ClientHello; o servidor responde com g<sup>s</sup> e, como já conhece a
+            chave, manda cifrados o certificado, a assinatura do handshake e o Finished. O handshake leva <strong>um RTT</strong>;
+            se o cliente adivinhou errado, o servidor indica os parâmetros certos e perde-se um RTT (pág. 178–179 do PDF);</li>
+        <li>permite o <strong>0-RTT</strong>: se cliente e servidor já combinaram uma chave numa sessão anterior (uma chave
+            pré-compartilhada, guardada em cache), o cliente manda dados cifrados junto com o ClientHello (pág. 179 do PDF).</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Empresas, privacidade e TLS</strong> (pág. 178 do PDF). Algumas empresas, sobretudo financeiras, queriam
+        continuar decifrando o próprio tráfego TLS e pediram à IETF que mantivesse as suítes RSA, sem sigilo futuro. A IETF
+        não aceitou; elas levaram a proposta ao ETSI, que adotou uma variante do TLS 1.3 sem sigilo futuro.
+    </div>
+    <p>
+        Na web, só o servidor apresenta certificado. Em redes corporativas, por exemplo em VPNs, o servidor pode pedir o
+        do cliente com uma mensagem <strong>CertificateRequest</strong>; o cliente responde com o seu certificado e assina o
+        handshake com a sua chave privada (pág. 180–181 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Os dados enviados em 0-RTT não têm proteção contra repetição: Mallory pode gravá-los e reenviá-los ao servidor. Por
+        isso só devem ser usados para pedidos que possam ser repetidos sem dano, os idempotentes do Capítulo 13
+        (<a href="https://www.rfc-editor.org/rfc/rfc8446#section-8" target="_blank" rel="noopener noreferrer">RFC 8446, seção 8</a>).
+        O TLS 1.0 e o 1.1 foram oficialmente abandonados em 2021
+        (<a href="https://www.rfc-editor.org/rfc/rfc8996" target="_blank" rel="noopener noreferrer">RFC 8996</a>).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="rtts-tls"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque o cliente já manda g^c no ClientHello, adivinhando os parâmetros|Porque o TLS 1.3 não autentica o servidor|Porque o TLS 1.3 não usa TCP" data-answer="0" data-explain="Com poucos parâmetros possíveis, o cliente começa o Diffie-Hellman na primeira mensagem (pág. 178–179 do PDF)." data-hint="O que vai no ClientHello do TLS 1.3?">
+        <p class="fw-semibold mb-2">Por que o handshake do TLS 1.3 leva só um RTT?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Uma chave pré-compartilhada de uma sessão anterior|O certificado do servidor|O nome do servidor (SNI)" data-answer="0" data-explain="Sem a chave do Diffie-Hellman ainda, o cliente cifra com uma chave guardada de uma sessão anterior (pág. 179 do PDF)." data-hint="Com que chave o cliente cifra antes de receber o ServerHello?">
+        <p class="fw-semibold mb-2">O que o cliente precisa ter para enviar dados em 0-RTT?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>TLS 1.2: 4 RTTs até a resposta. TLS 1.3: 3. TLS 1.3 com 0-RTT: 2.</li>
+        <li>TLS 1.3: cinco suítes, todas com sigilo futuro e AEAD; sem compressão; certificado cifrado.</li>
+        <li>0-RTT exige uma chave pré-compartilhada e só serve para pedidos idempotentes.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap16" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> com RTT de 80 ms, quanto tempo leva até a resposta HTTP com TLS 1.2, com TLS 1.3 e com TLS 1.3 em 0-RTT?
+            <details><summary>Ver solução</summary><p class="mb-0">4 × 80 = 320 ms; 3 × 80 = 240 ms; 2 × 80 = 160 ms.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> por que o Finished do TLS precisa cobrir todas as mensagens do handshake, e não só as últimas?
+            <details><summary>Ver solução</summary><p class="mb-0">Porque as primeiras mensagens, como o ClientHello com a lista de suítes, vão em claro e podem ser alteradas por Mallory para forçar uma suíte fraca (rebaixamento). Se o Finished resume tudo, qualquer alteração é detectada, como no hash assinado do ssh.</p></details></li>
+        <li><strong>Desafio:</strong> um servidor usa TLS 1.2 com troca RSA. A empresa grava todo o tráfego para auditoria e guarda a chave privada. Que propriedade de segurança está faltando, e o que mudaria com TLS 1.3?
+            <details><summary>Ver solução</summary><p class="mb-0">Falta o sigilo futuro: quem tiver a chave privada (inclusive um invasor que a roube) decifra todo o tráfego gravado. O TLS 1.3 só tem trocas Diffie-Hellman efêmeras: a chave privada só assina, e o tráfego antigo não pode ser decifrado com ela. Foi por isso que algumas empresas pediram, sem sucesso, que a IETF mantivesse o RSA.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Dois trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Quantas idas e voltas até a resposta</h3>
+    <pre class="code-block"><code># Quantas idas e voltas até o primeiro byte da resposta HTTP? (pág. 173–181 do PDF)
+ETAPAS = {
+    "HTTP sem TLS": ["TCP: SYN e SYN+ACK", "pedido e resposta HTTP"],
+    "TLS 1.2": ["TCP: SYN e SYN+ACK", "ClientHello; ServerHello ... ServerHelloDone",
+                "ClientKeyExchange e Finished; Finished do servidor", "pedido e resposta HTTP"],
+    "TLS 1.3": ["TCP: SYN e SYN+ACK", "ClientHello com key_share; ServerHello ... Finished",
+                "Finished do cliente com o pedido HTTP; resposta"],
+    "TLS 1.3 0-RTT": ["TCP: SYN e SYN+ACK", "ClientHello com o pedido HTTP (early data); resposta"],
+}
+rtt = 0.080   # segundos
+for nome, etapas in ETAPAS.items():
+    print(f"{nome:14} {len(etapas)} RTTs = {len(etapas) * rtt * 1000:.0f} ms")
+    for e in etapas:
+        print("      ", e)</code></pre>
+
+    <h3 class="h6 mt-4">2. Registros, números de sequência e MAC</h3>
+    <pre class="code-block"><code>import hmac, hashlib, struct
+
+LIMITE = 16384                        # dados de um registro, no máximo (pág. 176 do PDF)
+chave = b"chave-de-autenticacao"     # na prática, derivada do segredo do handshake
+
+def registros(dados):
+    """Divide os dados em registros (seq, cabeçalho, texto, mac). O MAC cobre o número de sequência."""
+    saida = []
+    for seq, i in enumerate(range(0, len(dados), LIMITE)):
+        texto = dados[i:i + LIMITE]
+        cab = struct.pack("!BBBH", 23, 3, 3, len(texto))   # 23 = application data; 3.3 = TLS 1.2
+        mac = hmac.new(chave, struct.pack("!Q", seq) + cab + texto, hashlib.sha256).digest()
+        saida.append((seq, cab, texto, mac))
+    return saida
+
+def recebe(lista):
+    """O receptor conta os registros e confere cada MAC com o número de sequência que espera."""
+    for esperado, (_, cab, texto, mac) in enumerate(lista):
+        certo = hmac.new(chave, struct.pack("!Q", esperado) + cab + texto, hashlib.sha256).digest()
+        ok = hmac.compare_digest(mac, certo)
+        print(f"   registro {esperado}: {len(texto):5} bytes,", "ok" if ok else "MAC inválido: conexão encerrada")
+        if not ok:
+            return
+
+r = registros(b"x" * 40000)
+print(len(r), "registros;", sum(len(c) + len(m) for _, c, _, m in r), "bytes de cabeçalho e MAC")
+recebe(r)
+print("Mallory repete o primeiro registro:")
+recebe([r[0], r[0], r[1], r[2]])</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.8 "Transport Layer Security" (pág. 172–181 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 5246 — <a href="https://www.rfc-editor.org/rfc/rfc5246" target="_blank" rel="noopener noreferrer">TLS 1.2</a>, RFC 8446 — <a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener noreferrer">TLS 1.3</a> e RFC 8996 — <a href="https://www.rfc-editor.org/rfc/rfc8996" target="_blank" rel="noopener noreferrer">Deprecating TLS 1.0 and TLS 1.1</a> (complemento)</li>
+        <li>RFC 6066 — <a href="https://www.rfc-editor.org/rfc/rfc6066" target="_blank" rel="noopener noreferrer">TLS Extensions (SNI)</a>, RFC 7525 — <a href="https://www.rfc-editor.org/rfc/rfc7525" target="_blank" rel="noopener noreferrer">Recommendations for Secure Use of TLS</a> e RFC 7366 — <a href="https://www.rfc-editor.org/rfc/rfc7366" target="_blank" rel="noopener noreferrer">Encrypt-then-MAC</a></li>
+        <li>RFC 3207 — <a href="https://www.rfc-editor.org/rfc/rfc3207" target="_blank" rel="noopener noreferrer">SMTP over TLS (STARTTLS)</a> e RFC 7258 — <a href="https://www.rfc-editor.org/rfc/rfc7258" target="_blank" rel="noopener noreferrer">Pervasive Monitoring Is an Attack</a></li>
+        <li>IANA — <a href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4" target="_blank" rel="noopener noreferrer">TLS Cipher Suites</a> e <a href="https://www.iana.org/dnssec/files" target="_blank" rel="noopener noreferrer">âncoras de confiança da raiz</a></li>
+        <li><a href="https://tls13.ulfheim.net/" target="_blank" rel="noopener noreferrer">The Illustrated TLS 1.3 Connection</a>, citado pelo livro, e <a href="https://letsencrypt.org/stats/" target="_blank" rel="noopener noreferrer">estatísticas do Let's Encrypt</a></li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" rel="noopener noreferrer">Transport Layer Security</a> e <a href="https://en.wikipedia.org/wiki/Forward_secrecy" target="_blank" rel="noopener noreferrer">Forward secrecy</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-15/index.html" class="text-muted text-decoration-none">← Capítulo 15</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 16</span>
+            <a href="../capitulo-17/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 17 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap16.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

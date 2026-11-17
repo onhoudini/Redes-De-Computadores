@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 28 — Prática: transferência confiável | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Calcular o tempo de um quadro e a vazão do bit alternado, inclusive num enlace assimétrico. Prever o comportamento do go-back-n e do selective repeat quando quadros e confirmações se perdem. Mostrar erros que o checksum da Internet não detecta e explicar o que um CRC e um hash garantem.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="28" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 28 · Parte 3: Prática · Seção 4.2</span>
+        <h1 class="display-5 mb-3">Prática: transferência confiável</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você calcula a vazão do bit alternado, acompanha o go-back-n e o selective repeat quando quadros se perdem e procura erros que um checksum não vê.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#tempo-quadro">1. Bit alternado</a>
+                    <a class="nav-link" href="#janelas">2. Janelas e perdas</a>
+                    <a class="nav-link" href="#deteccao">3. Checksum e CRC</a>
+                    <a class="nav-link" href="#exercicios-cap28">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios de transferência confiável</h2>
+    <p>
+        A seção 4.2 do livro traz perguntas abertas sobre a transferência confiável que o Capítulo 1 explicou
+        (pág. 277–279 do PDF). O livro não traz as respostas. Aqui, cada atividade tem uma resolução comentada, conferida com
+        código, mas tente resolver antes de abri-la. O formato das atividades está explicado no
+        <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Calcular o tempo de um quadro e a vazão do <strong>bit alternado</strong>, inclusive num enlace assimétrico.</li>
+                <li>Prever o comportamento do <strong>go-back-n</strong> e do <strong>selective repeat</strong> quando quadros e confirmações se perdem.</li>
+                <li>Mostrar erros que o <strong>checksum da Internet</strong> não detecta e explicar o que um <strong>CRC</strong> e um hash garantem.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise a entrega confiável e a janela deslizante do <a href="../capitulo-01/index.html">Capítulo 1</a> e o checksum
+                do UDP do <a href="../capitulo-19/index.html">Capítulo 19</a>. O capítulo cobre a seção 4.2 do livro
+                (pág. 277–279 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Bit alternado -->
+<section id="tempo-quadro" class="chapter-section" data-conceito="tempo-quadro" data-titulo="Bit alternado">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">Tempo de quadro e bit alternado</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um quadro de <em>d</em> bytes leva 8<em>d</em>/<em>b</em> segundos para ser transmitido num enlace de <em>b</em> bit/s e
+        mais o atraso de propagação para chegar. No <strong>bit alternado</strong>, o emissor manda um quadro e espera a
+        confirmação antes do próximo. O livro mostra o custo disso num enlace de satélite de 50 kbit/s com 250 ms de propagação:
+        quadros de 1000 bits saem a cada 20 + 250 + 250 = 520 ms, menos de 2 kbit/s (pág. 24 do PDF). Veja a
+        <a href="../capitulo-01/index.html#confiavel">entrega confiável no Capítulo 1</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol>
+        <li data-livro="4.2.1-Q1">Num enlace de <em>b</em> bit/s com atraso de propagação de <em>t</em> segundos, deduza o tempo entre o envio do primeiro
+            bit de um quadro de <em>d</em> bytes e a recepção do seu último bit (pág. 277 do PDF).</li>
+        <li data-livro="4.2.1-Q2">Num enlace ADSL com 1 Mbit/s de subida, 50 Mbit/s de descida e 10 ms de propagação, qual é a vazão máxima, em quadros
+            por segundo, do bit alternado com quadros de dados de 125 bytes e confirmações de 25 bytes? E com quadros de 1500 bytes?</li>
+        <li data-livro="4.2.1-Q3">Como você escolheria a duração do temporizador de retransmissão do bit alternado?</li>
+        <li data-livro="4.2.1-Q4">Uma versão com quadros de tamanho variável tem um cabeçalho com o número (0 ou 1), o tamanho dos dados e um CRC. Para
+            ganhar tempo, um estudante propõe calcular o CRC só sobre os dados, e não sobre o cabeçalho. O que você acha?</li>
+        <li data-livro="4.2.1-Q5">Deduza o <em>goodput</em> (bytes de dados úteis por segundo) do bit alternado, com <em>D</em> bytes de dados e <em>c</em>
+            de controle por quadro, confirmações de <em>c</em> bytes, <em>B</em> bit/s nos dois sentidos, atraso de <em>s</em>
+            segundos e nenhum erro (pág. 278 do PDF).</li>
+        <li data-livro="4.2.3-Q1">Na discussão (pág. 279 do PDF): dois servidores ligados por 10 Gbit/s, com 1 ms de atraso, usam quadros de 10.000 bits.
+            Que vazão um protocolo confiável alcança com janelas de 1, 10 e 100 quadros?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="abp-vazao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ol class="mt-2">
+            <li><strong>t<sub>total</sub> = 8d/b + t</strong>: o último bit sai 8<em>d</em>/<em>b</em> segundos depois do primeiro e
+                ainda precisa de <em>t</em> segundos para chegar.</li>
+            <li>O enunciado não diz em que sentido vão os dados, e a resposta depende disso. Um ciclo é: transmitir o quadro, propagar,
+                transmitir a confirmação, propagar de volta.
+                <div class="table-responsive mt-2">
+                    <table class="table table-sm small">
+                        <thead><tr><th>Quadro</th><th>Dados na subida</th><th>Dados na descida</th></tr></thead>
+                        <tbody>
+                            <tr><td>125 bytes</td><td>1 + 10 + 0,004 + 10 = 21,004 ms → <strong>47,61 quadros/s</strong></td><td>0,02 + 10 + 0,2 + 10 = 20,22 ms → <strong>49,46 quadros/s</strong></td></tr>
+                            <tr><td>1500 bytes</td><td>12 + 20 + 0,004 = 32,004 ms → <strong>31,25 quadros/s</strong></td><td>0,24 + 20 + 0,2 = 20,44 ms → <strong>48,92 quadros/s</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                Com quadros pequenos, os 20 ms de ida e volta dominam, e o sentido quase não importa. Com 1500 bytes na subida, só
+                transmitir o quadro leva 12 ms. Em todos os casos o enlace passa a maior parte do tempo parado.</li>
+            <li>O temporizador precisa ser <strong>maior</strong> que o tempo entre enviar um quadro e receber a confirmação:
+                8D/B<sub>dados</sub> + 2 × propagação + 8c/B<sub>conf.</sub>, mais o tempo de processamento. Se for menor, o emissor
+                retransmite quadros que chegaram (o bit alternado descarta as duplicatas, mas o enlace é desperdiçado); se for muito
+                maior, uma perda demora a ser recuperada. No ADSL com 125 bytes na subida, algo um pouco acima de 21 ms.</li>
+            <li>É uma má ideia. Um erro no cabeçalho passaria despercebido: com o tamanho corrompido, o receptor lê a quantidade
+                errada de dados; com o número corrompido, ele descarta um quadro novo como duplicata, ou aceita uma duplicata como
+                quadro novo. Em todos os casos o serviço deixa de ser confiável. Os poucos bytes do cabeçalho quase não pesam no
+                cálculo do CRC.</li>
+            <li>Cada ciclo leva 8(D + c)/B + s + 8c/B + s segundos e entrega D bytes:
+                <strong>goodput = D / (8(D + 2c)/B + 2s)</strong> bytes/s. Com D = 1000, c = 20, B = 1 Mbit/s e s = 10 ms, dá
+                cerca de 35.311 bytes/s, ou 282 kbit/s num enlace de 1 Mbit/s.</li>
+            <li>Com 1 ms em cada sentido, o RTT é de 2 ms, e um quadro leva 1 µs para ser transmitido. Com W quadros por ciclo, a vazão é
+                W × 10.000 bits / 2,001 ms: <strong>5 Mbit/s</strong> com 1 quadro, <strong>50 Mbit/s</strong> com 10 e
+                <strong>500 Mbit/s</strong> com 100. Para ocupar os 10 Gbit/s, a janela precisaria de 2001 quadros.</li>
+        </ol>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="A propagação de ida e volta|A transmissão do quadro|A transmissão da confirmação" data-answer="0" data-explain="No ADSL, com 125 bytes, a transmissão leva 1 ms e a ida e volta, 20 ms (pág. 277 do PDF)." data-hint="Compare 1 ms com 20 ms.">
+        <p class="fw-semibold mb-2">Com quadros pequenos num enlace de 10 ms de propagação, o que domina o ciclo do bit alternado?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque um erro no número ou no tamanho faria o receptor perder ou duplicar dados sem perceber|Porque o CRC fica mais rápido|Porque o cabeçalho é cifrado" data-answer="0" data-explain="O CRC precisa cobrir tudo o que o receptor usa para decidir o que fazer com o quadro (questão 4, pág. 277 do PDF)." data-hint="O que o receptor faz com o número de sequência?">
+        <p class="fw-semibold mb-2">Por que o CRC deve cobrir também o cabeçalho do quadro?</p>
+    </div>
+</section>
+
+<!-- 2. Janelas -->
+<section id="janelas" class="chapter-section" data-conceito="janelas" data-titulo="Janelas e perdas">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Go-back-n e selective repeat com perdas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O receptor <strong>go-back-n</strong> só aceita quadros em ordem e manda confirmações cumulativas; o emissor tem um único
+        temporizador e, quando ele expira, retransmite todos os quadros não confirmados. O receptor <strong>selective repeat</strong>
+        guarda os quadros fora de ordem que caibam na sua janela; o emissor tem um temporizador por quadro e retransmite só o que
+        expirou. Com confirmações só cumulativas, o emissor não sabe o que chegou depois de uma perda; por isso o receptor pode
+        acrescentar a lista dos quadros recebidos fora de ordem, as <strong>confirmações seletivas</strong> (pág. 27–31 do PDF).
+        Veja a <a href="../capitulo-01/index.html#janela">janela deslizante no Capítulo 1</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol>
+        <li data-livro="4.2.1-Q6">Um emissor e um receptor go-back-n estão ligados por um enlace de 10 Mbit/s com 100 ms de propagação, temporizador de
+            3 s e janela de 4 quadros. Desenhe o diagrama de tempo da transmissão de 10 quadros de 10.000 bits: sem perdas; quando o
+            terceiro e o sétimo quadros se perdem; quando uma confirmação em cada duas é descartada por erros (pág. 278 do PDF).</li>
+        <li data-livro="4.2.1-Q7">A mesma pergunta com selective repeat. A resposta não é necessariamente a mesma.</li>
+        <li data-livro="4.2.3-Q2">Um receptor go-back-n consegue funcionar com um emissor selective repeat? Justifique (pág. 279 do PDF).</li>
+        <li data-livro="4.2.3-Q3">Um receptor selective repeat consegue funcionar com um emissor go-back-n?</li>
+        <li data-livro="4.2.3-Q4">Um emissor go-back-n mandou 2<sup>n</sup> quadros, todos recebidos em ordem, mas todas as confirmações se perderam. O
+            que acontece (por exemplo, com uma janela de quatro quadros)? Dá para corrigir o problema no emissor?</li>
+        <li data-livro="4.2.3-Q5">A mesma pergunta com selective repeat nos dois lados.</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="gbn-sr-perdas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2">
+            Hipóteses: as confirmações têm tamanho desprezível; o receptor confirma assim que um quadro chega; o temporizador começa
+            quando o quadro começa a ser transmitido; "uma confirmação em cada duas" é a 2ª, a 4ª, a 6ª… enviadas; cada quadro
+            perdido só se perde na primeira transmissão. A simulação acima e o bloco 2 dos exemplos de código seguem essas hipóteses.
+        </p>
+        <div class="table-responsive">
+            <table class="table table-sm small">
+                <thead><tr><th>Cenário</th><th>Go-back-n</th><th>Selective repeat</th><th>Selective repeat com confirmações seletivas</th></tr></thead>
+                <tbody>
+                    <tr><td>Sem perdas</td><td>604 ms, 10 envios</td><td>604 ms, 10 envios</td><td>604 ms, 10 envios</td></tr>
+                    <tr><td>3º e 7º quadros perdidos</td><td>6610 ms, 18 envios</td><td>6404 ms, 18 envios</td><td>6404 ms, 12 envios</td></tr>
+                    <tr><td>1 confirmação em 2 perdida</td><td>3805 ms, 11 envios</td><td>3606 ms, 11 envios</td><td>3606 ms, 11 envios</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <ol>
+            <li><strong>Go-back-n.</strong> Sem perdas, D(0) a D(3) saem até 4 ms; OK0 volta em 201 ms, e cada confirmação libera um
+                quadro novo; a última, OK9, chega em 604 ms. Quando D(2) se perde, o receptor descarta D(3), D(4) e D(5) e repete OK1.
+                O temporizador, reiniciado por OK1 em 202 ms, expira em 3202 ms, e o emissor retransmite D(2) a D(5); com D(6), a
+                história se repete, e a transferência termina em 6610 ms. Com uma confirmação em cada duas perdida, as cumulativas
+                cobrem as perdidas, exceto a última: OK9 se perde, o temporizador reiniciado por OK8 (604 ms) expira em 3604 ms e D(9)
+                é reenviado.</li>
+            <li><strong>Selective repeat.</strong> Sem confirmações seletivas, o resultado surpreende: também 18 envios. O receptor
+                guarda D(3), D(4) e D(5), mas só pode confirmar OK1. Os temporizadores de cada quadro, iniciados com 1 ms de
+                diferença, expiram em 3002, 3003, 3201 e 3202 ms, antes de OK5 chegar (3203 ms), e todos são reenviados. É o problema
+                que o livro descreve na pág. 31. Com confirmações seletivas, o emissor cancela os temporizadores de D(3), D(4) e D(5)
+                e só retransmite D(2) e D(6): 12 envios. Com confirmações perdidas, só D(9) volta a ser enviado, e o temporizador
+                dele, iniciado em 405 ms, expira antes do go-back-n (3405 ms contra 3604 ms).</li>
+            <li><strong>Receptor go-back-n com emissor selective repeat: funciona.</strong> O receptor descarta os quadros fora de
+                ordem, que nunca são confirmados; o temporizador de cada um expira, e o emissor os reenvia um a um. A entrega é
+                correta, mas lenta, e a janela do emissor (até 2<sup>n−1</sup>) cabe no limite do go-back-n.</li>
+            <li><strong>Receptor selective repeat com emissor go-back-n: funciona, com uma condição.</strong> O receptor aceita as
+                retransmissões em bloco e descarta as duplicatas fora da sua janela. Mas o go-back-n permite janelas de até
+                2<sup>n</sup> − 1, e o selective repeat só é seguro até 2<sup>n−1</sup>: com uma janela maior, depois de perder as
+                confirmações, o receptor poderia aceitar uma retransmissão antiga como quadro novo. O emissor precisa usar no máximo
+                2<sup>n−1</sup>.</li>
+            <li>Com 2 bits (números 0 a 3) e janela de 4, o emissor manda D(0) a D(3), o receptor aceita os quatro e passa a esperar
+                o 0 seguinte. As confirmações se perdem, o temporizador expira e D(0) a D(3) são reenviados: o receptor aceita as
+                duplicatas como quadros novos e as entrega duas vezes. A correção é limitar a janela do emissor a
+                <strong>2<sup>n</sup> − 1</strong> = 3 quadros: o receptor espera então o número 3, que não está entre os
+                retransmitidos, e descarta as duplicatas. É a nota da pág. 31 do livro.</li>
+            <li>No selective repeat, 2<sup>n</sup> − 1 não basta, porque o receptor aceita quadros fora de ordem dentro da janela.
+                Com 2 bits e janela de 3, depois de aceitar 0, 1 e 2, a janela do receptor é {3, 0, 1}: as retransmissões de 0 e 1
+                seriam aceitas como novas. A janela precisa ser de no máximo <strong>2<sup>n−1</sup></strong> = 2 (pág. 31 do PDF).</li>
+        </ol>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Porque o receptor go-back-n os descartou ao recebê-los fora de ordem|Porque eles também se perderam|Porque o temporizador estava desligado" data-answer="0" data-explain="O receptor go-back-n só aceita quadros em ordem; tudo o que chega depois de uma perda é descartado (pág. 27 do PDF)." data-hint="O que o receptor go-back-n faz com um quadro fora de ordem?">
+        <p class="fw-semibold mb-2">No go-back-n, depois da perda de D(2), por que D(3), D(4) e D(5) também são retransmitidos?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="4|7|8" data-answer="0" data-explain="O selective repeat admite até 2ⁿ⁻¹ = 4 quadros com 3 bits; o go-back-n, até 2ⁿ − 1 = 7 (pág. 31 do PDF)." data-hint="2 elevado a n − 1.">
+        <p class="fw-semibold mb-2">Com 3 bits de número de sequência, qual é a maior janela segura do selective repeat?</p>
+    </div>
+</section>
+
+<!-- 3. Detecção de erros -->
+<section id="deteccao" class="chapter-section" data-conceito="deteccao" data-titulo="Checksum e CRC">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Checksum, CRC e hash</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Os protocolos confiáveis dependem da detecção de erros. O <strong>checksum da Internet</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">RFC 1071</a>), usado pelo UDP e
+        pelo TCP, soma as palavras de 16 bits em complemento de um. Os <strong>CRCs</strong> de 16 e 32 bits aparecem em discos,
+        arquivos zip e na camada de enlace; o <strong>checksum de Fletcher</strong> é outra opção. Nenhum deles serve contra quem
+        altera os dados de propósito: para isso existem as funções de hash criptográficas (pág. 278–279 do PDF). Veja o
+        <a href="../capitulo-01/index.html#enquadramento">enquadramento e o CRC no Capítulo 1</a> e as
+        <a href="../capitulo-08/index.html#hash">funções de hash no Capítulo 8</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol>
+        <li data-livro="4.2.2-Q1">Usando o que sabe do checksum da Internet, encontre um erro de transmissão que ele não detecta (pág. 278 do PDF).</li>
+        <li data-livro="4.2.2-Q2">Os CRCs detectam todos os erros que afetam um número ímpar de bits e todas as sequências de erros menores que o próprio
+            CRC. Escreva um programa que calcule o CRC-32 de um arquivo de texto e troque um número par ou ímpar de bits do arquivo.</li>
+        <li data-livro="4.2.2-Q3">Checksums e CRCs não devem ser confundidos com funções de hash seguras, como o MD5 (RFC 1321) e o SHA-1 (RFC 4634),
+            feitas para detectar alterações maliciosas. Repita os testes com os programas <code>shasum</code> e <code>md5sum</code>
+            (pág. 278–279 do PDF).</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        A frase "os CRCs detectam todos os erros que afetam um número ímpar de bits" (pág. 278 do PDF) vale só para os CRCs cujo
+        polinômio gerador tem o fator (x + 1), como o CRC de 16 bits do PPP, x<sup>16</sup> + x<sup>12</sup> + x<sup>5</sup> + 1. O
+        gerador do CRC-32 da Ethernet tem 15 termos, e um polinômio com número ímpar de termos não é divisível por (x + 1). Por isso
+        existem erros com número ímpar de bits que o CRC-32 não vê: por exemplo, os 15 bits do próprio gerador aplicados a qualquer
+        posição da mensagem (veja o desafio do bloco 3). O CRC-32 detecta todo erro de 1 ou 2 bits e toda rajada de até 32 bits,
+        como diz a segunda parte da frase.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="checksum-cego"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ol class="mt-2">
+            <li>A soma não depende da ordem das parcelas: <strong>trocar duas palavras de 16 bits de lugar</strong> não muda o
+                checksum. Também passa despercebido um erro que <strong>liga um bit numa palavra e desliga o mesmo bit em outra</strong>,
+                ou que soma 1 a uma palavra e subtrai 1 de outra. Em "Redes de Computadores!", trocar "Re" por "de" no começo, ou
+                transformar o "e" do segundo byte em "d" e o espaço do sexto em "!", mantém o checksum 0xb331. O Fletcher-16 percebe
+                a troca de palavras porque a sua segunda soma acumula a posição de cada byte.</li>
+            <li>Em Python, <code>zlib.crc32</code> calcula o CRC-32 (veja o bloco 3 dos exemplos). Trocar 1 bit, 2 bits ou uma rajada
+                curta sempre muda o resultado. Pela nota acima, há padrões com número ímpar de bits que passam, mas são raros: um erro
+                aleatório passa despercebido com probabilidade de cerca de 1 em 2<sup>32</sup>.</li>
+            <li>Qualquer mudança, mesmo de 1 bit, altera o resultado do <code>shasum</code> ou do <code>md5sum</code> de forma
+                imprevisível. A diferença está no objetivo: um checksum ou um CRC é fácil de recalcular e de enganar de propósito; de
+                uma função de hash segura se espera que ninguém consiga produzir duas entradas com o mesmo resumo.</li>
+        </ol>
+        <p class="nota-livro small mb-0">
+            <span class="extra-tag">Complemento</span><br>
+            O MD5 e o SHA-1 já não cumprem esse papel: há colisões conhecidas para os dois
+            (<a href="https://www.rfc-editor.org/rfc/rfc6151" target="_blank" rel="noopener noreferrer">RFC 6151</a>;
+            <a href="https://en.wikipedia.org/wiki/SHA-1#SHAttered_%E2%80%93_first_public_collision" target="_blank" rel="noopener noreferrer">colisão do SHA-1 em 2017</a>).
+            Hoje se usa o SHA-256 (<code>sha256sum</code>). A RFC 4634, citada pelo livro, foi substituída pela
+            <a href="https://www.rfc-editor.org/rfc/rfc6234" target="_blank" rel="noopener noreferrer">RFC 6234</a>. E um hash sozinho
+            só protege se o resumo chegar por um canal confiável: quem altera o arquivo pode recalculá-lo. Por isso os protocolos
+            usam hashes com chave, como o HMAC do <a href="../capitulo-15/index.html">Capítulo 15</a>.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Não: a soma é a mesma em qualquer ordem|Sim, sempre|Só se as palavras forem iguais" data-answer="0" data-explain="O checksum da Internet é uma soma, e a soma não depende da ordem das parcelas (pág. 278 do PDF)." data-hint="O que acontece com uma soma quando você troca as parcelas?">
+        <p class="fw-semibold mb-2">O checksum da Internet detecta a troca de lugar de duas palavras de 16 bits?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Uma função de hash segura, com o resumo recebido por um canal confiável ou com chave (HMAC)|Um CRC de 64 bits|O checksum da Internet calculado duas vezes" data-answer="0" data-explain="Checksums e CRCs só detectam erros aleatórios; contra alterações maliciosas, usa-se hash seguro (pág. 278–279 do PDF), e o resumo precisa estar protegido." data-hint="Quem altera de propósito pode recalcular qualquer código sem segredo.">
+        <p class="fw-semibold mb-2">Para detectar que alguém alterou de propósito um arquivo baixado, o que usar?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap28" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> quanto tempo leva, do primeiro bit enviado ao último bit recebido, um quadro de 1000 bytes num enlace de 100 Mbit/s com 2 ms de propagação?
+            <details><summary>Ver solução</summary><p class="mb-0">8000 / 100 Mbit/s = 0,08 ms de transmissão, mais 2 ms: 2,08 ms.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> com 3 bits de número de sequência, qual é a maior janela do go-back-n? E do selective repeat?
+            <details><summary>Ver solução</summary><p class="mb-0">2<sup>3</sup> − 1 = 7 no go-back-n e 2<sup>2</sup> = 4 no selective repeat (pág. 31 do PDF).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> qual é o goodput do bit alternado com D = 1000 bytes, c = 20 bytes, B = 1 Mbit/s e s = 10 ms?
+            <details><summary>Ver solução</summary><p class="mb-0">1000 / (8 × 1040 / 10<sup>6</sup> + 0,02) = 1000 / 0,02832 ≈ 35.311 bytes/s, cerca de 282 kbit/s.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> no cenário sem perdas da atividade 2, o temporizador do go-back-n é de 150 ms, menor que o RTT de cerca de 201 ms. O que acontece?
+            <details><summary>Ver solução</summary><p class="mb-0">A transferência ainda termina em 604 ms, mas com 20 envios: todo quadro expira antes de a confirmação chegar e é mandado duas vezes. O receptor descarta as duplicatas, e o enlace carrega o dobro de dados. Confira na simulação ou no bloco 2.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Tempo de quadro, bit alternado e janelas</h3>
+    <pre class="code-block"><code>def tempo_quadro(d_bytes, b_bps, t_prop):
+    """Do primeiro bit enviado ao último bit recebido: transmissão + propagação (questão 1, pág. 277)."""
+    return d_bytes * 8 / b_bps + t_prop
+
+def bit_alternado(dados, ack, b_dados, b_ack, prop):
+    """Um quadro por ciclo: transmite, propaga, a confirmação volta. Devolve (ciclo em s, quadros/s)."""
+    ciclo = dados * 8 / b_dados + prop + ack * 8 / b_ack + prop
+    return ciclo, 1 / ciclo
+
+def janela(W, quadro_bits, banda, rtt):
+    """Vazão com W quadros em trânsito: no máximo W quadros por (rtt + tempo de um quadro), limitada pela banda."""
+    return min(W * quadro_bits / (rtt + quadro_bits / banda), banda)
+
+print(f"satélite do livro (pág. 24): um quadro a cada {1000 * tempo_quadro(125, 50e3, 0.250) + 250:.0f} ms")
+
+# questão 2: ADSL com 1 Mbit/s de subida e 50 Mbit/s de descida, 10 ms de propagação
+for dados in (125, 1500):
+    ciclo, q = bit_alternado(dados, 25, 1e6, 50e6, 0.010)      # dados na subida, confirmações na descida
+    print(f"{dados:4} bytes na subida: ciclo de {1000 * ciclo:.3f} ms, {q:.2f} quadros/s, {q * dados * 8 / 1e3:.1f} kbit/s")
+
+# discussão 1: 10 Gbit/s, 1 ms de atraso em cada sentido, quadros de 10.000 bits
+for W in (1, 10, 100):
+    print(f"janela de {W:3} quadros: {janela(W, 10_000, 10e9, 0.002) / 1e6:7.2f} Mbit/s")</code></pre>
+
+    <h3 class="h6 mt-4">2. Go-back-n e selective repeat com perdas</h3>
+    <pre class="code-block"><code>import heapq
+
+def simula(proto, perdas=(), perde_ack=lambda k: False, sack=False, n=10, W=4, tx=1, prop=100, rto=3000):
+    """Go-back-n ("gbn") ou selective repeat ("sr") das págs. 27-31. Tempos em ms.
+    perdas: quadros cuja primeira transmissão se perde; perde_ack(k): a k-ésima confirmação se perde."""
+    fila, n_ev = [], [0]
+    def agenda(t, *x):
+        n_ev[0] += 1
+        heapq.heappush(fila, (t, n_ev[0]) + x)
+    livre, envios, perdidos = [0], [], set()
+    def transmite(t, s):
+        ini = max(t, livre[0]); livre[0] = ini + tx
+        envios.append(s)
+        if s in perdas and s not in perdidos: perdidos.add(s)      # perde só a primeira vez
+        else: agenda(ini + tx + prop, "chega", s)
+        return ini
+    base, prox, timer, timers = 0, 0, None, {}
+    esperado, guardados, acks = 0, set(), 0
+    def enche(t):
+        nonlocal prox, timer
+        while prox &lt; n and prox &lt; base + W:
+            ini = transmite(t, prox)
+            if proto == "sr": timers[prox] = ini + rto; agenda(ini + rto, "expira", prox)
+            elif timer is None: timer = ini + rto; agenda(timer, "expira", None)
+            prox += 1
+    enche(0)
+    while fila:
+        t, _, tipo, x = heapq.heappop(fila)
+        if tipo == "chega":                                         # receptor
+            if proto == "gbn" and x == esperado: esperado += 1
+            if proto == "sr" and esperado &lt;= x &lt; esperado + W: guardados.add(x)
+            while esperado in guardados: guardados.discard(esperado); esperado += 1
+            acks += 1
+            if not perde_ack(acks): agenda(t + prop, "ack", (esperado - 1, sorted(guardados) if sack else []))
+        elif tipo == "ack":                                         # emissor
+            ok, lista = x
+            for s in lista: timers.pop(s, None)                     # seletiva: cancela o temporizador
+            if ok &gt;= base:
+                for s in range(base, ok + 1): timers.pop(s, None)
+                base = ok + 1
+                if base == n: return t, envios
+                if proto == "gbn":
+                    timer = t + rto; agenda(timer, "expira", None)  # ainda há quadros sem confirmação
+                enche(t)
+        elif proto == "gbn" and x is None and t == timer:
+            for s in range(base, prox): transmite(t, s)             # go-back-n: retransmite tudo
+            timer = t + rto; agenda(timer, "expira", None)
+        elif proto == "sr" and timers.get(x) == t:
+            ini = transmite(t, x); timers[x] = ini + rto; agenda(ini + rto, "expira", x)
+
+for proto, sack in (("gbn", False), ("sr", False), ("sr", True)):
+    nome = proto + (" + SACK" if sack else "")
+    for cenario, kw in (("sem perdas", {}), ("perde o 3º e o 7º", {"perdas": (2, 6)}),
+                        ("perde 1 ack em 2", {"perde_ack": lambda k: k % 2 == 0})):
+        fim, envios = simula(proto, sack=sack, **kw)
+        print(f"{nome:9} {cenario:18} fim em {fim:5} ms, {len(envios):2} transmissões: {envios}")</code></pre>
+
+    <h3 class="h6 mt-4">3. Checksum da Internet, Fletcher, CRC-32 e SHA-256</h3>
+    <pre class="code-block"><code>import hashlib
+import zlib
+
+def checksum_internet(dados):
+    """RFC 1071: soma em complemento de um das palavras de 16 bits, invertida no fim."""
+    if len(dados) % 2:
+        dados += b"\x00"
+    soma = sum(int.from_bytes(dados[i:i + 2], "big") for i in range(0, len(dados), 2))
+    while soma &gt;&gt; 16:
+        soma = (soma &amp; 0xFFFF) + (soma &gt;&gt; 16)                  # o "vai um" volta para o bit mais baixo
+    return ~soma &amp; 0xFFFF
+
+def fletcher16(dados):
+    a = b = 0
+    for x in dados:
+        a = (a + x) % 255
+        b = (b + a) % 255                                       # b depende da posição de cada byte
+    return (b &lt;&lt; 8) | a
+
+def resumo(rotulo, m):
+    print(f"{rotulo:24} Internet {checksum_internet(m):04x}  Fletcher {fletcher16(m):04x}  "
+          f"CRC-32 {zlib.crc32(m):08x}  SHA-256 {hashlib.sha256(m).hexdigest()[:16]}…")
+
+original = b"Redes de Computadores!"
+resumo("original", original)
+
+trocada = original[2:4] + original[0:2] + original[4:]        # troca as duas primeiras palavras de 16 bits
+resumo("palavras trocadas", trocada)
+
+compensada = bytearray(original)
+compensada[1] ^= 0x01        # 'e' (0x65) vira 'd': o bit 0 da 1ª palavra passa de 1 para 0
+compensada[5] ^= 0x01        # ' ' (0x20) vira '!': o mesmo bit da 3ª palavra passa de 0 para 1
+resumo("bits compensados", bytes(compensada))
+print(bytes(compensada))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.2 "Reliable transfer" (pág. 277–279 do PDF) e seção 2.1 (pág. 24–31 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 1071 — <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">Computing the Internet Checksum</a></li>
+        <li>RFC 6234 — <a href="https://www.rfc-editor.org/rfc/rfc6234" target="_blank" rel="noopener noreferrer">US Secure Hash Algorithms</a> e RFC 6151 — <a href="https://www.rfc-editor.org/rfc/rfc6151" target="_blank" rel="noopener noreferrer">Updated Security Considerations for MD5</a></li>
+        <li>Documentação do Python — <a href="https://docs.python.org/3/library/struct.html" target="_blank" rel="noopener noreferrer">struct</a>, <a href="https://docs.python.org/3/library/zlib.html" target="_blank" rel="noopener noreferrer">zlib</a> e <a href="https://docs.python.org/3/library/hashlib.html" target="_blank" rel="noopener noreferrer">hashlib</a></li>
+        <li>Rosetta Code — <a href="https://rosettacode.org/wiki/CRC-32" target="_blank" rel="noopener noreferrer">CRC-32</a>, citado pelo livro</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Fletcher%27s_checksum" target="_blank" rel="noopener noreferrer">Fletcher's checksum</a> e <a href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check" target="_blank" rel="noopener noreferrer">Cyclic redundancy check</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-27/index.html" class="text-muted text-decoration-none">← Capítulo 27</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 28</span>
+            <a href="../capitulo-29/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 29 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap28.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

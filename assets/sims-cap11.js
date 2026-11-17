@@ -1,450 +1,490 @@
-/* Simulações do Capítulo 11 — Protocolos seguros: ssh, TLS e DNSSEC (seções 3.7 a 3.9 do livro).
- * Cada uma é registrada em Redes.registrar. A criptografia aqui é ilustrativa: os "MACs", resumos
- * e assinaturas usam uma função simples (FNV-1a), suficiente para mostrar o mecanismo, mas sem segurança. */
+/* Simulações do Capítulo 11 — Correio eletrônico (seção 3.3 do livro).
+ * Cada uma é registrada em Redes.registrar. Os dados vêm dos exemplos do livro;
+ * quando não vêm, usam nomes e endereços reservados para documentação (RFC 2606, RFC 3849, RFC 5737). */
 (function () {
     "use strict";
     var R = window.Redes;
     var u = R.util, el = u.el;
 
+    function hex2(n) { return n.toString(16).padStart(2, "0"); }
+    function hex4(n) { return n.toString(16).padStart(4, "0"); }
+    function bin(n, largura) { return n.toString(2).padStart(largura, "0"); }
+    function normaliza(s) { return String(s || "").trim().toLowerCase().replace(/\.$/, ""); }
+    function faixa(rotulo, min, max, passo, valor) {
+        var input = el("input", { type: "range", class: "form-range", min: min, max: max, step: passo, value: valor, id: u.novoId("faixa") });
+        var mostra = el("span", { class: "fw-semibold" });
+        var linha = el("div", { class: "mb-2" }, el("label", { class: "form-label small mb-0 d-flex justify-content-between", for: input.id }, rotulo, mostra), input);
+        return { input: input, mostra: mostra, linha: linha };
+    }
     function entrada(valor, rotulo) {
         return el("input", { class: "form-control form-control-sm mono", value: valor || "", "aria-label": rotulo || null, spellcheck: "false", autocomplete: "off" });
     }
-    function caixa(rotulo, marcada) {
-        var c = el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("cx"), checked: !!marcada });
-        return { input: c, linha: el("div", { class: "form-check" }, c, el("label", { class: "form-check-label small", for: c.id }, rotulo)) };
-    }
-    function faixa(rotulo, min, max, passo, valor, formata) {
-        var input = el("input", { type: "range", class: "form-range", min: min, max: max, step: passo, value: valor, id: u.novoId("faixa") });
-        var mostra = el("span", { class: "fw-semibold" });
-        function atualiza() { mostra.textContent = formata ? formata(Number(input.value)) : input.value; }
-        input.addEventListener("input", atualiza);
-        atualiza();
-        return { input: input, mostra: mostra, linha: el("div", { class: "mb-2" }, el("label", { class: "form-label small mb-0 d-flex justify-content-between", for: input.id }, rotulo, mostra), input) };
-    }
-    // Resumo didático (FNV-1a de 32 bits), só para ilustrar MACs e resumos.
-    function resumo(texto) {
-        var h = 0x811c9dc5;
-        var b = new TextEncoder().encode(String(texto));
-        for (var i = 0; i < b.length; i++) { h ^= b[i]; h = Math.imul(h, 0x01000193) >>> 0; }
-        return h.toString(16).padStart(8, "0");
-    }
-    R.resumoDidatico = resumo;
-    function num(n, casas) { return n.toLocaleString("pt-BR", { minimumFractionDigits: casas || 0, maximumFractionDigits: casas || 0 }); }
 
-    /* ------------------------------------------------------------------
-     * 1. telnet contra ssh: o que Eve vê (pág. 169 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("telnet-captura", function (raiz) {
-        var proto = el("select", { class: "form-select form-select-sm" }, el("option", { value: "telnet" }, "telnet (porta 23)"), el("option", { value: "ssh" }, "ssh (porta 22)"));
-        var usuario = entrada("alice", "Usuário"), senha = entrada("s3nh@", "Senha");
-        var terminal = el("pre", { class: "log mb-0" });
-        var eve = el("pre", { class: "log mb-0", "aria-live": "polite" });
-        var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "telnet-ssh", 10, "Comparar o que Eve captura no telnet e no ssh");
-        var sorteio = u.aleatorio(5);
-        function cifrado(n) { var s = ""; for (var i = 0; i < n; i++) s += Math.floor(sorteio() * 256).toString(16).padStart(2, "0"); return s; }
-        function login() {
-            var us = usuario.value || "alice", se = senha.value || "x";
-            terminal.textContent = "login: " + us + "\nPassword: \n$ ls\nnotas.txt  trabalho.pdf";
-            if (proto.value === "telnet") {
-                var pacotes = [];
-                (us + "\r").split("").forEach(function (c) { pacotes.push("cliente → servidor  '" + (c === "\r" ? "\\r" : c) + "'"); });
-                pacotes.push("servidor → cliente  'Password: '");
-                (se + "\r").split("").forEach(function (c) { pacotes.push("cliente → servidor  '" + (c === "\r" ? "\\r" : c) + "'"); });
-                pacotes.push("cliente → servidor  'ls\\r'", "servidor → cliente  'notas.txt  trabalho.pdf'");
-                eve.textContent = "Eve capturou (TCP, porta 23):\n" + pacotes.join("\n") + "\n\n→ senha de " + us + ": " + se;
-                vistos.telnet = true;
-            } else {
-                var linhas = ["cliente → servidor  SSH-2.0-OpenSSH_9.6", "servidor → cliente  SSH-2.0-OpenSSH_9.6", "… negociação e troca de chaves …"];
-                for (var i = 0; i < 5; i++) linhas.push((i % 2 ? "servidor → cliente  " : "cliente → servidor  ") + cifrado(16) + "…");
-                eve.textContent = "Eve capturou (TCP, porta 22):\n" + linhas.join("\n") + "\n\n→ só as versões aparecem em claro; usuário, senha e comandos vão cifrados.";
-                vistos.ssh = true;
+    /* ---------- IPv6: leitura e forma compacta ---------- */
+    // Devolve os 8 grupos de 16 bits, ou null se o texto não for um endereço IPv6 válido.
+    function leIPv6(texto) {
+        var s = String(texto || "").trim().toLowerCase();
+        if (!/^[0-9a-f:]+$/.test(s) || s.indexOf(":::") >= 0) return null;
+        var partes = s.split("::");
+        if (partes.length > 2) return null;
+        function grupos(p) { return p === "" ? [] : p.split(":"); }
+        var esq = grupos(partes[0]), dir = partes.length === 2 ? grupos(partes[1]) : [];
+        var todos = esq.concat(dir);
+        if (todos.some(function (g) { return !/^[0-9a-f]{1,4}$/.test(g); })) return null;
+        var faltam = 8 - todos.length;
+        if (partes.length === 1 && faltam !== 0) return null;
+        if (partes.length === 2 && faltam < 1) return null;
+        var zeros = [];
+        for (var i = 0; i < faltam && partes.length === 2; i++) zeros.push("0");
+        return esq.concat(zeros, dir).map(function (g) { return parseInt(g, 16); });
+    }
+    // Maior sequência de grupos nulos (a primeira, em caso de empate), com pelo menos 2 grupos (RFC 5952).
+    function maiorSequenciaZero(g) {
+        var melhor = { ini: -1, tam: 0 }, ini = -1;
+        for (var i = 0; i <= 8; i++) {
+            if (i < 8 && g[i] === 0) { if (ini < 0) ini = i; }
+            else if (ini >= 0) {
+                if (i - ini > melhor.tam) melhor = { ini: ini, tam: i - ini };
+                ini = -1;
             }
-            if (vistos.telnet && vistos.ssh) { u.marca(fb, true, "No telnet, cada tecla atravessa a rede em claro, inclusive a senha. No ssh, Eve só vê as linhas de versão e bytes cifrados."); concluir(); }
         }
-        raiz.append(el("div", { class: "row g-2" },
-            el("div", { class: "col-sm-4" }, u.campo("Protocolo", proto)),
-            el("div", { class: "col-sm-4" }, u.campo("Usuário", usuario)),
-            el("div", { class: "col-sm-4" }, u.campo("Senha", senha))),
-            u.botao("Fazer login e rodar ls", "btn-primary mb-2", login),
-            el("div", { class: "row g-2" },
-                el("div", { class: "col-md-5" }, el("div", { class: "small text-muted" }, "O que Alice vê"), terminal),
-                el("div", { class: "col-md-7" }, el("div", { class: "small text-muted" }, "O que Eve, na mesma rede, vê"), eve)),
-            fb, el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (10 pts): faça o login pelos dois protocolos e compare o que Eve consegue ler."));
-    });
+        return melhor.tam >= 2 ? melhor : { ini: -1, tam: 0 };
+    }
+    function compactaIPv6(g) {
+        var z = maiorSequenciaZero(g);
+        var txt = g.map(function (x) { return x.toString(16); });
+        if (z.ini < 0) return txt.join(":");
+        return txt.slice(0, z.ini).join(":") + "::" + txt.slice(z.ini + z.tam).join(":");
+    }
+    function completaIPv6(g) { return g.map(hex4).join(":"); }
+    R.ipv6 = { le: leIPv6, compacta: compactaIPv6 };   // exposto para os testes automáticos
 
     /* ------------------------------------------------------------------
-     * 2. Negociação de algoritmos do ssh e o ataque de rebaixamento (pág. 170–171 do PDF)
+     * 1. Notação IPv6 (pág. 133–134 do PDF)
      * ------------------------------------------------------------------ */
-    function negocia(cliente, servidor) {
-        for (var i = 0; i < cliente.length; i++) if (servidor.indexOf(cliente[i]) >= 0) return cliente[i];
-        return null;
-    }
-    R.negociaSsh = negocia;
 
-    R.registrar("negociacao-ssh", function (raiz) {
-        var TIPOS = [
-            { nome: "Troca de chaves", c: ["curve25519-sha256", "diffie-hellman-group14-sha256"], s: ["diffie-hellman-group14-sha256", "curve25519-sha256"] },
-            { nome: "Cifra", c: ["cifra-128", "cifra-48"], s: ["cifra-48", "cifra-128"] },
-            { nome: "MAC", c: ["hmac-sha2-256", "hmac-sha1"], s: ["hmac-sha1", "hmac-sha2-256"] },
-            { nome: "Compressão", c: ["none", "zlib"], s: ["none"] }
+    /* ------------------------------------------------------------------
+     * 5. Seguindo as linhas Received: (pág. 136 do PDF)
+     * ------------------------------------------------------------------ */
+    R.registrar("rastreia-received", function (raiz) {
+        // Linhas do cabeçalho do livro, de cima para baixo (a de cima foi acrescentada por último).
+        var LINHAS = [
+            { from: "smtp3.sgsi.ucl.ac.be", by: "mmp.sipr-dc.ucl.ac.be", data: "11:37:17 +0100", utc: "10:37:17" },
+            { from: "mail.ietf.org", by: "smtp3.sgsi.ucl.ac.be", data: "11:36:51 +0100", utc: "10:36:51" },
+            { from: "localhost [127.0.0.1]", by: "core3.amsl.com", data: "02:36:38 -0800", utc: "10:36:38" },
+            { from: "localhost [127.0.0.1]", by: "core3.amsl.com", data: "02:36:37 -0800", utc: "10:36:37" },
+            { from: "mail.ietf.org", by: "localhost (core3.amsl.com, filtro amavisd-new)", data: "02:36:36 -0800", utc: "10:36:36" },
+            { from: "gair.firstpr.com.au", by: "core3.amsl.com", data: "02:36:35 -0800", utc: "10:36:35" },
+            { from: "[10.0.0.6] (wira.firstpr.com.au)", by: "gair.firstpr.com.au", data: "21:36:37 +1100", utc: "10:36:37" }
         ];
-        var mallory = caixa("Mallory apaga a cifra-128 da lista que o cliente envia", false);
-        var hash = caixa("O servidor assina um hash de todas as mensagens da troca (como faz o ssh)", true);
+        var ordemCerta = [6, 5, 4, 3, 2, 1, 0];
+        var embaralhada = [3, 0, 5, 2, 6, 1, 4];
+        var escolhidas = [];
+        var lista = el("div", { class: "ordem-lista", role: "list" });
+        var caminho = el("ol", { class: "small mt-2 mb-0" });
+        var fb = u.feedback();
         var tabela = el("div", { class: "mt-2" });
-        var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "ssh-rebaixamento", 15, "Ver um ataque de rebaixamento funcionar e ser detectado");
-        function conecta() {
-            var linhas = [], comprometido = false;
-            TIPOS.forEach(function (t) {
-                var enviada = t.c.slice();
-                if (t.nome === "Cifra" && mallory.input.checked) { enviada = enviada.filter(function (x) { return x !== "cifra-128"; }); comprometido = true; }
-                linhas.push({ t: t, enviada: enviada, escolhido: negocia(enviada, t.s) });
-            });
-            tabela.replaceChildren(el("div", { class: "table-responsive" }, el("table", { class: "table table-sm small mb-0" },
-                el("thead", null, el("tr", null, el("th", null, "Tipo"), el("th", null, "Lista do cliente (preferida primeiro)"), el("th", null, "Lista do servidor"), el("th", null, "Escolhido"))),
-                el("tbody", null, linhas.map(function (l) {
-                    return el("tr", null, el("td", null, l.t.nome),
-                        el("td", { class: "mono" }, l.t.c.map(function (x, i) {
-                            var item = l.enviada.indexOf(x) < 0 ? el("s", { title: "apagado por Mallory" }, x) : x;
-                            return i ? [", ", item] : item;
-                        })),
-                        el("td", { class: "mono" }, l.t.s.join(", ")),
-                        el("td", { class: "mono fw-semibold" }, l.escolhido || "nenhum"));
-                })))));
-            if (!comprometido) { u.marca(fb, true, "Sem ataque: em cada tipo vale o primeiro algoritmo do cliente que o servidor aceita, inclusive a cifra-128."); return; }
-            if (hash.input.checked) {
-                vistos.detectado = true;
-                u.marca(fb, true, "Ataque detectado: o hash assinado pelo servidor cobre a lista que ELE recebeu, sem a cifra-128; o cliente calcula o hash com a lista que ENVIOU, e os dois não batem. O cliente encerra a conexão.");
-            } else {
-                vistos.rebaixado = true;
-                u.marca(fb, false, "Rebaixamento: a sessão usa a cifra-48, que Mallory consegue quebrar, e ninguém percebe.");
-            }
-            if (vistos.detectado && vistos.rebaixado) { concluir(); fb.textContent += " Você viu os dois casos."; }
-        }
-        raiz.append(mallory.linha, hash.linha, u.botao("Conectar", "btn-primary mt-2", conecta), tabela, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "As cifras \"cifra-128\" e \"cifra-48\" são as do exemplo do livro (chaves de 128 e de 48 bits). Desafio (15 pts): faça o rebaixamento passar despercebido e depois ser detectado."));
-        conecta();
-    });
+        var concluir = R.desafio(raiz, "received-caminho", 15, "Reconstruir o caminho de uma mensagem pelas linhas Received:");
 
-    /* ------------------------------------------------------------------
-     * 3. A chave do servidor guardada pelo cliente (pág. 170–171 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("chave-servidor", function (raiz) {
-        var CHAVES = {
-            real: "SHA256:q3Rv8mT0bW1yK5sXcL9eA2uH6nJ4pZ7gD0fQ8iVwE1o",
-            mallory: "SHA256:Zx7Lp2Qs9Vb4Nm1Kt6Hy3Gd8Fr5Ew0Ac2Ju7Ik4Ol9P",
-            nova: "SHA256:Hk4Tn8Wq1Ys6Pb3Mv9Lc2Xd7Ge5Rf0Ja8Uo1Si3Zt6E"
-        };
-        var quem = el("select", { class: "form-select form-select-sm" },
-            el("option", { value: "real" }, "o servidor verdadeiro"),
-            el("option", { value: "mallory" }, "Mallory, no meio do caminho"),
-            el("option", { value: "nova" }, "o servidor verdadeiro, reinstalado com uma chave nova"));
-        var conhecida = null;
-        var tela = el("pre", { class: "log mb-2", "aria-live": "polite" });
-        var escolhas = el("div", { class: "d-flex flex-wrap gap-2" });
-        var memoria = el("p", { class: "small mb-0" });
-        var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "ssh-chave", 15, "Guardar a chave certa e recusar a de Mallory");
-        function mostraMemoria() { memoria.textContent = "Chave guardada pelo cliente (known_hosts): " + (conhecida || "nenhuma"); }
-        function decide(aceita) {
-            var q = quem.value;
-            escolhas.replaceChildren();
-            if (aceita) {
-                conhecida = CHAVES[q];
-                tela.textContent += "\n> yes\nConectado.";
-                if (q === "mallory") u.marca(fb, false, "Você aceitou a chave de Mallory: agora ele decifra e altera toda a sessão. Em caso de dúvida, confira a impressão digital com o administrador por outro meio.");
-                else if (q === "real") { vistos.guardou = true; u.marca(fb, true, "Chave verdadeira guardada. Das próximas vezes, o cliente confere sozinho."); }
-                else u.marca(fb, true, "Chave nova aceita. Faça isso só depois de confirmar com o administrador que o servidor foi mesmo reinstalado.");
-            } else {
-                tela.textContent += "\n> no\nConexão recusada.";
-                if (q === "mallory" && conhecida === CHAVES.real) { vistos.recusou = true; u.marca(fb, true, "Isso: a chave mudou, e era Mallory. Recusar protege a sua senha e a sessão."); }
-                else u.marca(fb, true, "Conexão recusada.");
-            }
-            mostraMemoria();
-            if (vistos.guardou && vistos.recusou) concluir();
-        }
-        function conecta() {
-            var q = quem.value, fp = CHAVES[q];
-            escolhas.replaceChildren(); fb.textContent = "";
-            tela.textContent = "$ ssh alice@servidor.example";
-            if (!conhecida) {
-                tela.textContent += "\nThe authenticity of host 'servidor.example' can't be established.\nED25519 key fingerprint is " + fp + ".\nAre you sure you want to continue connecting (yes/no)?";
-            } else if (conhecida === fp) {
-                tela.textContent += "\n(a chave confere com a guardada)\nalice@servidor.example's password:\nConectado.";
-                return;
-            } else {
-                tela.textContent += "\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\nIT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\nThe fingerprint for the ED25519 key sent by the remote host is\n" + fp + ".\nAceitar a chave nova (yes/no)?";
-            }
-            escolhas.append(u.botao("yes", "btn-outline-danger", function () { decide(true); }), u.botao("no", "btn-outline-secondary", function () { decide(false); }));
-        }
-        raiz.append(u.campo("Quem responde em servidor.example", quem), u.botao("ssh alice@servidor.example", "btn-primary mb-2 mono", conecta),
-            tela, escolhas, memoria, fb,
-            u.botao("Esquecer a chave guardada", "btn-outline-secondary btn-sm mt-2", function () { conhecida = null; mostraMemoria(); }),
-            el("p", { class: "small text-muted mt-2 mb-0" }, "A impressão digital verdadeira, publicada pelo administrador, é " + CHAVES.real + ". Desafio (15 pts): na primeira conexão, guarde a chave verdadeira; depois, com Mallory no meio, recuse a conexão."));
-        mostraMemoria();
-    });
-
-    /* ------------------------------------------------------------------
-     * 4. Handshake do TLS 1.2 e o sigilo futuro (pág. 173–176 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("handshake-tls", function (raiz) {
-        var troca = el("select", { class: "form-select form-select-sm" }, el("option", { value: "RSA" }, "RSA"), el("option", { value: "DHE_RSA" }, "DHE_RSA (Diffie-Hellman efêmero)"));
-        var passo = 0;
-        var area = el("div", { class: "mt-2" });
-        var explica = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
-        var resultado = el("p", { class: "small mt-2 mb-0" });
-        var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "tls-pfs", 15, "Ver o efeito do sigilo futuro (PFS) no TLS 1.2");
-        function mensagens() {
-            var m = [
-                { de: 0, para: 1, rotulo: "ClientHello [versão, aleatório, suítes, SNI]", txt: "O cliente propõe a versão, 32 bytes aleatórios, as suítes que aceita (a preferida primeiro) e, na extensão SNI, o nome www.example.com." },
-                { de: 1, para: 0, rotulo: "ServerHello [aleatório, suíte, Session Id]", txt: "O servidor escolhe a suíte, manda os seus 32 bytes aleatórios e um identificador de sessão." },
-                { de: 1, para: 0, rotulo: "Certificate", txt: "A cadeia de certificados que liga www.example.com à chave pública do servidor. O cliente a valida com as chaves das autoridades raiz que já conhece." }
-            ];
-            if (troca.value === "DHE_RSA") m.push({ de: 1, para: 0, rotulo: "ServerKeyExchange [p, g, g^s, assinatura]", txt: "Os parâmetros de Diffie-Hellman do servidor, assinados com a chave privada dele. O segredo s é efêmero: é descartado no fim da sessão." });
-            m.push({ de: 1, para: 0, rotulo: "ServerHelloDone", txt: "O servidor terminou a sua parte da primeira fase." });
-            m.push(troca.value === "RSA"
-                ? { de: 0, para: 1, rotulo: "ClientKeyExchange [E(Kpub, segredo de 48 bytes)]", txt: "O cliente sorteia 48 bytes e os cifra com a chave pública do certificado. Só a chave privada do servidor os decifra." }
-                : { de: 0, para: 1, rotulo: "ClientKeyExchange [g^c]", txt: "O cliente manda a sua parte do Diffie-Hellman. Os dois calculam g^(cs) mod p sem que ele passe pela rede." });
-            m.push({ de: 0, para: 1, rotulo: "ChangeCipherSpec, Finished", txt: "O cliente passa a cifrar. O Finished, a primeira mensagem cifrada, traz um MAC de todo o handshake: se Mallory alterou alguma mensagem, o servidor percebe." });
-            m.push({ de: 1, para: 0, rotulo: "ChangeCipherSpec, Finished", txt: "O servidor confirma da mesma forma." });
-            m.push({ de: 0, para: 1, rotulo: "registros cifrados (GET /)", tipo: "tracejado", txt: "Começa a transferência de dados, cifrada e autenticada com chaves derivadas do segredo comum." });
-            return m;
-        }
         function desenha() {
-            var m = mensagens();
-            area.replaceChildren(R.diagramaSequencia({ titulo: "Handshake do TLS 1.2 com troca de chaves " + troca.value + ".", colunas: ["Cliente", "Servidor"], eventos: m.slice(0, passo), passo: 30, margem: 150, largura: 820 }));
-            explica.textContent = passo ? m[passo - 1].txt : "Clique em \"Próxima mensagem\".";
-        }
-        function proxima() { if (passo < mensagens().length) passo++; desenha(); }
-        function terrence() {
-            if (passo < mensagens().length) { u.marca(fb, false, "Termine o handshake primeiro."); return; }
-            if (troca.value === "RSA") {
-                vistos.rsa = true;
-                resultado.textContent = "Com RSA, o segredo de 48 bytes viajou cifrado com a chave pública do servidor. Terrence, que gravou o tráfego, decifra esse segredo com a chave privada roubada, refaz as chaves e lê TODAS as sessões gravadas.";
-            } else {
-                vistos.dhe = true;
-                resultado.textContent = "Com DHE_RSA, a chave privada só servia para assinar. O segredo da sessão veio de g^c e g^s, com c e s já descartados. Terrence pode se passar pelo servidor daqui para frente, mas não decifra as sessões antigas: isso é o sigilo futuro (PFS).";
-            }
-            if (vistos.rsa && vistos.dhe) { u.marca(fb, true, "Você viu a diferença: só a troca efêmera protege as sessões passadas."); concluir(); }
-            else { fb.className = "small mt-2 mb-0"; fb.textContent = "Agora repita com a outra troca de chaves."; }
-        }
-        troca.addEventListener("change", function () { passo = 0; resultado.textContent = ""; desenha(); });
-        raiz.append(u.campo("Troca de chaves da suíte escolhida", troca),
-            el("div", { class: "d-flex flex-wrap gap-2" }, u.botao("Próxima mensagem", "btn-primary", proxima), u.botao("Recomeçar", "btn-outline-secondary", function () { passo = 0; resultado.textContent = ""; desenha(); }),
-                u.botao("Seis meses depois, Terrence rouba a chave privada", "btn-outline-danger", terrence)),
-            area, explica, resultado, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): complete o handshake com RSA e com DHE_RSA e veja, nos dois casos, o que Terrence consegue fazer."));
-        desenha();
-    });
-
-    /* ------------------------------------------------------------------
-     * 5. O protocolo de registro: MAC com número de sequência (pág. 176–177 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("registro-tls", function (raiz) {
-        var CHAVE = "chave-mac-da-sessao";
-        var DADOS = ["GET /conta HTTP/1.1", "POST /transferir valor=10", "GET /sair HTTP/1.1"];
-        function mac(seq, dados) { return resumo(CHAVE + "|" + seq + "|23 03 03|" + dados); }
-        var enviados = DADOS.map(function (d, i) { return { seq: i, dados: d, mac: mac(i, d) }; });
-        var acao = el("select", { class: "form-select form-select-sm" },
-            el("option", { value: "nada" }, "Mallory não faz nada"),
-            el("option", { value: "repete" }, "Mallory repete o registro 2 (a transferência)"),
-            el("option", { value: "apaga" }, "Mallory apaga o registro 2"),
-            el("option", { value: "altera" }, "Mallory troca valor=10 por valor=99 no registro 2"));
-        var log = el("ul", { class: "log mt-2" });
-        var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "tls-registro", 10, "Ver o receptor TLS detectar registros repetidos, apagados e alterados");
-        function entrega() {
-            var chegada = enviados.map(function (r) { return { dados: r.dados, mac: r.mac }; });
-            if (acao.value === "repete") chegada.splice(2, 0, { dados: chegada[1].dados, mac: chegada[1].mac });
-            if (acao.value === "apaga") chegada.splice(1, 1);
-            if (acao.value === "altera") chegada[1] = { dados: chegada[1].dados.replace("valor=10", "valor=99"), mac: chegada[1].mac };
-            log.replaceChildren();
-            var esperado = 0, falhou = false;
-            chegada.forEach(function (r) {
-                if (falhou) return;
-                var ok = mac(esperado, r.dados) === r.mac;
-                log.append(el("li", { class: ok ? "" : "text-danger" }, "registro \"" + r.dados + "\"  MAC recebido " + r.mac + "  ·  calculado com seq " + esperado + ": " + mac(esperado, r.dados) + (ok ? "  ✔" : "  ✘ alerta: o receptor encerra a sessão")));
-                if (!ok) falhou = true;
-                esperado++;
-            });
-            if (acao.value !== "nada") vistos[acao.value] = falhou;
-            if (acao.value === "nada") u.marca(fb, true, "Os três registros chegam em ordem, e todos os MACs conferem.");
-            else u.marca(fb, falhou, falhou ? "Detectado: o MAC cobre o número de sequência, que não viaja no registro mas é contado nas duas pontas." : "Não detectado.");
-            if (vistos.repete && vistos.apaga && vistos.altera) { concluir(); fb.textContent += " Os três ataques foram detectados."; }
-        }
-        raiz.append(el("p", { class: "small mb-2" }, "O cliente envia três registros. Cada MAC (simplificado) cobre a chave, o número de sequência (0, 1, 2…), o cabeçalho e os dados."),
-            u.campo("O que Mallory faz no caminho", acao), u.botao("Entregar os registros", "btn-primary", entrega), log, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (10 pts): experimente os três ataques."));
-    });
-
-    /* ------------------------------------------------------------------
-     * 6. Quantos RTTs até a primeira resposta (pág. 178–180 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("rtts-tls", function (raiz) {
-        var rtt = faixa("RTT entre o cliente e o servidor", 10, 300, 10, 100, function (v) { return v + " ms"; });
-        var area = el("div", { class: "mt-2" });
-        var CASOS = [
-            { nome: "TLS 1.2", tcp: 1, tls: 2, http: 1 },
-            { nome: "TLS 1.3", tcp: 1, tls: 1, http: 1 },
-            { nome: "TLS 1.3 com 0-RTT", tcp: 1, tls: 0, http: 1 }
-        ];
-        function desenha() {
-            var T = Number(rtt.input.value);
-            area.replaceChildren();
-            CASOS.forEach(function (c) {
-                var total = c.tcp + c.tls + c.http;
-                area.append(el("div", { class: "mb-2" },
-                    el("div", { class: "small d-flex justify-content-between" }, el("span", null, c.nome), el("strong", null, total + " RTT = " + total * T + " ms")),
-                    el("div", { class: "d-flex", style: "height:22px", role: "img", "aria-label": c.nome + ": " + c.tcp + " RTT de TCP, " + c.tls + " de TLS e " + c.http + " do pedido HTTP" },
-                        el("div", { class: "small text-center", style: "width:" + 25 * c.tcp + "%;background:#adb5bd;color:#212529;border-right:2px solid var(--bs-body-bg,#fff)" }, "TCP"),
-                        c.tls ? el("div", { class: "small text-center", style: "width:" + 25 * c.tls + "%;background:#ffc107;color:#212529;border-right:2px solid var(--bs-body-bg,#fff)" }, "TLS") : null,
-                        el("div", { class: "small text-center", style: "width:" + 25 * c.http + "%;background:#6ea8fe;color:#212529" }, c.tls ? "HTTP" : "TLS + HTTP"))));
-            });
-        }
-        rtt.input.addEventListener("input", desenha);
-        var resp = el("input", { type: "number", class: "form-control form-control-sm", "aria-label": "Economia em milissegundos" });
-        var fb = u.feedback();
-        var concluir = R.desafio(raiz, "tls-rtt", 10, "Calcular o ganho do TLS 1.3 com 0-RTT");
-        raiz.append(rtt.linha, area,
-            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts): com RTT de 150 ms, quantos milissegundos o TLS 1.3 com 0-RTT economiza até a resposta HTTP, em relação ao TLS 1.2?"),
-            el("div", { class: "d-flex gap-2" }, resp, u.botao("Conferir", "btn-primary", function () {
-                var ok = Number(resp.value) === 300;
-                u.marca(fb, ok, ok ? "Isso: 4 RTT contra 2 RTT, ou seja, 2 × 150 = 300 ms." : "Ainda não. Conte os RTTs de cada caso no gráfico.");
-                if (ok) concluir();
-            })), fb);
-        desenha();
-    });
-
-    /* ------------------------------------------------------------------
-     * 7. Envenenamento de cache do DNS (pág. 181–182 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("envenenamento-dns", function (raiz) {
-        var k = faixa("Respostas falsas que Mallory consegue enviar a cada consulta de Alice", 0, 16, 1, 10, function (v) { return num(Math.pow(2, v)); });
-        var t = faixa("Consultas que Mallory consegue provocar", 1, 1000, 1, 1, function (v) { return num(v); });
-        var porta = caixa("Alice sorteia a porta de origem de cada consulta", false);
-        var saida = el("div", { class: "small mt-2", "aria-live": "polite" });
-        function desenha() {
-            var K = Math.pow(2, Number(k.input.value)), N = Number(t.input.value);
-            var espaco = porta.input.checked ? Math.pow(2, 32) : Math.pow(2, 16);
-            var p1 = Math.min(1, K / espaco), pn = 1 - Math.pow(1 - p1, N);
-            saida.replaceChildren(
-                el("div", null, "Combinações a adivinhar: ", el("strong", null, porta.input.checked ? "2^16 IDs × 2^16 portas ≈ 4,3 bilhões" : "2^16 = 65 536 IDs")),
-                el("div", null, "Chance de envenenar numa consulta: ", el("strong", null, (100 * p1).toLocaleString("pt-BR", { maximumSignificantDigits: 3 }) + "%")),
-                el("div", null, "Chance em " + num(N) + " consulta(s): ", el("strong", null, (100 * pn).toLocaleString("pt-BR", { maximumSignificantDigits: 3 }) + "%")),
-                el("div", { class: "progress mt-1", style: "height:10px", role: "img", "aria-label": "Chance acumulada" }, el("div", { class: "progress-bar bg-danger", style: "width:" + (100 * pn) + "%" })));
-        }
-        [k.input, t.input, porta.input].forEach(function (c) { c.addEventListener("input", desenha); c.addEventListener("change", desenha); });
-        var resp = el("input", { type: "number", class: "form-control form-control-sm", "aria-label": "Número de respostas falsas" });
-        var fb = u.feedback();
-        var concluir = R.desafio(raiz, "dns-envenenamento", 10, "Calcular o esforço do envenenamento de cache");
-        raiz.append(k.linha, t.linha, porta.linha, saida,
-            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts): com a porta fixa, quantas respostas falsas Mallory precisa enviar para ter 50% de chance numa única consulta?"),
-            el("div", { class: "d-flex gap-2" }, resp, u.botao("Conferir", "btn-primary", function () {
-                var ok = Number(resp.value) === 32768;
-                u.marca(fb, ok, ok ? "Isso: metade dos 65 536 identificadores. Com a porta sorteada, a mesma chance exigiria mais de 2 bilhões." : "Ainda não. Quantos IDs diferentes existem, e que fração deles Mallory precisa cobrir?");
-                if (ok) concluir();
-            })), fb);
-        desenha();
-    });
-
-    /* ------------------------------------------------------------------
-     * 8. A cadeia de confiança do DNSSEC (pág. 183–184 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("cadeia-dnssec", function (raiz) {
-        var ataque = el("select", { class: "form-select form-select-sm" },
-            el("option", { value: "nada" }, "Nenhum ataque"),
-            el("option", { value: "aaaa" }, "Mallory troca o endereço do AAAA de www.example.org"),
-            el("option", { value: "chave" }, "Mallory troca a DNSKEY de example.org pela dele"),
-            el("option", { value: "ds" }, "Mallory troca a DNSKEY de example.org e o DS guardado em .org"));
-        var lista = el("ol", { class: "small mt-2 mb-0" });
-        var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "dnssec-cadeia", 15, "Ver onde a cadeia do DNSSEC quebra em cada ataque");
-        function verifica() {
-            var a = ataque.value;
-            var chaveEx = a === "chave" || a === "ds" ? "chave-de-mallory" : "chave-example.org";
-            var dsEmOrg = a === "ds" ? resumo("chave-de-mallory") : resumo("chave-example.org");
-            var endereco = a === "aaaa" ? "203.0.113.66 (de Mallory)" : "2001:db8::80";
-            var passos = [
-                ["Âncora de confiança: a resolvedora já tem a DNSKEY da raiz, obtida fora do DNS.", true],
-                ["DS de .org, na raiz, com RRSIG feita pela chave da raiz.", true],
-                ["DNSKEY de .org confere com o resumo do DS: " + resumo("chave-org") + ".", true],
-                ["DS de example.org, em .org, com RRSIG feita pela chave de .org.", a !== "ds", "a assinatura de .org não confere com o DS trocado, e Mallory não tem a chave privada de .org"],
-                ["DNSKEY de example.org confere com o resumo do DS: resumo(" + chaveEx + ") = " + resumo(chaveEx) + " · DS = " + dsEmOrg + ".", a !== "chave" && a !== "ds", "o resumo da chave recebida é diferente do DS"],
-                ["AAAA de www.example.org = " + endereco + ", com RRSIG feita pela chave de example.org.", a !== "aaaa", "a assinatura cobre o endereço original, e Mallory não tem a chave privada de example.org"]
-            ];
             lista.replaceChildren();
-            var quebrou = false;
-            passos.forEach(function (p) {
-                if (quebrou) { lista.append(el("li", { class: "text-muted" }, p[0] + " (não verificado)")); return; }
-                lista.append(el("li", { class: p[1] ? "" : "text-danger" }, (p[1] ? "✔ " : "✘ ") + p[0] + (p[1] ? "" : " Falha: " + p[2] + ".")));
-                if (!p[1]) quebrou = true;
+            embaralhada.forEach(function (i) {
+                var L = LINHAS[i], usada = escolhidas.indexOf(i) >= 0;
+                lista.append(el("div", { class: "ordem-item", role: "listitem" },
+                    el("span", { class: "mono" }, "Received: from " + L.from + " by " + L.by + "; 08 Mar 2010 " + L.data),
+                    u.botao(usada ? "✔" : "Próximo salto", usada ? "btn-success" : "btn-outline-primary", function () { escolhe(i); }, usada ? "Já escolhida" : "Escolher como próximo salto: de " + L.from + " para " + L.by)));
             });
-            if (a === "nada") u.marca(fb, true, "A cadeia DS → DNSKEY vai da raiz até o registro: a resposta é autêntica.");
-            else { vistos[a] = true; u.marca(fb, true, "A resolvedora rejeita a resposta: a cadeia quebra no passo marcado."); }
-            if (vistos.aaaa && vistos.chave && vistos.ds) { concluir(); fb.textContent += " Os três ataques foram barrados."; }
+            caminho.replaceChildren();
+            escolhidas.forEach(function (i) { caminho.append(el("li", null, LINHAS[i].from + " → " + LINHAS[i].by + " (" + LINHAS[i].utc + " UTC)")); });
         }
-        raiz.append(u.campo("Ataque", ataque), u.botao("Validar www.example.org AAAA", "btn-primary", verifica), lista, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Resumos e assinaturas simplificados, só para mostrar a cadeia. Desafio (15 pts): rode os três ataques e veja onde cada um é barrado."));
-        verifica();
+        function escolhe(i) {
+            if (escolhidas.indexOf(i) >= 0) return;
+            var esperado = ordemCerta[escolhidas.length];
+            if (i !== esperado) {
+                var dica = escolhidas.length === 0
+                    ? "O primeiro salto sai do computador de quem escreveu a mensagem (wira.firstpr.com.au)."
+                    : "O \"from\" do próximo salto costuma ser o \"by\" do anterior; dentro do mesmo servidor, use os horários.";
+                u.marca(fb, false, "Ainda não. " + dica);
+                return;
+            }
+            escolhidas.push(i);
+            fb.textContent = "";
+            desenha();
+            if (escolhidas.length === LINHAS.length) {
+                u.marca(fb, true, "Caminho completo. No cabeçalho original, essa ordem é a de baixo para cima: cada servidor acrescenta a sua linha no topo.");
+                tabela.replaceChildren(el("p", { class: "small mb-0" },
+                    "Repare nos horários em UTC: gair.firstpr.com.au marca 10:36:37, e o salto seguinte, em core3.amsl.com, marca 10:36:35, dois segundos antes. ",
+                    "Cada servidor usa o próprio relógio, e eles não estão perfeitamente sincronizados."));
+                concluir();
+            }
+        }
+        raiz.append(
+            el("p", { class: "small mb-2" }, "As 7 linhas Received: do exemplo do livro, embaralhadas. Clique nelas na ordem em que a mensagem passou pelos servidores."),
+            lista, caminho, fb, tabela,
+            u.botao("Recomeçar", "btn-outline-secondary mt-2", function () { escolhidas = []; fb.textContent = ""; tabela.replaceChildren(); desenha(); }),
+            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): reconstrua o caminho inteiro."));
+        desenha();
     });
 
     /* ------------------------------------------------------------------
-     * 9. NSEC: provando que um nome não existe (pág. 184–185 do PDF)
+     * 6. Montando uma mensagem MIME (pág. 136–138 do PDF)
      * ------------------------------------------------------------------ */
-    function chaveCanonica(nome) { return nome.toLowerCase().replace(/\.$/, "").split(".").reverse(); }
-    function compara(a, b) {
-        var x = chaveCanonica(a), y = chaveCanonica(b);
-        for (var i = 0; i < Math.min(x.length, y.length); i++) { if (x[i] < y[i]) return -1; if (x[i] > y[i]) return 1; }
-        return x.length - y.length;
-    }
-    function nsecQueCobre(zona, nome) {
-        var z = zona.slice().sort(compara);
-        if (z.some(function (n) { return compara(n, nome) === 0; })) return null;
-        for (var i = 0; i < z.length; i++) {
-            var dono = z[i], prox = z[(i + 1) % z.length];
-            var depois = compara(dono, nome) < 0, antes = compara(nome, prox) < 0, volta = compara(prox, dono) <= 0;
-            if ((depois && antes) || (volta && (depois || antes))) return { dono: dono, prox: prox };
-        }
-        return null;
-    }
-    R.nsecQueCobre = nsecQueCobre;
-
-    R.registrar("nsec", function (raiz) {
-        var zona = ["alpha.example.org", "beta.example.org", "gamma.example.org"];
-        var consulta = entrada("delta.example.org", "Nome consultado");
-        var registros = el("pre", { class: "log mt-2 mb-0" });
-        var resposta = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
-        registros.textContent = zona.map(function (n, i) { return n + " NSEC " + zona[(i + 1) % zona.length]; }).join("\n");
-        function responde() {
-            var q = consulta.value.trim().toLowerCase();
-            if (!q) return;
-            var c = nsecQueCobre(zona, q);
-            resposta.replaceChildren(c ? el("span", null, "Não existe. O servidor devolve, já assinado: ", el("strong", { class: "mono" }, c.dono + " NSEC " + c.prox), " — entre esses dois nomes não há outro.")
-                : el("span", null, q + " existe na zona: o servidor devolve os registros dele."));
-        }
-        consulta.addEventListener("input", responde);
-        var perguntas = [["delta.example.org", "beta.example.org"], ["pi.example.org", "gamma.example.org"], ["aaa.example.org", "gamma.example.org"]];
-        var selects = perguntas.map(function (p) {
-            return el("select", { class: "form-select form-select-sm", "aria-label": "Registro NSEC que prova que " + p[0] + " não existe" },
-                el("option", { value: "" }, "escolha…"), zona.map(function (n, i) { return el("option", { value: n }, n + " NSEC " + zona[(i + 1) % zona.length]); }));
-        });
+    R.registrar("monta-mime", function (raiz) {
+        var TEXTO = "Oi, turma!\r\nNuma mensagem MIME, cada parte começa com uma linha assim:\r\n--simple boundary\r\nPor isso a fronteira precisa ser escolhida com cuidado.";
+        var HTML = "<p>Oi, turma!</p><p>Veja a mensagem em <b>texto simples</b>.</p>";
+        var PNG = "iVBORw0KGgo=";   // os 8 bytes da assinatura PNG em Base64
+        var partes = {
+            texto: el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("mime"), checked: true }),
+            html: el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("mime"), checked: true }),
+            imagem: el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("mime") })
+        };
+        var tipo = el("select", { class: "form-select form-select-sm" },
+            el("option", { value: "mixed" }, "multipart/mixed"), el("option", { value: "alternative" }, "multipart/alternative"));
+        var fronteira = entrada("simple boundary", "Fronteira (boundary)");
+        var msg = el("pre", { class: "log mt-2 mb-0", style: "max-height:320px" });
+        var analise = el("div", { class: "small mt-2", "aria-live": "polite" });
         var fb = u.feedback();
-        var concluir = R.desafio(raiz, "dnssec-nsec", 15, "Escolher o NSEC que prova a inexistência de um nome");
-        var passeio = el("p", { class: "small mt-2 mb-0" });
-        raiz.append(el("div", { class: "small text-muted" }, "Os registros NSEC da zona do livro (pág. 184 do PDF)"), registros,
-            u.campo("Consulte um nome", consulta), resposta,
-            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (15 pts): qual registro NSEC prova que cada nome não existe?"),
-            el("div", null, perguntas.map(function (p, i) { return el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-5 mono small" }, p[0]), el("div", { class: "col-sm-7" }, selects[i])); })),
-            u.botao("Conferir", "btn-primary mt-1", function () {
-                var certas = perguntas.filter(function (p, i) { return selects[i].value === p[1]; }).length;
-                u.marca(fb, certas === 3, certas === 3 ? "Os três certos. aaa.example.org viria antes de alpha: é o último NSEC, que dá a volta, que o cobre." : certas + " de 3 certos. Ordene os nomes e veja entre quais dois cada consulta cairia.");
-                if (certas === 3) concluir();
-            }), fb,
-            u.botao("Seguir os NSEC a partir de alpha", "btn-outline-secondary btn-sm mt-2", function () {
-                passeio.textContent = "Seguindo cada NSEC até voltar ao início: " + zona.join(" → ") + " → alpha.example.org. Qualquer um pode listar a zona inteira assim (complemento: o NSEC3 dificulta isso).";
-            }), passeio);
-        responde();
+        var concluir = R.desafio(raiz, "mime-fronteira", 15, "Montar uma mensagem MIME que o destinatário separa corretamente");
+
+        function corpoPartes() {
+            var lista = [];
+            if (partes.texto.checked) lista.push({ nome: "texto", cab: "Content-Type: text/plain; charset=UTF-8", corpo: TEXTO });
+            if (partes.html.checked) lista.push({ nome: "HTML", cab: "Content-Type: text/html; charset=UTF-8", corpo: HTML });
+            if (partes.imagem.checked) lista.push({ nome: "imagem", cab: "Content-Type: image/png\r\nContent-Transfer-Encoding: base64", corpo: PNG });
+            return lista;
+        }
+        function mostra() {
+            var b = fronteira.value;
+            var lista = corpoPartes();
+            var linhas = ["From: Professor <prof@example.edu>", "To: Turma <turma@example.edu>", "Subject: Formato MIME",
+                "Date: Mon, 8 Mar 2010 19:55:06 -0600", "MIME-Version: 1.0", "Content-Type: multipart/" + tipo.value + "; boundary=\"" + b + "\"", "",
+                "preâmbulo, ignorado pelo leitor de e-mail"];
+            lista.forEach(function (p) { linhas.push("", "--" + b, p.cab, "", p.corpo); });
+            linhas.push("", "--" + b + "--");
+            var texto = linhas.join("\r\n");
+            msg.textContent = texto.replace(/\r\n/g, "\n");
+
+            // Como o destinatário separa: corta em toda linha que comece com "--fronteira" (menos a linha final "--fronteira--").
+            var achadas = 0, corpo = texto.slice(texto.indexOf("\r\n\r\n") + 4);
+            if (b.length) {
+                corpo.split("\r\n").forEach(function (l) { if (l.indexOf("--" + b) === 0 && l !== "--" + b + "--") achadas++; });
+            }
+            var problemas = [];
+            if (!b.trim()) problemas.push("A fronteira está vazia.");
+            if (!partes.texto.checked) problemas.push("Mantenha a parte de texto simples: é ela que o desafio pede para entregar inteira.");
+            else if (achadas !== lista.length) problemas.push("O destinatário encontrou " + achadas + " partes, mas a mensagem tem " + lista.length + ": a fronteira aparece dentro de uma parte e corta o texto no lugar errado.");
+            if (lista.length < 2) problemas.push("Escolha pelo menos duas partes para ter uma mensagem multipart.");
+            if (partes.imagem.checked && tipo.value === "alternative") problemas.push("multipart/alternative é para várias versões da mesma informação; uma imagem anexada é outra informação (use mixed).");
+            if (!partes.imagem.checked && lista.length >= 2 && tipo.value === "mixed") problemas.push("Texto e HTML com o mesmo conteúdo são versões alternativas: o tipo adequado é multipart/alternative.");
+            analise.replaceChildren(el("div", null, "O destinatário encontrou ", el("strong", null, String(achadas)), " parte(s); a mensagem tem ", el("strong", null, String(lista.length)), "."));
+            return problemas;
+        }
+        function confere() {
+            var problemas = mostra();
+            if (problemas.length) { u.marca(fb, false, problemas[0]); return; }
+            u.marca(fb, true, "O destinatário separa as partes certas, e o tipo combina com o conteúdo.");
+            concluir();
+        }
+        [partes.texto, partes.html, partes.imagem, tipo, fronteira].forEach(function (c) { c.addEventListener("input", mostra); c.addEventListener("change", mostra); });
+
+        raiz.append(
+            el("div", { class: "d-flex flex-wrap gap-3 mb-2" },
+                el("div", { class: "form-check" }, partes.texto, el("label", { class: "form-check-label small", for: partes.texto.id }, "Texto simples")),
+                el("div", { class: "form-check" }, partes.html, el("label", { class: "form-check-label small", for: partes.html.id }, "O mesmo texto em HTML")),
+                el("div", { class: "form-check" }, partes.imagem, el("label", { class: "form-check-label small", for: partes.imagem.id }, "Imagem anexada (PNG)"))),
+            el("div", { class: "row g-2" },
+                el("div", { class: "col-sm-6" }, u.campo("Content-Type da mensagem", tipo)),
+                el("div", { class: "col-sm-6" }, u.campo("Fronteira (boundary)", fronteira))),
+            msg, analise,
+            u.botao("Conferir a mensagem", "btn-primary mt-2", confere), fb,
+            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): faça o destinatário separar as partes corretamente, com o tipo multipart adequado ao conteúdo. Leia o texto da primeira parte."));
+        mostra();
+    });
+
+    /* ------------------------------------------------------------------
+     * 7. Base64 passo a passo (pág. 138–139 do PDF)
+     * ------------------------------------------------------------------ */
+    var B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    function base64(bytes) {
+        var grupos = [];
+        for (var i = 0; i < bytes.length; i += 3) {
+            var g = bytes.slice(i, i + 3);
+            var bits = g.map(function (b) { return bin(b, 8); }).join("");
+            var nSextetos = Math.ceil(bits.length / 6);
+            bits = bits.padEnd(nSextetos * 6, "0");
+            var sext = [];
+            for (var k = 0; k < nSextetos; k++) sext.push(parseInt(bits.slice(k * 6, k * 6 + 6), 2));
+            var cod = sext.map(function (v) { return B64[v]; }).join("") + "=".repeat(4 - nSextetos);
+            grupos.push({ bytes: g, sextetos: sext, codigo: cod });
+        }
+        return grupos;
+    }
+    R.base64 = function (bytes) { return base64(bytes).map(function (g) { return g.codigo; }).join(""); };
+
+    R.registrar("base64-bits", function (raiz) {
+        var modo = el("select", { class: "form-select form-select-sm" }, el("option", { value: "hex" }, "bytes em hexadecimal"), el("option", { value: "texto" }, "texto (UTF-8)"));
+        var campo = entrada("14fb9c03d97e", "Entrada");
+        var exemplos = el("div", { class: "d-flex flex-wrap gap-2 mb-2" });
+        [["14fb9c03d97e", "RFC 4648"], ["14", "1 byte"], ["14fb", "2 bytes"]].forEach(function (e) {
+            exemplos.append(u.botao("0x" + e[0] + " (" + e[1] + ")", "btn-outline-secondary", function () { modo.value = "hex"; campo.value = e[0]; mostra(); }));
+        });
+        var tabela = el("div", { class: "mt-2" });
+        var resultado = el("p", { class: "mono mt-2 mb-0", "aria-live": "polite" });
+
+        function bytesDaEntrada() {
+            if (modo.value === "texto") return Array.from(new TextEncoder().encode(campo.value));
+            var h = campo.value.replace(/^0x/i, "").replace(/\s+/g, "");
+            if (!/^([0-9a-fA-F]{2})*$/.test(h)) return null;
+            var out = [];
+            for (var i = 0; i < h.length; i += 2) out.push(parseInt(h.slice(i, i + 2), 16));
+            return out;
+        }
+        function mostra() {
+            var bytes = bytesDaEntrada();
+            tabela.replaceChildren();
+            if (!bytes) { resultado.textContent = "Hexadecimal inválido: use pares de dígitos (ex.: 14fb)."; return; }
+            if (!bytes.length) { resultado.textContent = "Base64: (vazio)"; return; }
+            var grupos = base64(bytes.slice(0, 12));
+            grupos.forEach(function (g, gi) {
+                tabela.append(el("div", { class: "demo-box py-2 mb-2" },
+                    el("div", { class: "small text-muted" }, "Grupo " + (gi + 1) + (g.bytes.length < 3 ? " (incompleto: " + g.bytes.length + " byte" + (g.bytes.length > 1 ? "s" : "") + ")" : "")),
+                    el("div", { class: "d-flex flex-wrap" }, g.bytes.map(function (b) { return el("span", { class: "byte-cell" }, bin(b, 8), el("small", null, "0x" + hex2(b))); })),
+                    el("div", { class: "d-flex flex-wrap" }, g.sextetos.map(function (s, i) {
+                        var preenchido = i * 6 + 6 > g.bytes.length * 8;
+                        return el("span", { class: "byte-cell " + (preenchido ? "ctrl" : "ok") }, bin(s, 6), el("small", null, s + " → " + B64[s]));
+                    }), "=".repeat(4 - g.sextetos.length).split("").map(function () { return el("span", { class: "byte-cell muted" }, "=", el("small", null, "enchimento")); }))));
+            });
+            resultado.textContent = "Base64: " + R.base64(bytes) + (bytes.length > 12 ? "  (a tabela mostra só os 12 primeiros bytes)" : "");
+        }
+        [modo, campo].forEach(function (c) { c.addEventListener("input", mostra); c.addEventListener("change", mostra); });
+
+        var r1 = entrada("", "Texto que vira UmVkZXM="), r2 = entrada("", "Bytes que viram FPs=");
+        var fb = u.feedback(), feitas = {};
+        var concluir = R.desafio(raiz, "base64-inverso", 15, "Achar a entrada de duas codificações Base64");
+        function confere() {
+            if (r1.value.trim() === "Redes") feitas.a = true;
+            if (r2.value.replace(/^0x/i, "").trim().toLowerCase() === "14fb") feitas.b = true;
+            if (feitas.a && feitas.b) { u.marca(fb, true, "As duas conferem. Repare que FPs= vem de 0x14fb, e não de 0x14b9, como está impresso no livro."); concluir(); }
+            else u.marca(fb, false, (feitas.a ? "O texto está certo. " : "O texto ainda não confere (use o codificador para testar). ") + (feitas.b ? "Os bytes estão certos." : "Os bytes ainda não conferem: são dois bytes, escritos em hexadecimal."));
+        }
+
+        raiz.append(exemplos,
+            el("div", { class: "row g-2" }, el("div", { class: "col-sm-4" }, u.campo("Tipo de entrada", modo)), el("div", { class: "col-sm-8" }, u.campo("Entrada", campo))),
+            el("p", { class: "small text-muted mb-0" }, "Verde: bits que vieram da entrada. Amarelo: sexteto completado com zeros. Cinza: caractere de enchimento \"=\"."),
+            tabela, resultado,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (15 pts): descubra as entradas."),
+            u.campo("Qual texto vira UmVkZXM= ?", r1), u.campo("Quais bytes (em hexadecimal) viram FPs= ?", r2),
+            u.botao("Conferir", "btn-primary", confere), fb);
+        mostra();
+    });
+
+    /* ------------------------------------------------------------------
+     * 8. Registros MX e preferência (pág. 139–140 do PDF)
+     * ------------------------------------------------------------------ */
+    R.registrar("mx-preferencia", function (raiz) {
+        var MX = [
+            { pref: 10, nome: "mx1.b.example" },
+            { pref: 20, nome: "mx2.b.example" },
+            { pref: 30, nome: "backup.provedor.example" }
+        ];
+        var fora = {};
+        var tabela = el("table", { class: "table table-sm small mb-2" });
+        var log = el("ul", { class: "log" });
+        var fb = u.feedback(), vistos = {};
+        var concluir = R.desafio(raiz, "mx-backup", 10, "Ver a entrega cair para o MX reserva e ficar na fila");
+
+        function desenha() {
+            tabela.replaceChildren(el("thead", null, el("tr", null, el("th", null, "Preferência"), el("th", null, "Servidor"), el("th", null, "Situação"))),
+                el("tbody", null, MX.map(function (m) {
+                    var c = el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("mx"), checked: !fora[m.nome] });
+                    c.addEventListener("change", function () { fora[m.nome] = !c.checked; });
+                    return el("tr", null, el("td", null, String(m.pref)), el("td", { class: "mono" }, m.nome),
+                        el("td", null, el("div", { class: "form-check mb-0" }, c, el("label", { class: "form-check-label", for: c.id }, "no ar"))));
+                })));
+        }
+        function entrega() {
+            log.replaceChildren(el("li", null, "Servidor de a.example pergunta ao DNS: MX de b.example → " + MX.map(function (m) { return m.pref + " " + m.nome; }).join(", ")));
+            var ordenados = MX.slice().sort(function (a, b) { return a.pref - b.pref; });
+            for (var i = 0; i < ordenados.length; i++) {
+                var m = ordenados[i];
+                if (fora[m.nome]) { log.append(el("li", { class: "text-danger" }, "Tenta " + m.nome + " (preferência " + m.pref + "): não responde")); continue; }
+                log.append(el("li", { class: "text-success" }, "Tenta " + m.nome + " (preferência " + m.pref + "): conexão aceita, mensagem entregue"));
+                if (i === 0) vistos.direto = true; else if (i === ordenados.length - 1) vistos.reserva = true;
+                fb.textContent = i === 0 ? "Entregue no servidor de menor preferência numérica, o preferido." : "Entregue em " + m.nome + ", porque os mais preferidos estavam fora do ar.";
+                fb.className = "small mt-2 mb-0";
+                checa();
+                return;
+            }
+            log.append(el("li", null, "Nenhum MX respondeu: a mensagem fica na fila do servidor de a.example, que tenta de novo mais tarde."));
+            vistos.fila = true;
+            fb.textContent = "Ninguém respondeu: a mensagem espera na fila.";
+            fb.className = "small mt-2 mb-0";
+            checa();
+        }
+        function checa() {
+            if (vistos.reserva && vistos.fila) { u.marca(fb, true, fb.textContent.replace(/^[✔✘] /, "") + " Você viu o reserva receber e a mensagem esperar na fila."); concluir(); }
+        }
+        raiz.append(tabela, u.botao("Enviar a mensagem de alice@a.example para bob@b.example", "btn-primary mb-2", entrega), log, fb,
+            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (10 pts): faça a mensagem ser entregue no servidor reserva e, depois, ficar na fila porque nenhum MX responde."));
+        desenha();
+    });
+
+    /* ------------------------------------------------------------------
+     * 9. Diálogo SMTP (pág. 140–142 do PDF)
+     * ------------------------------------------------------------------ */
+    R.registrar("dialogo-smtp", function (raiz) {
+        var chat = el("div", { class: "chat", role: "log", "aria-live": "polite" });
+        var botoes = el("div", { class: "d-flex flex-wrap gap-2 mt-2" });
+        var fb = u.feedback();
+        var st, vistos = {};
+        var concluir = R.desafio(raiz, "smtp-dialogo", 20, "Entregar uma mensagem por SMTP e provocar um erro de ordem");
+
+        function msg(lado, texto) {
+            var classe = lado === "C" ? "chat-esq" : /^[45]/.test(texto) ? "chat-erro" : "chat-dir";
+            chat.append(el("div", { class: "chat-msg mono " + classe }, lado + ": " + texto));
+            chat.scrollTop = chat.scrollHeight;
+        }
+        function reinicia() {
+            st = { fase: "saudacao", remetente: false, destinos: 0, fechado: false };
+            chat.replaceChildren();
+            msg("S", "220 smtp.example.com ESMTP MTA information");
+            fb.textContent = "";
+        }
+        function responde(cmd) {
+            if (st.fechado) { u.marca(fb, false, "A conexão já foi fechada. Clique em Recomeçar."); return; }
+            msg("C", cmd);
+            var r;
+            if (cmd.indexOf("EHLO") === 0) {
+                if (st.fase !== "saudacao") r = "503 Bad sequence of commands";
+                else { st.fase = "pronto"; r = "250 Hello mta.example.org, glad to meet you"; }
+            } else if (cmd.indexOf("MAIL FROM") === 0) {
+                if (st.fase !== "pronto" || st.remetente) r = "503 Bad sequence of commands";
+                else { st.remetente = true; r = "250 Ok"; }
+            } else if (cmd.indexOf("RCPT TO") === 0) {
+                if (!st.remetente) r = "503 Bad sequence of commands";
+                else if (cmd.indexOf("ninguem@") >= 0) r = "550 Requested action not taken: mailbox unavailable";
+                else { st.destinos++; r = "250 Ok"; }
+            } else if (cmd === "DATA") {
+                if (!st.remetente || !st.destinos) r = "503 Bad sequence of commands";
+                else {
+                    msg("S", "354 End data with <CR><LF>.<CR><LF>");
+                    ["From: \"Alice Doe\" <alice@example.org>", "To: Bob Smith <bob@example.com>", "Date: Mon, 9 Mar 2010 18:22:32 +0100",
+                        "Subject: Hello", "", "Hello Bob", "Best regards,", "Alice", "."].forEach(function (l) { msg("C", l); });
+                    st.remetente = false; st.destinos = 0;
+                    vistos.entregue = true;
+                    r = "250 Ok: queued as 12345";
+                }
+            } else if (cmd === "QUIT") {
+                st.fechado = true;
+                r = "221 Bye";
+                if (vistos.entregue) vistos.saiu = true;
+            }
+            msg("S", r);
+            if (/^503/.test(r)) vistos.e503 = true;
+            if (/^550/.test(r)) vistos.e550 = true;
+            var faltam = [];
+            if (!vistos.saiu) faltam.push("entregar uma mensagem (250 queued) e encerrar com QUIT");
+            if (!vistos.e503) faltam.push("provocar um 503 (comando fora de ordem)");
+            if (faltam.length) { fb.className = "small mt-2 mb-0"; fb.textContent = "Falta: " + faltam.join("; ") + "."; }
+            else { u.marca(fb, true, "Mensagem entregue e um 503 provocado: o servidor confere a ordem MAIL FROM → RCPT TO → DATA." + (vistos.e550 ? " Você também viu o 550 de um destinatário inexistente." : "")); concluir(); }
+        }
+        ["EHLO mta.example.org", "MAIL FROM:<alice@example.org>", "RCPT TO:<bob@example.com>", "RCPT TO:<ninguem@example.com>", "DATA", "QUIT"].forEach(function (c) {
+            botoes.append(u.botao(c, "btn-outline-primary mono", function () { responde(c); }, "Cliente envia " + c));
+        });
+        botoes.append(u.botao("Recomeçar", "btn-outline-secondary", reinicia));
+        raiz.append(chat, botoes, fb,
+            el("p", { class: "small text-muted mt-2 mb-0" }, "Você é o cliente SMTP. Desafio (20 pts): entregue a mensagem a bob@example.com, feche a sessão com QUIT e, em algum momento, mande um comando fora de ordem para ver o 503."));
+        reinicia();
+    });
+
+    /* ------------------------------------------------------------------
+     * 10. Diálogo POP3 (pág. 143–144 do PDF)
+     * ------------------------------------------------------------------ */
+    R.registrar("dialogo-pop", function (raiz) {
+        var caixa = [{ n: 1, tam: 120 }, { n: 2, tam: 500 }];
+        var chat = el("div", { class: "chat", role: "log", "aria-live": "polite" });
+        var botoes = el("div", { class: "d-flex flex-wrap gap-2 mt-2" });
+        var situacao = el("div", { class: "small mt-2" });
+        var fb = u.feedback();
+        var sessao = null, vistos = {};
+        var concluir = R.desafio(raiz, "pop-dele", 15, "Apagar uma mensagem no POP3 e entender a fase de atualização");
+
+        function msg(lado, texto) {
+            var classe = lado === "C" ? "chat-esq" : /^-ERR/.test(texto) ? "chat-erro" : lado === "!" ? "chat-erro" : "chat-dir";
+            chat.append(el("div", { class: "chat-msg mono " + classe }, (lado === "!" ? "" : lado + ": ") + texto));
+            chat.scrollTop = chat.scrollHeight;
+        }
+        function vivas() { return caixa.filter(function (m) { return !sessao || !sessao.apagar[m.n]; }); }
+        function total(lista) { return lista.reduce(function (s, m) { return s + m.tam; }, 0); }
+        function desenhaSituacao() {
+            situacao.replaceChildren(el("div", null, "Caixa de alice no servidor: ",
+                caixa.length ? caixa.map(function (m) { return el("span", { class: "chip" + (sessao && sessao.apagar[m.n] ? " chip-bad" : "") }, "msg " + m.n + " (" + m.tam + " octetos)" + (sessao && sessao.apagar[m.n] ? " — marcada" : "")); }) : el("em", null, "vazia")),
+                el("div", { class: "text-muted" }, "Fase: " + (sessao ? sessao.fase : "sem conexão")));
+        }
+        function conecta() {
+            if (sessao) { u.marca(fb, false, "Já existe uma conexão aberta."); return; }
+            sessao = { fase: "autorização", usuario: false, apagar: {} };
+            chat.replaceChildren();
+            msg("S", "+OK POP3 server ready");
+            desenhaSituacao();
+        }
+        function envia(cmd) {
+            if (!sessao) { u.marca(fb, false, "Primeiro abra a conexão com o servidor POP."); return; }
+            msg("C", cmd);
+            var partes = cmd.split(" "), verbo = partes[0], arg = Number(partes[1]);
+            var r;
+            if (sessao.fase === "autorização") {
+                if (verbo === "USER") { sessao.usuario = true; r = "+OK"; }
+                else if (verbo === "PASS" && sessao.usuario) { sessao.fase = "transação"; var v = vivas(); r = "+OK alice's maildrop has " + v.length + " messages (" + total(v) + " octets)"; }
+                else if (verbo === "QUIT") { r = "+OK POP3 server signing off"; sessao = null; }
+                else r = "-ERR comando inválido nesta fase";
+            } else {
+                var alvo = caixa.filter(function (m) { return m.n === arg; })[0];
+                if (verbo === "STAT") { var v2 = vivas(); r = "+OK " + v2.length + " " + total(v2); }
+                else if (verbo === "LIST") {
+                    var v3 = vivas();
+                    msg("S", "+OK " + v3.length + " messages (" + total(v3) + " octets)");
+                    v3.forEach(function (m) { msg("S", m.n + " " + m.tam); });
+                    r = ".";
+                } else if (verbo === "RETR") {
+                    if (!alvo || sessao.apagar[arg]) r = "-ERR no such message";
+                    else { msg("S", "+OK " + alvo.tam + " octets"); msg("S", "<o servidor envia a mensagem " + arg + ">"); r = "."; }
+                } else if (verbo === "DELE") {
+                    if (!alvo || sessao.apagar[arg]) r = "-ERR no such message";
+                    else { sessao.apagar[arg] = true; r = "+OK message " + arg + " deleted"; }
+                } else if (verbo === "QUIT") {
+                    var apagadas = Object.keys(sessao.apagar).length;
+                    caixa = caixa.filter(function (m) { return !sessao.apagar[m.n]; });
+                    r = "+OK POP3 server signing off (" + caixa.length + " message" + (caixa.length === 1 ? "" : "s") + " left)";
+                    if (apagadas) vistos.quit = true;
+                    sessao = null;
+                } else r = "-ERR comando inválido nesta fase";
+            }
+            msg("S", r);
+            desenhaSituacao();
+            avalia();
+        }
+        function cai() {
+            if (!sessao) { u.marca(fb, false, "Não há conexão aberta."); return; }
+            var tinha = Object.keys(sessao.apagar).length;
+            sessao = null;
+            msg("!", "A conexão caiu antes do QUIT.");
+            if (tinha) vistos.queda = true;
+            desenhaSituacao();
+            avalia();
+        }
+        function avalia() {
+            if (vistos.queda && vistos.quit) { u.marca(fb, true, "Isso: DELE só marca. A remoção acontece na fase de atualização, depois do QUIT; se a conexão cai antes, a mensagem continua no servidor."); concluir(); }
+            else { fb.className = "small mt-2 mb-0"; fb.textContent = (vistos.queda ? "✔ Você viu a marcação se perder com a queda. " : "Falta: marcar uma mensagem com DELE e deixar a conexão cair. ") + (vistos.quit ? "✔ Você apagou uma mensagem de verdade com QUIT." : "Falta: apagar uma mensagem de verdade (DELE e depois QUIT)."); }
+        }
+        botoes.append(u.botao("Abrir conexão (porta 110)", "btn-primary", conecta));
+        ["USER alice", "PASS 12345pass", "STAT", "LIST", "RETR 1", "DELE 1", "DELE 2", "QUIT"].forEach(function (c) {
+            botoes.append(u.botao(c, "btn-outline-primary mono", function () { envia(c); }, "Cliente envia " + c));
+        });
+        botoes.append(u.botao("Derrubar a conexão", "btn-outline-danger", cai),
+            u.botao("Restaurar a caixa", "btn-outline-secondary", function () { caixa = [{ n: 1, tam: 120 }, { n: 2, tam: 500 }]; sessao = null; chat.replaceChildren(); desenhaSituacao(); }));
+        raiz.append(chat, situacao, botoes, fb,
+            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): marque uma mensagem com DELE e derrube a conexão; reconecte e veja que ela continua lá. Depois apague uma mensagem de verdade."));
+        desenhaSituacao();
     });
 }());

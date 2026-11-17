@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 33 — Prática: a camada de aplicação | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.7: o dig, os servidores raiz, a delegação desde a raiz, o TTL e o cache, os registros MX, o identificador da consulta e o DNS sobre UDP e TCP.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="33" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 33 · Parte 3: Prática · Seção 4.7</span>
+        <h1 class="display-5 mb-3">Prática: a camada de aplicação</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você usa um dig simulado para seguir uma resolução desde os servidores raiz, observa o TTL caindo no cache e calcula a chance de um atacante acertar o identificador de uma consulta.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#sintaxe">1. O dig e os resolvedores</a>
+                    <a class="nav-link" href="#delegacao">2. Desde a raiz</a>
+                    <a class="nav-link" href="#ttl">3. TTL e cache</a>
+                    <a class="nav-link" href="#mx">4. MX e preferências</a>
+                    <a class="nav-link" href="#identificador">5. O identificador</a>
+                    <a class="nav-link" href="#udp-tcp">6. UDP ou TCP</a>
+                    <a class="nav-link" href="#exercicios-cap33">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre o DNS</h2>
+    <p>
+        A seção 4.7 do livro tem exercícios com o dig sobre o DNS (pág. 312–313 do PDF). Como o navegador não manda consultas DNS de verdade,
+        o dig desta página responde com os 13 servidores raiz reais e, abaixo deles, uma árvore de nomes ilustrativa; os comandos para rodar
+        o dig real estão nas resoluções. O formato das atividades está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Usar o <strong>dig</strong> para consultar resolvedores e servidores autoritativos e seguir a <strong>delegação</strong> desde a raiz.</li>
+                <li>Explicar o <strong>TTL</strong>, as preferências dos registros <strong>MX</strong> e a importância de um <strong>identificador aleatório</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o DNS do <a href="../capitulo-10/index.html">Capítulo 10</a>, os registros MX do <a href="../capitulo-11/index.html">Capítulo 11</a>
+                e os ataques ao DNS do <a href="../capitulo-17/index.html">Capítulo 17</a>. O capítulo cobre a seção 4.7 do livro (pág. 312–313 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Sintaxe -->
+<section id="sintaxe" class="chapter-section" data-conceito="sintaxe" data-titulo="O dig e os resolvedores">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">O dig e os resolvedores</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma mensagem DNS leva uma pergunta (nome e tipo) e volta com as seções de resposta, autoridade e informação adicional. Os tipos
+        mais comuns são A (IPv4), AAAA (IPv6), NS (servidor de nomes) e MX (relay de e-mail). Quem pergunta em nome da aplicação é o
+        <strong>resolvedor</strong>, que percorre a hierarquia e guarda as respostas. Veja a <a href="../capitulo-10/index.html#mensagem-dns">mensagem DNS</a>
+        e os <a href="../capitulo-10/index.html#registros">registros</a> no Capítulo 10.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        O livro usa o dig, instalado na maioria dos sistemas Unix/Linux, na forma <code>dig @servidor -t tipo nome</code>: servidor é o
+        endereço ou o nome de um servidor DNS ou resolvedor; tipo é o tipo de registro pedido; nome é o nome completo (FQDN). A opção
+        <code>+trace</code> mostra todas as consultas de uma resolução recursiva (pág. 312 do PDF).
+    </p>
+    <ol class="mb-2">
+        <li data-livro="4.7.1-Q1">Quais são os endereços IP dos resolvedores que o seu dig usa? (No Linux, a seção Description da página
+            de manual do dig diz onde ele encontra essa lista.)</li>
+        <li data-livro="4.7.1-Q2">Quais são os servidores de nomes responsáveis pelo domínio de topo info? Dá para consultá-los por IPv6?</li>
+        <li data-livro="4.7.1-Q3">Qual é o endereço IPv6 de www.computer-networking.info? Que tipo de consulta o dig manda para obtê-lo (pág. 312 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="dig-simulado" data-desafio="sintaxe"></div>
+    <p class="small text-muted">Dados ilustrativos: o TLD .example é reservado para exemplos (RFC 2606), e os endereços são de documentação. Os servidores raiz são os reais.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1:</strong> sem <code>@servidor</code>, o dig usa os resolvedores listados em <code>/etc/resolv.conf</code>, nas linhas
+                <code>nameserver</code>. A linha <code>;; SERVER:</code> no fim da saída mostra qual respondeu.</li>
+            <li><strong>Q2:</strong> <code>dig -t NS info</code> lista os servidores do TLD. Se a seção adicional trouxer registros AAAA deles,
+                dá para consultá-los por IPv6, com <code>dig @endereço-IPv6 …</code> ou <code>dig -6</code>. Na simulação, faça o mesmo com
+                <code>-t NS example</code>.</li>
+            <li><strong>Q3:</strong> o tipo AAAA: <code>dig -t AAAA www.computer-networking.info</code>. A resposta real muda com o tempo; rode em
+                casa para ver a de hoje.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="aa: a resposta veio de um servidor autoritativo|ra: o servidor é autoritativo|rd: a resposta veio do cache" data-answer="0" data-explain="aa (authoritative answer) só aparece quando quem respondeu é autoritativo para o nome; ra diz que o servidor faz recursão; rd é o pedido de recursão do cliente." data-hint="aa = authoritative answer.">
+        <p class="fw-semibold mb-2">O que indica a flag aa no cabeçalho da resposta?</p>
+    </div>
+</section>
+
+<!-- 2. Delegação -->
+<section id="delegacao" class="chapter-section" data-conceito="delegacao" data-titulo="Desde a raiz">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Seguindo a delegação desde a raiz</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um servidor que não é autoritativo para um nome responde com uma <strong>referência</strong>: os registros NS da zona filha na
+        seção de autoridade e, na adicional, os endereços desses servidores. Seguindo as referências desde a raiz, chega-se ao servidor
+        autoritativo. Veja os <a href="../capitulo-10/index.html#registros">registros de recurso no Capítulo 10</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="4">
+        <li data-livro="4.7.1-Q4">Sem parâmetros, o dig consulta um servidor raiz e obtém os nomes de todos eles. Por motivos técnicos, há só
+            13 servidores raiz, listados também no arquivo named.root da InterNIC. Quais são os endereços IPv6 deles?</li>
+        <li data-livro="4.7.1-Q5">Suponha uma rede sem resolvedor, em que você precisa fazer a consulta à mão desde a raiz: pergunte a um
+            servidor raiz pelos servidores (NS) do TLD org; depois, a um deles pelos de root-servers.org; continue até o servidor responsável
+            por www.root-servers.org. Qual é o tempo de vida associado ao endereço IPv6 encontrado (pág. 312 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="dig-simulado" data-desafio="delegacao"></div>
+    <p class="small text-muted">Faça a Q5 com www.rede.example: comece por um servidor raiz, depois a.nic.example e, por fim, ns1.rede.example.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-2">
+            <li><strong>Q4:</strong> os endereços IPv6 dos 13 servidores raiz, segundo o named.root de 12/11/2026:</li>
+        </ul>
+        <div class="table-responsive"><table class="table table-sm small mono mb-2">
+            <thead><tr><th>Servidor</th><th>IPv4</th><th>IPv6</th></tr></thead>
+            <tbody>
+                <tr><td>a.root-servers.net</td><td>198.41.0.4</td><td>2001:503:ba3e::2:30</td></tr>
+                <tr><td>b.root-servers.net</td><td>170.247.170.2</td><td>2801:1b8:10::b</td></tr>
+                <tr><td>c.root-servers.net</td><td>192.33.4.12</td><td>2001:500:2::c</td></tr>
+                <tr><td>d.root-servers.net</td><td>199.7.91.13</td><td>2001:500:2d::d</td></tr>
+                <tr><td>e.root-servers.net</td><td>192.203.230.10</td><td>2001:500:a8::e</td></tr>
+                <tr><td>f.root-servers.net</td><td>192.5.5.241</td><td>2001:500:2f::f</td></tr>
+                <tr><td>g.root-servers.net</td><td>192.112.36.4</td><td>2001:500:12::d0d</td></tr>
+                <tr><td>h.root-servers.net</td><td>198.97.190.53</td><td>2001:500:1::53</td></tr>
+                <tr><td>i.root-servers.net</td><td>192.36.148.17</td><td>2001:7fe::53</td></tr>
+                <tr><td>j.root-servers.net</td><td>192.58.128.30</td><td>2001:503:c27::2:30</td></tr>
+                <tr><td>k.root-servers.net</td><td>193.0.14.129</td><td>2001:7fd::1</td></tr>
+                <tr><td>l.root-servers.net</td><td>199.7.83.42</td><td>2001:500:9f::42</td></tr>
+                <tr><td>m.root-servers.net</td><td>202.12.27.33</td><td>2001:dc3::35</td></tr>
+            </tbody>
+        </table></div>
+        <ul class="mb-0">
+            <li><strong>Q5:</strong> <code>dig @2001:503:ba3e::2:30 -t NS org</code> devolve uma referência para os servidores de org; perguntando a
+                um deles, vem a referência para os de root-servers.org; o último responde com o registro AAAA de www.root-servers.org e o seu
+                TTL. São três consultas, como na simulação com www.rede.example (raiz, a.nic.example, ns1.rede.example), cujo AAAA tem TTL de
+                3600 s.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Na seção de autoridade, como registros NS|Na seção de resposta, como registros A|Na seção de pergunta" data-answer="0" data-explain="Uma referência não tem resposta: traz os NS da zona filha em AUTHORITY e os endereços deles em ADDITIONAL." data-hint="Veja a saída do dig perguntando à raiz.">
+        <p class="fw-semibold mb-2">Onde vêm os servidores da zona filha numa referência?</p>
+    </div>
+</section>
+
+<!-- 3. TTL -->
+<section id="ttl" class="chapter-section" data-conceito="ttl" data-titulo="TTL e cache">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">O TTL e as respostas que mudam</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Cada registro tem um TTL: por quantos segundos um resolvedor pode guardá-lo antes de perguntar de novo. Enquanto guarda, o
+        resolvedor responde do cache, com o TTL diminuindo. Veja os <a href="../capitulo-10/index.html#registros">registros e o TTL no Capítulo 10</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.7.1-Q6">
+        Faça a mesma análise para um site popular, como www.google.com. Qual é o tempo de vida do endereço IPv6? Fazendo a mesma consulta
+        várias vezes, você recebe sempre a mesma resposta? Por que um tempo de vida é associado às respostas DNS (pág. 313 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ttl-cache"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Sites muito grandes usam TTLs curtos, de minutos, e respostas que variam: o endereço pode depender de onde está o resolvedor, e a
+            ordem dos endereços gira para espalhar os clientes. Consultas repetidas ao mesmo resolvedor mostram o TTL caindo, porque a resposta
+            vem do cache. O TTL existe para equilibrar duas coisas: um TTL longo poupa consultas e deixa as respostas rápidas; um curto permite
+            trocar os endereços (por manutenção, falha ou distribuição de carga) sem esperar muito.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O resolvedor pergunta de novo aos servidores autoritativos|O registro continua válido para sempre|O resolvedor apaga o domínio" data-answer="0" data-explain="Expirado o TTL, a cópia guardada deixa de valer, e a próxima consulta refaz a resolução." data-hint="O TTL é o prazo de validade da cópia.">
+        <p class="fw-semibold mb-2">O que acontece quando o TTL de um registro em cache chega a zero?</p>
+    </div>
+</section>
+
+<!-- 4. MX -->
+<section id="mx" class="chapter-section" data-conceito="mx" data-titulo="MX e preferências">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Registros MX e preferências</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um registro MX diz que servidor recebe o e-mail de um domínio, com uma preferência: o remetente tenta primeiro o de menor número e
+        só passa ao seguinte se ele falhar. Veja os <a href="../capitulo-11/index.html#mx">registros MX no Capítulo 11</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.7.1-Q7">
+        Use o dig para achar os relays de e-mail dos domínios uclouvain.be e student.uclouvain.be. Qual é o TTL desses registros? Explique as
+        preferências dos registros MX. Há mais informação sobre eles na RFC 5321 (pág. 313 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="mx-preferencia"></div>
+    <p class="small text-muted">rede.example e aluno.rede.example fazem o papel de uclouvain.be e student.uclouvain.be, com dados ilustrativos.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            A RFC 5321 (seção 5.1) manda o remetente ordenar os MX pela preferência, do menor para o maior, e sortear a ordem entre os de mesma
+            preferência. Dois MX com 10 dividem a carga; um com 20 é reserva. Um subdomínio pode ter MX próprios, como aluno.rede.example, que
+            prefere o seu relay (5) e usa mx1.rede.example só como reserva (50). Os domínios reais do livro mudaram desde 2021; rode
+            <code>dig -t MX uclouvain.be</code> para ver os de hoje.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Sorteia entre os dois|Usa sempre o primeiro da lista|Manda para os dois" data-answer="0" data-explain="Preferências iguais são tentadas em ordem aleatória, o que divide a carga (RFC 5321, seção 5.1)." data-hint="O que fazer com um empate?">
+        <p class="fw-semibold mb-2">O que o remetente faz com dois MX de mesma preferência?</p>
+    </div>
+</section>
+
+<!-- 5. Identificador -->
+<section id="identificador" class="chapter-section" data-conceito="identificador" data-titulo="O identificador">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">O identificador da consulta</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O cabeçalho DNS tem um identificador de 16 bits que o cliente escolhe e o servidor copia na resposta. Um atacante que forja
+        respostas precisa acertar esse identificador antes de a resposta verdadeira chegar: é o envenenamento de cache. Veja os
+        <a href="../capitulo-17/index.html#dns-ataques">ataques ao DNS no Capítulo 17</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="8">
+        <li data-livro="4.7.1-Q8">Na saída do dig, a seção de cabeçalho mostra o identificador usado na consulta (no exemplo do livro, 25718).
+            O seu dig gera identificadores aleatórios?</li>
+        <li data-livro="4.7.1-Q9">Um dig, e principalmente um resolvedor como o bind ou o unbound, sempre confere se a resposta traz o mesmo
+            identificador da consulta. Por que isso é tão importante? Imagine um atacante que forja respostas para associar www.bigbank.com ao
+            seu próprio endereço. Como ele atacaria uma implementação que manda consultas com o mesmo identificador sempre, com o identificador
+            somado de 1 a cada consulta, ou com identificadores aleatórios (pág. 313 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="adivinha-id"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q8:</strong> rode o dig algumas vezes e compare os ids: implementações atuais sorteiam.</li>
+            <li><strong>Q9:</strong> conferir o identificador descarta respostas que não correspondem a nenhuma consulta. Com id <strong>fixo</strong>,
+                o atacante põe esse id em todas as respostas forjadas; com id <strong>incremental</strong>, basta ver (ou provocar) uma consulta
+                para prever a próxima. Nos dois casos, ele só precisa chegar antes do servidor verdadeiro. Com id <strong>aleatório</strong>, cada
+                resposta forjada acerta com chance 1/65 536; com 100 respostas antes da verdadeira, cerca de 0,15%. Como o atacante pode repetir o
+                ataque muitas vezes, os resolvedores atuais também sorteiam a porta UDP de origem, o que multiplica as possibilidades (complemento).</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="65 536|256|4 294 967 296" data-answer="0" data-explain="O identificador tem 16 bits: 2^16 = 65 536 valores." data-hint="Quantos bits tem o campo?">
+        <p class="fw-semibold mb-2">Quantos identificadores diferentes uma consulta DNS pode ter?</p>
+    </div>
+</section>
+
+<!-- 6. UDP e TCP -->
+<section id="udp-tcp" class="chapter-section" data-conceito="udp-tcp" data-titulo="UDP ou TCP">
+    <span class="kicker">Atividade 6</span>
+    <h2 class="section-title">DNS sobre UDP e sobre TCP</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Com UDP, a consulta vai num datagrama e a resposta volta noutro. Com TCP, a abertura em três vias vem antes, e cada mensagem DNS
+        leva na frente dois bytes de comprimento. Veja o <a href="../capitulo-10/index.html#mensagem-dns">DNS no Capítulo 10</a> e a
+        <a href="../capitulo-20/index.html#abertura">abertura do TCP no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.7.1-Q10">
+        O DNS pode rodar sobre UDP e sobre TCP. A maioria dos servidores prefere UDP, que gasta menos recursos; o TCP é útil quando se espera uma
+        resposta grande. Compare <code>time dig +tcp</code> e <code>time dig</code> consultando um servidor raiz. A resposta chega mais rápido
+        por TCP ou por UDP (pág. 313 do PDF)?
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro termina a seção mencionando três exercícios com capturas de pacotes das resoluções de www.example.com, www.google.com e
+        www.computer-networking.info, para pôr em ordem. As capturas eram do INGInious e não fazem parte do PDF.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="udp-tcp-dns"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Por UDP, a resposta chega em cerca de um RTT; por TCP, em cerca de dois, porque a conexão precisa ser aberta antes da consulta. Com o
+            servidor raiz a 25 ms, algo como 25 ms contra 50 ms, mais o processamento. O TCP compensa quando a resposta não cabe num datagrama
+            UDP (o servidor marca a resposta como truncada, com a flag TC, e o cliente repete por TCP) e nas transferências de zona.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Repete a consulta por TCP|Desiste da consulta|Junta vários datagramas UDP" data-answer="0" data-explain="A flag TC (truncated) avisa que a resposta não coube; o cliente refaz a consulta por TCP." data-hint="TC = truncated.">
+        <p class="fw-semibold mb-2">Uma resposta UDP chega com a flag TC ligada. O que o cliente faz?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap33" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Que comando dig pergunta ao servidor raiz a.root-servers.net, por IPv6, quais são os servidores do TLD org?
+            <details><summary>Ver solução</summary><p class="mb-0"><code>dig @2001:503:ba3e::2:30 -t NS org</code>. A resposta é uma referência: os NS de org na seção de autoridade e os endereços deles na adicional.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Um registro tem TTL de 3600 s. Um resolvedor o guardou há 25 minutos. Que TTL ele mostra numa resposta do cache?
+            <details><summary>Ver solução</summary><p class="mb-0">3600 − 25 × 60 = 2100 s.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Um domínio tem os MX 30 a.exemplo, 10 b.exemplo e 20 c.exemplo. Em que ordem um servidor SMTP tenta entregar?
+            <details><summary>Ver solução</summary><p class="mb-0">b.exemplo (10), depois c.exemplo (20) e, por fim, a.exemplo (30): a menor preferência primeiro.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Com identificadores aleatórios de 16 bits, quantas respostas forjadas um atacante precisa mandar para ter 50% de chance de acertar?
+            <details><summary>Ver solução</summary><p class="mb-0">n tal que 1 − (1 − 1/65 536)<sup>n</sup> = 0,5: n ≈ 45 426. Se a porta de origem também for sorteada (mais 16 bits), seriam quase 3 bilhões.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Montando uma consulta DNS</h3>
+    <pre class="code-block"><code>import struct
+
+# O cabeçalho DNS tem 12 bytes: id, flags e quatro contadores (pág. 134-135 do PDF, Capítulo 10).
+def consulta(ident, nome, tipo, recursao=True):
+    flags = 0x0100 if recursao else 0          # bit RD (recursion desired)
+    cab = struct.pack("!HHHHHH", ident, flags, 1, 0, 0, 0)
+    qname = b"".join(bytes([len(p)]) + p.encode("ascii") for p in nome.rstrip(".").split(".")) + b"\x00"
+    TIPOS = {"A": 1, "NS": 2, "MX": 15, "AAAA": 28}
+    return cab + qname + struct.pack("!HH", TIPOS[tipo], 1)   # classe IN = 1
+
+def le_flags(flags):
+    nomes = {15: "qr", 10: "aa", 9: "tc", 8: "rd", 7: "ra"}
+    return [n for bit, n in nomes.items() if flags &gt;&gt; bit &amp; 1]
+
+msg = consulta(25718, "www.rede.example", "AAAA")       # o id do exemplo do livro (pág. 313)
+print(len(msg), "bytes:", msg.hex(" "))
+print("id em hexadecimal:", hex(25718))
+print("flags 0x8180 =", le_flags(0x8180))                # uma resposta típica de resolvedor</code></pre>
+    <h3 class="h6 mt-4">2. Resolução iterativa e cache</h3>
+    <pre class="code-block"><code># Resolução iterativa com dados ilustrativos (TLD .example, RFC 2606) e um cache com TTL.
+ZONAS = {
+    ".": {"filhos": {"example.": "a.nic.example."}},
+    "example.": {"filhos": {"rede.example.": "ns1.rede.example.", "video.example.": "ns.video.example."}},
+    "rede.example.": {"rr": {("www.rede.example.", "AAAA"): (3600, ["2001:db8:10::80"]),
+                             ("rede.example.", "MX"): (3600, ["10 mx1.rede.example.", "10 mx2.rede.example.", "20 reserva.video.example."])}},
+    "video.example.": {"rr": {("video.example.", "AAAA"): (300, ["2001:db8:a::1", "2001:db8:a::2", "2001:db8:a::3"])}},
+}
+cache, relogio = {}, 0
+
+def resolve(nome, tipo):
+    chave = (nome, tipo)
+    if chave in cache and cache[chave][0] &gt; relogio:
+        expira, dados = cache[chave]
+        return dados, expira - relogio, ["cache"]
+    zona, caminho = ".", []
+    while True:
+        caminho.append(zona)
+        z = ZONAS[zona]
+        filho = next((f for f in z.get("filhos", {}) if nome == f or nome.endswith("." + f)), None)
+        if filho:                               # referência: desce um nível
+            zona = filho
+            continue
+        ttl, dados = z["rr"][chave]
+        cache[chave] = (relogio + ttl, dados)
+        return dados, ttl, caminho
+
+print(resolve("www.rede.example.", "AAAA"))
+relogio = 100
+print(resolve("www.rede.example.", "AAAA"))
+print(resolve("video.example.", "AAAA"))</code></pre>
+    <h3 class="h6 mt-4">3. A chance do envenenamento</h3>
+    <pre class="code-block"><code>import random
+
+# Quantas respostas forjadas acertam o identificador de 16 bits? (4.7.1 Q9)
+def chance(n, bits=16):
+    return 1 - (1 - 2 ** -bits) ** n
+
+for n in (1, 100, 1000, 10000):
+    print(f"{n:6} respostas forjadas: {chance(n):.4%}")
+
+# Experimento: 2000 consultas; contra cada uma, o atacante manda 100 respostas com ids sorteados
+rng = random.Random(42)
+envenenadas = 0
+for _ in range(2000):
+    verdadeiro = rng.randrange(65536)
+    forjados = {rng.randrange(65536) for _ in range(100)}
+    envenenadas += verdadeiro in forjados
+print("consultas envenenadas:", envenenadas, "de 2000 (esperado: cerca de", round(2000 * chance(100), 1), ")")
+
+# Complemento: sortear também a porta de origem soma cerca de 16 bits de incerteza
+print(f"id + porta (32 bits), 1000 respostas: {chance(1000, 32):.8%}")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.7 "Application layer" (pág. 312–313 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>InterNIC — <a href="https://www.internic.net/domain/named.root" target="_blank" rel="noopener noreferrer">named.root</a>, a lista oficial dos servidores raiz (versão de 12/11/2026)</li>
+        <li>RFC 1035 — <a href="https://www.rfc-editor.org/rfc/rfc1035" target="_blank" rel="noopener noreferrer">Domain Names: Implementation and Specification</a>, RFC 2606 — <a href="https://www.rfc-editor.org/rfc/rfc2606" target="_blank" rel="noopener noreferrer">Reserved Top Level DNS Names</a> e RFC 5321 — <a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener noreferrer">Simple Mail Transfer Protocol</a> (seção 5.1, os MX)</li>
+        <li>RFC 5452 — <a href="https://www.rfc-editor.org/rfc/rfc5452" target="_blank" rel="noopener noreferrer">Measures for Making DNS More Resilient against Forged Answers</a> (id e porta aleatórios) e a página de manual do <a href="https://manpages.debian.org/bookworm/bind9-dnsutils/dig.1.en.html" target="_blank" rel="noopener noreferrer">dig(1)</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-32/index.html" class="text-muted text-decoration-none">← Capítulo 32</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 33</span>
+            <a href="../capitulo-34/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 34 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap33.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

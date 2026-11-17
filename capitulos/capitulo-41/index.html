@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 41 — Prática: roteamento interdomínio | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.15: caminhos com relações cliente-provedor e de par, prefixos mais específicos num stub com dois provedores, ECMP por fluxo, o traceroute6 até o Google e as mensagens de erro ICMPv6.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="41" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 41 · Parte 3: Prática · Seção 4.15</span>
+        <h1 class="display-5 mb-3">Prática: roteamento interdomínio</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você calcula os caminhos que as relações comerciais permitem, vê como um prefixo mais específico desvia o tráfego, distribui fluxos por caminhos de mesmo custo e lê as mensagens de erro ICMPv6.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#relacoes">1. Caminhos e relações</a>
+                    <a class="nav-link" href="#especificos">2. Prefixos mais específicos</a>
+                    <a class="nav-link" href="#ecmp">3. Caminhos de mesmo custo</a>
+                    <a class="nav-link" href="#traceroute">4. O traceroute6 até o Google</a>
+                    <a class="nav-link" href="#icmpv6">5. Mensagens de erro ICMPv6</a>
+                    <a class="nav-link" href="#exercicios-cap41">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre roteamento interdomínio</h2>
+    <p>
+        A seção 4.15 do livro tem dez questões sobre roteamento interdomínio, caminhos de mesmo custo e ICMPv6 (pág. 350–353 do PDF). As topologias são as
+        das figuras do livro, e a saída do traceroute6 é a impressa na pág. 353. O formato das atividades está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Aplicar as <strong>regras de exportação</strong> e as <strong>preferências</strong> do BGP para achar os caminhos e os domínios que não se alcançam.</li>
+                <li>Explicar o efeito de <strong>prefixos mais específicos</strong>, o <strong>ECMP por fluxo</strong> e os códigos das <strong>mensagens de erro ICMPv6</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise as relações entre domínios e o BGP do <a href="../capitulo-25/index.html">Capítulo 25</a> e o ICMPv6 do
+                <a href="../capitulo-22/index.html">Capítulo 22</a>. O capítulo cobre a seção 4.15 do livro (pág. 350–353 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Relações comerciais -->
+<section id="relacoes" class="chapter-section" data-conceito="relacoes" data-titulo="Caminhos e relações">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">Caminhos com relações cliente-provedor e de par</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um domínio anuncia aos clientes todas as rotas que conhece. Aos pares e aos provedores, anuncia só as próprias e as dos clientes: ninguém leva de graça
+        o tráfego entre dois pares ou dois provedores. Entre várias rotas, prefere as aprendidas de clientes, depois as de pares e, por último, as de
+        provedores. Veja as <a href="../capitulo-25/index.html#relacoes">relações entre domínios no Capítulo 25</a> e o
+        <a href="../capitulo-25/index.html#bgp-decisao">processo de decisão</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        Nas figuras, <strong>$</strong> marca uma relação cliente-provedor, com a seta indo do cliente para o provedor (a convenção da Fig. 67, pág. 245), e
+        <strong>=</strong> marca um acordo de par (<em>shared-cost</em>). Nas Q2 e Q3, cada ASn anuncia o prefixo 2001:db8:n::/48.
+    </p>
+    <ol class="mb-2">
+        <li data-livro="4.15-Q1">Na primeira topologia (AS1 cliente de AS2 e de AS3, AS4 cliente de AS2; pares AS2 = AS3 e AS3 = AS4), quais são os caminhos de AS1
+            para AS4, de AS4 para AS2 e de AS4 para AS1?</li>
+        <li data-livro="4.15-Q2">Na segunda (AS3 cliente de AS1 e de AS4, AS1 cliente de AS4; pares AS1 = AS2 e AS2 = AS3), calcule as tabelas de rotas. Todos os
+            domínios alcançam todos os outros?</li>
+        <li data-livro="4.15-Q3">Na terceira (AS4 cliente de AS1 e de AS2; pares AS4 = AS5, AS5 = AS3, AS3 = AS2, AS3 = AS1 e AS1 = AS2), alguns domínios não
+            alcançam todos os outros. Dá para resolver acrescentando um único enlace de par ou um único enlace cliente-provedor (pág. 350–351 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="caminhos-relacoes"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1.</strong> AS1 → AS4 é AS1-AS2-AS4: AS2 anuncia o cliente AS4 a todos, e AS3 anuncia ao cliente AS1 a rota que aprendeu do par AS4. As duas
+                rotas vêm de provedores e têm o mesmo tamanho; o livro não diz como desempatar, e aqui o desempate é pelo menor número de AS. AS4 → AS2 é direto,
+                pelo provedor. AS4 → AS1 é AS4-AS3-AS1: AS4 conhece AS4-AS2-AS1 (pelo provedor) e AS4-AS3-AS1 (pelo par), e a rota do par é mais barata.
+                O caminho de AS1 a AS4 e o de AS4 a AS1 são diferentes.</li>
+            <li><strong>Q2.</strong> AS2 e AS4 não se alcançam. AS2 só tem pares (AS1 e AS3), e cada um deles só anuncia a um par as próprias rotas e as dos clientes.
+                AS4 é provedor de AS1 e de AS3, então nenhum dos dois repassa a rota de AS4 para AS2, nem a de AS2 para AS4. Os outros pares de domínios se alcançam.</li>
+            <li><strong>Q3.</strong> AS5 só tem pares (AS4 e AS3) e fica isolado de AS1 e de AS2: AS4 e AS3 não repassam a ele as rotas aprendidas de provedores e de
+                pares, e não anunciam a AS1 e a AS2 a rota do par AS5. Testando todos os enlaces possíveis entre domínios ainda sem ligação direta (AS5–AS1, AS5–AS2
+                e AS3–AS4), só dois resolvem: <strong>AS5 cliente de AS1</strong> ou <strong>AS5 cliente de AS2</strong>. Com um provedor, AS5 recebe a tabela
+                inteira dele, e o provedor anuncia AS5 a todos. Um par novo não basta: um par AS5 = AS2, por exemplo, dá a AS5 a rota de AS2, mas AS2 não anuncia
+                AS5 ao par AS1.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Só aos clientes|A todos os vizinhos|Só aos outros pares" data-answer="0" data-explain="Uma rota aprendida de um par só é anunciada aos clientes, que pagam pelo trânsito; repassá-la a outro par ou a um provedor seria levar de graça o tráfego dos outros." data-hint="Quem paga pelo trânsito?">
+        <p class="fw-semibold mb-2">A quem um domínio anuncia uma rota aprendida de um par?</p>
+    </div>
+</section>
+
+<!-- 2. Prefixos mais específicos -->
+<section id="especificos" class="chapter-section" data-conceito="especificos" data-titulo="Prefixos mais específicos">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Um domínio stub com dois provedores</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Cada roteador da Internet encaminha pelo maior prefixo: se dois anúncios cobrem o mesmo endereço, o mais específico vence, venha de onde vier. Veja o
+        <a href="../capitulo-22/index.html#enderecos">maior prefixo no Capítulo 22</a> e o
+        <a href="../capitulo-25/index.html#relacoes">multihoming no Capítulo 25</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="4">
+        <li data-livro="4.15-Q4">O domínio stub AS456 está ligado a dois provedores, AS123 e AS789, e anuncia o seu prefixo aos dois. AS123 anuncia
+            2001:db8:dead::/48; AS789 anuncia 2001:db8:beef::/48 e 2001:db8:dead:cafe::/63. Por qual provedor AS456 recebe os pacotes para
+            2001:db8:dead:cafe::1? AS123 deveria mudar a sua configuração (pág. 351 do PDF)?</li>
+        <li data-livro="4.15-Q5">Na figura da pág. 352, AS456 tem o /47 2001:db8:cafe::/47, mas anuncia dois /48: 2001:db8:caff::/48 pelo enlace R1–R2 (AS123)
+            e 2001:db8:cafe::/48 pelo enlace R1–R3 (AS789). Por qual provedor chegam os pacotes para 2001:db8:caff::bb e para 2001:db8:cafe::aa? O que acontece
+            com o alcance desses endereços se o enlace R1–R3 falhar? Proponha uma configuração em R1 com o mesmo objetivo, mas que mantenha alcançáveis todos os
+            endereços de AS456 se um dos seus enlaces interdomínio falhar (pág. 351–352 do PDF).</li>
+    </ol>
+    <p class="small">
+        Os dois /48 são as metades do /47: 0xcafe e 0xcaff só diferem no último bit, e o /47 fixa só os 15 primeiros bits do terceiro grupo.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="prefixo-especifico"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q4.</strong> Por AS789. O /63 cobre 2001:db8:dead:cafe::1 e é mais longo que o /48 de AS123, então toda a Internet, inclusive AS123,
+                manda esses pacotes por AS789. Se AS123 quer receber parte do tráfego, deve anunciar também 2001:db8:dead:cafe::/63, um prefixo tirado do seu
+                bloco, mas do cliente. Com os dois anúncios do /63, cada domínio escolhe pelas suas preferências e pelo tamanho do AS-path.</li>
+            <li><strong>Q5.</strong> 2001:db8:caff::bb entra por AS123 e 2001:db8:cafe::aa por AS789: cada /48 só é anunciado por um provedor. Se R1–R3 falhar,
+                o anúncio de cafe::/48 some, e nenhum outro prefixo cobre cafe::aa: a metade cafe::/48 de AS456 fica inalcançável. A correção em R1 é anunciar
+                o /47 aos dois provedores, além de caff::/48 a AS123 e cafe::/48 a AS789. Sem falhas, os /48 mais específicos dividem o tráfego como antes; se
+                um enlace cair, o /47 anunciado pelo outro provedor ainda cobre a metade que ficou sem o /48.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Pelo provedor que anuncia o /48|Pelo provedor que anuncia o /47|Metade por cada um" data-answer="0" data-explain="Com os dois enlaces funcionando, o /48 é o maior prefixo que cobre o endereço; o /47 só é usado quando o /48 desaparece." data-hint="Maior prefixo.">
+        <p class="fw-semibold mb-2">Com a configuração corrigida (o /47 pelos dois provedores e um /48 por cada um), por onde entra um endereço de cafe::/48, sem falhas?</p>
+    </div>
+</section>
+
+<!-- 3. ECMP -->
+<section id="ecmp" class="chapter-section" data-conceito="ecmp" data-titulo="Caminhos de mesmo custo">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Vários caminhos de mesmo custo sem trocar a ordem</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Quando há vários caminhos de mesmo custo, distribuí-los pacote a pacote mistura a ordem dos segmentos de uma conexão; por isso os roteadores escolhem
+        a saída por um hash do fluxo. Veja os <a href="../capitulo-24/index.html#ospf">caminhos de mesmo custo no OSPF, no Capítulo 24</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="6">
+        <li data-livro="4.15-Q6">Na rede da Fig. 11, todos os enlaces têm métrica 1, menos A–B, com métrica 4 nos dois sentidos, e há dois caminhos de mesmo custo
+            entre D e C. Roteadores antigos escolhiam um deles ao acaso; os recentes usam até N caminhos de mesmo custo, e a consulta à tabela devolve um conjunto
+            de interfaces de saída. Como projetar o algoritmo que escolhe a interface de cada pacote, sabendo que todos os segmentos de uma conexão TCP devem
+            seguir o mesmo caminho, para evitar a troca de ordem (pág. 352–353 do PDF)?</li>
+    </ol>
+    <svg class="sim-svg w-100 mb-2" viewBox="0 0 300 190" style="max-height:200px" role="img" aria-label="Fig. 11: A no alto; B e C embaixo dele, ligados entre si; D embaixo de B e E embaixo de C, ligados entre si. A–B custa 4; os outros enlaces custam 1.">
+        <title>Fig. 11: uma rede simples (pág. 352)</title>
+        <g stroke="currentColor" stroke-width="2"><line x1="150" y1="25" x2="70" y2="85"/><line x1="150" y1="25" x2="230" y2="85"/><line x1="70" y1="85" x2="230" y2="85"/><line x1="70" y1="85" x2="70" y2="165"/><line x1="230" y1="85" x2="230" y2="165"/><line x1="70" y1="165" x2="230" y2="165"/></g>
+        <g font-size="12" text-anchor="middle" fill="currentColor"><text x="100" y="48" font-weight="bold">4</text><text x="200" y="48">1</text><text x="150" y="78">1</text><text x="58" y="128">1</text><text x="242" y="128">1</text><text x="150" y="160">1</text></g>
+        <g font-size="13" text-anchor="middle"><ellipse class="no" cx="150" cy="25" rx="18" ry="13"/><text x="150" y="30">A</text><ellipse class="no" cx="70" cy="85" rx="18" ry="13"/><text x="70" y="90">B</text><ellipse class="no" cx="230" cy="85" rx="18" ry="13"/><text x="230" y="90">C</text><ellipse class="no" cx="70" cy="165" rx="18" ry="13"/><text x="70" y="170">D</text><ellipse class="no" cx="230" cy="165" rx="18" ry="13"/><text x="230" y="170">E</text></g>
+    </svg>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ecmp-hash"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Calcule um hash sobre os campos que identificam a conexão, a 5-tupla (endereços de origem e de destino, o Next Header e as portas de origem e de
+            destino), e escolha a interface de índice <code>hash mod N</code>. Todos os segmentos de uma conexão têm a mesma 5-tupla, caem na mesma interface e
+            não trocam de ordem; conexões diferentes têm hashes diferentes e se espalham pelos N caminhos. No IPv6, o campo <em>flow label</em> pode entrar no
+            hash, o que evita ler as portas além dos cabeçalhos de extensão (RFC 6437). Um hash só do destino também manteria a ordem, mas mandaria todo o
+            tráfego para um mesmo destino por um único caminho.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Alternar os caminhos a cada pacote|Um hash da 5-tupla|Sortear um caminho para cada pacote" data-answer="1" data-explain="O hash da 5-tupla é igual para todos os segmentos da conexão, que seguem sempre o mesmo caminho e chegam na ordem." data-hint="O que é igual em todos os segmentos da conexão?">
+        <p class="fw-semibold mb-2">Que escolha de saída mantém a ordem dos segmentos de cada conexão TCP?</p>
+    </div>
+</section>
+
+<!-- 4. traceroute6 -->
+<section id="traceroute" class="chapter-section" data-conceito="traceroute" data-titulo="O traceroute6 até o Google">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Vários endereços num mesmo salto</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O traceroute6 manda, para cada valor de hop limit, três sondas UDP, cada uma para uma porta de destino diferente, e mostra o endereço de origem de cada
+        ICMPv6 Time Exceeded que volta. Veja o <a href="../capitulo-22/index.html#icmpv6">ICMPv6 no Capítulo 22</a> e o
+        <a href="../capitulo-40/index.html#pacotes-ipv6">traceroute6 no Capítulo 40</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.15-Q7">
+        Um traceroute6 para ipv6.google.com dá a saída abaixo. Por que, no oitavo, no nono e no décimo saltos, aparecem vários endereços IPv6
+        (pág. 353 do PDF)?
+    </p>
+<pre class="log small">traceroute6 to ipv6.l.google.com (2a00:1450:4009:800::1001) from 2a02:2788:2c4:16f:5099:ccba:671d:e085, 64 hops max, 12 byte packets
+ 1  2a02:2788:2c4:16f:a221:b7ff:fed8:aa90  4.777 ms  1.189 ms  1.023 ms
+ 2  2a02:2788:2c0::1  8.746 ms  7.934 ms  10.024 ms
+ 3  2a02:2788:2c0:3::1  10.039 ms  14.967 ms  8.943 ms
+ 4  2a02:2788:ffff:12::1  9.808 ms  11.076 ms  13.658 ms
+ 5  xe-4-2.r00.brslbe01.be.bb.gin.ntt.net  10.043 ms  10.408 ms  9.551 ms
+ 6  ae-10.r02.amstnl02.nl.bb.gin.ntt.net  15.591 ms  18.416 ms  15.665 ms
+ 7  core1.ams.net.google.com  21.259 ms  24.261 ms  20.826 ms
+ 8  2001:4860::1:0:4b3  19.134 ms
+    2001:4860::1:0:8  22.208 ms
+    2001:4860::1:0:4b3  19.713 ms
+ 9  2001:4860::8:0:519f  26.712 ms
+    2001:4860::8:0:51a0  25.313 ms  19.392 ms
+10  2001:4860::8:0:5bb8  24.197 ms
+    2001:4860::8:0:5bb9  25.337 ms  26.264 ms
+11  2001:4860::1:0:3067  29.431 ms  31.585 ms  29.260 ms
+12  2001:4860:0:1::9  24.806 ms  24.297 ms  23.819 ms
+13  lhr14s23-in-x01.1e100.net  29.406 ms  25.729 ms  29.160 ms</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro escreve "<em>hopes</em>" no lugar de "<em>hops</em>" (saltos) no enunciado.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="traceroute-google"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Do salto 8 ao 10, o caminho passa dentro da rede do Google (2001:4860::/32), que tem roteadores em paralelo ligados por caminhos de mesmo custo. Cada
+            sonda do traceroute6 tem outra porta de destino, então o hash da 5-tupla (Atividade 3) muda de sonda para sonda, e sondas com o mesmo hop limit podem
+            expirar em roteadores diferentes, cada um devolvendo o Time Exceeded com o seu próprio endereço. Os pares de endereços vizinhos, como ::519f e ::51a0
+            ou ::5bb8 e ::5bb9, sugerem roteadores irmãos. Não é mudança de rota: o salto 11 volta a ser um só. Ferramentas como o Paris traceroute mantêm a
+            5-tupla fixa justamente para seguir um único caminho.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="A porta de destino de cada sonda|O hop limit de cada sonda|O endereço de destino" data-answer="0" data-explain="As três sondas de um salto têm o mesmo hop limit e o mesmo destino; muda a porta UDP de destino, e com ela o hash que escolhe o caminho." data-hint="O que muda entre as três sondas de um mesmo salto?">
+        <p class="fw-semibold mb-2">O que faz sondas do mesmo salto seguirem caminhos diferentes?</p>
+    </div>
+</section>
+
+<!-- 5. ICMPv6 -->
+<section id="icmpv6" class="chapter-section" data-conceito="icmpv6" data-titulo="Mensagens de erro ICMPv6">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Os códigos das mensagens de erro ICMPv6</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma mensagem de erro ICMPv6 tem tipo, código e, no corpo, o começo do pacote que causou o erro, para que o emissor saiba a que conexão ela se refere.
+        Veja o <a href="../capitulo-22/index.html#icmpv6">ICMPv6 no Capítulo 22</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="8">
+        <li data-livro="4.15-Q8">A seção 3.3 da RFC 4443 explica dois motivos para um dispositivo IPv6 gerar um Time Exceeded. Quando um roteador gera essa mensagem
+            com código 0, e quando um host a gera com código 1?</li>
+        <li data-livro="4.15-Q9">A seção 3.1 da RFC 4443 define sete códigos para o Destination Unreachable. Em que situação um roteador gera essa mensagem com
+            código 0?</li>
+        <li data-livro="4.15-Q10">Quantos bytes do pacote original uma mensagem de erro precisa devolver para o host recuperar os endereços e as portas de origem e de
+            destino (pág. 353 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="icmpv6-erros"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q8.</strong> Código 0 (<em>hop limit exceeded in transit</em>): um roteador recebe um pacote com hop limit 1, que chegaria a 0, descarta-o e
+                avisa a origem; é o que o traceroute6 aproveita. Código 1 (<em>fragment reassembly time exceeded</em>): o host de destino recebeu parte dos
+                fragmentos de um pacote, mas os outros não chegaram a tempo (60 s, pela RFC 8200); ele descarta os pedaços e avisa a origem.</li>
+            <li><strong>Q9.</strong> Código 0 (<em>no route to destination</em>): o roteador não tem nenhuma rota que case com o destino, nem uma rota padrão.
+                É o <code>!N</code> do traceroute6 no <a href="../capitulo-40/index.html#ipmininet">Capítulo 40</a>.</li>
+            <li><strong>Q10.</strong> O cabeçalho IPv6 tem 40 bytes, com os dois endereços. As portas são os 4 primeiros bytes do cabeçalho UDP ou TCP. Sem cabeçalhos
+                de extensão, bastam 40 + 4 = <strong>44 bytes</strong>; com extensões, é preciso somar o tamanho delas. Por isso a RFC 4443 (seção 2.4) manda
+                incluir o máximo possível do pacote original sem que a mensagem de erro passe do MTU mínimo do IPv6, 1280 bytes.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Time Exceeded, código 0|Time Exceeded, código 1|Destination Unreachable, código 4" data-answer="0" data-explain="A sonda com hop limit pequeno expira num roteador, que devolve um Time Exceeded com código 0; o código 4 (porta inalcançável) só vem do destino, no fim." data-hint="O hop limit chega ao fim num roteador do caminho.">
+        <p class="fw-semibold mb-2">Que mensagem cada roteador intermediário devolve ao traceroute6?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap41" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Um domínio tem duas rotas para o mesmo prefixo: uma aprendida de um cliente, com AS-path de 4 domínios, e outra de um provedor, com 2. Qual ele usa?
+            <details><summary>Ver solução</summary><p class="mb-0">A do cliente: a relação comercial vem antes do tamanho do AS-path. Mandar pelo cliente rende dinheiro; mandar pelo provedor custa.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Na Q1, AS3 anuncia a AS2 a rota de AS4 que aprendeu do par AS4?
+            <details><summary>Ver solução</summary><p class="mb-0">Não. AS2 também é par de AS3, e uma rota aprendida de um par só vai para os clientes. Por isso AS2 só alcança AS4 pelo enlace direto com o cliente AS4.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Um stub anuncia 2001:db8:a::/48 ao provedor P1 e 2001:db8:a:1::/64 ao provedor P2. Por onde chegam os pacotes para 2001:db8:a:1::5 e para 2001:db8:a:2::5?
+            <details><summary>Ver solução</summary><p class="mb-0">2001:db8:a:1::5 por P2, porque o /64 é mais específico; 2001:db8:a:2::5 por P1, o único anúncio que o cobre.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Na Q3, por que o par AS5 = AS1 não dá conectividade completa, mas AS5 cliente de AS1 dá?
+            <details><summary>Ver solução</summary><p class="mb-0">Como par, AS1 anuncia a AS5 só as próprias rotas e as do cliente AS4, e não anuncia AS5 ao par AS2: AS5 e AS2 continuam sem rota. Como provedor, AS1 dá a AS5 a tabela inteira e anuncia AS5 a todos, inclusive a AS2.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Caminhos com as regras de exportação</h3>
+    <pre class="code-block"><code># Caminhos interdomínio com as regras de exportação (Q1, pág. 350).
+# (cliente, provedor) e pares; um AS exporta rotas próprias e de clientes a todos,
+# e rotas de pares e de provedores só aos clientes.
+CP = [("AS1", "AS2"), ("AS4", "AS2"), ("AS1", "AS3")]
+PARES = [("AS2", "AS3"), ("AS4", "AS3")]
+ASES = sorted({a for l in CP + PARES for a in l})
+PREF = {"cliente": 3, "par": 2, "provedor": 1}
+
+rel = {a: {} for a in ASES}
+for c, p in CP:
+    rel[c][p], rel[p][c] = "provedor", "cliente"
+for a, b in PARES:
+    rel[a][b] = rel[b][a] = "par"
+
+melhor = {a: {a: ([a], "proprio")} for a in ASES}
+def chave(caminho, r):
+    return (PREF[r], -len(caminho), -int(caminho[1][2:]))
+
+mudou = True
+while mudou:
+    mudou = False
+    for a in ASES:
+        for v, r in rel[a].items():
+            for d, (cam, orig) in list(melhor[v].items()):
+                if a in cam:
+                    continue
+                if orig in ("par", "provedor") and rel[v][a] != "cliente":
+                    continue          # v não exporta essa rota para a
+                novo = [a] + cam
+                if d not in melhor[a] or chave(novo, r) &gt; chave(*melhor[a][d]):
+                    melhor[a][d] = (novo, r)
+                    mudou = True
+
+for a in ASES:
+    print(a, {d: "-".join(c) for d, (c, _) in melhor[a].items() if d != a})</code></pre>
+    <h3 class="h6 mt-4">2. ECMP com hash da 5-tupla</h3>
+    <pre class="code-block"><code>import hashlib
+
+# ECMP por fluxo: a saída é hash(5-tupla) mod N (Q6, pág. 352).
+SAIDAS = ["via B", "via E"]
+
+def saida(origem, destino, proto, porta_o, porta_d):
+    tupla = f"{origem}|{destino}|{proto}|{porta_o}|{porta_d}".encode()
+    h = int.from_bytes(hashlib.sha256(tupla).digest()[:4], "big")
+    return SAIDAS[h % len(SAIDAS)]
+
+# três pacotes de cada conexão: todos seguem o mesmo caminho
+for porta in (52001, 52002, 52003, 52004):
+    print(porta, [saida("2001:db8:d::1", "2001:db8:c::1", 6, porta, 80) for _ in range(3)])
+
+# distribuição de 1000 conexões
+contagem = {s: 0 for s in SAIDAS}
+for porta in range(40000, 41000):
+    contagem[saida("2001:db8:d::1", "2001:db8:c::1", 6, porta, 443)] += 1
+print(contagem)</code></pre>
+    <h3 class="h6 mt-4">3. O que uma mensagem de erro ICMPv6 precisa devolver</h3>
+    <pre class="code-block"><code>import ipaddress, struct
+
+# O começo de um pacote IPv6 com UDP, como uma mensagem de erro ICMPv6 o devolve (Q10).
+orig = ipaddress.IPv6Address("2001:db8:1::a").packed
+dest = ipaddress.IPv6Address("2001:db8:2::b").packed
+ipv6 = struct.pack("!IHBB", 6 &lt;&lt; 28, 20, 17, 64) + orig + dest   # versão, payload length, next header 17 (UDP), hop limit
+udp = struct.pack("!HHHH", 33434, 33435, 20, 0)                  # portas, tamanho, checksum
+pacote = ipv6 + udp + b"x" * 12
+
+def le(trecho):
+    if len(trecho) &lt; 44:
+        return "faltam bytes: só " + str(len(trecho))
+    nh = trecho[6]
+    o = ipaddress.IPv6Address(trecho[8:24]); d = ipaddress.IPv6Address(trecho[24:40])
+    po, pd = struct.unpack("!HH", trecho[40:44])
+    return f"next header {nh}: {o} porta {po} -&gt; {d} porta {pd}"
+
+for n in (40, 44, len(pacote)):
+    print(n, "bytes:", le(pacote[:n]))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.15 "Inter-domain routing" (pág. 350–353 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 4271 — <a href="https://www.rfc-editor.org/rfc/rfc4271" target="_blank" rel="noopener noreferrer">A Border Gateway Protocol 4 (BGP-4)</a></li>
+        <li>RFC 4443 — <a href="https://www.rfc-editor.org/rfc/rfc4443" target="_blank" rel="noopener noreferrer">ICMPv6</a> e RFC 8200 — <a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">IPv6 Specification</a></li>
+        <li>RFC 2992 — <a href="https://www.rfc-editor.org/rfc/rfc2992" target="_blank" rel="noopener noreferrer">Analysis of an Equal-Cost Multi-Path Algorithm</a> e RFC 6437 — <a href="https://www.rfc-editor.org/rfc/rfc6437" target="_blank" rel="noopener noreferrer">IPv6 Flow Label Specification</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Equal-cost_multi-path_routing" target="_blank" rel="noopener noreferrer">Equal-cost multi-path routing</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-40/index.html" class="text-muted text-decoration-none">← Capítulo 40</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 41</span>
+            <a href="../capitulo-42/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 42 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap41.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 Transforme cada capítulo do livro em uma experiência web didática, interativa e gamificada.
 
-Na Parte 1 do livro (*Principles*), o capítulo N do site cobre a seção 2.N. Na Parte 2 (*Protocols*), cada capítulo agrupa seções 3.x de um mesmo tema; a correspondência fica na tabela do AGENTS.md.
+Cada capítulo do site cobre uma seção de nível 2 do livro, sem agrupar seções: na Parte 1 (*Principles*), o capítulo N é a seção 2.N; na Parte 2 (*Protocols*), o capítulo 8 + k é a seção 3.k; na Parte 3 (*Practice*), o capítulo 26 + k é a seção 4.k, no formato de atividades da seção 1.1. Uma seção curta continua sendo um capítulo: os conceitos, as simulações e os blocos saem das páginas dela. A correspondência fica na tabela do AGENTS.md.
 
 ## 1. Estrutura de conteúdo
 
@@ -38,12 +38,26 @@ No HTML, cada conceito é uma `<section class="chapter-section">` com um `kicker
 - Identifique os conceitos a partir do conteúdo real do capítulo.
 - Divida conceitos complexos em subconceitos quando necessário.
 - Cada subconceito pode seguir a mesma estrutura de aprendizagem.
-- Adapte as etapas à natureza do conceito: não é obrigatório utilizar todas.
+- Adapte as etapas à natureza do conceito: não é obrigatório utilizar todas, mas a Visualização entra sempre que ajudar a entender o conceito (uma figura do livro, uma comparação, uma simulação). Se um conceito ficar sem ela, a numeração das outras etapas não muda.
 - Permita que uma etapa contenha múltiplos exemplos, explicações, visualizações ou atividades.
 - Preserve a progressão lógica entre conceitos relacionados.
 - Não estabeleça quantidade fixa de conceitos, subconceitos ou atividades.
 
 O objetivo é transformar cada conceito em uma pequena experiência de aprendizagem: **contextualizar → ensinar → demonstrar → permitir explorar → aplicar → consolidar**.
+
+### 1.1 Capítulos de prática (Parte 3)
+
+A Parte 3 do livro é feita de exercícios abertos e laboratórios, sem exposição de conceito e sem respostas. Nesses capítulos, cada seção `data-conceito` é uma **atividade** (kicker "Atividade N"), com as etapas:
+
+1. **Relembre:** o conceito em duas ou três frases, com link para a seção do capítulo onde ele foi explicado.
+2. **O que o livro pede** (ou "O que o livro mostra", nos trechos de tutorial): os enunciados traduzidos, com a página do PDF.
+3. **Experimente:** a simulação que faz o papel do laboratório (dig, tcpdump, packetdrill, IPMininet…), com um desafio.
+4. **Resolução comentada:** dentro de `<details>`, com a etiqueta "Resolução (não está no livro)". Cada número é conferido com código antes de entrar; as hipóteses usadas ficam explícitas.
+5. **Fixação:** perguntas rápidas.
+
+O Capítulo 27 (seção 4.1, a abertura da Parte 3) apresenta esse formato aos alunos, com o kicker "Tópico N", e traz o mapa dos capítulos de prática.
+
+Ferramentas que não rodam no navegador aparecem como código em `<pre class="log">`, sem execução; o equivalente em Python vai num `pre.code-block`. Quando o livro remete a material que não está no PDF ou exige cadastro (como o INGInious), o capítulo diz isso numa nota e, se precisar, define o que falta como complemento.
 
 ## 2. Apresentação do capítulo
 

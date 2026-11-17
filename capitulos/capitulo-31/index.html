@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 31 — Prática: servindo aplicações | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.5: o mínimo de um transporte sem conexão, números de sequência por segmento e por byte, o tempo de vida máximo, um disco pelo correio e o piggybacking.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="31" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 31 · Parte 3: Prática · Seção 4.5</span>
+        <h1 class="display-5 mb-3">Prática: servindo aplicações</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você resolve os exercícios do livro sobre a camada de transporte: numera segmentos e bytes, fecha conexões de forma graciosa e calcula até onde vai um número de sequência de 32 bits.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#mecanismos">1. O protocolo mínimo</a>
+                    <a class="nav-link" href="#dialogo">2. Sequência por segmento</a>
+                    <a class="nav-link" href="#fluxo">3. Sequência por byte</a>
+                    <a class="nav-link" href="#tempo-vida">4. Tempo de vida máximo</a>
+                    <a class="nav-link" href="#correio">5. O disco pelo correio</a>
+                    <a class="nav-link" href="#janela">6. Janela e piggybacking</a>
+                    <a class="nav-link" href="#exercicios-cap31">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre a camada de transporte</h2>
+    <p>
+        A seção 4.5 do livro traz questões abertas, um exercício prático e questões de discussão sobre o Capítulo 4: serviços de
+        transporte, abertura e liberação de conexões e números de sequência (pág. 292–294 do PDF). O formato das atividades está
+        explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Montar diálogos de transporte com <strong>números de sequência por segmento e por byte</strong>, da abertura à <strong>liberação graciosa</strong>.</li>
+                <li>Calcular o limite que o <strong>tempo de vida máximo</strong> impõe a um número de sequência e comparar vazão com atraso.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise a camada de transporte do <a href="../capitulo-04/index.html">Capítulo 4</a> (abertura em três vias, números de
+                sequência e liberação) e o <a href="../capitulo-19/index.html">UDP do Capítulo 19</a>. O capítulo cobre a seção 4.5 do livro (pág. 292–294 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Mecanismos -->
+<section id="mecanismos" class="chapter-section" data-conceito="mecanismos" data-titulo="O protocolo mínimo">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">O mínimo para detectar erros</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O serviço sem conexão entrega SDUs sem garantias. Para detectar erros de transmissão, os protocolos de transporte usam
+        checksums ou CRCs e descartam os segmentos corrompidos (pág. 66–67 do PDF); para saber a que aplicação entregar, usam
+        números de porta. Números de sequência, confirmações e temporizadores servem para <em>corrigir</em> perdas. Veja o
+        <a href="../capitulo-04/index.html#sem-conexao">serviço sem conexão no Capítulo 4</a> e o
+        <a href="../capitulo-19/index.html#udp">UDP no Capítulo 19</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.5.2-Q1">
+        Que mecanismos devem fazer parte de um protocolo de transporte que oferece um serviço sem conexão e não confiável, capaz
+        de detectar erros de transmissão, mas não de corrigi-los (pág. 292 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="monta-protocolo"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Dois mecanismos bastam: <strong>números de porta</strong> (de origem, para a resposta, e de destino), que identificam
+            as aplicações, e um <strong>checksum</strong> calculado sobre o segmento inteiro, que permite ao receptor descartar o
+            que chegou corrompido. Não há números de sequência, confirmações nem retransmissões: o serviço não promete corrigir
+            nada. É exatamente o desenho do UDP, cujo cabeçalho de 8 bytes tem as duas portas, o comprimento e o checksum.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O segmento é descartado|O segmento é retransmitido|O segmento é corrigido pelo receptor" data-answer="0" data-explain="Um serviço que só detecta erros descarta o segmento; como não há retransmissão, a aplicação simplesmente não o recebe." data-hint="O serviço não corrige nada.">
+        <p class="fw-semibold mb-2">Nesse serviço, o que acontece com um segmento cujo checksum não confere?</p>
+    </div>
+</section>
+
+<!-- 2. Diálogo -->
+<section id="dialogo" class="chapter-section" data-conceito="dialogo" data-titulo="Sequência por segmento">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Números de sequência por segmento</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Na abertura em três vias, o CR leva um número de sequência x, o CA confirma com ack=x e propõe o seu número y, e o
+        iniciador confirma o CA. Os dados de cada lado começam a ser numerados a partir do seu número inicial (pág. 69 do PDF).
+        Na liberação graciosa, cada sentido é fechado por um DR que leva o próximo número de sequência e é confirmado pelo outro
+        lado (pág. 74–76 do PDF). Veja a <a href="../capitulo-04/index.html#handshake">abertura em três vias</a> e a
+        <a href="../capitulo-04/index.html#liberacao-protocolo">liberação da conexão</a> no Capítulo 4.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="2">
+        <li data-livro="4.5.2-Q2">Um transporte confiável orientado a conexão põe um número de sequência de 32 bits no cabeçalho para
+            numerar os segmentos, somando 1 a cada segmento de dados. A conexão começa com CR(seq=1341), a resposta (ack=1341,
+            seq=2141) e CA(seq=1341, ack=2141). Continue a conexão: B manda Hello, e A responde Pleased to meet you. Depois de
+            receber a resposta, B fecha a conexão de forma graciosa, e A faz o mesmo. Discuta o estado que cada host precisa
+            manter (pág. 292 do PDF).</li>
+        <li data-livro="4.5.2-Q3">Uma conexão em modo mensagem está ativa há algum tempo, e todos os dados foram trocados e
+            confirmados nos dois sentidos. A manda DATA(seq=1123, abc) e DATA(seq=1124, def) e, em seguida, pede
+            DISCONNECT.req(graceful, A→B). Que confirmações B manda? Como A reage, e como termina a conexão (pág. 292 do PDF)?</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Na figura da Q2, o segundo segmento aparece como CR(ack=1341,seq=2141). Pela descrição da abertura em três vias (pág. 69 do
+        PDF), a resposta ao CR é um <strong>CA</strong>: é o nome usado aqui. A figura também mostra um DATA.req(a) que o enunciado
+        não usa.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="dialogo-transporte"></div>
+    <p class="small text-muted">Convenção usada: como o CA da Fig. 44 (pág. 69), a confirmação leva o número do segmento confirmado.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q2:</strong> B manda DATA(seq=2141, Hello), e A confirma com ACK(ack=2141). A responde DATA(seq=1341, Pleased
+                to meet you), confirmado com ACK(ack=1341). B fecha com DR(seq=2142), confirmado por A; A fecha com DR(seq=1342),
+                confirmado por B.</li>
+            <li><strong>Estado de cada host:</strong> a fase da conexão (abrindo, aberta, um sentido fechado, fechada); o próximo número
+                a usar no envio e o próximo esperado na recepção; as cópias dos segmentos ainda não confirmados, com os temporizadores
+                de retransmissão; e, ao fechar, o número do DR, para saber que nenhum segmento ficou para trás.</li>
+            <li><strong>Q3:</strong> B confirma os dois segmentos (ack=1123 e ack=1124) e o DR que A manda em seguida com o próximo
+                número, DR(seq=1125). B só entrega o DISCONNECT.ind à aplicação depois de abc e def. Quando A recebe o ack do DR, o
+                sentido A→B está fechado, mas A continua recebendo: B ainda pode mandar dados. A conexão termina quando B, por sua
+                vez, manda o seu DR e A o confirma.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Para o outro lado saber se recebeu todos os segmentos anteriores|Para reiniciar a numeração|Para o DR ser entregue antes dos dados" data-answer="0" data-explain="Com o próximo número no DR, o receptor só libera o sentido depois de entregar tudo o que veio antes (pág. 74 do PDF)." data-hint="O que o receptor pode conferir com esse número?">
+        <p class="fw-semibold mb-2">Por que o DR leva o próximo número de sequência?</p>
+    </div>
+</section>
+
+<!-- 3. Fluxo de bytes -->
+<section id="fluxo" class="chapter-section" data-conceito="fluxo" data-titulo="Sequência por byte">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Números de sequência por byte</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Num serviço de fluxo de bytes, o número de sequência de um segmento é a posição, no fluxo, do primeiro byte que ele leva.
+        Isso permite ao transporte dividir uma SDU grande em vários segmentos, e ao receptor reordená-los (pág. 72 do PDF). Veja os
+        <a href="../capitulo-04/index.html#modos">modos mensagem e fluxo</a> e a <a href="../capitulo-04/index.html#transferencia">transferência de dados</a> no Capítulo 4.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="4">
+        <li data-livro="4.5.2-Q4">Num transporte de fluxo de bytes, a conexão abre com CR(seq=8765), CA(ack=8765, seq=4321) e
+            CA(seq=8765, ack=4321). Dê os segmentos de dados que A manda para DATA.req(a), DATA.req(bcdefg), DATA.req(ab) e
+            DATA.req(bbbbbbbbbbbb), com um segmento por DATA.req (pág. 292–293 do PDF).</li>
+        <li data-livro="4.5.2-Q5">A mesma pergunta, mas agora o protocolo tenta mandar segmentos grandes sempre que possível, com até 8
+            bytes de dados cada. Mostre também as confirmações (pág. 293 do PDF).</li>
+        <li data-livro="4.5.2-Q6">Você observa um host que manda DATA(seq=1123, abc), DATA(seq=1126, def) e depois
+            DATA(seq=1123, abcdef). Esse diagrama reflete uma implementação válida de um fluxo de bytes confiável? Justifique (pág. 293 do PDF).</li>
+        <li data-livro="4.5.2-Q7">No exemplo acima, os dois primeiros segmentos se perderam antes de chegar. Como o receptor deve reagir
+            ao último segmento (pág. 293 do PDF)?</li>
+    </ol>
+    <ul class="mb-2">
+        <li data-livro="4.5.4-Q2">Para um serviço em modo mensagem e um de fluxo de bytes, qual uso do número de sequência é mais adequado:
+            (a) somar 1 a cada byte; (b) somar 1 a cada segmento (pág. 294 do PDF)?</li>
+        <li data-livro="4.5.4-Q4">Como modificar um protocolo de fluxo de bytes, com números de sequência de 32 bits, para oferecer modo
+            mensagem? Primeiro, com mensagens curtas que cabem num segmento; depois, com mensagens de tamanho ilimitado (pág. 294 do PDF).</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="segmenta-bytes"></div>
+    <p class="small text-muted">Os acks seguem a convenção do TCP: o número do próximo byte esperado.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q4:</strong> DATA(seq=8765, a), DATA(seq=8766, bcdefg), DATA(seq=8772, ab) e DATA(seq=8774, bbbbbbbbbbbb). Cada
+                seq é o anterior somado ao tamanho do anterior.</li>
+            <li><strong>Q5:</strong> os 21 bytes viram três segmentos: DATA(seq=8765, abcdefga), DATA(seq=8773, bbbbbbbb) e
+                DATA(seq=8781, bbbbb), confirmados com ack=8773, ack=8781 e ack=8786. Para juntar pedidos, o emissor precisa esperar
+                um pouco antes de enviar, o que é o papel do algoritmo de Nagle no TCP.</li>
+            <li><strong>Q6:</strong> válido. O receptor só enxerga posições no fluxo: o terceiro segmento retransmite os bytes 1123 a 1128
+                num pacote só, e isso é permitido justamente porque a numeração é por byte.</li>
+            <li><strong>Q7:</strong> o receptor aceita o segmento, entrega abcdef à aplicação e confirma com ack=1129. Se um dos
+                originais tivesse chegado, ele descartaria os bytes repetidos e usaria só os novos.</li>
+            <li><strong>4.5.4 Q2:</strong> (a), por byte, combina com o fluxo de bytes; (b), por segmento, com o modo mensagem, em que
+                cada segmento leva uma mensagem inteira.</li>
+            <li><strong>4.5.4 Q4:</strong> para mensagens curtas, basta marcar as fronteiras: um campo de comprimento no início de cada
+                mensagem ou um bit de "fim de mensagem" no cabeçalho. Para mensagens de qualquer tamanho, o bit de fim (ou um campo de
+                comprimento grande, de 64 bits) permite espalhar uma mensagem por vários segmentos, e o receptor só entrega quando ela
+                está completa.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="8774|8773|8770" data-answer="0" data-explain="8765 + 1 (a) + 6 (bcdefg) + 2 (ab) = 8774." data-hint="Some os tamanhos dos pedidos anteriores ao seq inicial.">
+        <p class="fw-semibold mb-2">Na Q4, qual é o seq do segmento com bbbbbbbbbbbb?</p>
+    </div>
+</section>
+
+<!-- 4. Tempo de vida -->
+<section id="tempo-vida" class="chapter-section" data-conceito="tempo-vida" data-titulo="Tempo de vida máximo">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">O tempo de vida máximo e o tamanho do número de sequência</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um segmento muito atrasado pode chegar quando o seu número de sequência já foi reutilizado e ser aceito por engano. Por
+        isso os transportes usam 32 bits ou mais, e a camada de rede garante um tempo de vida máximo (MSL): se o número tem n bits,
+        o transporte não pode mandar mais que 2<sup>n</sup> segmentos a cada MSL segundos (pág. 74 do PDF). Na Internet, o MSL é de
+        2 minutos (RFC 793). Veja a <a href="../capitulo-04/index.html#transferencia">transferência de dados no Capítulo 4</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="8">
+        <li data-livro="4.5.2-Q8">A camada de rede garante que um pacote nunca vive mais de 100 segundos na rede. Um transporte
+            confiável põe um número de sequência de 32 bits em cada segmento. Qual é a taxa máxima, em segmentos por segundo, para
+            não haver dois segmentos com o mesmo número na rede ao mesmo tempo (pág. 293 do PDF)?</li>
+    </ol>
+    <ul class="mb-2">
+        <li data-livro="4.5.4-Q3">Alguns transportes usam números de sequência de 32 bits, outros de 64. Quais são as vantagens e as
+            desvantagens de cada um (pág. 294 do PDF)?</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="tempo-vida"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q8:</strong> 2<sup>32</sup> / 100 s ≈ 42,9 milhões de segmentos por segundo. Mais rápido que isso, o emissor
+                voltaria a usar um número antes de o segmento antigo com o mesmo número sair da rede.</li>
+            <li><strong>Com bytes:</strong> se o número contar bytes, como no TCP, o mesmo limite vale para bytes. Com o MSL de 2 minutos,
+                2<sup>32</sup> / 120 s ≈ 35,8 milhões de bytes por segundo, cerca de 0,29 Gbit/s. Por isso o TCP rápido usa a opção de
+                timestamps, que distingue segmentos com o mesmo número (RFC 7323, complemento).</li>
+            <li><strong>4.5.4 Q3:</strong> 32 bits economizam 4 bytes em cada cabeçalho, mas limitam a vazão segura, como acima. 64 bits
+                praticamente eliminam o problema (2<sup>64</sup> / 120 s passa de 10<sup>17</sup> por segundo), ao custo de cabeçalhos
+                maiores em todos os segmentos.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Dobra|Cai pela metade|Não muda" data-answer="0" data-explain="A taxa máxima é 2^n / MSL: com um bit a mais, 2^n dobra." data-hint="Veja a fórmula 2^n / MSL.">
+        <p class="fw-semibold mb-2">O que acontece com a taxa máxima se o número de sequência ganhar um bit?</p>
+    </div>
+</section>
+
+<!-- 5. Correio -->
+<section id="correio" class="chapter-section" data-conceito="correio" data-titulo="O disco pelo correio">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Um disco rígido pelo correio</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Vazão (bits por segundo) e atraso (quanto tempo um bit leva para chegar) são coisas diferentes. Um caminhão de discos tem
+        atraso de horas, mas pode ter uma vazão enorme. Veja a <a href="../capitulo-01/index.html#janela">janela deslizante no
+        Capítulo 1</a>, que separa o atraso de propagação da vazão útil de um enlace.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.5.3-Q1">
+        O serviço S3 da Amazon guarda dados de empresas e pesquisadores. Os arquivos podem ir pela Internet ou em discos rígidos
+        enviados pelo correio. Se um disco de 1 terabyte pode ser entregue em 24 horas, qual é a vazão mínima necessária para igualar
+        a desse serviço de entrega (pág. 294 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="disco-correio"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            1 TB = 10<sup>12</sup> bytes = 8 × 10<sup>12</sup> bits; 24 h = 86 400 s. A vazão equivalente é 8 × 10<sup>12</sup> /
+            86 400 ≈ 92,6 Mbit/s. Se o terabyte for 2<sup>40</sup> bytes, dá cerca de 101,8 Mbit/s. Com dois discos na mesma caixa,
+            a vazão dobra e o atraso continua o mesmo: é o oposto de um enlace, em que a vazão é limitada e o atraso é pequeno. A
+            RFC 1149, citada pelo livro na pág. 74, leva a ideia ao extremo, com pombos-correio.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="A vazão dobra e o atraso não muda|O atraso cai pela metade|Nada muda" data-answer="0" data-explain="O pacote leva o mesmo tempo para chegar, mas carrega o dobro de bits." data-hint="Pense no que muda quando a caixa leva mais discos.">
+        <p class="fw-semibold mb-2">Se a caixa levar dois discos de 1 TB, o que acontece?</p>
+    </div>
+</section>
+
+<!-- 6. Janela e carona -->
+<section id="janela" class="chapter-section" data-conceito="janela" data-titulo="Janela e piggybacking">
+    <span class="kicker">Atividade 6</span>
+    <h2 class="section-title">A janela de recepção e o piggybacking</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O receptor anuncia em cada confirmação o tamanho atual da sua janela de recepção (pág. 73 do PDF). Com
+        <strong>piggybacking</strong>, as confirmações viajam dentro dos quadros ou segmentos de dados do outro sentido, em vez de
+        segmentos só para elas (pág. 31 do PDF). Veja a <a href="../capitulo-20/index.html#transferencia">transferência de dados no TCP</a>, no Capítulo 20.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.5.4-Q1">A janela de recepção anunciada por um receptor pode variar ao longo da conexão. O que causa essas
+            variações (pág. 294 do PDF)?</li>
+        <li data-livro="4.5.4-Q5" value="5">O que é piggybacking, e quais são as vantagens dessa técnica (pág. 294 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="piggyback"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1:</strong> a entidade de transporte divide a memória entre centenas de conexões, e a parte de cada uma muda;
+                o receptor pode reduzir a janela de propósito, para limitar a vazão do emissor; e, se a aplicação lê os dados mais
+                devagar do que chegam, o buffer enche e a janela encolhe, até 0 (pág. 72–73 do PDF).</li>
+            <li><strong>Q5:</strong> piggybacking é pôr a confirmação no cabeçalho de um segmento de dados que já ia no sentido contrário.
+                Economiza segmentos e cabeçalhos (na simulação, 21 em vez de 40 para dez pedidos e dez respostas) e só funciona quando
+                há dados nos dois sentidos (pág. 31 do PDF). No TCP, o ACK atrasado espera um pouco para aproveitar a carona.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Quando só um lado manda dados|Quando os dois lados mandam dados|Sempre que há perdas" data-answer="0" data-explain="Sem dados no sentido contrário, não há segmento onde pôr a confirmação: ela precisa ir sozinha." data-hint="Em que carona a confirmação viaja?">
+        <p class="fw-semibold mb-2">Quando o piggybacking não ajuda?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap31" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Na Q3, A manda DATA(seq=1123, abc) e DATA(seq=1124, def) e pede a liberação graciosa. Que número de sequência leva o DR de A?
+            <details><summary>Ver solução</summary><p class="mb-0">1125, o próximo número de A. Com ele, B sabe que precisa ter entregado os segmentos 1123 e 1124 antes do DISCONNECT.ind.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Refaça a Q5 com segmentos de até 5 bytes. Quantos segmentos saem, e qual é o seq do último?
+            <details><summary>Ver solução</summary><p class="mb-0">Cinco segmentos (5 + 5 + 5 + 5 + 1 bytes dos 21). O último começa no byte 8765 + 20 = 8785 e leva um b só.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Numa conexão de 1 Gbit/s com números de sequência de 32 bits contando bytes, quanto tempo leva para o número dar a volta? Isso é um problema com o MSL de 2 minutos?
+            <details><summary>Ver solução</summary><p class="mb-0">2<sup>32</sup> bytes × 8 / 10<sup>9</sup> bit/s ≈ 34,4 s. É menos que os 120 s do MSL: um segmento muito atrasado poderia ser confundido com um novo. O TCP resolve com a opção de timestamps (RFC 7323).</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Um avião leva 10 discos de 4 TB (10<sup>12</sup> bytes por TB) em 12 horas. Qual é a vazão equivalente?
+            <details><summary>Ver solução</summary><p class="mb-0">40 × 10<sup>12</sup> bytes × 8 / 43 200 s ≈ 7,41 Gbit/s, com um atraso de 12 horas.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Segmentos de um fluxo de bytes</h3>
+    <pre class="code-block"><code># Números de sequência por byte (Q4 e Q5, pág. 292-293): o seq é a posição do primeiro byte no fluxo.
+def um_por_pedido(inicio, pedidos):
+    segs, seq = [], inicio
+    for dados in pedidos:
+        segs.append((seq, dados))
+        seq += len(dados)
+    return segs
+
+def juntando(inicio, pedidos, maximo=8):
+    fluxo = "".join(pedidos)
+    return [(inicio + i, fluxo[i:i + maximo]) for i in range(0, len(fluxo), maximo)]
+
+pedidos = ["a", "bcdefg", "ab", "bbbbbbbbbbbb"]
+for nome, segs in [("Q4", um_por_pedido(8765, pedidos)), ("Q5", juntando(8765, pedidos))]:
+    print(nome)
+    for seq, dados in segs:
+        print(f"  DATA(seq={seq},{dados})  -&gt;  ACK(ack={seq + len(dados)})")   # ack: próximo byte esperado</code></pre>
+    <h3 class="h6 mt-4">2. Números por segmento e liberação graciosa</h3>
+    <pre class="code-block"><code># Números de sequência por segmento (Q2, pág. 292): cada lado numera os seus segmentos.
+class Lado:
+    def __init__(self, nome, inicial):
+        self.nome, self.prox = nome, inicial       # próximo número a usar
+        self.nao_confirmados = {}                   # cópias guardadas até o ack chegar
+
+    def envia(self, tipo, dados=""):
+        seq = self.prox
+        self.prox += 1
+        self.nao_confirmados[seq] = (tipo, dados)
+        print(f"{self.nome} -&gt; {tipo}(seq={seq}{',' + dados if dados else ''})")
+        return seq
+
+    def recebe_ack(self, ack):
+        self.nao_confirmados.pop(ack)
+        print(f"   ack={ack} confirma o segmento {ack} de {self.nome}; faltam {list(self.nao_confirmados)}")
+
+A, B = Lado("A", 1341), Lado("B", 2141)      # números iniciais do CR e do CA
+B.recebe_ack(B.envia("DATA", "Hello"))
+A.recebe_ack(A.envia("DATA", "Pleased to meet you"))
+B.recebe_ack(B.envia("DR"))                    # B fecha o sentido B-&gt;A
+A.recebe_ack(A.envia("DR"))                    # A fecha o sentido A-&gt;B
+print("próximos números:", A.prox, B.prox)</code></pre>
+    <h3 class="h6 mt-4">3. Tempo de vida, 32 × 64 bits e o correio</h3>
+    <pre class="code-block"><code># Três contas da seção 4.5: tempo de vida máximo, 32 x 64 bits e o disco pelo correio.
+def taxa_maxima(bits, msl):
+    """No máximo 2^bits números a cada msl segundos (pág. 74)."""
+    return 2 ** bits / msl
+
+print(f"Q8: 32 bits, MSL 100 s -&gt; {taxa_maxima(32, 100):,.0f} segmentos/s")
+for bits in (32, 64):
+    b = taxa_maxima(bits, 120)                 # MSL de 2 minutos, números contando bytes
+    print(f"{bits} bits, MSL 120 s: {b:.3e} bytes/s = {b * 8 / 1e9:.3g} Gbit/s")
+
+def correio(terabytes, horas, tb=10**12):
+    return terabytes * tb * 8 / (horas * 3600)
+
+print(f"1 TB em 24 h = {correio(1, 24) / 1e6:.1f} Mbit/s")
+print(f"com 1 TB = 2^40 bytes: {correio(1, 24, 2**40) / 1e6:.1f} Mbit/s")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.5 "Serving applications" (pág. 292–294 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 768 — <a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">User Datagram Protocol</a> e RFC 793 — <a href="https://www.rfc-editor.org/rfc/rfc793" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a> (o MSL de 2 minutos)</li>
+        <li>RFC 7323 — <a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">TCP Extensions for High Performance</a> (timestamps contra números de sequência repetidos) e RFC 896 — <a href="https://www.rfc-editor.org/rfc/rfc896" target="_blank" rel="noopener noreferrer">Congestion Control in IP/TCP Internetworks</a> (o algoritmo de Nagle)</li>
+        <li>RFC 1149 — <a href="https://www.rfc-editor.org/rfc/rfc1149" target="_blank" rel="noopener noreferrer">A Standard for the Transmission of IP Datagrams on Avian Carriers</a>, a piada que o livro cita na pág. 74</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-30/index.html" class="text-muted text-decoration-none">← Capítulo 30</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 31</span>
+            <a href="../capitulo-32/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 32 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap31.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

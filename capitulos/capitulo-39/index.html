@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 39 — Prática: o TCP de perto | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.13: scripts packetdrill, estados da conexão, o rto e a retransmissão rápida, a janela de congestionamento do Linux e diagramas de tempo com slow start, ACK atrasado, ECN e perdas.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="39" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 39 · Parte 3: Prática · Seção 4.13</span>
+        <h1 class="display-5 mb-3">Prática: o TCP de perto</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você acompanha os scripts packetdrill do livro, que testam a pilha TCP do Linux, e resolve as questões abertas sobre controle de congestionamento com um simulador de diagramas de tempo.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#packetdrill">1. O packetdrill</a>
+                    <a class="nav-link" href="#estados">2. Os estados da conexão</a>
+                    <a class="nav-link" href="#rto">3. rto e retransmissão rápida</a>
+                    <a class="nav-link" href="#cwnd-linux">4. A cwnd no Linux</a>
+                    <a class="nav-link" href="#questoes">5. As questões abertas</a>
+                    <a class="nav-link" href="#exercicios-cap39">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre o TCP de perto</h2>
+    <p>
+        A seção 4.13 do livro usa o packetdrill para injetar segmentos na pilha TCP do Linux e observar a reação dela, e termina com questões abertas sobre
+        controle de congestionamento (pág. 319–336 do PDF). Os scripts e os valores impressos são os do livro. O formato das atividades está explicado no
+        <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Ler scripts <strong>packetdrill</strong> e relacioná-los aos estados, ao <strong>rto</strong> e à <strong>janela de congestionamento</strong> do Linux.</li>
+                <li>Montar <strong>diagramas de tempo</strong> com slow start, ACK atrasado, ECN e perdas, e deduzir o tempo de uma transferência.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o TCP do <a href="../capitulo-20/index.html">Capítulo 20</a> e o controle de congestionamento do
+                <a href="../capitulo-21/index.html">Capítulo 21</a>. O capítulo cobre a seção 4.13 do livro (pág. 319–336 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. packetdrill -->
+<section id="packetdrill" class="chapter-section" data-conceito="packetdrill" data-titulo="O packetdrill">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">Injetando segmentos com o packetdrill</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma conexão TCP abre em três vias, troca dados com números de sequência por byte e fecha com FINs; o kernel do sistema implementa tudo isso,
+        e a aplicação só vê as chamadas de sistema. Veja o <a href="../capitulo-20/index.html">TCP no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.13.1-connect">
+        O packetdrill é um conjunto de testes para implementações TCP. Um script tem três tipos de linha: chamadas de sistema, cujo resultado é
+        conferido; segmentos que ele injeta no kernel como se viessem da rede (<code>&lt;</code>); e segmentos que ele espera que o kernel mande
+        (<code>&gt;</code>). Cada linha começa com o instante, absoluto ou relativo (<code>+0,1</code>), e os segmentos usam uma sintaxe próxima à do
+        tcpdump, com números relativos. O primeiro script, connect.pkt, abre uma conexão com o kernel no papel de servidor, troca 10 bytes num sentido e
+        2 no outro e fecha (pág. 319–322 do PDF). Para o livro, a pilha do Linux foi configurada com MSS de 1000 bytes e sem extensões.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O packetdrill precisa de privilégios de administrador e de um kernel Linux; os scripts do livro estão no repositório público
+        <a href="https://github.com/cnp3/ebook/tree/master/exercises/packetdrill_scripts" target="_blank" rel="noopener noreferrer">cnp3/ebook</a>.
+        Aqui, os scripts são percorridos linha a linha.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="packetdrill-passo"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            O accept devolve 4, um descritor novo para a conexão (o 3 continua escutando). Ao receber os 2 bytes 1:3(2), o kernel confirma com ack 3. O FIN do
+            kernel tem seq 11 (os 10 bytes enviados ocuparam 1 a 10) e consome um número: o packetdrill o confirma com ack 12. Repare que o packetdrill não
+            confere a janela dos segmentos que o kernel manda, e <code>&lt;...&gt;</code> aceita quaisquer opções.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Um segmento que o packetdrill injeta no kernel, como se viesse da rede|Um segmento que o kernel deve mandar|Uma chamada de sistema" data-answer="0" data-explain="&lt; injeta um segmento de entrada; &gt; descreve o segmento que o kernel deve mandar, e o script falha se ele não vier." data-hint="Pense na direção da seta.">
+        <p class="fw-semibold mb-2">Num script packetdrill, o que significa uma linha que começa com <code>+0 &lt;</code>?</p>
+    </div>
+</section>
+
+<!-- 2. Estados -->
+<section id="estados" class="chapter-section" data-conceito="estados" data-titulo="Os estados da conexão">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Abrindo e fechando: os estados da conexão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        A máquina de estados do TCP passa por SYN_SENT, ESTABLISHED, FIN_WAIT, CLOSE_WAIT, LAST_ACK e TIME_WAIT, entre outros. A abertura e o
+        encerramento podem ser simultâneos. Veja a <a href="../capitulo-20/index.html#abertura">abertura</a> e a <a href="../capitulo-20/index.html#liberacao">liberação</a> no Capítulo 20.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.13.1-estados">
+        A opção TCP_INFO dá acesso a variáveis do bloco de controle da conexão; tcpi_state segue a máquina de estados do TCP. No client.pkt, o kernel é o
+        cliente: depois de mandar o SYN, imprime 2 (SYN_SENT); depois do SYN+ACK e do ACK, 1 (ESTABLISHED). No dual.pkt, a abertura é simultânea: o
+        kernel manda um SYN, recebe um SYN, responde com SYN+ACK e só fica ESTABLISHED depois do quarto segmento; no meio, imprime 3 (SYN_RECV). Outros três
+        scripts mostram o encerramento: quando o host local fecha primeiro, quando o remoto manda o seu FIN junto com o ACK e quando o remoto fecha primeiro
+        (pág. 322–324 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="estados-tcp"></div>
+    <p class="small text-muted">Os números dos estados são os do Linux (include/net/tcp_states.h). Os estados das linhas marcadas como complemento seguem a máquina de estados da RFC 9293; o livro não os imprime.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Abertura simultânea: ao receber um SYN em SYN_SENT, o kernel vai para SYN_RECV (3) e manda SYN+ACK; com o ACK do outro lado, ESTABLISHED (1).</li>
+            <li>Fechamento local: close leva a FIN_WAIT1 (4); o ACK do FIN, a FIN_WAIT2 (5); o FIN do remoto, a TIME_WAIT (6), onde a conexão espera um tempo
+                antes de sumir. Se o FIN do remoto vem junto com o ACK (local-close2), o kernel vai direto de FIN_WAIT1 para TIME_WAIT.</li>
+            <li>Fechamento remoto: o FIN do outro lado leva a CLOSE_WAIT (8), onde a conexão fica até a aplicação chamar close; aí vem LAST_ACK (9) e, com o ACK
+                final, CLOSE (7). Quem fecha primeiro é quem passa por TIME_WAIT.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Quem manda o primeiro FIN|Quem recebe o primeiro FIN|O servidor, sempre" data-answer="0" data-explain="O lado que fecha primeiro termina em TIME_WAIT, guardando a conexão por um tempo para absorver segmentos atrasados; o outro passa por CLOSE_WAIT e LAST_ACK." data-hint="Compare local-close com remote-close.">
+        <p class="fw-semibold mb-2">Qual lado passa pelo estado TIME_WAIT?</p>
+    </div>
+</section>
+
+<!-- 3. RTO e FRR -->
+<section id="rto" class="chapter-section" data-conceito="rto" data-titulo="rto e retransmissão rápida">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">O temporizador e a retransmissão rápida</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O temporizador de retransmissão (rto) vem do RTT medido e da sua variação; quando expira, o TCP retransmite e dobra o rto. Três ACKs duplicados
+        disparam a retransmissão rápida, sem esperar o temporizador. Veja o <a href="../capitulo-20/index.html#rto">rto</a> e a <a href="../capitulo-20/index.html#retransmissao">retransmissão</a> no Capítulo 20.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.13.1-rto">
+        Com uma janela inicial grande (16 KB), para não haver slow start, o rto.pkt manda 8000 bytes e só o primeiro segmento é confirmado: tcpi_rto vale
+        204 000 µs antes, 216 000 depois de medir o RTT e dobra a cada retransmissão (432 000, 864 000, 1 728 000). O frr.pkt mostra a retransmissão rápida
+        depois de três ACKs duplicados (tcpi_bytes_retrans passa de 0 a 1000). No frr-rto.pkt, dois segmentos seguidos se perdem: o primeiro volta pela
+        retransmissão rápida e o segundo, 24 ms depois do ACK seguinte; no frr-rto2.pkt, três segmentos se perdem, e tcpi_bytes_retrans chega a 3000
+        (pág. 324–326 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="rto-frr"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            O rto dobra a cada expiração: o próximo seria 3 456 000 µs (3,456 s). Esse recuo exponencial segura o emissor quando a rede está muito
+            congestionada. O mínimo de cerca de 200 ms que se vê no Linux vem de um piso de implementação, maior que o RTT do teste (0,1 s). No frr-rto2.pkt,
+            os três segmentos perdidos são retransmitidos, um por vez, e tcpi_bytes_retrans soma 1000, 2000 e 3000. Os 24 ms entre o ACK e a retransmissão
+            vêm de uma heurística do Linux para a recuperação.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Dobra|Volta ao valor inicial|Não muda" data-answer="0" data-explain="A cada expiração, o TCP dobra o rto (recuo exponencial), como mostram os valores 216 000, 432 000, 864 000 e 1 728 000 µs." data-hint="Veja os valores impressos pelo rto.pkt.">
+        <p class="fw-semibold mb-2">O que acontece com o rto a cada vez que o temporizador expira?</p>
+    </div>
+</section>
+
+<!-- 4. cwnd -->
+<section id="cwnd-linux" class="chapter-section" data-conceito="cwnd-linux" data-titulo="A cwnd no Linux">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">A janela de congestionamento no Linux</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No slow start, a janela de congestionamento cresce rápido, até o limiar ssthresh; depois de uma perda, ela cai, e o TCP recupera. Veja a
+        <a href="../capitulo-21/index.html#slow-start">slow start</a> e as <a href="../capitulo-21/index.html#perdas">reações a perdas</a> no Capítulo 21.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.13.1-cwnd">
+        Com janela inicial de dois segmentos, os scripts imprimem tcpi_snd_cwnd e tcpi_snd_ssthresh. Sem perdas, a janela vai de 2 a 9 e salta para 18 com
+        um ACK que confirma tudo; com ACK atrasado, vai de 2 a 4, 6, 8, 10 e 18. Quando o penúltimo segmento se perde, não chegam ACKs duplicados suficientes,
+        e o TCP espera o temporizador: a janela cai para 1. Quando o segundo ou o primeiro segmento se perdem, a regra da RFC 3042 manda segmentos novos a cada
+        ACK duplicado, e a retransmissão rápida acontece (pág. 326–330 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="diagrama-cwnd"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>No slow start, a janela cresce o número de segmentos que cada ACK confirma (contagem de bytes, RFC 3465): um por ACK quando cada ACK confirma um
+                segmento; dois, com ACK atrasado. O salto final soma de uma vez os 9 (ou 8) segmentos confirmados: 9 + 9 = 18 e 10 + 8 = 18.</li>
+            <li>Depois do rto, a janela cai a 1 e o slow start recomeça: o ACK que confirma dois segmentos a leva a 3.</li>
+            <li>Na retransmissão rápida, o Linux reduz a janela aos poucos durante a recuperação (o algoritmo PRR, RFC 6937), por isso os valores 2, 2, 2, 4 e 5
+                no frr2 não seguem a regra simples de dividir por dois. Os números do livro são o que conta aqui.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="1 segmento, recomeçando o slow start|Metade da janela anterior|A janela não muda" data-answer="0" data-explain="Depois de um rto, o TCP volta a 1 segmento e recomeça o slow start, como no slow-start-rto2.pkt (cwnd @9 = 1)." data-hint="Veja o script com a perda do penúltimo segmento.">
+        <p class="fw-semibold mb-2">Que valor a janela assume quando o temporizador de retransmissão expira?</p>
+    </div>
+</section>
+
+<!-- 5. Questões abertas -->
+<section id="questoes" class="chapter-section" data-conceito="questoes" data-titulo="As questões abertas">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Diagramas de tempo com controle de congestionamento</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        A janela efetiva é o menor entre a janela de congestionamento e a de recepção. No slow start, a cwnd cresce um MSS por ACK; acima do ssthresh,
+        cresce cerca de um MSS por RTT. Uma marca ECN ou uma perda reduzem a janela. Veja o <a href="../capitulo-21/index.html">Capítulo 21</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        Hipóteses das questões (pág. 326–327 do PDF): o emissor faz um único send de x bytes; o RTT é fixo, de 100 ms, e o temporizador, de 200 ms; transmitir
+        um segmento de MSS bytes leva 1 ms, seja qual for o MSS; o ACK não tem tempo de transmissão; a janela inicial é de um segmento; o limiar de ACKs
+        duplicados é 3; e o TCP confirma cada segmento recebido.
+    </p>
+    <ol class="mb-2">
+        <li data-livro="4.13.2-Q1">Com cwnd de 1000 bytes, rwin de 2000 (constante) e ssthresh de 64 000, o emissor manda 3 KB. (a) Por que manda primeiro um
+            segmento e depois dois? (b) Por que a janela cresce ao chegar o primeiro ACK? (c) Quanto tempo leva para entregar os 3 KB?</li>
+        <li data-livro="4.13.2-Q2">A mesma coisa, com a janela inicial de 10 000 bytes, como nas implementações recentes.</li>
+        <li data-livro="4.13.2-Q3">A mesma coisa, com MSS de 500 bytes. Como isso afeta o atraso total?</li>
+        <li data-livro="4.13.2-Q4">Sem perdas nem congestionamento, deduza uma fórmula para o tempo mínimo de entregar x bytes numa conexão nova, com x múltiplo
+            do MSS e rwin e ssthresh maiores que x.</li>
+        <li data-livro="4.13.2-Q5">Com ACK atrasado (temporizador de 50 ms), refaça o diagrama da Q1. O atraso aumenta ou diminui?</li>
+        <li data-livro="4.13.2-Q6">Com cwnd de 4000 bytes e rwin de 64 000, o emissor manda 10 KB. Refaça o diagrama supondo que (a) o segundo segmento passou
+            por congestionamento e veio marcado (ECN), com a marca devolvida no ACK; (b) o quarto segmento foi marcado, sem ser descartado.</li>
+        <li data-livro="4.13.2-Q7">Uma conexão chegou a cwnd de 4000 bytes (com ssthresh de 4000). Quatro segmentos são enviados, e o segundo chega corrompido.
+            Complete o diagrama (pág. 327–336 do PDF).</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="slowstart-diagrama"></div>
+    <p class="small text-muted">Hipóteses do simulador além das do livro: na ECN, o emissor divide a janela por dois uma vez por RTT; na retransmissão rápida e no rto, o ssthresh vira metade dos bytes em voo; a retransmissão reinicia o temporizador (RFC 6298).</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1:</strong> (a) a janela inicial é de um segmento; (b) no slow start, cada ACK soma um MSS à cwnd, que vai a 2000 e libera dois segmentos;
+                (c) o primeiro segmento sai em 0–1 ms e o ACK volta em 101 ms; os outros dois saem em 101–103 ms, e o último chega ao receptor em 153 ms (o emissor
+                recebe o último ACK em 203 ms).</li>
+            <li><strong>Q2:</strong> a cwnd de 10 000 não ajuda muito, porque a rwin de 2000 limita a dois segmentos em voo: o terceiro só sai com o primeiro ACK.
+                Os dados chegam em 152 ms.</li>
+            <li><strong>Q3:</strong> com MSS de 500, a janela inicial tem 500 bytes e são precisos 6 segmentos: três rodadas de slow start em vez de duas. A entrega
+                passa para 255 ms, um RTT a mais.</li>
+            <li><strong>Q4:</strong> com n = x/MSS segmentos, a rodada k manda 2<sup>k−1</sup> segmentos; são r = ⌈log<sub>2</sub>(n + 1)⌉ rodadas, a última com
+                n<sub>r</sub> = n − (2<sup>r−1</sup> − 1) segmentos. Com d = 1 ms por segmento: T = (r − 1)(RTT + d) + n<sub>r</sub> · d + RTT/2. Para 3 KB: r = 2,
+                n<sub>r</sub> = 2, T = 101 + 2 + 50 = 153 ms. O bloco 3 confere a fórmula com o simulador.</li>
+            <li><strong>Q5:</strong> o primeiro segmento chega sozinho, e o receptor espera 50 ms antes de confirmar: tudo atrasa 50 ms, e a entrega passa para 203 ms.
+                O ACK atrasado aumenta o atraso no começo da conexão.</li>
+            <li><strong>Q6:</strong> sem marcas, os 10 segmentos chegam em 157 ms. (a) Com o segundo marcado, o ACK com a marca chega quando a cwnd vale 5000: ela cai
+                para 2500, e o resto da transferência segue em prevenção de congestionamento; a entrega vai para 256 ms. (b) Com o quarto marcado, quando a marca
+                chega, os 10 segmentos já foram enviados: a entrega continua em 157 ms, e só a janela das próximas transmissões fica menor.</li>
+            <li><strong>Q7:</strong> o receptor confirma o primeiro (ack 1000) e manda dois ACKs duplicados pelo terceiro e pelo quarto. Dois não bastam, mas o ACK novo
+                levou a cwnd a 4250 e liberou mais um segmento, cuja chegada produz o terceiro duplicado: retransmissão rápida aos 202 ms, cwnd de 2000, e a entrega
+                termina em 457 ms. Sem esse segmento extra, o TCP teria esperado o temporizador de 200 ms.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O menor entre a cwnd e a rwin|Só a cwnd|A soma das duas" data-answer="0" data-explain="O emissor nunca tem em voo mais que min(cwnd, rwin) bytes: na Q2, a rwin de 2000 manda mais que a cwnd de 10 000." data-hint="Veja a Q2.">
+        <p class="fw-semibold mb-2">Quantos bytes o emissor pode ter em voo?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap39" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Num script packetdrill, o kernel manda <code>&gt; P. 1:1001(1000) ack 1</code>. Que ack o packetdrill deve injetar para confirmar esse segmento?
+            <details><summary>Ver solução</summary><p class="mb-0">ack 1001: o segmento leva os bytes 1 a 1000, e o próximo esperado é o 1001.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Se o rto começa em 216 ms e a perda continua, em quanto tempo, a partir da primeira retransmissão, sai a quarta?
+            <details><summary>Ver solução</summary><p class="mb-0">As esperas são 432, 864 e 1728 ms depois da primeira: 432 + 864 + 1728 = 3024 ms, cerca de 3 s.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Com as hipóteses da seção 4.13.2 e rwin grande, quanto tempo leva para entregar 7 KB (sete segmentos de 1000 bytes)?
+            <details><summary>Ver solução</summary><p class="mb-0">Três rodadas (1, 2 e 4 segmentos): T = 2 × 101 + 4 + 50 = 256 ms.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Com janela inicial de 10 segmentos (RFC 6928) e as mesmas hipóteses, quanto tempo leva para entregar 31 segmentos? E com janela inicial 1?
+            <details><summary>Ver solução</summary><p class="mb-0">Rodadas de 10, 20 e 1 segmento: o último sai em 202 ms e chega em 202 + 1 + 50 = 253 ms. Com janela inicial 1, são cinco rodadas (1, 2, 4, 8 e 16): 4 × 101 + 16 + 50 = 470 ms.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Lendo o connect.pkt</h3>
+    <pre class="code-block"><code>import re
+
+# As linhas de segmento do connect.pkt (pág. 321-322). "&lt;" o packetdrill injeta; "&gt;" o kernel deve mandar.
+# As chamadas de sistema ficaram de fora; por isso, os instantes não contam o +.2 do read.
+SCRIPT = """\
++0 &lt; S 0:0(0) win 1000 &lt;mss 1000&gt;
++0 &gt; S. 0:0(0) ack 1 &lt;...&gt;
++.1 &lt; . 1:1(0) ack 1 win 1000
++0 &gt; P. 1:11(10) ack 1
++.1 &lt; . 1:1(0) ack 11 win 1000
++.1 &lt; P. 1:3(2) ack 11 win 4000
++0 &gt; . 11:11(0) ack 3
++0 &lt; F. 3:3(0) ack 11 win 4000
++0 &gt; . 11:11(0) ack 4
++0 &gt; F. 11:11(0) ack 4
++0 &lt; . 4:4(0) ack 12 win 4000"""
+
+PADRAO = re.compile(r"^\+?([\d.]+) ([&lt;&gt;]) (\S+) (\d+):(\d+)\((\d+)\)(?: ack (\d+))?")
+t = 0.0
+for linha in SCRIPT.splitlines():
+    dt, sentido, flags, ini, fim, tam, ack = PADRAO.match(linha).groups()
+    t += float(dt)
+    quem = "packetdrill -&gt; kernel" if sentido == "&lt;" else "kernel -&gt; packetdrill"
+    consome = int(tam) + ("S" in flags) + ("F" in flags)        # SYN e FIN consomem um número
+    faixa = f"seq {ini}" if consome == 0 else f"seq {ini}..{int(ini) + consome - 1}"
+    print(f"{t:4.1f} s  {quem:22} [{flags:2}] {faixa}{'' if ack is None else ', ack ' + ack}")</code></pre>
+    <h3 class="h6 mt-4">2. O slow start do Linux</h3>
+    <pre class="code-block"><code># O slow start do Linux nos scripts da pág. 326-328: a cwnd cresce os segmentos que cada ACK confirma.
+def slow_start(acks, cwnd=2, mss=1000):
+    confirmado, saida = 1, [cwnd]
+    for ack in acks:
+        segmentos = (ack - confirmado) // mss
+        cwnd += segmentos                      # contagem de bytes (RFC 3465), sem limite por ACK
+        confirmado = ack
+        saida.append(cwnd)
+    return saida
+
+um_por_segmento = [1001, 2001, 3001, 4001, 5001, 6001, 7001, 16001]
+atrasado = [2001, 4001, 6001, 8001, 16001]
+print("slow-start.pkt:        ", slow_start(um_por_segmento), "(o livro imprime 2, 3, 4, 5, 6, 7, 8, 9, 18)")
+print("slow-start-delayed.pkt:", slow_start(atrasado), "(o livro imprime 2, 4, 6, 8, 10, 18)")</code></pre>
+    <h3 class="h6 mt-4">3. A fórmula da Q4</h3>
+    <pre class="code-block"><code>import math
+
+# Q4 (pág. 329): tempo mínimo para entregar x bytes com slow start, sem perdas, rwin e ssthresh grandes.
+RTT, D = 100, 1            # ms; D = tempo de transmitir um segmento
+
+def formula(x, mss=1000):
+    n = math.ceil(x / mss)
+    r = math.ceil(math.log2(n + 1))          # rodadas: 1, 2, 4, ... segmentos
+    ultima = n - (2 ** (r - 1) - 1)          # segmentos na última rodada
+    return (r - 1) * (RTT + D) + ultima * D + RTT / 2
+
+def simula(x, mss=1000):
+    """Cada ACK soma um MSS à cwnd; o enlace do emissor manda um segmento por ms."""
+    n = math.ceil(x / mss)
+    chegada_ack = []                          # quando cada ACK volta ao emissor
+    livre, cwnd, enviados, t = 0.0, 1, 0, 0.0
+    entrega = 0.0
+    while enviados &lt; n:
+        while enviados &lt; n and enviados - len([a for a in chegada_ack if a &lt;= t]) &lt; cwnd:
+            ini = max(t, livre); livre = ini + D
+            entrega = livre + RTT / 2         # o segmento chega ao receptor
+            chegada_ack.append(livre + RTT)
+            enviados += 1
+        proximos = sorted(a for a in chegada_ack if a &gt; t)
+        if not proximos:
+            break
+        t = proximos[0]
+        cwnd = 1 + len([a for a in chegada_ack if a &lt;= t])   # slow start: +1 por ACK recebido
+    return entrega
+
+for x in (1000, 3000, 7000, 10000, 15000):
+    print(f"x = {x:5} bytes: fórmula {formula(x):6.1f} ms, simulação {simula(x):6.1f} ms")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.13 "A closer look at TCP" (pág. 319–336 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>Repositório público dos scripts do livro: <a href="https://github.com/cnp3/ebook/tree/master/exercises/packetdrill_scripts" target="_blank" rel="noopener noreferrer">cnp3/ebook, packetdrill_scripts</a> e o <a href="https://github.com/google/packetdrill" target="_blank" rel="noopener noreferrer">packetdrill</a></li>
+        <li>RFC 6298 — <a href="https://www.rfc-editor.org/rfc/rfc6298" target="_blank" rel="noopener noreferrer">Computing TCP's Retransmission Timer</a>, RFC 5681 — <a href="https://www.rfc-editor.org/rfc/rfc5681" target="_blank" rel="noopener noreferrer">TCP Congestion Control</a> e RFC 3042 — <a href="https://www.rfc-editor.org/rfc/rfc3042" target="_blank" rel="noopener noreferrer">Limited Transmit</a></li>
+        <li>RFC 3465 — <a href="https://www.rfc-editor.org/rfc/rfc3465" target="_blank" rel="noopener noreferrer">TCP Congestion Control with Appropriate Byte Counting</a>, RFC 6937 — <a href="https://www.rfc-editor.org/rfc/rfc6937" target="_blank" rel="noopener noreferrer">Proportional Rate Reduction</a> e RFC 6928 — <a href="https://www.rfc-editor.org/rfc/rfc6928" target="_blank" rel="noopener noreferrer">Increasing TCP's Initial Window</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-38/index.html" class="text-muted text-decoration-none">← Capítulo 38</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 39</span>
+            <a href="../capitulo-40/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 40 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap39.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

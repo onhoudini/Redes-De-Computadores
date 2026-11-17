@@ -283,3 +283,188 @@
             el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (20 pts): classifique as seis funções (livro, pág. 118–119 do PDF)."));
     });
 }());
+
+/* Etapa "3. Visualização" dos conceitos enlace, rede e transporte (Figs. 93–95, pág. 116–117 do PDF). */
+(function () {
+    "use strict";
+    var R = window.Redes;
+    var u = R.util, el = u.el, s = u.svg;
+    function escolha(rotulo, lista) {
+        return el("select", { class: "form-select form-select-sm", "aria-label": rotulo },
+            el("option", { value: "" }, "escolha…"), lista.map(function (o) { return el("option", { value: o[0] }, o[1]); }));
+    }
+    function fundo(w, h) { return s("rect", { x: 0, y: 0, width: w, height: h, style: "fill: var(--bs-body-bg)" }); }
+    // Uma pilha de camadas; `acesas` diz quais camadas aparecem destacadas.
+    function pilha(x, y, nome, camadas, acesas, larg) {
+        var w = larg || 110, g = s("g", { "font-size": 11, "text-anchor": "middle" });
+        g.append(s("text", { x: x + w / 2, y: y - 6, "font-weight": "bold" }, nome));
+        camadas.forEach(function (c, i) {
+            var ativa = acesas && acesas.indexOf(c) >= 0;
+            g.append(s("rect", { class: ativa ? "no no-ativo" : "camada", x: x, y: y + i * 28, width: w, height: 26, rx: 4 }),
+                s("text", { x: x + w / 2, y: y + i * 28 + 17 }, c));
+        });
+        return g;
+    }
+
+    /* ---------- Fig. 93: o quadro desce bit a bit ---------- */
+    function requestsPorQuadro(bytes) { return bytes * 8; }
+    R.requestsPorQuadro = requestsPorQuadro;
+
+    R.registrar("quadro-bits", function (raiz) {
+        var entrada = el("input", { class: "form-control form-control-sm mono", value: "10110010", maxlength: 16, "aria-label": "Bits do quadro", spellcheck: "false" });
+        var ruido = el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("cx") });
+        var desenho = s("svg", { viewBox: "0 0 640 240", class: "sim-svg w-100", style: "max-height:260px", role: "img", "aria-label": "Duas entidades de enlace trocam um quadro; na verdade cada bit desce à camada física, vira sinal e sobe do outro lado." });
+        var saida = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
+        var enviados = 0;
+        function bits() { return entrada.value.replace(/[^01]/g, "").slice(0, 16); }
+        function recebido(b) { return b.split("").map(function (x, i) { return ruido.checked && i === 4 ? (x === "1" ? "0" : "1") : x; }).join(""); }
+        function desenha() {
+            var b = bits(), rx = recebido(b), n = Math.min(enviados, b.length);
+            var g = s("g", null, fundo(640, 240));
+            g.append(pilha(20, 30, "Host A", ["Enlace", "Física"], n > 0 && n < b.length ? ["Enlace", "Física"] : null));
+            g.append(pilha(510, 30, "Host B", ["Enlace", "Física"], n > 0 && n < b.length ? ["Física", "Enlace"] : null));
+            g.append(s("line", { class: "linha", x1: 130, y1: 44, x2: 510, y2: 44, "stroke-dasharray": "5 4" }),
+                s("text", { x: 320, y: 38, "font-size": 11, "text-anchor": "middle" }, "o quadro, \"diretamente\" (Fig. 93)"));
+            // sinal NRZ-L no meio físico: 1 = nível alto, 0 = nível baixo
+            var x0 = 150, larg = 340 / Math.max(b.length, 1), pts = [];
+            for (var i = 0; i < n; i++) {
+                var y = rx[i] === "1" ? 80 : 108;
+                pts.push((x0 + i * larg) + "," + y, (x0 + (i + 1) * larg) + "," + y);
+                g.append(s("text", { x: x0 + i * larg + larg / 2, y: 128, "font-size": 11, "text-anchor": "middle", class: rx[i] !== b[i] ? "text-danger" : null, style: rx[i] !== b[i] ? "fill: var(--bs-danger)" : null }, rx[i]));
+            }
+            g.append(s("rect", { class: "camada", x: 130, y: 70, width: 380, height: 48, rx: 4, style: "fill-opacity:.35" }));
+            if (pts.length) g.append(s("polyline", { points: pts.join(" "), fill: "none", class: "linha-ativa" }));
+            g.append(s("text", { x: 320, y: 146, "font-size": 11, "text-anchor": "middle" }, "meio físico (sinal NRZ-L: 1 = nível alto, 0 = nível baixo)"));
+            var reqs = [], inds = [];
+            for (var j = 0; j < n; j++) { reqs.push("Data.request(" + b[j] + ")"); inds.push("Data.indication(" + rx[j] + ")"); }
+            g.append(s("text", { x: 20, y: 172, "font-size": 11 }, "A emitiu " + n + " de " + b.length + " Data.request"));
+            g.append(s("text", { x: 620, y: 172, "font-size": 11, "text-anchor": "end" }, "B recebeu " + n + " Data.indication"));
+            g.append(s("text", { x: 20, y: 192, "font-size": 10, class: "mono" }, reqs.slice(-3).join("  ")));
+            g.append(s("text", { x: 620, y: 192, "font-size": 10, "text-anchor": "end", class: "mono" }, inds.slice(-3).join("  ")));
+            if (n === b.length && b.length) g.append(s("text", { x: 320, y: 222, "font-size": 12, "text-anchor": "middle", "font-weight": "bold" }, "B montou o quadro " + rx + (rx === b ? " = o enviado" : " ≠ " + b + " (erro de transmissão)")));
+            desenho.replaceChildren(s("title", null, "Um quadro atravessa a camada física bit a bit"), g);
+            saida.textContent = !b.length ? "Digite bits 0 e 1." : n === 0 ? "Cada bit do quadro vira um Data.request para a camada física."
+                : n < b.length ? "Bit " + n + ": A pediu Data.request(" + b[n - 1] + "); a física de B decodificou o sinal e entregou Data.indication(" + rx[n - 1] + ")."
+                : rx === b ? "Sem erros de transmissão, B recebe exatamente o quadro que A enviou." : "O ruído inverteu o 5º bit no meio físico: a camada física não percebe, e o quadro chega errado.";
+        }
+        function reinicia() { enviados = 0; desenha(); }
+        entrada.addEventListener("input", reinicia);
+        ruido.addEventListener("change", reinicia);
+        var resp = el("input", { type: "number", class: "form-control form-control-sm", min: 0, "aria-label": "Número de Data.request" });
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "quadro-bits", 10, "Contar as primitivas de um quadro");
+        raiz.append(
+            el("div", { class: "row g-2 align-items-end" },
+                el("div", { class: "col-sm-5" }, u.campo("Bits do quadro (até 16)", entrada)),
+                el("div", { class: "col-sm-7 d-flex flex-wrap gap-2 mb-2" },
+                    u.botao("Próximo bit", "btn-primary", function () { if (enviados < bits().length) enviados++; desenha(); }),
+                    u.botao("Quadro inteiro", "btn-outline-primary", function () { enviados = bits().length; desenha(); }),
+                    u.botao("Recomeçar", "btn-outline-secondary", reinicia))),
+            el("div", { class: "form-check mb-2" }, ruido, el("label", { class: "form-check-label small", for: ruido.id }, "Ruído no meio: inverter o 5º bit")),
+            desenho, saida,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts): quantos Data.request a entidade de enlace emite para enviar um quadro de 1500 bytes?"),
+            el("div", { class: "d-flex gap-2 align-items-center" }, resp, u.botao("Conferir", "btn-primary", function () {
+                var ok = Number(resp.value) === requestsPorQuadro(1500);
+                u.marca(fb, ok, ok ? "12 000: um por bit, e um byte tem 8 bits." : "Não. A entidade de enlace emite um Data.request para cada bit do quadro.");
+                if (ok) concluir();
+            })), fb);
+        desenha();
+    });
+
+    /* ---------- Fig. 94: o pacote atravessa roteadores ---------- */
+    var NOS = [{ nome: "Host A", tipo: "host" }, { nome: "Roteador R1", tipo: "rot" }, { nome: "Roteador R2", tipo: "rot" }, { nome: "Host B", tipo: "host" }];
+    var CAMADAS3 = ["Rede", "Enlace", "Física"];
+    function passosPacote(nRoteadores) {
+        var p = [{ no: 0, camadas: ["Rede", "Enlace", "Física"], texto: "Host A: a camada de rede monta o pacote (origem A, destino B) e o entrega ao enlace, que o põe num quadro." }];
+        for (var r = 1; r <= nRoteadores; r++) {
+            p.push({ no: r, camadas: ["Física", "Enlace", "Rede"], texto: "Roteador R" + r + ": o quadro chega, o enlace tira o pacote dele, e a camada de rede lê o destino para escolher a próxima saída. O pacote não sobe além da rede." });
+        }
+        p.push({ no: nRoteadores + 1, camadas: ["Física", "Enlace", "Rede"], texto: "Host B: o pacote chega ao destino e a camada de rede o entrega para cima." });
+        return p;
+    }
+    function enlacesNoCaminho(nRoteadores) { return nRoteadores + 1; }
+    R.enlacesNoCaminho = enlacesNoCaminho;
+
+    R.registrar("pacote-roteadores", function (raiz) {
+        var passos = passosPacote(2), atual = 0;
+        var desenho = s("svg", { viewBox: "0 0 640 190", class: "sim-svg w-100", style: "max-height:230px", role: "img", "aria-label": "Um pacote vai do host A ao host B passando por dois roteadores." });
+        var saida = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
+        function desenha() {
+            var p = passos[atual], g = s("g", null, fundo(640, 190));
+            NOS.forEach(function (n, i) {
+                var x = 15 + i * 160;
+                g.append(pilha(x, 40, n.nome, CAMADAS3, p.no === i ? p.camadas : null, 130));
+                if (i < NOS.length - 1) {
+                    var ativo = p.no === i;
+                    g.append(s("line", { class: ativo ? "linha-ativa" : "linha", x1: x + 130, y1: 107, x2: x + 160, y2: 107 }));
+                }
+            });
+            var xp = 15 + p.no * 160 + 65;
+            g.append(s("rect", { class: "pacote", x: xp - 30, y: 140, width: 60, height: 22, rx: 4 }), s("text", { x: xp, y: 155, "font-size": 11, "text-anchor": "middle", class: "balao-texto" }, "A → B"));
+            g.append(s("text", { x: 320, y: 182, "font-size": 11, "text-anchor": "middle" }, "passo " + (atual + 1) + " de " + passos.length + " · " + enlacesNoCaminho(2) + " enlaces no caminho"));
+            desenho.replaceChildren(s("title", null, "O pacote e as camadas usadas em cada nó"), g);
+            saida.textContent = p.texto;
+        }
+        var PERG1 = escolha("Até que camada o pacote sobe num roteador", [["fisica", "Física"], ["enlace", "Enlace"], ["rede", "Rede"], ["transporte", "Transporte"]]);
+        var PERG2 = el("input", { type: "number", min: 0, class: "form-control form-control-sm", "aria-label": "Número de quadros" });
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "pacote-roteadores", 10, "O pacote nos roteadores");
+        raiz.append(el("div", { class: "d-flex flex-wrap gap-2 mb-2" },
+                u.botao("◀ Passo anterior", "btn-outline-primary", function () { atual = Math.max(0, atual - 1); desenha(); }),
+                u.botao("Próximo passo ▶", "btn-primary", function () { atual = Math.min(passos.length - 1, atual + 1); desenha(); })),
+            desenho, saida,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts)"),
+            el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-7 small" }, "Até que camada o pacote sobe dentro de um roteador?"), el("div", { class: "col-sm-5" }, PERG1)),
+            el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-7 small" }, "Com 4 roteadores entre A e B, em quantos quadros diferentes (um por enlace) o pacote viaja?"), el("div", { class: "col-sm-5" }, PERG2)),
+            u.botao("Conferir", "btn-primary mt-1", function () {
+                var ok1 = PERG1.value === "rede", ok2 = Number(PERG2.value) === enlacesNoCaminho(4);
+                u.marca(fb, ok1 && ok2, ok1 && ok2 ? "Isso. O roteador só precisa da camada de rede para escolher a saída, e cada um dos 5 enlaces leva o pacote num quadro próprio."
+                    : (ok1 ? "" : "O roteador lê o destino do pacote, que é informação da camada de rede. ") + (ok2 ? "" : "Conte os enlaces: há um a mais que o número de roteadores."));
+                if (ok1 && ok2) concluir();
+            }), fb);
+        desenha();
+    });
+
+    /* ---------- Fig. 95: segmentos dentro de pacotes ---------- */
+    var FLUXOS = [
+        { id: "web", nome: "navegador → servidor web", transporte: "TCP", po: 52100, pd: 80 },
+        { id: "mail", nome: "cliente de e-mail → servidor SMTP", transporte: "TCP", po: 52101, pd: 25 },
+        { id: "dns", nome: "resolvedor → servidor DNS", transporte: "UDP", po: 53000, pd: 53 }
+    ];
+    R.fluxosEncapsula = FLUXOS;
+
+    R.registrar("encapsula", function (raiz) {
+        var sel = el("select", { class: "form-select form-select-sm", "aria-label": "Fluxo entre os hosts A e B" }, FLUXOS.map(function (f) { return el("option", { value: f.id }, f.nome + " (" + f.transporte + ")"); }));
+        var caixa = el("div", { class: "mt-2" });
+        var saida = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
+        function bloco(cor, titulo, campos, dentro) {
+            return el("div", { class: "border rounded p-2 mt-1", style: "border-color: " + cor + " !important; border-width: 2px !important" },
+                el("div", { class: "small fw-semibold" }, titulo),
+                el("div", { class: "small mono" }, campos), dentro || null);
+        }
+        function mostra() {
+            var f = FLUXOS.find(function (x) { return x.id === sel.value; });
+            caixa.replaceChildren(
+                bloco("var(--muted)", "Quadro (enlace) — cabeçalho do enlace", "muda a cada enlace do caminho",
+                    bloco("var(--accent)", "Pacote (rede) — cabeçalho", "origem: host A · destino: host B · protocolo: " + f.transporte,
+                        bloco("var(--warn)", "Segmento (transporte) — cabeçalho", "porta de origem: " + f.po + " · porta de destino: " + f.pd,
+                            el("div", { class: "small border rounded p-1 mt-1" }, "dados da aplicação")))));
+            saida.textContent = "Os três fluxos usam os mesmos dois hosts, então o cabeçalho do pacote só difere no campo de protocolo. Quem separa os fluxos é a camada de transporte, pelas portas. Os roteadores do caminho não têm camada de transporte (Fig. 95): só os hosts leem as portas.";
+        }
+        sel.addEventListener("change", mostra);
+        var PERG1 = escolha("O que distingue os fluxos", [["enderecos", "os endereços de rede dos hosts"], ["portas", "o protocolo de transporte e as portas"], ["quadro", "o cabeçalho do quadro"]]);
+        var PERG2 = escolha("Quem lê as portas", [["rot", "os roteadores do caminho"], ["hosts", "só os dois hosts"], ["todos", "todos os nós"]]);
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "encapsula", 10, "Segmentos, pacotes e quadros");
+        raiz.append(u.campo("Fluxo entre os hosts A e B", sel), caixa, saida,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts)"),
+            el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-6 small" }, "O que distingue dois fluxos entre os mesmos hosts?"), el("div", { class: "col-sm-6" }, PERG1)),
+            el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-6 small" }, "Quem lê as portas no caminho de A até B?"), el("div", { class: "col-sm-6" }, PERG2)),
+            u.botao("Conferir", "btn-primary mt-1", function () {
+                var ok = PERG1.value === "portas" && PERG2.value === "hosts";
+                u.marca(fb, ok, ok ? "Isso: identificar o fluxo é tarefa da camada de transporte, que só existe nos hosts." : "Ainda não. Compare os cabeçalhos dos três fluxos e veja que camadas os roteadores têm na Fig. 95.");
+                if (ok) concluir();
+            }), fb);
+        mostra();
+    });
+}());

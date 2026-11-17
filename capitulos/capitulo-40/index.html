@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 40 — Prática: redes IPv6 | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.14: o maior prefixo em binário, tabelas estáticas, a configuração com defeito dos alunos, caminhos impostos e plano de endereços, o IPMininet e os pacotes IPv6.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="40" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 40 · Parte 3: Prática · Seção 4.14</span>
+        <h1 class="display-5 mb-3">Prática: redes IPv6</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você configura tabelas de encaminhamento IPv6 à mão, caça laços e buracos negros numa configuração com defeito e usa um mininet simulado para depurar rotas estáticas com traceroute6.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#binario">1. O maior prefixo</a>
+                    <a class="nav-link" href="#estaticas">2. Rotas estáticas</a>
+                    <a class="nav-link" href="#alunos">3. Conferindo uma configuração</a>
+                    <a class="nav-link" href="#objetivos">4. Objetivos e plano de endereços</a>
+                    <a class="nav-link" href="#ipmininet">5. IPMininet</a>
+                    <a class="nav-link" href="#pacotes-ipv6">6. Pacotes IPv6</a>
+                    <a class="nav-link" href="#exercicios-cap40">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre redes IPv6</h2>
+    <p>
+        A seção 4.14 do livro tem questões de projeto com rotas estáticas IPv6, um tutorial do IPMininet e notas sobre os pacotes IPv6 (pág. 336–350 do PDF). As
+        topologias, os endereços e as tabelas são os das figuras do livro. O formato das atividades está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Aplicar o <strong>maior prefixo</strong> e configurar <strong>rotas estáticas</strong> que levem os pacotes pelos caminhos desejados.</li>
+                <li>Achar <strong>laços</strong> e <strong>buracos negros</strong> numa configuração, com tabelas e com <strong>traceroute6</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o IPv6 e o ICMPv6 do <a href="../capitulo-22/index.html">Capítulo 22</a> e as tabelas de encaminhamento do
+                <a href="../capitulo-02/index.html">Capítulo 2</a>. O capítulo cobre a seção 4.14 do livro (pág. 336–350 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Binário -->
+<section id="binario" class="chapter-section" data-conceito="binario" data-titulo="O maior prefixo">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">Endereços em binário e o maior prefixo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um prefixo /n fixa os n primeiros bits do endereço; o roteador escolhe, entre as rotas que contêm o destino, a de maior prefixo. Veja o
+        <a href="../capitulo-22/index.html#enderecos">endereçamento IPv6 e o maior prefixo no Capítulo 22</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.14.1">
+        Antes de determinar os caminhos dos pacotes, é preciso saber converter endereços IPv6 para binário. Uma tabela de encaminhamento IPv6 tem prefixos
+        com o próximo salto ou a interface de saída, e o roteador encaminha pela correspondência mais longa entre o destino e as rotas (pág. 336 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Os exercícios de conversão da seção 4.14.1 eram interativos e não estão no PDF. Nas figuras desta seção, o livro também escreve os prefixos de forma
+        abreviada, como <code>2001:db8:1341:4/64</code>; a forma correta é <code>2001:db8:1341:4::/64</code>, com o <code>::</code> antes da barra.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="prefixo-binario"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            No quarto grupo, 0x12 = 0000 0000 0001 0010 e 0x13 = 0000 0000 0001 0011: os 15 primeiros bits são iguais, e o /63 só olha 15 bits desse grupo.
+            Por isso p:12::/63 cobre p:12::/64 e p:13::/64, mas não p:14:: (0001 0100). Um /60 olha só os 12 primeiros bits do quarto grupo e cobre de 0x0 a
+            0xf: 2001:db8:1341:3::b está dentro de 2001:db8:1341::/60.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Dois /64 vizinhos que só diferem no último bit|Quatro /64|Um único /64" data-answer="0" data-explain="Um /63 deixa livre um bit a mais que um /64: cobre dois /64, os que só diferem no 64º bit." data-hint="Um bit a menos no prefixo dobra o bloco.">
+        <p class="fw-semibold mb-2">Quantos /64 um /63 cobre?</p>
+    </div>
+</section>
+
+<!-- 2. Rotas estáticas -->
+<section id="estaticas" class="chapter-section" data-conceito="estaticas" data-titulo="Rotas estáticas">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Configurando tabelas à mão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Cada roteador decide sozinho, pela sua tabela: o caminho de ida não precisa ser o inverso do de volta, e uma tabela incompleta ou incoerente gera
+        buracos negros e laços. Veja as <a href="../capitulo-02/index.html#tabelas">tabelas de encaminhamento no Capítulo 2</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        Na rede da pág. 336–337, A (2001:db8:1341:1::A) e B (2001:db8:1341:4::B) usam como rota padrão R1 e R4. R1 usa os endereços 1::1, 12::1 e 13::1;
+        R2, 12::2, 23::2 e 24::2; R3, 34::3, 23::3 e 13::3; R4, 34::4, 24::4 e 4::4 (sempre dentro de 2001:db8:1341). As tabelas de R1 e R4 estão na figura.
+    </p>
+    <ol class="mb-2">
+        <li data-livro="4.14.2-Q1">Proponha as tabelas de R2 e R3 para que A e B troquem pacotes nos dois sentidos.</li>
+        <li data-livro="4.14.2-Q2">Com as tabelas de R2 e R3 dadas na figura da pág. 338, selecione todas as regras que fazem os pacotes de A para B seguirem o
+            caminho inverso dos de B para A.</li>
+        <li data-livro="4.14.2-Q3">Numa rede sem o enlace R2–R3, R2 e R3 estão com defeito e só têm uma rota padrão (R2 para R1, R3 para R4). Como configurar
+            as tabelas de R1 e R4 para que A alcance B e vice-versa?</li>
+        <li data-livro="4.14.2-Q4">Com um enlace a mais entre R1 e R4 (14::1 e 14::4), dá para configurar as tabelas de modo que os pacotes de A sigam os caminhos
+            das figuras (direto pelo enlace R1–R4, ou por R3) até um dos quatro endereços de R4? As suas tabelas impõem o caminho até B, ligado a R4, ou é preciso
+            uma entrada a mais (pág. 336–340 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="rotas-estaticas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1:</strong> R1 manda 4::/64 para R2, e R4 manda 1::/64 para R3. Basta R2 ter 4::/64 via 24::4 e R3 ter 1::/64 via 13::1: A → R1 → R2 → R4 → B
+                e B → R4 → R3 → R1 → A. Os caminhos não são inversos, e não precisam ser.</li>
+            <li><strong>Q2:</strong> as regras usadas são, em R2, 4::/64 via 23::3 e 1::/64 via 12::1, e, em R3, 4::/64 via 34::4 e 1::/64 via 23::2. Com elas, A → R1 →
+                R2 → R3 → R4 → B, e a volta percorre exatamente o caminho inverso.</li>
+            <li><strong>Q3:</strong> R1 precisa mandar 4::/64 para R3 (13::3), e R4, 1::/64 para R2 (24::2). Se R1 mandasse para R2, a rota padrão de R2 devolveria o
+                pacote a R1: laço. Ida e volta ficam diferentes: A → R1 → R3 → R4 → B e B → R4 → R2 → R1 → A.</li>
+            <li><strong>Q4:</strong> cada endereço de R4 fica numa sub-rede diferente. 14::4 está numa rede ligada direto a R1 (caminho direto); para 34::4, R1 usa uma rota
+                34::/64 via 13::3 (caminho por R3). O encaminhamento é por destino, então isso não diz nada sobre 4::/64, a rede de B: ela precisa da sua própria entrada.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Não: cada roteador escolhe o próximo salto sozinho, pela sua tabela|Sim: o IP sempre volta pelo mesmo caminho|Só com rotas padrão" data-answer="0" data-explain="Com encaminhamento por destino, a ida e a volta dependem de tabelas diferentes, em roteadores diferentes; na Q1 e na Q3, elas são assimétricas." data-hint="Compare os caminhos da Q3.">
+        <p class="fw-semibold mb-2">O caminho de B para A precisa ser o inverso do de A para B?</p>
+    </div>
+</section>
+
+<!-- 3. Alunos -->
+<section id="alunos" class="chapter-section" data-conceito="alunos" data-titulo="Conferindo uma configuração">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Conferindo a configuração dos alunos</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Rotas padrão e prefixos agregados (como um /63) economizam entradas, mas é fácil criar laços: dois roteadores que mandam o mesmo destino um para o outro.
+        Veja as <a href="../capitulo-02/index.html#tabelas">tabelas de encaminhamento no Capítulo 2</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.14.2-Q5">
+        Uma rede de seis roteadores foi configurada por um grupo de alunos, e você precisa verificar a configuração. Todos os endereços estão no mesmo /48, chamado p:
+        p:12/64 entre R1 e R2 (R1 usa p:12::1 e R2, p:12::2), p:13/64 entre R1 e R3, p:24/64 entre R2 e R4, e assim por diante. Com as tabelas da pág. 340–341, o que
+        você acha da configuração?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="verifica-alunos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Dos 70 pares (roteador, endereço de outro roteador), 30 falham: 22 por laço e 8 por falta de rota.</li>
+            <li>R1 manda p:34::/64 para R2, que não conhece essa rede e devolve pela rota padrão: laço R1–R2. Deveria ir para R3 (p:13::3).</li>
+            <li>R2 manda p:13::/64 para R4, e o /63 de R4 (p:12::/63, que cobre p:12 e p:13) o devolve a R2: outro laço.</li>
+            <li>R4 manda p:25::/64 para R6, e o p:24::/63 de R6 (que cobre p:24 e p:25) o devolve a R4: laço R4–R6.</li>
+            <li>R4 não tem rota padrão nem rota para p:56::/64: tudo o que vai para R5 ou R6 por essa rede morre em R4.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Os dois roteadores mandam o mesmo destino um para o outro|Falta a rota padrão|O prefixo é curto demais" data-answer="0" data-explain="Um laço de dois roteadores aparece quando cada um aponta o outro como próximo salto para o mesmo destino, como R4 e R6 para p:25::/64." data-hint="Veja o caso de p:25.">
+        <p class="fw-semibold mb-2">O que caracteriza um laço entre dois roteadores?</p>
+    </div>
+</section>
+
+<!-- 4. Objetivos -->
+<section id="objetivos" class="chapter-section" data-conceito="objetivos" data-titulo="Objetivos e plano de endereços">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Impondo caminhos e planejando endereços</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Rotas estáticas por destino permitem escolher por onde passa o tráfego de cada prefixo; um bom plano de endereços, com prefixos agregáveis, reduz o número
+        de entradas. Veja o <a href="../capitulo-22/index.html#enderecos">endereçamento no Capítulo 22</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="6">
+        <li data-livro="4.14.2-Q6">Na rede de seis roteadores da pág. 341, com p:0000::/64 entre A1 e R1, p:0001::/64 entre A2 e R3, p:0002::/64 entre B1 e R5 e
+            p:0003::/64 entre B2 e R6, configure as tabelas para obter: (a) os pacotes de B1 e B2 para A1 e A2 sempre passam por R2, e os de A1 e A2 sempre por R4;
+            (b) os pacotes para A1, A2, B1 ou B2 nunca passam por R4; (c) os pacotes de A1 ou A2 para B1 passam por R2, e os para B2, por R4. Use o menor número de
+            entradas possível.</li>
+        <li data-livro="4.14.2-Q7">Atribua sub-redes a todos os enlaces da rede da pág. 342, a partir de um /56, de modo a reduzir as tabelas; cada sub-rede com host
+            deve ser um /64 (pág. 341–342 do PDF).</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="objetivos-estaticos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2">p:0000::/63 junta as redes de A1 e A2; p:0002::/63, as de B1 e B2. Uma solução para cada objetivo (verificada com o simulador):</p>
+        <ul class="mb-2 mono small">
+            <li>(a) R1: p:0002::/63 R3, p:0001::/64 R3 · R2: p:0000::/63 R1 · R3: p:0002::/63 R4, p:0000::/64 R1 · R4: p:0002::/63 R6 · R5: p:0000::/63 R2, p:0003::/64 R6 · R6: p:0000::/63 R5, p:0002::/64 R5 (10 entradas)</li>
+            <li>(b) R1: p:0002::/63 R2, p:0001::/64 R3 · R2: p:0002::/63 R5, p:0000::/63 R1 · R3: ::/0 R1 · R5: p:0003::/64 R6, p:0000::/63 R2 · R6: p:0000::/63 R5 (8 entradas, nenhuma em R4)</li>
+            <li>(c) R1: p:0002::/64 R2, p:0003::/64 R3, p:0001::/64 R3 · R2: p:0002::/64 R5, p:0000::/63 R1 · R3: p:0002::/64 R1, p:0003::/64 R4, p:0000::/64 R1 · R4: p:0003::/64 R6 · R5: p:0000::/63 R2 · R6: p:0000::/63 R5 (11 entradas)</li>
+        </ul>
+        <p class="mb-0">
+            <strong>Q7:</strong> agrupe as redes pela topologia. Por exemplo, do /56 (p:00::/56), dê um /60 ao lado esquerdo (R1, R3, A1, A2: p:00:: a p:0f::) e outro ao
+            direito (R5, R6, B1, B2: p:10:: a p:1f::), com os enlaces ligados a R2 num terceiro bloco. Assim, R2 precisa de uma rota por lado, e R5 e R6 chegam a toda a
+            esquerda com uma só entrada. O bloco 3 monta esse plano com o módulo ipaddress.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Permitem uma só entrada para várias redes vizinhas|Deixam os pacotes mais rápidos|Evitam laços automaticamente" data-answer="0" data-explain="Com redes contíguas, um prefixo mais curto (como um /63 ou um /60) representa todas elas numa só entrada." data-hint="Pense em p:0000::/63.">
+        <p class="fw-semibold mb-2">Para que serve um plano de endereços que agrupa as redes pela topologia?</p>
+    </div>
+</section>
+
+<!-- 5. IPMininet -->
+<section id="ipmininet" class="chapter-section" data-conceito="ipmininet" data-titulo="IPMininet">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Rotas estáticas no IPMininet</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O traceroute6 manda pacotes com hop limit crescente; cada roteador que zera o hop limit responde com um ICMPv6, e o destino responde com "porta
+        inalcançável". Um !N indica que um roteador não tinha rota. Veja o <a href="../capitulo-22/index.html#icmpv6">ICMPv6 no Capítulo 22</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.14.3">
+        O mininet emula redes com os namespaces do Linux; o IPMininet, de Olivier Tilmans e Mathieu Jadin, acrescenta IPv6 e protocolos de roteamento. O livro monta a
+        rede da Fig. 10 (a, r1, r2, r3 e b) com rotas estáticas em static-1.py e mostra os comandos nodes, links, pingall, traceroute6 e
+        <code>ip -f inet6 route</code>. Depois, mostra dois defeitos clássicos: em static-1-hole.py, r2 não tem rota para a rede de b, e o traceroute6 termina com !N;
+        em static-1-loop.py, a rota 2001:db8:1341::/60 de r2 aponta para r1, que manda a rede de b para r2, e os pacotes ficam presos entre os dois. No sentido contrário,
+        o traceroute6 de b não passa de r3, porque as respostas ICMPv6 de r1 para b também caem no laço (pág. 342–349 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Duas inconsistências do livro: a lista de prefixos diz 2001:db8:1341:1::/64 no enlace entre b e r3, mas b usa 2001:db8:1341:3::b, e o enlace é o 3::/64; e o
+        exemplo de traceroute6 da pág. 346 mostra endereços de outra configuração (2001:7ab:…, 2001:89ab:…). A simulação usa os endereços do script.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ipmininet-rotas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>static-1.py: a → b vai por r1, r2 e r3; b → a, por r3 e r1 (as tabelas são assimétricas).</li>
+            <li>static-1-hole.py: r2 recebe o pacote para 3::b e não tem rota; responde com um ICMPv6 Destination Unreachable (código 0, sem rota), que o traceroute6
+                mostra como !N depois de 12::2.</li>
+            <li>static-1-loop.py: r1 manda 3::/64 para r2, e r2 casa 3::b com o seu /60 e devolve a r1. O traceroute6 de a alterna 1::1 e 12::2 até ser interrompido.
+                Cada roteador responde com o endereço da interface por onde a resposta sai: r1 pelo enlace de a, r2 pelo enlace com r1.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="As respostas ICMPv6 de r1 para b caem no mesmo laço|r1 não responde a traceroute|O pacote de b nunca chega a r1" data-answer="0" data-explain="O pacote de b chega a r1, mas a resposta de r1 vai para 3::b, que r1 manda para r2, que a devolve: ela nunca chega a b (pág. 349 do PDF)." data-hint="Para onde vai a resposta de r1?">
+        <p class="fw-semibold mb-2">No static-1-loop.py, por que o traceroute6 de b mostra só * depois de r3?</p>
+    </div>
+</section>
+
+<!-- 6. Pacotes -->
+<section id="pacotes-ipv6" class="chapter-section" data-conceito="pacotes-ipv6" data-titulo="Pacotes IPv6">
+    <span class="kicker">Atividade 6</span>
+    <h2 class="section-title">Next Header, Packet Too Big, ping6 e traceroute6</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O Next Header diz o que vem depois do cabeçalho IPv6. Os roteadores IPv6 não fragmentam: descartam o pacote grande demais e devolvem um Packet Too Big com
+        o MTU. Veja o <a href="../capitulo-22/index.html#cabecalho">cabeçalho</a>, a <a href="../capitulo-22/index.html#fragmentacao">fragmentação</a> e o
+        <a href="../capitulo-22/index.html#icmpv6">ICMPv6</a> no Capítulo 22.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.14.4">
+        O Next Header indica o tipo do cabeçalho seguinte, numa lista mantida pela IANA. Quando um roteador recebe um pacote maior que o MTU da interface de saída,
+        ele o descarta e devolve um ICMPv6 à origem, que reduz os pacotes ou usa fragmentação. O ping6 manda Echo Request com identificador e números de sequência
+        crescentes; o traceroute6 manda segmentos UDP com hop limit crescente e usa a porta de origem para saber a que salto cada sonda se refere (pág. 349 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Os exercícios desta parte eram interativos e não estão no PDF. O texto também tem um erro de digitação: "HotLimit" no lugar de HopLimit (e falta dizer que a
+        primeira sonda tem hop limit 1).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ping6-traceroute6"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Time Exceeded é o tipo 3 (código 0, hop limit esgotado em trânsito); quando a sonda chega a B, a porta UDP alta não tem dono, e B devolve Destination
+                Unreachable, tipo 1, código 4 (porta inalcançável), o que encerra o traceroute6 (RFC 4443).</li>
+            <li>Com 1400 bytes, R1 e R2 passam o pacote, e R3, cujo enlace até B tem MTU de 1280, devolve Packet Too Big (tipo 2) com MTU = 1280. 1280 bytes é o mínimo que
+                todo enlace IPv6 precisa aceitar.</li>
+            <li>Next Header: 6 é TCP, 17 é UDP, 58 é ICMPv6 e 44 é o cabeçalho de fragmento. Echo Request e Echo Reply são os tipos 128 e 129.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="1280 bytes|576 bytes|1500 bytes" data-answer="0" data-explain="O IPv6 exige que todo enlace leve pacotes de pelo menos 1280 bytes; abaixo disso, a camada de enlace precisa fragmentar por conta própria." data-hint="É o MTU do enlace R3–B na simulação.">
+        <p class="fw-semibold mb-2">Qual é o MTU mínimo que todo enlace IPv6 precisa aceitar?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap40" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> 2001:db8:1341:2f::1 está dentro de 2001:db8:1341:20::/60?
+            <details><summary>Ver solução</summary><p class="mb-0">Sim: o /60 fixa os 12 primeiros bits do quarto grupo (0x002_), e 0x2f = 0000 0000 0010 1111 começa igual a 0x20.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Na Q3, por que R4 não pode mandar a rede de A (1::/64) para R3?
+            <details><summary>Ver solução</summary><p class="mb-0">Porque a única rota de R3 é a padrão, que aponta para R4: o pacote voltaria a R4, formando um laço R3–R4.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Um traceroute6 mostra: 1 r1, 2 r2 !N. O que isso diz sobre r1 e r2?
+            <details><summary>Ver solução</summary><p class="mb-0">r1 tinha rota para o destino e mandou o pacote a r2; r2 não tinha rota e devolveu um ICMPv6 Destination Unreachable (sem rota), que o traceroute6 mostra como !N.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Na rede da Q5, que entrada única em R4 resolveria todas as falhas por falta de rota?
+            <details><summary>Ver solução</summary><p class="mb-0">Uma rota padrão, por exemplo ::/0 via p:46::6 (R6), que conhece p:56. Ela não resolve os laços: esses exigem corrigir p:34 em R1, p:13 em R2 e o /63 de R6.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, com o módulo ipaddress. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. O maior prefixo com ipaddress</h3>
+    <pre class="code-block"><code>import ipaddress as ip
+
+# Maior prefixo, como num roteador: a tabela de R1 na rede da Q1 (pág. 337).
+TABELA = [("2001:db8:1341:4::/64", "2001:db8:1341:12::2"),
+          ("2001:db8:1341:23::/64", "2001:db8:1341:13::3"),
+          ("2001:db8:1341:34::/64", "2001:db8:1341:13::3"),
+          ("2001:db8:1341:24::/64", "2001:db8:1341:12::2"),
+          ("::/0", "2001:db8:1341:12::2")]
+
+def proximo_salto(destino):
+    d = ip.IPv6Address(destino)
+    casam = [(ip.IPv6Network(p), nh) for p, nh in TABELA if d in ip.IPv6Network(p)]
+    rede, nh = max(casam, key=lambda c: c[0].prefixlen)
+    return rede, nh
+
+for destino in ["2001:db8:1341:4::b", "2001:db8:1341:34::4", "2001:db8:1341:99::1"]:
+    print(destino, "-&gt;", *proximo_salto(destino))
+
+# o quarto grupo em binário: por que p:12::/63 cobre p:13 e não p:14
+for g in (0x12, 0x13, 0x14):
+    print(hex(g), format(g, "016b"))</code></pre>
+    <h3 class="h6 mt-4">2. Laços e buracos negros</h3>
+    <pre class="code-block"><code>import ipaddress as ip
+
+# Rastreia caminhos por maior prefixo e acha laços e buracos negros (Q3, pág. 338-339).
+P = "2001:db8:1341:"
+INTERFACES = {"A": ["1::a"], "B": ["4::b"], "R1": ["1::1", "12::1", "13::1"], "R2": ["12::2", "24::2"],
+              "R3": ["34::3", "13::3"], "R4": ["34::4", "24::4", "4::4"]}
+TABELAS = {"A": [("::/0", "1::1")], "B": [("::/0", "4::4")],
+           "R2": [("::/0", "12::1")], "R3": [("::/0", "34::4")],          # os roteadores com defeito
+           "R1": [("4::/64", "13::3")], "R4": [("1::/64", "24::2")]}      # a solução da Q3
+
+def dono(endereco):
+    a = ip.IPv6Address(P + endereco if "::" not in endereco[:2] else endereco)
+    return next(n for n, ends in INTERFACES.items() if any(ip.IPv6Address(P + e) == a for e in ends))
+
+def caminho(origem, destino, limite=12):
+    d, n, cam = ip.IPv6Address(P + destino), origem, [origem]
+    for _ in range(limite):
+        if any(ip.IPv6Address(P + e) == d for e in INTERFACES[n]):
+            return cam, "entregue"
+        rotas = [(ip.IPv6Network(P + e + "/64", strict=False), None) for e in INTERFACES[n]]
+        rotas += [(ip.IPv6Network(p if p == "::/0" else P + p), nh) for p, nh in TABELAS.get(n, [])]
+        rotas = [r for r in rotas if d in r[0]]
+        if not rotas:
+            return cam, "sem rota em " + n
+        rede, nh = max(rotas, key=lambda r: r[0].prefixlen)
+        n = dono(destino) if nh is None else dono(nh)
+        cam.append(n)
+    return cam, "laço"
+
+print("A -&gt; B:", caminho("A", "4::b"))
+print("B -&gt; A:", caminho("B", "1::a"))</code></pre>
+    <h3 class="h6 mt-4">3. Um plano de endereços</h3>
+    <pre class="code-block"><code>import ipaddress as ip
+
+# Um plano de endereços para a Q7 (pág. 342) a partir de um /56, agrupando as redes pela topologia.
+bloco = ip.IPv6Network("2001:db8:1341:100::/56")
+esquerda, direita, centro, *_ = bloco.subnets(new_prefix=60)      # 16 blocos /60; usamos 3
+redes_esq = list(esquerda.subnets(new_prefix=64))
+redes_dir = list(direita.subnets(new_prefix=64))
+plano = {"A1-R1": redes_esq[0], "A2-R3": redes_esq[1], "R1-R3": redes_esq[2],
+         "B1-R5": redes_dir[0], "B2-R6": redes_dir[1], "R5-R6": redes_dir[2],
+         "R3-R2": list(centro.subnets(new_prefix=64))[0], "R2-R5": list(centro.subnets(new_prefix=64))[1],
+         "R2-R6": list(centro.subnets(new_prefix=64))[2]}
+for enlace, rede in plano.items():
+    print(f"{enlace:6} {rede}")
+print("R2 chega a toda a esquerda com", esquerda, "e a toda a direita com", direita)</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.14 "IPv6 Networks" (pág. 336–350 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 4291 — <a href="https://www.rfc-editor.org/rfc/rfc4291" target="_blank" rel="noopener noreferrer">IP Version 6 Addressing Architecture</a>, RFC 8200 — <a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">IPv6 Specification</a> e RFC 4443 — <a href="https://www.rfc-editor.org/rfc/rfc4443" target="_blank" rel="noopener noreferrer">ICMPv6</a></li>
+        <li>IPMininet — <a href="https://ipmininet.readthedocs.io/" target="_blank" rel="noopener noreferrer">documentação</a> e os scripts do livro no repositório <a href="https://github.com/cnp3/ebook/tree/master/exercises/ipmininet_scripts" target="_blank" rel="noopener noreferrer">cnp3/ebook</a></li>
+        <li>IANA — <a href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml" target="_blank" rel="noopener noreferrer">Assigned Internet Protocol Numbers</a> (os valores de Next Header)</li>
+        <li>Documentação do Python — <a href="https://docs.python.org/3/library/ipaddress.html" target="_blank" rel="noopener noreferrer">ipaddress</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-39/index.html" class="text-muted text-decoration-none">← Capítulo 39</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 40</span>
+            <a href="../capitulo-41/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 41 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap40.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

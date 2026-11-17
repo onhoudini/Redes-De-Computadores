@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 25 — Roteamento interdomínio: BGP | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Aplicar as regras de exportação das relações cliente-provedor e de custo compartilhado. Acompanhar sessões e mensagens BGP, o AS-Path e o nexthop. Aplicar o processo de decisão do BGP e explicar por que ele pode não convergir.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="25" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 25 · Parte 2: Protocolos · Seção 3.17</span>
+        <h1 class="display-5 mb-3">Roteamento interdomínio: BGP</h1>
+        <p class="lead mb-4">
+            Entre os domínios, quem decide o caminho não é só a distância: são os contratos comerciais. Este capítulo mostra as relações entre domínios, as sessões e as mensagens BGP, o processo de decisão e por que o BGP pode não convergir.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#relacoes">1. Relações entre domínios</a>
+                    <a class="nav-link" href="#bgp-sessao">2. BGP: sessões e mensagens</a>
+                    <a class="nav-link" href="#bgp-decisao">3. O processo de decisão</a>
+                    <a class="nav-link" href="#convergencia">4. Convergência</a>
+                    <a class="nav-link" href="#exercicios-cap25">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Entre domínios</h2>
+    <p>
+        O roteamento interdomínio troca rotas entre redes de donos diferentes, que têm interesses comerciais e nem sempre
+        confiam umas nas outras (pág. 243 do PDF). O BGP é o protocolo que faz isso na Internet, guiado por políticas de
+        importação e de exportação.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Aplicar as <strong>regras de exportação</strong> das relações cliente-provedor e de custo compartilhado.</li>
+                <li>Acompanhar <strong>sessões e mensagens BGP</strong>, o AS-Path e o nexthop.</li>
+                <li>Aplicar o <strong>processo de decisão</strong> do BGP e explicar por que ele pode não convergir.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise a divisão entre IGP e EGP do <a href="../capitulo-23/index.html">Capítulo 23</a>, o OSPF do
+                <a href="../capitulo-24/index.html">Capítulo 24</a> e o maior prefixo do <a href="../capitulo-22/index.html">Capítulo 22</a>.
+                O capítulo cobre a seção 3.17 do livro (pág. 243–257 do PDF), com as topologias das figuras do livro.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Relações -->
+<section id="relacoes" class="chapter-section" data-conceito="relacoes" data-titulo="Relações entre domínios">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">Relações entre domínios</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Nos primeiros anos, os domínios anunciavam todas as rotas que conheciam. Na Internet comercial, cada rota anunciada pode
+        significar dinheiro gasto ou recebido.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Um domínio <strong>stub</strong> só manda e recebe pacotes dos próprios hosts (cerca de 85% dos domínios); um domínio de
+        <strong>trânsito</strong> encaminha pacotes de terceiros. Um stub com um só provedor é <em>single-homed</em>; com vários,
+        <em>multihomed</em>. Há stubs que mais recebem (acesso) e que mais produzem (conteúdo, como buscadores e CDNs). Os domínios se
+        ligam por <strong>enlaces privados</strong> ou em <strong>pontos de troca de tráfego</strong> (IXP), onde todos se ligam a
+        uma mesma LAN (Figs. 64–66, pág. 243–244 do PDF). Estar no mesmo IXP não basta: dois roteadores ali só trocam
+        pacotes se os donos tiverem interesse econômico nisso, e cada um costuma trocar tráfego com uma pequena parte dos
+        presentes. O livro trata domínio e sistema autônomo (AS) como sinônimos; na prática, um domínio pode ser dividido em
+        vários ASes (pág. 244 e 246 do PDF).
+    </p>
+    <p>As relações comerciais viram regras de anúncio (pág. 244–245 do PDF):</p>
+    <ul>
+        <li><strong>Cliente → provedor</strong>: o cliente paga. O cliente anuncia ao provedor os seus prefixos e os dos seus
+            clientes; o provedor anuncia ao cliente <strong>todas</strong> as rotas que conhece.</li>
+        <li><strong>Custo compartilhado</strong> (<em>shared-cost peering</em>): sem pagamento, entre domínios de tamanho parecido.
+            Cada um anuncia só os seus prefixos e os dos seus clientes, nunca as rotas aprendidas de um provedor ou de outro par:
+            senão, daria trânsito de graça.</li>
+        <li><strong>Irmãos</strong> (<em>sibling</em>): trocam tudo; só entre domínios da mesma empresa.</li>
+    </ul>
+    <p>
+        Os filtros podem ser escritos em <strong>RPSL</strong> (<a href="https://www.rfc-editor.org/rfc/rfc2622" target="_blank" rel="noopener noreferrer">RFC 2622</a>),
+        usado sobretudo na Europa (Fig. 68, pág. 245–246 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="politicas-exportacao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Não: rotas de provedores não vão para pares de custo compartilhado|Sim: num peering, tudo é trocado|Só se o par pagar" data-answer="0" data-explain="Se anunciasse, o par usaria de graça o enlace pago com o provedor (pág. 245 do PDF)." data-hint="Quem pagaria pelo tráfego?">
+        <p class="fw-semibold mb-2">AS3 aprendeu uma rota do seu provedor AS1. Ela deve anunciar essa rota ao par AS4?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Para provedores e pares: rotas próprias e de clientes. Para clientes: todas.</li>
+        <li>Stub, trânsito, single-homed, multihomed; enlace privado ou IXP.</li>
+    </ul>
+</section>
+
+<!-- 2. BGP sessões -->
+<section id="bgp-sessao" class="chapter-section" data-conceito="bgp-sessao" data-titulo="BGP: sessões e mensagens">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">BGP: sessões e mensagens</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Com centenas de milhares de prefixos, mandar a tabela inteira a cada 30 segundos, como o RIP, sobrecarregaria os roteadores.
+        E o vetor de distância sofre de contagem ao infinito.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Border Gateway Protocol</strong> (<a href="https://www.rfc-editor.org/rfc/rfc4271" target="_blank" rel="noopener noreferrer">RFC 4271</a>)
+        é um protocolo de <strong>vetor de caminho</strong>: cada rota leva o prefixo e o <strong>AS-Path</strong>, a lista dos
+        números de sistema autônomo (AS) atravessados. Com o AS-Path, não há contagem ao infinito, e as atualizações são
+        <strong>incrementais</strong>: só o que mudou (pág. 246 do PDF). Na Fig. 69, AS1 anuncia 2001:db8:cafe::/48, AS4 o
+        repassa acrescentando o seu número, e AS5 recebe de AS2 o caminho AS2:AS4:AS1.
+    </p>
+    <p>
+        Uma <strong>sessão BGP</strong> liga dois roteadores de domínios vizinhos, sobre <strong>TCP, porta 179</strong>, que já
+        cuida da entrega confiável. Ela só existe se for configurada manualmente nos dois lados. As mensagens (pág. 247–248 do PDF):
+    </p>
+    <ul>
+        <li><strong>OPEN</strong>: abre a sessão e negocia opções;</li>
+        <li><strong>UPDATE</strong>: anuncia rotas novas ou alteradas e retira as que deixaram de existir (o livro chama de Update
+            e Withdraw);</li>
+        <li><strong>KEEPALIVE</strong>: enviado se não houve UPDATE em 30 s; sem nenhuma mensagem por 90 s, a sessão cai e as rotas
+            dela são retiradas;</li>
+        <li><strong>NOTIFICATION</strong>: encerra a sessão por erro.</li>
+    </ul>
+    <p>
+        O roteador guarda as rotas recebidas de cada vizinho na <strong>Adj-RIB-In</strong>, aplica o filtro de importação, guarda
+        as aceitáveis na <strong>Loc-RIB</strong>, escolhe a melhor de cada prefixo para a tabela de encaminhamento e, para cada
+        vizinho, aplica o filtro de exportação para formar a <strong>Adj-RIB-Out</strong> (Fig. 71). O filtro de importação mais
+        simples descarta as rotas que já contêm o próprio AS no AS-Path, que causariam laços; outro comum descarta os
+        <strong>bogons</strong>, prefixos que nunca deveriam circular, como 2001:db8::/32 e ::1/128 (pág. 248–251 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        No pseudo-código do livro, ao mudar a melhor rota o roteador só manda o UPDATE ou o WITHDRAW de volta ao vizinho que mandou
+        a mensagem (pág. 250 do PDF). O texto seguinte diz o certo: para <strong>cada vizinho</strong>, o roteador aplica o filtro de
+        exportação e manda o anúncio ou a retirada (pág. 251 do PDF). Na RFC 4271, a Loc-RIB guarda as rotas escolhidas pelo processo
+        de decisão; o livro usa o nome para todas as rotas aceitas.
+    </p>
+    <p>
+        Cada UPDATE leva o prefixo, o <strong>nexthop</strong> (o endereço para onde mandar os pacotes) e atributos como o
+        AS-Path. Na Fig. 72, ao repassar uma rota, R2 troca o nexthop pelo seu próprio endereço e acrescenta o AS20 (pág. 251–252 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O exemplo da Fig. 72 tem inconsistências (pág. 251–252 do PDF). Uma sub-rede /127 tem só dois endereços, mas o livro usa
+        2001:db8::5 e 2001:db8::6 no enlace 2001:db8::4/127, e 2001:db8::1 e 2001:db8::2 no 2001:db8::0/127 (só ::4 e ::5, e ::0 e
+        ::1, pertencem a cada um). O texto também fala numa "sessão R1-R3", que não existe (é a R1-R2), e escreve o prefixo de R3
+        ora como abcd, ora como acbd. A simulação usa ::4 e ::5, e ::0 e ::1, e o prefixo abcd. O uso de /127 em enlaces entre
+        roteadores segue a <a href="https://www.rfc-editor.org/rfc/rfc6164" target="_blank" rel="noopener noreferrer">RFC 6164</a>.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>De onde vêm as rotas</strong> (pág. 252 do PDF). Em geral, o operador configura o roteador para sempre anunciar os
+        prefixos do domínio, como a UCLouvain com 2001:6a8:3080::/48. Anunciar rotas aprendidas do IGP é desaconselhado: um enlace
+        instável faria o BGP mandar uma enxurrada de mensagens pela Internet. O livro chama de <em>flapping</em> o enlace que
+        alterna várias vezes entre ativo e desativado em pouco tempo.
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="bgp-updates"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="TCP, porta 179|UDP, porta 521|IP direto, protocolo 89" data-answer="0" data-explain="O BGP roda sobre TCP, que já garante a entrega confiável (pág. 247 do PDF)." data-hint="O BGP precisa de entrega confiável.">
+        <p class="fw-semibold mb-2">Sobre o que roda uma sessão BGP?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Descarta a rota: o próprio AS no caminho indica um laço|Aceita e escolhe a de menor caminho|Retransmite a rota a todos os vizinhos" data-answer="0" data-explain="O filtro de importação básico descarta rotas cujo AS-Path já contém o AS local (pág. 250 do PDF)." data-hint="O que significa encontrar o próprio número no caminho?">
+        <p class="fw-semibold mb-2">O AS20 recebe uma rota com AS-Path AS30 AS20 AS10. O que ele faz?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Vetor de caminho com AS-Path; atualizações incrementais; TCP 179.</li>
+        <li>OPEN, UPDATE, KEEPALIVE (30 s; queda após 90 s) e NOTIFICATION.</li>
+        <li>Adj-RIB-In → importação → Loc-RIB → decisão → exportação → Adj-RIB-Out.</li>
+    </ul>
+</section>
+
+<!-- 3. Decisão -->
+<section id="bgp-decisao" class="chapter-section" data-conceito="bgp-decisao" data-titulo="O processo de decisão">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">O processo de decisão do BGP</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Um domínio pode receber várias rotas para o mesmo prefixo. Diferente de um IGP, quem decide qual usar é o próprio domínio,
+        com os critérios que quiser.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O primeiro critério é o <strong>local-pref</strong>, um inteiro posto pelo filtro de importação: vence a rota com o
+        <strong>maior</strong> local-pref. Entre rotas com o mesmo local-pref, vence a de <strong>AS-Path mais curto</strong>
+        (pág. 252 do PDF). Usos típicos:
+    </p>
+    <ul>
+        <li><strong>Enlace reserva</strong> (Fig. 73): local-pref 200 para as rotas do enlace principal e 100 para as do reserva.
+            Para controlar também por onde os pacotes <em>chegam</em>, o outro domínio precisa configurar o mesmo.</li>
+        <li><strong>Enlace barato</strong> (Fig. 74): o local-pref escolhe por onde sair, mas não influencia por onde os outros
+            mandam os pacotes de volta.</li>
+        <li><strong>Relações comerciais</strong>: local-pref alto para rotas de clientes (que pagam), médio para pares e baixo para
+            provedores (a quem se paga). Uma consequência: os caminhos da Internet costumam ser <strong>assimétricos</strong>
+            (Fig. 75, pág. 253–254 do PDF).</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro só detalha os dois primeiros critérios. A lista completa, na <a href="https://www.rfc-editor.org/rfc/rfc4271#section-9.1.2.2" target="_blank" rel="noopener noreferrer">RFC 4271, seção 9.1.2.2</a>,
+        continua com: menor MED (entre rotas do mesmo AS vizinho), rotas aprendidas por eBGP antes das aprendidas por iBGP, menor
+        custo IGP até o nexthop e, por fim, um desempate pelo identificador do roteador. A simulação e o exemplo de código seguem essa ordem.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="decisao-bgp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="A rota com local-pref 200, mesmo com AS-Path maior|A rota de AS-Path mais curto|A que chegou primeiro" data-answer="0" data-explain="O local-pref vem antes do tamanho do AS-Path (pág. 252 do PDF)." data-hint="Qual critério é avaliado primeiro?">
+        <p class="fw-semibold mb-2">Rota X: local-pref 200, AS-Path com 5 ASes. Rota Y: local-pref 100, AS-Path com 1 AS. Qual vence?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque cada domínio escolhe por onde sai pelas suas preferências, e o caminho de volta é escolhido pelo outro lado|Porque o TCP exige|Porque o BGP sorteia os caminhos" data-answer="0" data-explain="O local-pref de cada domínio só controla os pacotes que ele envia (pág. 253–254 do PDF)." data-hint="Quem escolhe o caminho de ida e quem escolhe o de volta?">
+        <p class="fw-semibold mb-2">Por que os caminhos da Internet costumam ser assimétricos?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Maior local-pref; depois AS-Path mais curto; depois MED, eBGP, custo IGP e identificador.</li>
+        <li>Local-pref: enlace reserva, enlace barato e preferência cliente > par > provedor.</li>
+        <li>O local-pref controla a saída, não a chegada; os caminhos são assimétricos.</li>
+    </ul>
+</section>
+
+<!-- 4. Convergência -->
+<section id="convergencia" class="chapter-section" data-conceito="convergencia" data-titulo="Convergência">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Convergência do BGP</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Cada domínio define a sua política sem consultar os outros. O que acontece quando as políticas de dois domínios brigam?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Na rede <strong>disagree</strong> (Fig. 76), AS1 anuncia um prefixo a AS3 e a AS4, e cada um prefere a rota via o outro. Se
+        AS3 anuncia primeiro, AS4 passa a usar a rota via AS3 e não anuncia nada; se AS4 anuncia primeiro, o contrário. Se os dois
+        anunciam ao mesmo tempo, os dois trocam de rota, retiram os anúncios, voltam às rotas diretas… e poderiam continuar para
+        sempre; na prática, um é mais rápido e o BGP converge. O resultado depende da ordem das mensagens
+        (<a href="https://www.rfc-editor.org/rfc/rfc4264" target="_blank" rel="noopener noreferrer">RFC 4264</a>, pág. 254–255 do PDF).
+    </p>
+    <p>
+        Na rede <strong>bad gadget</strong> (Fig. 77), AS1 prefere AS3:AS0, AS3 prefere AS4:AS0 e AS4 prefere AS1:AS0. Cada mudança
+        de um provoca a de outro, e o BGP nunca converge. Verificar se um conjunto de políticas converge é NP-completo ou NP-difícil
+        (pág. 255–256 do PDF).
+    </p>
+    <p>A convergência é garantida se duas regras, ligadas à economia, forem seguidas (pág. 256 do PDF):</p>
+    <ol>
+        <li>o grafo das relações cliente → provedor não tem ciclos (o provedor do meu provedor não pode ser meu cliente);</li>
+        <li>um AS sempre prefere rotas de clientes às de pares e provedores.</li>
+    </ol>
+    <p>
+        Medições sugerem que a maioria dos domínios as segue. A Internet tem uma estrutura em camadas (Fig. 78), e a maioria dos
+        caminhos tem de 3 a 5 ASes (pág. 256–257 do PDF).
+    </p>
+    <p>
+        Essas medições vêm de coletores de rotas: máquinas Unix com um daemon BGP mantêm sessões com roteadores de vários ASes e
+        guardam todas as mensagens recebidas e cópias periódicas das tabelas. Projetos como o
+        <a href="https://www.routeviews.org/" target="_blank" rel="noopener noreferrer">Route Views</a> e o RIS do RIPE publicam
+        esses dados. Pesquisas também mostraram que modelar a topologia no nível dos ASes exige mais do que as relações cliente →
+        provedor e de custo compartilhado, mas não há modelo público que vá além delas (pág. 256 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O BGP confia no que os vizinhos anunciam, e anúncios errados ou maliciosos de prefixos alheios ("sequestros") já tiraram
+        serviços do ar. A validação de origem com RPKI (<a href="https://www.rfc-editor.org/rfc/rfc6811" target="_blank" rel="noopener noreferrer">RFC 6811</a>)
+        permite conferir se um AS pode mesmo anunciar um prefixo.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="disagree"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Pode convergir para estados diferentes, conforme a ordem das mensagens|Nunca converge|Sempre converge para o mesmo estado" data-answer="0" data-explain="Há dois estados estáveis, e a ordem das mensagens decide qual (pág. 254–255 do PDF)." data-hint="O que mudou entre as duas primeiras execuções da simulação?">
+        <p class="fw-semibold mb-2">O que a rede disagree mostra sobre o BGP?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Disagree: o resultado depende da ordem. Bad gadget: não converge.</li>
+        <li>Convergência garantida: sem ciclos cliente → provedor e preferência por clientes.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap25" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Intermediário:</strong> na Fig. 67, um prefixo de AS7 chega a AS3? Por qual caminho?
+            <details><summary>Ver solução</summary><p class="mb-0">Sim: AS4 aprende a rota do cliente AS7 e pode anunciá-la ao par AS3. Caminho AS3 AS4 AS7 (de um par, preferido à rota via o provedor AS1, AS3 AS1 AS4 AS7).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> duas rotas para um prefixo têm local-pref 150, AS-Paths de 3 ASes, e uma foi aprendida por eBGP e a outra por iBGP (MED igual). Qual vence?
+            <details><summary>Ver solução</summary><p class="mb-0">Empatam no local-pref, no AS-Path e no MED; vence a aprendida por eBGP.</p></details></li>
+        <li><strong>Desafio:</strong> explique, com as preferências do bad gadget, por que nenhum estado é estável.
+            <details><summary>Ver solução</summary><p class="mb-0">Se AS1 usa a direta e anuncia AS1:AS0, AS4 passa a usá-la e deixa de anunciar AS4:AS0; então AS3 fica com a direta e anuncia AS3:AS0, que AS1 prefere; AS1 troca e retira AS1:AS0, então AS4 volta à direta e anuncia AS4:AS0, que AS3 prefere; AS3 troca e retira AS3:AS0, e AS1 volta à direta. Cada estado faz alguém mudar, e o ciclo recomeça.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, sem acessar a rede, com as topologias do livro. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Regras de exportação na Fig. 67</h3>
+    <pre class="code-block"><code># a Fig. 67 do livro: (cliente, provedor) e pares de custo compartilhado
+provedores = {"AS3": ["AS1"], "AS4": ["AS1", "AS2"], "AS7": ["AS4"]}
+pares = [("AS1", "AS2"), ("AS3", "AS4")]
+ases = ["AS1", "AS2", "AS3", "AS4", "AS7"]
+
+def relacao(de, para):
+    """Como 'para' enxerga 'de': cliente, par ou provedor."""
+    if para in provedores.get(de, []):
+        return "cliente"                                # 'de' é cliente de 'para'
+    if de in provedores.get(para, []):
+        return "provedor"
+    if (de, para) in pares or (para, de) in pares:
+        return "par"
+    return None
+
+PREF = {"origem": 3, "cliente": 2, "par": 1, "provedor": 0}   # local-pref: cliente > par > provedor
+
+def propaga(origem):
+    rota = {origem: ([origem], "origem")}               # AS -> (caminho, de quem aprendeu)
+    mudou = True
+    while mudou:
+        mudou = False
+        for de in list(rota):
+            caminho, aprendeu = rota[de]
+            for para in ases:
+                rel = relacao(de, para)
+                if rel is None or para in caminho:
+                    continue
+                # regra de exportação: para provedores e pares, só rotas próprias ou de clientes
+                if rel in ("cliente", "par") and aprendeu not in ("origem", "cliente"):
+                    continue
+                novo = ([para] + caminho, rel)
+                atual = rota.get(para)
+                if atual is None or (PREF[rel], -len(novo[0])) > (PREF[atual[1]], -len(atual[0])):
+                    rota[para] = novo
+                    mudou = True
+    return rota
+
+for origem in ("AS3", "AS7"):
+    print("Prefixo de", origem)
+    for asn, (caminho, aprendeu) in sorted(propaga(origem).items()):
+        de_quem = "é a origem" if aprendeu == "origem" else f"aprendida de um {aprendeu}"
+        print(f"   {asn}: {' '.join(caminho):14} ({de_quem})")</code></pre>
+
+    <h3 class="h6 mt-4">2. O processo de decisão do BGP</h3>
+    <pre class="code-block"><code>def melhor_rota(rotas):
+    """Processo de decisão do BGP, um critério de cada vez (livro, pág. 252; RFC 4271, seção 9.1)."""
+    criterios = [
+        ("maior local-pref", lambda r: -r["local_pref"]),
+        ("AS-Path mais curto", lambda r: len(r["as_path"])),
+        ("menor MED (mesmo AS vizinho)", lambda r: r["med"]),
+        ("eBGP antes de iBGP", lambda r: 0 if r["ebgp"] else 1),
+        ("menor custo IGP até o nexthop", lambda r: r["igp"]),
+        ("menor identificador do roteador", lambda r: r["router_id"]),
+    ]
+    candidatas = list(rotas)
+    for nome, chave in criterios:
+        melhor = min(chave(r) for r in candidatas)
+        restantes = [r for r in candidatas if chave(r) == melhor]
+        if len(restantes) &lt; len(candidatas):
+            print(f"   {nome}: ficam {[r['via'] for r in restantes]}")
+        candidatas = restantes
+        if len(candidatas) == 1:
+            return candidatas[0], nome
+    return candidatas[0], "empate total"
+
+# a Fig. 73 do livro: AS1 recebe as mesmas rotas de AS2 pelo enlace reserva (RA) e pelo principal (RB)
+rotas = [
+    {"via": "RA (reserva)",   "local_pref": 100, "as_path": ["AS2"], "med": 0, "ebgp": True, "igp": 0, "router_id": 1},
+    {"via": "RB (principal)", "local_pref": 100, "as_path": ["AS2"], "med": 0, "ebgp": True, "igp": 0, "router_id": 2},
+]
+vence, motivo = melhor_rota(rotas)
+print("sem filtro de importação:", vence["via"], "-", motivo)
+rotas[1]["local_pref"] = 200                            # o filtro do livro: from AS2 RB at R1 set localpref=200
+vence, motivo = melhor_rota(rotas)
+print("com local-pref 200 em RB:", vence["via"], "-", motivo)</code></pre>
+
+    <h3 class="h6 mt-4">3. A rede disagree</h3>
+    <pre class="code-block"><code>OUTRO = {"AS3": "AS4", "AS4": "AS3"}
+
+def disagree(ordem, rodadas=3):
+    """A Fig. 76 do livro: AS1 anuncia p a AS3 e a AS4; AS3 prefere a rota via AS4, e AS4 a via AS3.
+    ordem: "AS3 primeiro", "AS4 primeiro" ou "ao mesmo tempo". Devolve os estados (rota de AS3, rota de AS4)."""
+    rota = {"AS3": "AS1", "AS4": "AS1"}                 # no começo, os dois usam a rota direta de AS1
+    estados = [(rota["AS3"], rota["AS4"])]
+    if ordem != "ao mesmo tempo":
+        x = ordem.split()[0]                            # x anuncia "x AS1" primeiro
+        rota[OUTRO[x]] = x                              # o outro prefere a rota via x e para de anunciar a sua
+        estados.append((rota["AS3"], rota["AS4"]))
+        return estados                                  # estável: x continua com a direta
+    for _ in range(rodadas):
+        # 1) anúncios cruzados: cada um anuncia a rota direta, e o outro passa a preferi-la
+        rota = {"AS3": "AS4", "AS4": "AS3"}
+        estados.append((rota["AS3"], rota["AS4"]))
+        # 2) retiradas cruzadas: como nenhum usa mais a direta, os dois retiram os anúncios
+        rota = {"AS3": "AS1", "AS4": "AS1"}
+        estados.append((rota["AS3"], rota["AS4"]))
+    return estados
+
+for ordem in ("AS3 primeiro", "AS4 primeiro", "ao mesmo tempo"):
+    print(f"{ordem:15}", " -> ".join(f"({a3}, {a4})" for a3, a4 in disagree(ordem)))
+print("(rota de AS3, rota de AS4): de qual vizinho cada um usa a rota para p")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.17 "Interdomain routing" (pág. 243–257 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 4271 — <a href="https://www.rfc-editor.org/rfc/rfc4271" target="_blank" rel="noopener noreferrer">A Border Gateway Protocol 4 (BGP-4)</a> e RFC 4264 — <a href="https://www.rfc-editor.org/rfc/rfc4264" target="_blank" rel="noopener noreferrer">BGP Wedgies</a></li>
+        <li>RFC 2622 — <a href="https://www.rfc-editor.org/rfc/rfc2622" target="_blank" rel="noopener noreferrer">Routing Policy Specification Language (RPSL)</a> e RFC 6164 — <a href="https://www.rfc-editor.org/rfc/rfc6164" target="_blank" rel="noopener noreferrer">Using 127-Bit IPv6 Prefixes on Inter-Router Links</a></li>
+        <li>RFC 6811 — <a href="https://www.rfc-editor.org/rfc/rfc6811" target="_blank" rel="noopener noreferrer">BGP Prefix Origin Validation</a> (complemento)</li>
+        <li><a href="https://bgp.potaroo.net/" target="_blank" rel="noopener noreferrer">bgp.potaroo.net</a>, citado pelo livro, com estatísticas diárias do BGP</li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Border_Gateway_Protocol" target="_blank" rel="noopener noreferrer">BGP</a> e <a href="https://en.wikipedia.org/wiki/Internet_exchange_point" target="_blank" rel="noopener noreferrer">Internet exchange point</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-24/index.html" class="text-muted text-decoration-none">← Capítulo 24</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 25</span>
+            <a href="../capitulo-26/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 26 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap25.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>
