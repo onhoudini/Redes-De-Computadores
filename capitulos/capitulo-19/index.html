@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 19 — UDP: o User Datagram Protocol | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Descrever o serviço e o cabeçalho do UDP. Calcular o checksum da Internet de um segmento UDP, com o pseudo-cabeçalho.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="19" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 19 · Parte 2: Protocolos · Seção 3.11</span>
+        <h1 class="display-5 mb-3">UDP: o User Datagram Protocol</h1>
+        <p class="lead mb-4">
+            O UDP acrescenta pouco mais que portas ao IP. Este capítulo mostra o cabeçalho de 8 bytes, o checksum com o pseudo-cabeçalho e por que tantas aplicações preferem esse serviço simples.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#udp">1. UDP</a>
+                    <a class="nav-link" href="#exercicios-cap19">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Datagramas com portas</h2>
+    <p>
+        O UDP oferece um serviço sem conexão e não confiável sobre o IP (pág. 185–187 do PDF). O que ele acrescenta são
+        as portas, que separam as aplicações de um mesmo host, e um checksum que detecta erros de transmissão.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Descrever o serviço e o <strong>cabeçalho</strong> do UDP.</li>
+                <li>Calcular o <strong>checksum da Internet</strong> de um segmento UDP, com o pseudo-cabeçalho.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise as portas do <a href="../capitulo-09/index.html">Capítulo 9</a> e o serviço do IP do
+                <a href="../capitulo-18/index.html">Capítulo 18</a>. O capítulo cobre a seção 3.11 do livro (pág. 185–187 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. UDP -->
+<section id="udp" class="chapter-section" data-conceito="udp" data-titulo="UDP">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">UDP: datagramas com portas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O IP entrega pacotes a um host. Mas num host rodam várias aplicações: o resolvedor DNS, um jogo, uma chamada de
+        voz. Qual o mínimo que o transporte precisa acrescentar para separá-las?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>User Datagram Protocol</strong> (<a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">RFC 768</a>)
+        oferece um serviço sem conexão e não confiável sobre o IP (pág. 185 do PDF):
+    </p>
+    <ul>
+        <li>não entrega SDUs muito grandes, porque não sabe dividi-las e o pacote IP tem no máximo 64 KB;</li>
+        <li>não garante a entrega: SDUs podem se perder ou chegar fora de ordem;</li>
+        <li>não entrega uma SDU corrompida.</li>
+    </ul>
+    <p>
+        A vantagem sobre o IP puro são as <strong>portas</strong>: um servidor UDP registra uma porta, e cada SDU leva a porta
+        de origem e a de destino. Se o cliente usa a porta 1234 e o servidor a 5678, a resposta sai da 5678 para a 1234
+        (Fig. 18, pág. 186 do PDF). O cabeçalho tem só quatro campos de 16 bits (Fig. 19):
+    </p>
+    <pre class="log mb-3">+----------------+----------------+
+|  porta origem  | porta destino  |
++----------------+----------------+
+|    tamanho     |    checksum    |
++----------------+----------------+
+|              dados …            |</pre>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o UDP não entrega SDUs maiores que 65 467 bytes sobre IPv6, porque o cabeçalho IPv6 teria 60 bytes
+        (pág. 185 do PDF). O cabeçalho IPv6 tem <strong>40 bytes</strong>, e o campo de tamanho do IPv6 nem conta o próprio
+        cabeçalho: o limite é 65 535 − 8 = <strong>65 527 bytes</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc8200#section-3" target="_blank" rel="noopener noreferrer">RFC 8200</a>; com
+        "jumbogramas", da RFC 2675, pode ser mais). Com IPv4, a conta do livro está certa: 65 535 − 20 − 8 = 65 507 bytes.
+    </p>
+    <p>
+        As portas são divididas em três faixas: as <strong>privilegiadas</strong>, abaixo de 1024, que no Unix exigem
+        privilégios de administrador e são usadas por servidores conhecidos (DNS, NTP, RPC); as <strong>registradas</strong>,
+        de 1024 a 49151, para servidores, que deveriam registrá-las na IANA; e as <strong>efêmeras</strong>, de 49152 a 65535,
+        que o sistema sorteia para os clientes (pág. 186 do PDF).
+    </p>
+    <p>
+        O <strong>checksum</strong> é calculado sobre um <strong>pseudo-cabeçalho</strong> (endereços de origem e destino,
+        tamanho do pacote em 32 bits e três bytes zero seguidos do número 17, que identifica o UDP) e o segmento inteiro,
+        com o cabeçalho (pág. 186–187 do PDF). Com o pseudo-cabeçalho, um segmento entregue ao host errado é descartado. A
+        soma é a do checksum da Internet: palavras de 16 bits somadas em complemento de um.
+    </p>
+    <p>
+        Usam UDP as aplicações que precisam de pouco atraso ou que recuperam as perdas sozinhas: pedidos e respostas curtos,
+        como o DNS e o RPC (o NFS roda sobre RPC); jogos, que trocam mensagens pequenas o tempo todo; e voz e vídeo
+        interativos, que aceitam no máximo uns 200 ms de atraso (pág. 187 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O pseudo-cabeçalho que o livro descreve é o do IPv6 (RFC 2460, hoje RFC 8200). No IPv4
+        (<a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">RFC 768</a>), ele tem os dois
+        endereços de 32 bits, um byte zero, o número do protocolo e o tamanho do UDP. O algoritmo da soma está na
+        <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">RFC 1071</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="checksum-udp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="108|100|128" data-answer="0" data-explain="O campo de tamanho conta o cabeçalho de 8 bytes e os dados." data-hint="O cabeçalho UDP tem quatro campos de 2 bytes.">
+        <p class="fw-semibold mb-2">Um segmento UDP leva 100 bytes de dados. Quanto vale o campo de tamanho?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque precisa de pouco atraso e recupera as perdas sozinha|Porque o UDP é confiável|Porque o TCP não aceita mensagens pequenas" data-answer="0" data-explain="Esperar retransmissões custaria mais do que perder uma amostra de áudio (pág. 187 do PDF)." data-hint="O que importa mais numa chamada de voz: atraso ou confiabilidade?">
+        <p class="fw-semibold mb-2">Por que uma chamada de voz interativa costuma usar UDP?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>UDP = IP + portas + checksum. Sem confiabilidade, sem ordem, sem divisão de SDUs.</li>
+        <li>Cabeçalho de 8 bytes: portas, tamanho e checksum.</li>
+        <li>O checksum cobre pseudo-cabeçalho, cabeçalho e dados, mas não protege contra erros que se compensam.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap19" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> qual é o maior número de bytes de dados que cabe num único datagrama UDP sobre IPv4 (sem fragmentação no destino)?
+            <details><summary>Ver solução</summary><p class="mb-0">65 535 − 20 (IPv4) − 8 (UDP) = 65 507 bytes.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> um segmento UDP leva 100 bytes de dados. Quanto vale o campo Length?
+            <details><summary>Ver solução</summary><p class="mb-0">108: o Length conta o cabeçalho de 8 bytes e os dados.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> por que o checksum do UDP cobre também os endereços IP de origem e de destino?
+            <details><summary>Ver solução</summary><p class="mb-0">Para detectar um segmento entregue ao host errado: se um erro alterar o endereço de destino, o checksum calculado no destino não confere.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Dois trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. O checksum do UDP</h3>
+    <pre class="code-block"><code>import ipaddress, struct
+
+def soma_internet(dados):
+    """Checksum da Internet (RFC 1071): soma em complemento de um das palavras de 16 bits."""
+    if len(dados) % 2:
+        dados += b"\x00"                               # completa com um byte zero
+    total = 0
+    for i in range(0, len(dados), 2):
+        total += (dados[i] &lt;&lt; 8) | dados[i + 1]
+        total = (total &amp; 0xFFFF) + (total >> 16)       # o "vai um" volta para o começo
+    return total
+
+def checksum_udp(origem, destino, porta_o, porta_d, carga):
+    tamanho = 8 + len(carga)
+    pseudo = (ipaddress.ip_address(origem).packed + ipaddress.ip_address(destino).packed
+              + struct.pack("!I", tamanho) + b"\x00\x00\x00" + bytes([17]))   # pseudo-cabeçalho IPv6
+    cabecalho = struct.pack("!HHHH", porta_o, porta_d, tamanho, 0)           # checksum zerado no cálculo
+    return 0xFFFF - soma_internet(pseudo + cabecalho + carga)
+
+carga = b"OLA"
+ck = checksum_udp("2001:db8::1", "2001:db8::2", 1234, 5678, carga)
+print(f"checksum = 0x{ck:04x}")
+
+def confere(origem, destino, porta_o, porta_d, carga, ck):
+    tamanho = 8 + len(carga)
+    pseudo = (ipaddress.ip_address(origem).packed + ipaddress.ip_address(destino).packed
+              + struct.pack("!I", tamanho) + b"\x00\x00\x00" + bytes([17]))
+    segmento = struct.pack("!HHHH", porta_o, porta_d, tamanho, ck) + carga
+    return soma_internet(pseudo + segmento) == 0xFFFF  # tudo somado dá 0xFFFF se não houve erro
+
+print("intacto:      ", confere("2001:db8::1", "2001:db8::2", 1234, 5678, b"OLA", ck))
+print("um bit trocado:", confere("2001:db8::1", "2001:db8::2", 1234, 5678, b"OLB", ck))</code></pre>
+
+    <h3 class="h6 mt-4">2. Montando e lendo um cabeçalho UDP</h3>
+    <pre class="code-block"><code>import struct
+
+def monta_udp(porta_o, porta_d, dados, checksum=0):
+    """Cabeçalho de 8 bytes: porta de origem, porta de destino, tamanho e checksum (pág. 186 do PDF)."""
+    return struct.pack("!HHHH", porta_o, porta_d, 8 + len(dados), checksum) + dados
+
+def le_udp(seg):
+    porta_o, porta_d, tamanho, checksum = struct.unpack("!HHHH", seg[:8])
+    return porta_o, porta_d, tamanho, checksum, seg[8:tamanho]
+
+# o exemplo do livro: cliente na porta 1234, servidor na porta 5678 (pág. 185 do PDF)
+pedido = monta_udp(1234, 5678, b"pedido")
+print(pedido.hex(" "))
+print(le_udp(pedido))
+resposta = monta_udp(5678, 1234, b"resposta")       # a resposta troca as portas
+print(le_udp(resposta)[:3])
+
+# o maior conteúdo de um datagrama UDP (nota de rodapé da pág. 185 do PDF)
+print("IPv4:", 65535 - 20 - 8, "bytes   IPv6:", 65535 - 8, "bytes")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.11 "The User Datagram Protocol" (pág. 185–187 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 768 — <a href="https://www.rfc-editor.org/rfc/rfc768" target="_blank" rel="noopener noreferrer">User Datagram Protocol</a> e RFC 1071 — <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener noreferrer">Computing the Internet Checksum</a></li>
+        <li>IANA — <a href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml" target="_blank" rel="noopener noreferrer">Port Numbers</a> e <a href="https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml" target="_blank" rel="noopener noreferrer">TCP Option Kinds</a>, citadas pelo livro</li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/User_Datagram_Protocol" target="_blank" rel="noopener noreferrer">User Datagram Protocol</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-18/index.html" class="text-muted text-decoration-none">← Capítulo 18</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 19</span>
+            <a href="../capitulo-20/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 20 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap19.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

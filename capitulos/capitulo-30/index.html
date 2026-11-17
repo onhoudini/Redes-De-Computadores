@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 30 — Prática: construindo uma rede | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.4: endereços planos e hierárquicos, tabelas porta-endereço, pesos de enlace, roteamento pela origem e circuitos virtuais, e o que acontece logo depois de uma falha.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="30" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 30 · Parte 3: Prática · Seção 4.4</span>
+        <h1 class="display-5 mb-3">Prática: construindo uma rede</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você resolve os exercícios do livro sobre a camada de rede: vê tabelas aprendendo pela origem dos pacotes, escolhe os pesos da rede Abilene e acompanha, passo a passo, o que acontece logo depois que um enlace cai.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#enderecos">1. Planos e hierárquicos</a>
+                    <a class="nav-link" href="#portas">2. Tabelas porta-endereço</a>
+                    <a class="nav-link" href="#peso-negativo">3. Pesos negativos</a>
+                    <a class="nav-link" href="#abilene">4. Métricas na Abilene</a>
+                    <a class="nav-link" href="#caminhos">5. Caminhos desejados</a>
+                    <a class="nav-link" href="#transitorios">6. Transitórios</a>
+                    <a class="nav-link" href="#exercicios-cap30">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre a construção de uma rede</h2>
+    <p>
+        A seção 4.4 do livro traz questões abertas e de discussão sobre o Capítulo 2: endereçamento, tabelas de encaminhamento e
+        roteamento (pág. 286–292 do PDF). Cada atividade junta as questões de um mesmo tema e tem uma simulação com as topologias
+        das figuras do livro. O formato das atividades está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Comparar <strong>endereços planos e hierárquicos</strong> e acompanhar uma tabela porta-endereço sendo aprendida.</li>
+                <li>Escolher <strong>pesos de enlace</strong> para obter caminhos e reconhecer quando só <strong>circuitos virtuais</strong> resolvem.</li>
+                <li>Explicar os <strong>transitórios</strong> do vetor de distância e do estado de enlace depois de uma falha.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise a camada de rede do <a href="../capitulo-02/index.html">Capítulo 2</a>: tabelas de encaminhamento, datagramas e
+                circuitos virtuais, vetor de distância e estado de enlace. O capítulo cobre a seção 4.4 do livro (pág. 286–292 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Endereços -->
+<section id="enderecos" class="chapter-section" data-conceito="enderecos" data-titulo="Planos e hierárquicos">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">Endereços planos e hierárquicos</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Num endereçamento <strong>plano</strong>, cada nó tem um endereço único que não diz nada sobre onde ele está: a
+        tabela precisa de uma entrada por destino, e a busca é por igualdade. No <strong>hierárquico</strong>, os bits mais
+        significativos identificam um bloco da rede (o provedor, depois o campus) e os menos significativos, o host; a busca
+        é pelo prefixo mais longo. Veja as <a href="../capitulo-02/index.html#tabelas">tabelas de encaminhamento no Capítulo 2</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.4.2-Q1">No dia a dia, você também usa espaços de endereços hierárquicos e planos. Dê exemplos dos dois tipos
+            e discuta as vantagens de cada um no seu contexto (pág. 286 do PDF).</li>
+        <li data-livro="4.4.3-Q4">Quais são as vantagens e as desvantagens dos endereços planos em relação aos hierárquicos (pág. 290 do PDF)?</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        As seções 4.4.1 (questões de múltipla escolha) e as de mesmo tipo dos capítulos seguintes estão vazias no PDF: no site
+        original do livro, elas eram exercícios interativos do INGInious, que não fazem parte do texto.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="classifica-enderecos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-2">
+            <li><strong>Hierárquicos:</strong> o endereço postal (país, cidade, rua, número), o telefone com código do país e DDD,
+                o CEP. O carteiro de outro país só olha o país; o centro de distribuição só olha a cidade. Ninguém precisa conhecer
+                todas as casas.</li>
+            <li><strong>Planos:</strong> o número de série de um aparelho e o endereço MAC de uma placa de rede. Eles são únicos e
+                valem em qualquer lugar, mas não dizem onde o dono está.</li>
+        </ul>
+        <p class="mb-1">O livro resume as diferenças na pág. 39 do PDF:</p>
+        <ul class="mb-0">
+            <li><strong>Plano:</strong> o endereço pode vir gravado de fábrica, o nó funciona assim que é ligado, e um host móvel
+                continua com o mesmo endereço em qualquer rede. A busca é por igualdade, simples de fazer em hardware. O problema é
+                o tamanho: a tabela cresce linearmente com o número de hosts.</li>
+            <li><strong>Hierárquico:</strong> um prefixo representa milhares de hosts, e as tabelas ficam pequenas. Em troca, o
+                endereço depende de onde o host está ligado: quem muda de lugar muda de endereço, e a busca pelo prefixo mais longo
+                é mais complexa que a busca exata.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="A tabela cresce com o número de hosts|O host muda de endereço ao mudar de rede|A busca na tabela exige o prefixo mais longo" data-answer="0" data-explain="Com endereços planos, cada destino precisa de uma entrada própria em cada tabela (pág. 39 do PDF)." data-hint="Pense no que acontece numa rede com milhões de hosts.">
+        <p class="fw-semibold mb-2">Qual é a maior desvantagem dos endereços planos?</p>
+    </div>
+</section>
+
+<!-- 2. Tabelas porta-endereço -->
+<section id="portas" class="chapter-section" data-conceito="portas" data-titulo="Tabelas porta-endereço">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Tabelas porta-endereço</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Numa rede com endereços planos, um nó pode montar a tabela sozinho olhando os pacotes (pág. 36–37 do PDF). Ao receber
+        um pacote por uma porta, ele <strong>aprende</strong> que a origem fica do lado dessa porta. Se já conhece o destino,
+        encaminha pela porta da tabela; senão, manda uma cópia por <strong>todas as outras portas</strong>. O livro avisa que a
+        técnica só funciona bem numa árvore: com um ciclo, as cópias não param mais. Veja as
+        <a href="../capitulo-02/index.html#tabelas">tabelas de encaminhamento no Capítulo 2</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.4.2-Q2">A rede da figura usa encaminhamento por porta com endereços planos. Ela liga e todos os hosts
+            iniciam, um depois do outro. Explique, a cada passo, como os pacotes são encaminhados e como mudam as tabelas dos
+            nós: o host C manda um pacote para B; depois, A manda um pacote para C; por fim, B manda um pacote para A (pág. 286–287 do PDF).</li>
+        <li data-livro="4.4.2-Q3">A mesma pergunta, com a rede modificada: há também um enlace entre R1 e R3 (pág. 287 do PDF).</li>
+        <li data-livro="4.4.3-Q1">A rede (em árvore) funciona há horas e todos os hosts já trocaram pacotes. Qual é o conteúdo das
+            tabelas? Nesse momento, um enlace novo é acrescentado entre R1 e R3. O que acontece com o encaminhamento (pág. 290 do PDF)?</li>
+        <li data-livro="4.4.3-Q2">O que acontece se o host A sai do enlace com R1 e passa a se ligar a R3? Como redes com
+            encaminhamento por porta deveriam tratar hosts móveis (pág. 290 do PDF)?</li>
+        <li data-livro="4.4.3-Q3">Alguns hosts precisam de dois enlaces (<em>multihoming</em>): A se liga a R1 e a R3. A rede
+            funcionaria com tabelas por porta se (a) A usasse o mesmo endereço plano nos dois enlaces? (b) A usasse um endereço
+            plano diferente em cada enlace (pág. 290 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="aprende-portas"></div>
+    <p class="small text-muted">Topologias das figuras das págs. 287 e 290 do PDF. A inundação para em 30 transmissões para não travar a página.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q2, C → B:</strong> R3 aprende C pela porta de C e, sem saber de B, manda cópias para B e para R2. R2
+                aprende C (porta de R3) e repassa a R1, que aprende C (porta de R2) e entrega uma cópia a A, que a descarta. São 5
+                transmissões, e B recebe uma cópia.</li>
+            <li><strong>A → C:</strong> R1 aprende A e já sabe que C está do lado de R2; R2 e R3 aprendem A e encaminham sem
+                inundar. <strong>B → A:</strong> R3 aprende B e encaminha por R2; R2 e R1 aprendem B. No fim, as três tabelas têm
+                A, B e C, e todo pacote segue um único caminho.</li>
+            <li><strong>Q3 (com R1–R3):</strong> o primeiro pacote de C para B é inundado, e as cópias de R1, R2 e R3 voltam umas
+                às outras pelo ciclo. Cada cópia gera novas cópias, que circulam para sempre, e as tabelas de R1 e R2 trocam de
+                porta para C a cada volta. A técnica só funciona em árvores (pág. 37 do PDF).</li>
+            <li><strong>4.4.3 Q1:</strong> com as tabelas cheias, o enlace novo não muda nada de imediato, porque todo destino é
+                conhecido e ninguém inunda. O problema aparece no primeiro pacote para um destino desconhecido (ou quando uma
+                entrada expira): a inundação entra no ciclo e não termina.</li>
+            <li><strong>4.4.3 Q2:</strong> as tabelas continuam mandando os pacotes para A pelo lado de R1, e eles se perdem no
+                enlace que não existe mais (teste o botão "Mover A para R3" e depois envie B → A). A rede só se corrige quando A
+                transmite: os nós reaprendem pela origem dos pacotes de A. Por isso as entradas costumam expirar sozinhas depois de
+                algum tempo, e um host que se move deve mandar um pacote logo depois de se reconectar.</li>
+            <li><strong>4.4.3 Q3:</strong> R1–R2–R3 continuam formando um caminho sem ciclo entre roteadores, porque um host não
+                repassa pacotes de outros. (a) Com o mesmo endereço nos dois enlaces, as tabelas apontam para o enlace que A usou por
+                último, e os pacotes chegam, mas a entrada muda de lugar sempre que A troca de enlace. (b) Com endereços diferentes,
+                cada um é aprendido de forma independente; os outros hosts precisam saber qual dos dois usar, e o endereço do enlace
+                que falhar fica inalcançável.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Pela porta de onde o pacote veio, para a origem|Pela porta de onde o pacote veio, para o destino|Por todas as portas, para a origem" data-answer="0" data-explain="O nó aprende que a origem do pacote é alcançável pela porta de chegada (pág. 36 do PDF)." data-hint="O nó usa o endereço de origem para aprender.">
+        <p class="fw-semibold mb-2">O que um nó aprende quando recebe um pacote?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Só quando há um ciclo na topologia|Quando o destino não está na tabela|Sempre que um pacote chega" data-answer="1" data-explain="Sem entrada para o destino, o nó manda cópias por todas as portas, menos a de chegada (pág. 36 do PDF)." data-hint="O que o nó faz quando não sabe para onde mandar?">
+        <p class="fw-semibold mb-2">Quando um nó inunda um pacote?</p>
+    </div>
+</section>
+
+<!-- 3. Peso negativo -->
+<section id="peso-negativo" class="chapter-section" data-conceito="peso-negativo" data-titulo="Pesos negativos">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Pesos negativos</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No vetor de distância, cada roteador anuncia aos vizinhos a distância que conhece até cada destino, e cada um escolhe
+        o vizinho com o menor "peso do enlace + distância anunciada". Com pesos positivos, voltas no caminho só aumentam o
+        custo, e o processo converge. Veja o <a href="../capitulo-02/index.html#vetor-distancia">vetor de distância no Capítulo 2</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.4.2-Q4">
+        Os protocolos de roteamento usam só pesos positivos. O que aconteceria com um protocolo de vetor de distância nesta rede,
+        que tem enlaces de peso negativo: R1–R2 com peso 1, R1–R3 com peso −1 e R2–R3 com peso −3 (pág. 287 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="peso-negativo"></div>
+    <p class="small text-muted">Vetor de distância síncrono, sem split horizon: em cada rodada, todos recalculam com os vetores da rodada anterior.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2">
+            O protocolo nunca converge. Na rodada 1, R2 e R3 aprendem as rotas diretas até R1 (1 e −1). Na rodada 2, R2 descobre
+            que ir por R3 custa −3 + (−1) = −4, e R3 descobre que ir por R2 custa −3 + 1 = −2. A partir daí, cada um "melhora" a
+            rota usando o anúncio do outro: R2 passa a −5, −10, −11…; R3, a −7, −8, −13… As distâncias descem sem limite.
+        </p>
+        <p class="mb-0">
+            O motivo é o ciclo de custo negativo: o próprio enlace R2–R3, ida e volta, custa −6, e cada volta a mais reduz o custo.
+            Os pacotes para R1 ficam presos entre R2 e R3. Com pesos positivos, uma volta sempre aumenta o custo e nunca é escolhida.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Porque o protocolo converge mais devagar|Porque um ciclo de custo negativo faz as distâncias caírem sem parar|Porque os roteadores não aceitam números negativos" data-answer="1" data-explain="Cada volta num ciclo de custo negativo reduz o custo, então sempre existe uma rota &quot;melhor&quot;, e o cálculo não termina." data-hint="O que acontece com o custo a cada volta no ciclo?">
+        <p class="fw-semibold mb-2">Por que os protocolos de roteamento não aceitam pesos negativos?</p>
+    </div>
+</section>
+
+<!-- 4. Abilene -->
+<section id="abilene" class="chapter-section" data-conceito="abilene" data-titulo="Métricas na Abilene">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Configurando as métricas da rede Abilene</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No estado de enlace, todo roteador conhece a topologia e os pesos e calcula, com Dijkstra, o caminho de menor custo até
+        cada destino. Quem projeta a rede escolhe os pesos para decidir por onde o tráfego passa. Veja o
+        <a href="../capitulo-02/index.html#estado-enlace">estado de enlace no Capítulo 2</a> e o OSPF no
+        <a href="../capitulo-24/index.html">Capítulo 24</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.4.2-Q5">
+        A rede Abilene interligava a maior parte dos laboratórios de pesquisa e universidades dos EUA; a Fig. 4 mostra a topologia
+        de 2009 (pág. 287–288 do PDF). Com todos os pesos iguais a 1:
+    </p>
+    <ol class="mb-2" type="a">
+        <li>quais são os caminhos de um pacote enviado pelo roteador de Los Angeles até o de New York? E até o de Washington?</li>
+        <li>dá para configurar as métricas de modo que os pacotes de Los Angeles para New York e para Washington não sigam o mesmo caminho?</li>
+        <li>dá para configurar os pesos de modo que os pacotes de Los Angeles para New York sigam um caminho e os de New York para
+            Los Angeles sigam um caminho completamente diferente?</li>
+        <li>os roteadores de Denver e Kansas City trocam muitos pacotes. Dá para configurar as métricas de modo que o enlace entre
+            eles não carregue nenhum pacote enviado por outro roteador?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="abilene-metricas"></div>
+    <p class="small text-muted">Topologia transcrita da Fig. 4 (pág. 288 do PDF); as posições no desenho são aproximadas.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>(a)</strong> LA → Houston → Atlanta → Washington (3 saltos) e LA → Houston → Atlanta → Washington → New York
+                (4 saltos). Os caminhos são únicos, e o de New York contém o de Washington.</li>
+            <li><strong>(b)</strong> Sim. Com peso 10 no enlace Washington–New York, LA → New York passa a ir por Indianapolis e
+                Chicago (custo 5; há dois caminhos empatados, por Atlanta ou por Kansas City), enquanto LA → Washington continua por
+                Houston e Atlanta. Para desfazer o empate, aumente também Houston–Kansas City.</li>
+            <li><strong>(c)</strong> Sim, se os pesos puderem ser diferentes em cada sentido, como no OSPF. Com peso 10 em New
+                York → Washington e em Houston → Los Angeles, LA → NY segue LA, Houston, Atlanta, Washington, NY, e NY → LA segue NY,
+                Chicago, Indianapolis, Kansas City, Denver, Sunnyvale, LA: nenhum roteador intermediário em comum. Com o mesmo peso
+                nos dois sentidos, os dois sentidos sempre usam o mesmo caminho.</li>
+            <li><strong>(d)</strong> Sim, mas não basta mexer no enlace Denver–Kansas City. Com todos os outros pesos em 1, o peso
+                w precisaria ser menor que 4 (o desvio Denver → Sunnyvale → LA → Houston → Kansas City) para Denver e Kansas City o
+                usarem, e maior que 4 para Denver → Indianapolis não passar por ele: impossível. Uma solução: Denver–Seattle = 2,
+                Denver–Kansas City = 5 e Houston–Kansas City = 3, os outros em 1. Assim, só os pacotes entre Denver e Kansas City
+                usam o enlace (confira na simulação).</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Usar pesos diferentes em cada sentido do enlace|Usar pesos negativos|Usar o mesmo peso em todos os enlaces" data-answer="0" data-explain="Com o mesmo peso nos dois sentidos, o caminho de menor custo de A para B é o inverso do de B para A; pesos por sentido permitem caminhos assimétricos." data-hint="O que faria o custo de ida diferir do de volta?">
+        <p class="fw-semibold mb-2">O que é preciso para que a ida e a volta entre dois roteadores sigam caminhos diferentes?</p>
+    </div>
+</section>
+
+<!-- 5. Caminhos desejados -->
+<section id="caminhos" class="chapter-section" data-conceito="caminhos" data-titulo="Caminhos desejados">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Pesos, roteamento pela origem e circuitos virtuais</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Numa rede de datagramas, cada roteador escolhe a saída só pelo <strong>destino</strong> do pacote: todos os pacotes para
+        R1 que passam por R3 saem pela mesma porta. Nos <strong>circuitos virtuais</strong>, a tabela é indexada pelo rótulo do
+        circuito, e dois fluxos para o mesmo destino podem sair por portas diferentes. No <strong>roteamento pela origem</strong>,
+        o próprio pacote leva a lista de nós. Veja <a href="../capitulo-02/index.html#organizacao">datagrama e circuito virtual no Capítulo 2</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="6">
+        <li data-livro="4.4.2-Q6">Na rede de cinco nós, dá para configurar as métricas de modo que os pacotes de R5 para R1 usem o
+            enlace R3 → R1, enquanto os de R3 usem R3 → R2 e R2 → R1 (pág. 288 do PDF)?</li>
+        <li data-livro="4.4.2-Q7">Na mesma rede, dá para configurar os pesos de modo que os pacotes de R5 sigam R5 → R3 → R1 e os de
+            R4 sigam R4 → R2 → R3 → R1 (pág. 288 do PDF)?</li>
+        <li data-livro="4.4.2-Q8">Na rede de quatro nós, com roteamento pela origem, quais são os caminhos possíveis de R1 a R4 (pág. 288 do PDF)?</li>
+        <li data-livro="4.4.2-Q9">O operador quer os caminhos R3 → R2 → R4 → R5 e R1 → R2 → R5. É possível? Quais seriam as tabelas?
+            E com circuitos virtuais (pág. 288–289 do PDF)?</li>
+        <li data-livro="4.4.2-Q10">Na rede com o enlace R3–R4, o operador quer R1 → R2 → R4 e R3 → R2 → R5 → R4. Esses caminhos são
+            possíveis com estado de enlace ou vetor de distância? Com que pesos? E com circuitos virtuais (pág. 289 do PDF)?</li>
+        <li data-livro="4.4.2-Q11">Na rede com o enlace R1–R5, o operador quer R1 → R5 → R4 e R3 → R2 → R4. São possíveis com estado
+            de enlace ou vetor de distância? Com que pesos (pág. 289 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="caminhos-desejados"></div>
+    <p class="small text-muted">Topologias transcritas das figuras das págs. 288–289 do PDF.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2">
+            Com encaminhamento por destino, os caminhos de menor custo têm uma propriedade: se o caminho de R4 para R1 passa por
+            R3, então o trecho de R3 até R1 é o caminho do próprio R3. Basta procurar um roteador onde os caminhos pedidos exigem
+            duas saídas para o mesmo destino.
+        </p>
+        <ul class="mb-0">
+            <li><strong>Q6, impossível:</strong> em R3, os pacotes para R1 teriam de sair por R1 (os de R5) e por R2 (os do próprio R3).</li>
+            <li><strong>Q7, possível:</strong> R2–R1 = 10, R4–R5 = 2 e os outros em 1. R5 → R3 → R1 custa 2; R4 → R2 → R3 → R1 custa 3,
+                contra 4 por R5 e 11 direto.</li>
+            <li><strong>Q8:</strong> três caminhos sem repetir nós: R1 → R4, R1 → R3 → R4 e R1 → R2 → R3 → R4. Com roteamento pela
+                origem, a origem escolhe qualquer um.</li>
+            <li><strong>Q9 e Q10, impossíveis com tabelas por destino:</strong> em R2, os pacotes para R5 (Q9) ou para R4 (Q10) teriam
+                de sair por duas portas. Com circuitos virtuais, cada fluxo tem o seu rótulo, e R2 trata os dois de forma diferente:
+                os dois pares de caminhos funcionam.</li>
+            <li><strong>Q11, possível:</strong> R1–R2 = 3 e os outros em 1. R1 → R5 → R4 custa 2 (contra 3 por R3–R2 e 4 por R2), e
+                R3 → R2 → R4 custa 2 (contra 3 por R1–R5). Estado de enlace e vetor de distância calculam os mesmos caminhos de menor
+                custo, então a resposta vale para os dois.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Três|Duas|Quatro" data-answer="0" data-explain="R1 → R4, R1 → R3 → R4 e R1 → R2 → R3 → R4: os caminhos sem repetir nós." data-hint="Liste os caminhos que não passam duas vezes pelo mesmo roteador.">
+        <p class="fw-semibold mb-2">Na Q8, com roteamento pela origem, quantos caminhos sem repetição levam de R1 a R4?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque o roteador escolhe a saída só pelo destino|Porque os pesos teriam de ser negativos|Porque a rede não tem caminhos suficientes" data-answer="0" data-explain="Com tabelas por destino, um roteador tem uma única saída para cada destino; dois fluxos para o mesmo destino não podem se separar nele." data-hint="O que a tabela de um roteador usa como chave?">
+        <p class="fw-semibold mb-2">Por que alguns conjuntos de caminhos só funcionam com circuitos virtuais?</p>
+    </div>
+</section>
+
+<!-- 6. Transitórios -->
+<section id="transitorios" class="chapter-section" data-conceito="transitorios" data-titulo="Transitórios">
+    <span class="kicker">Atividade 6</span>
+    <h2 class="section-title">O que acontece logo depois de uma falha</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Quando um enlace cai, os roteadores não mudam de tabela todos ao mesmo tempo. No vetor de distância, a notícia anda de
+        vizinho em vizinho; com <strong>split horizon</strong>, um roteador não anuncia a um vizinho as rotas que aprendeu por
+        ele. No estado de enlace, o LSP novo é inundado e cada roteador recalcula quando o recebe. Enquanto isso, pacotes podem
+        se perder ou dar voltas. Veja o <a href="../capitulo-02/index.html#vetor-distancia">vetor de distância</a> e o
+        <a href="../capitulo-02/index.html#estado-enlace">estado de enlace</a> no Capítulo 2.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        A rede tem os enlaces A–B (1), B–C (1), C–D (1), B–D (3), A–E (8) e D–E (1); a pág. 291 do PDF traz as tabelas
+        convergidas. O livro explica que o vetor de distância tem dois modos: <em>atualizações periódicas</em> (cada roteador
+        anuncia o vetor, por exemplo, a cada trinta segundos) e <em>atualizações disparadas</em> (o roteador anuncia assim que a
+        tabela muda).
+    </p>
+    <ol class="mb-2" start="5">
+        <li data-livro="4.4.3-Q5">Com split horizon e atualizações periódicas, o enlace B–C falha. B e C atualizam as tabelas, mas só
+            anunciam no fim do período. Escolha uma ordem para os anúncios, mostre o vetor enviado a cada vizinho e atualize a tabela.
+            Quantos períodos até a rede convergir? Depois, com atualizações disparadas, B anuncia na hora a A e D, que processam o
+            vetor, e assim por diante: quantas mensagens até a rede convergir (pág. 290–291 do PDF)?</li>
+        <li data-livro="4.4.3-Q6">Agora com estado de enlace. B é o primeiro a detectar a falha: B não alcança mais C, D e E, e C
+            não alcança mais B e A. B inunda o seu LSP, e cada roteador primeiro repassa o LSP e depois recalcula: primeiro B, depois
+            D, A, C e, por fim, E. Depois de cada atualização, quais pares de roteadores conseguem trocar pacotes (pág. 291 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="microlacos"></div>
+    <p class="small text-muted">Topologia e tabela da pág. 291 do PDF. No modo de vetor de distância, B e C anunciam primeiro, e todo roteador cuja tabela muda anuncia em seguida, por ordem de chegada.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Estado de enlace (Q6):</strong> antes de qualquer recálculo, só 4 dos 10 pares se comunicam nos dois
+                sentidos (A–B, C–D, C–E e D–E). Depois de B, continuam 4: B já manda por D, mas D, C e E ainda mandam para A e B pelo
+                enlace que caiu. Depois de D, são 8. A recalcula sem mudar nada (as rotas dele continuam via B). Só quando C recalcula,
+                e passa a mandar para A e B por D, todos os 10 pares voltam. Nesta ordem não há laços, só pacotes perdidos no enlace em
+                falha.</li>
+            <li><strong>Vetor de distância, atualizações disparadas (Q5):</strong> na ordem da simulação (B e C anunciam primeiro;
+                quem muda anuncia em seguida), a rede converge com 20 mensagens, cada vetor mandado a um vizinho contando como uma.
+                Outra ordem dá outro número; o importante é contar só até nenhuma tabela mudar.</li>
+            <li><strong>Atualizações periódicas:</strong> com os anúncios na ordem A, B, C, D, E em cada período, as tabelas mudam nos
+                dois primeiros períodos, e no terceiro já nada muda: a rede converge em dois períodos, um minuto inteiro com períodos de
+                30 s. É por isso que as atualizações disparadas existem.</li>
+            <li>Nos dois protocolos, o estado final é o mesmo: A alcança C por B e D (custo 5), e C alcança A por D e B.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Só quando o último roteador recalcula|Assim que B, que detectou a falha, recalcula|Nunca: o estado de enlace não perde pacotes" data-answer="0" data-explain="Enquanto houver roteador com a tabela antiga, ele pode mandar pacotes pelo enlace que caiu; na simulação, só depois de C tudo volta." data-hint="Veja quantos pares funcionam a cada passo.">
+        <p class="fw-semibold mb-2">No estado de enlace, quando todos os pares voltam a se comunicar?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="O roteador anuncia assim que a tabela muda|O roteador anuncia só a cada período fixo|O roteador nunca anuncia rotas aprendidas de um vizinho" data-answer="0" data-explain="Com atualizações disparadas, a notícia da falha anda na velocidade das mensagens, sem esperar o fim do período (pág. 291 do PDF)." data-hint="&quot;Disparada&quot; por quê?">
+        <p class="fw-semibold mb-2">O que caracteriza as atualizações disparadas?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap30" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Na rede em árvore da Q2, depois dos envios C → B, A → C e B → A, quantas entradas tem a tabela de R2, e para que vizinho aponta cada uma?
+            <details><summary>Ver solução</summary><p class="mb-0">Três: A → R1, B → R3 e C → R3. R2 aprendeu C no primeiro envio, A no segundo e B no terceiro.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Com todos os pesos iguais a 1 na rede Abilene, qual é o caminho de Sunnyvale até Washington?
+            <details><summary>Ver solução</summary><p class="mb-0">Sunnyvale → Los Angeles → Houston → Atlanta → Washington, com 4 saltos e sem empate. Confira na simulação da Atividade 4 ou no bloco 2.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Numa rede que aprende pela origem, por que dez pacotes para um destino Z que não existe são todos inundados pela rede inteira?
+            <details><summary>Ver solução</summary><p class="mb-0">Os nós só aprendem um endereço quando recebem um pacote vindo dele. Como Z não existe, nunca manda nada, nenhuma tabela ganha uma entrada para Z, e todo pacote para Z é inundado (pág. 37 do PDF).</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Na rede da Q4, troque o peso de R2–R3 para +3 e mantenha R1–R2 = 1 e R1–R3 = −1. O vetor de distância converge?
+            <details><summary>Ver solução</summary><p class="mb-0">Não. O enlace R1–R3, ida e volta, já forma um ciclo de custo −2. A distância de R1 até R2 vale 1, 1, −1, −1, −3… nas rodadas 1 a 5, e a de R3 até R2, 3, 0, 0, −2, −2…: as duas caem sem limite.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Uma tabela porta-endereço aprendendo</h3>
+    <pre class="code-block"><code># Tabelas porta-endereço (pág. 36-37): aprende pela origem, inunda quando não conhece o destino.
+VIZ = {"A": ["R1"], "B": ["R3"], "C": ["R3"],
+       "R1": ["A", "R2"], "R2": ["R1", "R3"], "R3": ["R2", "B", "C"]}
+HOSTS = {"A", "B", "C"}
+tabela = {r: {} for r in VIZ if r not in HOSTS}
+
+def envia(origem, destino, limite=30):
+    fila = [(VIZ[origem][0], origem)]          # (quem recebe, de onde veio)
+    transmissoes = 0
+    while fila and transmissoes &lt; limite:
+        no, de = fila.pop(0)
+        transmissoes += 1
+        if no in HOSTS:
+            if no == destino:
+                print(f"  {destino} recebeu uma cópia (vinda de {de})")
+            continue                             # um host não repassa pacotes
+        tabela[no][origem] = de                  # aprende: a origem está do lado de 'de'
+        if destino in tabela[no]:
+            fila.append((tabela[no][destino], no))
+        else:
+            fila += [(v, no) for v in VIZ[no] if v != de]   # inunda
+    print(f"{origem} -&gt; {destino}: {transmissoes} transmissões" + (" (interrompido)" if fila else ""))
+
+for o, d in [("C", "B"), ("A", "C"), ("B", "A")]:
+    envia(o, d)
+for r in sorted(tabela):
+    print(r, tabela[r])</code></pre>
+    <h3 class="h6 mt-4">2. Dijkstra na rede Abilene</h3>
+    <pre class="code-block"><code>import heapq
+
+# A rede Abilene (Fig. 4, pág. 288). Mude os pesos: um enlace pode ter peso diferente em cada sentido.
+ENLACES = [("Seattle", "Sunnyvale"), ("Seattle", "Denver"), ("Sunnyvale", "Denver"), ("Sunnyvale", "Los Angeles"),
+           ("Los Angeles", "Houston"), ("Denver", "Kansas City"), ("Kansas City", "Houston"),
+           ("Kansas City", "Indianapolis"), ("Houston", "Atlanta"), ("Indianapolis", "Chicago"),
+           ("Indianapolis", "Atlanta"), ("Chicago", "New York"), ("New York", "Washington"), ("Washington", "Atlanta")]
+PESO = {}                                  # ex.: PESO[("New York", "Washington")] = 10 (só nesse sentido)
+
+def peso(a, b):
+    return PESO.get((a, b), 1)
+
+grafo = {}
+for a, b in ENLACES:
+    grafo.setdefault(a, {})[b] = peso(a, b)
+    grafo.setdefault(b, {})[a] = peso(b, a)
+
+def dijkstra(origem):
+    dist, ant = {origem: 0}, {}
+    fila = [(0, origem)]
+    while fila:
+        d, u = heapq.heappop(fila)
+        if d &gt; dist[u]:
+            continue
+        for v, w in grafo[u].items():
+            if d + w &lt; dist.get(v, float("inf")):
+                dist[v], ant[v] = d + w, u
+                heapq.heappush(fila, (d + w, v))
+    return dist, ant
+
+def caminho(origem, destino):
+    dist, ant = dijkstra(origem)
+    c = [destino]
+    while c[-1] != origem:
+        c.append(ant[c[-1]])
+    return dist[destino], c[::-1]
+
+for destino in ["New York", "Washington"]:
+    print("Los Angeles -&gt;", destino, caminho("Los Angeles", destino))
+print("New York -&gt; Los Angeles", caminho("New York", "Los Angeles"))
+
+# quem usa o enlace Denver-Kansas City?
+usam = []
+for o in grafo:
+    for t in grafo:
+        if o != t:
+            c = caminho(o, t)[1]
+            if any({c[i], c[i + 1]} == {"Denver", "Kansas City"} for i in range(len(c) - 1)):
+                usam.append((o, t))
+print(len(usam), "pares usam Denver-Kansas City:", usam[:6], "...")</code></pre>
+    <h3 class="h6 mt-4">3. Transitórios no estado de enlace</h3>
+    <pre class="code-block"><code>import heapq
+
+# A rede de 4.4.3 Q5 (pág. 291): o enlace B-C falha.
+ENLACES = {("A", "B"): 1, ("B", "C"): 1, ("C", "D"): 1, ("B", "D"): 3, ("A", "E"): 8, ("D", "E"): 1}
+NOS = "ABCDE"
+
+def proximos_saltos(enlaces):
+    g = {n: {} for n in NOS}
+    for (a, b), w in enlaces.items():
+        g[a][b] = g[b][a] = w
+    tabela = {}
+    for o in NOS:
+        dist, primeiro = {o: 0}, {}
+        fila = [(0, o, None)]
+        while fila:
+            d, u, p = heapq.heappop(fila)
+            if d &gt; dist.get(u, float("inf")) or (u in primeiro and u != o):
+                continue
+            if u != o:
+                primeiro[u] = p
+            for v, w in g[u].items():
+                if d + w &lt; dist.get(v, float("inf")):
+                    dist[v] = d + w
+                    heapq.heappush(fila, (d + w, v, v if u == o else p))
+        tabela[o] = primeiro
+    return tabela
+
+antes = proximos_saltos(ENLACES)
+vivos = {k: w for k, w in ENLACES.items() if k != ("B", "C")}
+depois = proximos_saltos(vivos)
+
+def entrega(prox, s, t):
+    no, vistos = s, set()
+    while no != t:
+        if no in vistos:
+            return "laço"
+        vistos.add(no)
+        nx = prox[no][t]
+        if (no, nx) not in vivos and (nx, no) not in vivos:
+            return "perdido"
+        no = nx
+    return "ok"
+
+prox = {r: dict(antes[r]) for r in NOS}
+for quem in [None, "B", "D", "A", "C", "E"]:
+    if quem:
+        prox[quem] = dict(depois[quem])          # este roteador recalculou
+    pares = [s + t for s in NOS for t in NOS if s &lt; t
+             and entrega(prox, s, t) == "ok" and entrega(prox, t, s) == "ok"]
+    print(f"depois de {quem or 'ninguém'}: {len(pares)} pares", pares)</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.4 "Building a network" (pág. 286–292 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 1058 — <a href="https://www.rfc-editor.org/rfc/rfc1058" target="_blank" rel="noopener noreferrer">Routing Information Protocol</a> (vetor de distância, split horizon e atualizações disparadas)</li>
+        <li>RFC 2328 — <a href="https://www.rfc-editor.org/rfc/rfc2328" target="_blank" rel="noopener noreferrer">OSPF Version 2</a> (o custo é configurado em cada interface de saída, por isso pode diferir em cada sentido)</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Abilene_Network" target="_blank" rel="noopener noreferrer">Abilene Network</a> e <a href="https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm" target="_blank" rel="noopener noreferrer">Bellman–Ford algorithm</a> (ciclos de custo negativo)</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-29/index.html" class="text-muted text-decoration-none">← Capítulo 29</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 30</span>
+            <a href="../capitulo-31/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 31 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap30.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

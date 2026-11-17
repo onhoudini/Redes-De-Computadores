@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 32 — Prática: compartilhamento de recursos | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.6: o diagrama espaço-tempo de um cabo, ALOHA, CSMA, CSMA/CD, recuo exponencial, justiça max-min, filas, janelas e o DECBIT.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="32" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 32 · Parte 3: Prática · Seção 4.6</span>
+        <h1 class="display-5 mb-3">Prática: compartilhamento de recursos</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você desenha quadros num cabo compartilhado como o livro faz, com a posição na horizontal e o tempo descendo, descobre quem colide e calcula alocações justas e filas em roteadores.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#geometria">1. O diagrama espaço-tempo</a>
+                    <a class="nav-link" href="#aloha">2. ALOHA no cabo</a>
+                    <a class="nav-link" href="#csma">3. CSMA e CSMA/CD</a>
+                    <a class="nav-link" href="#recuo">4. Recuo exponencial</a>
+                    <a class="nav-link" href="#maxmin">5. Justiça max-min</a>
+                    <a class="nav-link" href="#filas">6. Filas, RTT e janelas</a>
+                    <a class="nav-link" href="#discussao">7. Questões de discussão</a>
+                    <a class="nav-link" href="#exercicios-cap32">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre compartilhamento de recursos</h2>
+    <p>
+        A seção 4.6 do livro tem exercícios de acesso ao meio, com diagramas espaço-tempo, e de justiça e controle de congestionamento
+        (pág. 294–312 do PDF). Os instantes de cada pedido de transmissão foram lidos das figuras do livro. O formato das atividades está
+        explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Desenhar quadros num <strong>diagrama espaço-tempo</strong> e achar as colisões do ALOHA, do CSMA e do CSMA/CD.</li>
+                <li>Calcular o <strong>recuo exponencial</strong>, a <strong>alocação max-min</strong> e o efeito de filas e janelas no tempo de ida e volta.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o <a href="../capitulo-06/index.html">Capítulo 6</a>: ALOHA, CSMA/CD, justiça max-min e controle de congestionamento. O capítulo cobre a seção 4.6 do livro (pág. 294–312 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Geometria -->
+<section id="geometria" class="chapter-section" data-conceito="geometria" data-titulo="O diagrama espaço-tempo">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">O diagrama espaço-tempo de um cabo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Num meio compartilhado, todos os hosts escutam o mesmo cabo, e dois quadros que se sobrepõem num ponto do cabo colidem
+        nesse ponto. Veja o <a href="../capitulo-06/index.html#aloha">ALOHA</a> e o <a href="../capitulo-06/index.html#csma-cd">CSMA/CD</a> no Capítulo 6.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p>
+        Para entender os protocolos de acesso ao meio, o livro usa uma representação geométrica (pág. 294–297 do PDF): a posição no
+        cabo na horizontal e o tempo descendo. O sinal elétrico anda 5 µs por quilômetro. Um quadro de 2000 bits enviado a 100 Mbps
+        por A, numa ponta de um cabo de 1 km, leva 20 µs para sair de A e chega à outra ponta 5 µs depois: no desenho, vira um
+        paralelogramo inclinado. Se quem transmite está no meio do cabo, como C, o sinal se espalha para os dois lados. E, se dois
+        hosts transmitem quase ao mesmo tempo, os paralelogramos se cruzam: é a colisão.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="mac-cabo" data-cenarios="g1,g2,g3" data-desafio="geometria"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            O primeiro bit sai de A em 0 e chega a B em 5 µs; o último sai de A em 20 µs (2000 bits / 100 bits por µs) e chega a B em
+            25 µs. A altura do paralelogramo é o tempo de transmissão; a inclinação, o atraso de propagação. Para C, no meio do cabo de
+            1 km, o sinal leva 2,5 µs até cada ponta, e o quadro de 100 bits ocupa só 1 µs de altura.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O atraso de propagação|O tempo de transmissão|O tamanho do cabo em bits" data-answer="0" data-explain="A diferença de altura entre as duas pontas do paralelogramo é o tempo que o sinal leva para atravessar o cabo." data-hint="O que faz o lado de B começar mais tarde que o de A?">
+        <p class="fw-semibold mb-2">No diagrama, o que a inclinação do paralelogramo representa?</p>
+    </div>
+</section>
+
+<!-- 2. ALOHA -->
+<section id="aloha" class="chapter-section" data-conceito="aloha" data-titulo="ALOHA no cabo">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">ALOHA, confirmações e temporizadores</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No ALOHA, o host transmite assim que tem um quadro, sem escutar o meio. Quem recebe um quadro correto devolve uma
+        confirmação; quem não recebe a confirmação a tempo retransmite. Veja o <a href="../capitulo-06/index.html#aloha">ALOHA no Capítulo 6</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.6.1-Q1">Três hosts estão num cabo de 1 km e transmitem quadros de 1000 bits a 1 Mbps. Cada seta da figura é
+            um pedido de transmissão, e cada quadrado vale 250 µs. Desenhe os quadros transmitidos e diga quais colidem (pág. 297–298 do PDF).</li>
+        <li data-livro="4.6.1-Q2">A mesma pergunta, com quadros de 1000 bits a 100 Mbps, num cabo de 2 km, com C no meio e quadrados de
+            10 µs (Fig. 5, pág. 298–299 do PDF).</li>
+        <li data-livro="4.6.1-Q3">No ALOHA, os hosts dependem de confirmações. A rede é de 100 Mbps, com quadros de 1000 bits e
+            confirmações de 100 bits, num cabo de 2 km. Desenhe os quadros de A e de B (pág. 298–300 do PDF).</li>
+        <li data-livro="4.6.1-Q4">A mesma pergunta, com o temporizador de retransmissão de cada host em 50 µs (pág. 300–301 do PDF).</li>
+        <li data-livro="4.6.1-Q5">Na prática, os quadros têm tamanhos diferentes. O cabo tem 100 Mbps e 2 km (pág. 300–302 do PDF).</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="mac-cabo" data-cenarios="q1,q2,q3,q4,q5" data-desafio="aloha"></div>
+    <p class="small text-muted">Instantes dos pedidos lidos das figuras das págs. 298–302 do PDF. Hipóteses: a confirmação sai assim que o quadro termina de chegar, sem escutar o meio; quando o temporizador expira, o host retransmite na hora (o enunciado não dá a regra de espera).</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1:</strong> A transmite de 0 a 1000 µs; B, de 1000 a 2000; C, de 1500 a 2500; e B de novo, de 3500 a 4500. B e C
+                colidem com certeza. A e B também colidem, por pouco: o fim do quadro de A só passa por B em 1005 µs, e B já começou em
+                1000. São 5 µs, 5 bits a 1 Mbps, invisíveis com quadrados de 250 µs, mas um receptor perto de B recebe os dois sinais
+                misturados.</li>
+            <li><strong>Q2:</strong> a 100 Mbps, um quadro dura 10 µs, o mesmo que o sinal leva de ponta a ponta. A (0–10 µs) e B (20–30 µs)
+                não se encontram: o último bit de A passa por B exatamente em 20 µs. C e o segundo quadro de B começam juntos, em 60 µs, e colidem.</li>
+            <li><strong>Q3:</strong> B recebe o quadro de A em 20 µs e confirma (20–21 µs). O quadro que B queria mandar em 20 µs espera a
+                confirmação e sai em 21 µs. Nada colide.</li>
+            <li><strong>Q4 (Fig. 6):</strong> a confirmação de B para A (20–21 µs) chega a A junto com o quadro de C, e os dois se perdem.
+                Sem a confirmação, A retransmite quando o temporizador expira, em 60 µs, e dá de cara com o quadro de B, que sai no mesmo
+                instante. Como todos retransmitem exatamente 50 µs depois, os mesmos encontros se repetem a cada rodada. É por isso que o
+                ALOHA espera um tempo aleatório antes de retransmitir.</li>
+            <li><strong>Q5:</strong> com quadros de 2000 e de 1000 bits, os três quadros e as três confirmações passam sem colisão: um quadro
+                maior ocupa o cabo por mais tempo, mas aqui os pedidos estão bem espaçados.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Para que as retransmissões de quem colidiu não se encontrem de novo|Para economizar energia|Para dar tempo à confirmação de ser montada" data-answer="0" data-explain="Na Q4, com retransmissões determinísticas, as mesmas colisões se repetem sem parar; um atraso aleatório desfaz o empate." data-hint="Veja o que acontece na Q4 com o temporizador fixo.">
+        <p class="fw-semibold mb-2">Por que o ALOHA espera um tempo aleatório antes de retransmitir?</p>
+    </div>
+</section>
+
+<!-- 3. CSMA -->
+<section id="csma" class="chapter-section" data-conceito="csma" data-titulo="CSMA e CSMA/CD">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Escutar antes e durante a transmissão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No CSMA, o host escuta o meio e só transmite se ele estiver livre. No CSMA/CD, ele continua escutando enquanto transmite e
+        para assim que percebe outro sinal. Para a colisão ser sempre percebida, o quadro precisa durar pelo menos o tempo de ida e
+        volta no cabo. Veja o <a href="../capitulo-06/index.html#csma-cd">CSMA/CD no Capítulo 6</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="6">
+        <li data-livro="4.6.1-Q6">No CSMA, os hosts escutam o canal antes de transmitir. Num cabo de 2 km a 100 Mbps, mostre a
+            transmissão correta dos quadros com CSMA (pág. 302–303 do PDF).</li>
+        <li data-livro="4.6.1-Q7">O CSMA/CD não usa confirmações: cada host detecta colisões escutando enquanto transmite. Num cabo de
+            2 km a 10 Mbps, mostre o uso do canal e as colisões, sem retransmitir os quadros que colidiram (pág. 303–304 do PDF).</li>
+        <li data-livro="4.6.1-Q8">De novo CSMA/CD, agora a 1 Gbps num cabo de 2 km. Quando ocorre uma colisão, B e C retransmitem na
+            hora, e A espera o próximo slot (pág. 304–305 do PDF).</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="mac-cabo" data-cenarios="q6,q6a,q7,q8" data-desafio="csma"></div>
+    <p class="small text-muted">Hipóteses: o host escuta o meio na sua posição e, se ele estiver ocupado, transmite assim que ficar livre (CSMA persistente); a colisão é percebida no instante em que o outro sinal chega; não há sinal de reforço (jam).</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q6:</strong> o quadro de A (0–20 µs) passa por C de 5 a 25 µs. Quando C quer transmitir, em 20 µs, o meio está
+                ocupado; C espera e começa em 25 µs. B transmite em 60 µs com o meio livre. Nada colide. Sem escutar (cenário ALOHA), C
+                começaria em 20 µs e colidiria com A.</li>
+            <li><strong>Q7:</strong> A e C começam juntos, em 0. O sinal de cada um chega ao outro em 5 µs (1 km), e os dois param ali. Os
+                quadros de 200 e 100 bits durariam 20 e 10 µs: a colisão foi percebida a tempo. B transmite em 60 µs sem problema.</li>
+            <li><strong>Q8, primeira rodada:</strong> C espera o quadro de A passar e transmite em 15 µs; B transmite em 40 µs. O segundo
+                quadro de A sai em 45 µs e encontra o de B: A percebe em 50 µs e para, mas B já tinha terminado em 50 µs e o sinal de A só
+                chega a ele em 55 µs. B nunca fica sabendo. A 1 Gbps, um quadro de 10 000 bits dura 10 µs, metade do tempo de ida e volta
+                (20 µs) no cabo de 2 km: curto demais para o CSMA/CD funcionar. Com as nossas hipóteses, só A precisa retransmitir; o
+                enunciado, que fala em B e C retransmitindo, provavelmente supõe outra regra de escuta para C.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Pelo menos o tempo de ida e volta no cabo|Pelo menos o tempo de ida no cabo|Qualquer duração" data-answer="0" data-explain="Se o quadro terminar antes de o sinal do outro voltar, o emissor não percebe a colisão, como B na Q8." data-hint="Pense no pior caso: o outro host está na outra ponta.">
+        <p class="fw-semibold mb-2">No CSMA/CD, quanto um quadro precisa durar para toda colisão ser percebida?</p>
+    </div>
+</section>
+
+<!-- 4. Recuo exponencial -->
+<section id="recuo" class="chapter-section" data-conceito="recuo" data-titulo="Recuo exponencial">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">O recuo exponencial</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Depois da k-ésima colisão seguida, o host do CSMA/CD sorteia um número inteiro entre 0 e 2<sup>k</sup> − 1 e espera esse número
+        de slots antes de tentar de novo. A cada colisão, o intervalo dobra. Veja o <a href="../capitulo-06/index.html#csma-cd">CSMA/CD no Capítulo 6</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.6.1-Q9">
+        O cabo tem 1 km e 10 Mbps. Quando há colisão, A sempre sorteia o maior atraso possível do recuo exponencial, e B sempre o menor.
+        O slot vale o tempo de transmitir 100 bits, e um host detecta a colisão assim que o outro quadro chega. Desenhe as transmissões
+        (pág. 305–306 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="mac-cabo" data-cenarios="q9" data-desafio="recuo"></div>
+    <p class="small text-muted">Hipóteses: a espera conta a partir do instante em que o host para de transmitir; depois dela, o host escuta o meio e transmite quando estiver livre.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            O slot vale 100 bits / 10 Mbps = 10 µs. B transmite o primeiro quadro (10–20 µs). A quer transmitir em 20 µs, mas o sinal de B
+            ainda passa por A até 25 µs: A espera e começa em 25 µs. B, com o segundo quadro, também começa em 25 µs, e os dois detectam a
+            colisão em 30 µs. Na primeira colisão, o sorteio é entre 0 e 1 slot: B espera 0 e A espera 1 slot (10 µs). B escuta em 30 µs,
+            encontra o resto do sinal de A até 35 µs e transmite em 35 µs, com sucesso. A, pronto em 40 µs, encontra o quadro de B passando
+            até 50 µs e transmite em 50 µs. Quem sorteia menos ganha o meio.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="0 a 7 slots|0 a 3 slots|0 a 15 slots" data-answer="0" data-explain="Depois da k-ésima colisão, o intervalo é de 0 a 2^k − 1 slots: com k = 3, de 0 a 7." data-hint="Use 2^k − 1 com k = 3.">
+        <p class="fw-semibold mb-2">Depois da terceira colisão seguida, entre quantos slots o host sorteia a espera?</p>
+    </div>
+</section>
+
+<!-- 5. Max-min -->
+<section id="maxmin" class="chapter-section" data-conceito="maxmin" data-titulo="Justiça max-min">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">A alocação max-min justa</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Numa alocação max-min justa, nenhum fluxo pode ganhar banda sem tirar de outro que tem banda menor ou igual. Ela se calcula por
+        enchimento progressivo: todas as taxas sobem juntas; quando um enlace lota, as taxas de quem passa por ele param, e as outras
+        continuam subindo. Veja a <a href="../capitulo-06/index.html#justica">justiça no Capítulo 6</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.6.2-Q1">Calcule a alocação max-min justa para os hosts da rede, sabendo que cada Sx manda tráfego para Dx, que o
+            enlace R1–R2 tem 10 Mbps e o R2–R3, 20 Mbps (pág. 306–307 do PDF).</li>
+        <li data-livro="4.6.2-Q4" value="4">Calcule a alocação max-min justa na rede da Fig. 7 (pág. 310–311 do PDF).</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="maxmin-justo"></div>
+    <p class="small text-muted">Topologias transcritas das figuras das págs. 307 e 311. Na Q1, S1, S2 e S3 estão em R1; S4 e S5, em R3; D4 em R1, D2 e D5 em R2, D1 e D3 em R3. Os enlaces de acesso não limitam.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1, com enlaces full duplex:</strong> no sentido R1→R2, S1, S2 e S3 dividem 10 Mbps: 3,33 Mbps cada (e R2→R3, com
+                20 Mbps, não limita S1 e S3). No sentido contrário, S4 (R3→R2→R1) e S5 (R3→R2) dividem os 20 Mbps de R3→R2, e S4 ainda
+                cabe nos 10 Mbps de R2→R1: 10 Mbps cada. Se os dois sentidos dividissem a mesma capacidade, S1 a S4 ficariam com 2,5 Mbps
+                e S5 com 12,5 Mbps.</li>
+            <li><strong>Q4:</strong> o primeiro enlace a lotar é o Link1 (34 Mbps): S3 e S4 ficam com 17 Mbps. Depois, o Link4: sobram 83
+                Mbps para S2, S6, S7 e S8, 20,75 Mbps cada. No Link2, sobram 100 − 17 − 17 − 20,75 = 45,25 Mbps para S1; no Link3, 100 −
+                3 × 20,75 = 37,75 Mbps para S5.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Não: S1 só pode ganhar tirando de S2, que tem taxa menor|Sim: há folga no Link2|Sim: basta reduzir S5" data-answer="0" data-explain="Na alocação max-min, aumentar um fluxo exige reduzir outro de taxa menor ou igual; S1 e S2 dividem o Link2, e S2 já está no gargalo do Link4." data-hint="Que enlace S1 divide com quem?">
+        <p class="fw-semibold mb-2">Na Q4, dá para aumentar S1 sem prejudicar ninguém com taxa menor?</p>
+    </div>
+</section>
+
+<!-- 6. Filas -->
+<section id="filas" class="chapter-section" data-conceito="filas" data-titulo="Filas, RTT e janelas">
+    <span class="kicker">Atividade 6</span>
+    <h2 class="section-title">Filas, tempo de ida e volta e janelas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um pacote espera na fila de um roteador quando o enlace de saída está ocupado. A janela limita o emissor a w segmentos por tempo
+        de ida e volta; quando ela é maior que o gargalo comporta, os segmentos só se acumulam na fila. No esquema simples do livro, a
+        janela sobe 1/cwin a cada confirmação sem marca e cai pela metade quando chega uma marcada, e o roteador DECBIT marca o pacote
+        que chega quando o buffer já tem pacote esperando (pág. 110–113 do PDF). Veja o
+        <a href="../capitulo-06/index.html#controle-congestionamento">controle de congestionamento no Capítulo 6</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2" start="2">
+        <li data-livro="4.6.2-Q2">Na rede com A–R1 (1 Mbps, 0 ms), B–R1 (10 Mbps, 10 ms), R1–R2 (1 Mbps, 10 ms) e R2–D (100 Mbps, 0 ms):
+            (a) calcule o tempo mínimo de ida e volta de A e de B até D, com segmentos de 1000 bits; (b) como o máximo muda se o buffer de R1
+            guardar 10 pacotes? (c) com janelas de quatro segmentos, qual a vazão máxima de cada um? (d) com round-robin em R1, uma fila de 5
+            pacotes para cada host, A mandando um pacote por segundo e B a 10 Mbps, qual o tempo de ida e volta de cada um (pág. 309–310 do PDF)?</li>
+        <li data-livro="4.6.2-Q3">Com round-robin, o tráfego pode ser visto como um fluido e o escalonador como uma torneira. Todos os
+            enlaces têm 100 Mbps, e B manda a 100 Mbps. Se A mandar a 1, 5, 10, 20, 30, 40, 50, 60, 80 e 100 Mbps, que vazão D recebe de A
+            (pág. 310 do PDF)?</li>
+        <li data-livro="4.6.2-Q5" value="5">Na rede A–R1 (1 Mbps), R1–R2 (250 kbps), R2–D (100 Mbps), sem atraso de propagação e com
+            segmentos de 1000 bits: (a) qual o tempo mínimo de ida e volta de A? (b) com janela de dois segmentos, quanto dura a transferência
+            de cinco segmentos? (c) e com o DECBIT e janela máxima de quatro (pág. 310 do PDF)?</li>
+        <li data-livro="4.6.2-Q6">Na rede da pág. 311 (A–R1 com 1 Mbps e 10 ms; B–R1 com 1 Mbps e 0 ms; R1–D com 500 kbps e 0 ms), A e B
+            usam o esquema simples do livro, e R1 usa o DECBIT. Os dois mandam cinco segmentos e começam juntos. Quanto cada um espera pelo
+            ack do quinto segmento (pág. 310–311 do PDF)?</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O exemplo do livro com o DECBIT (pág. 112–113 do PDF) arredonda a janela: ele diz que ela chega a 3 depois de dois acks, quando a
+        regra cwin + 1/cwin dá 2,9. Aqui as contas seguem a regra ao pé da letra, com a janela real e só segmentos inteiros enviados.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="fila-roteador"></div>
+    <p class="small text-muted">A rede da Q5, desenhada como as Figs. 84–87 do livro: cada coluna é um enlace, e cada retângulo, um segmento sendo transmitido. Os ACKs não ocupam tempo.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q2a:</strong> para A, 1 ms em A–R1, 1 ms em R1–R2, 0,01 ms em R2–D e 10 ms de propagação na ida e na volta: 22,01 ms.
+                Para B, 0,1 + 1 + 0,01 ms de transmissão e 20 ms de propagação em cada sentido: 41,11 ms.</li>
+            <li><strong>Q2b:</strong> com 10 pacotes à frente em R1, cada um ocupando 1 ms no enlace de 1 Mbps, o tempo de ida e volta cresce até
+                10 ms: cerca de 32 ms para A e 51 ms para B.</li>
+            <li><strong>Q2c:</strong> a janela limita cada um a quatro segmentos por tempo de ida e volta: 4000 bits / 22,01 ms ≈ 180 kbit/s para A
+                e 4000 / 41,11 ms ≈ 97 kbit/s para B (numa simulação, B fica perto de 96, porque os seus segmentos chegam em rajada e esperam
+                um pouco em R1). Juntos, não lotam o enlace de 1 Mbps.</li>
+            <li><strong>Q2d:</strong> a fila de B vive cheia: cada pacote de B espera os 5 da frente, cerca de 5 ms, e B mede uns 46 ms. A fila de
+                A está quase sempre vazia; o pacote de A espera no máximo o fim do pacote de B em transmissão, e A mede de 22,0 a 22,3 ms. O
+                round-robin protege quem manda pouco.</li>
+            <li><strong>Q3:</strong> com B ocupando tudo o que pode, a torneira dá metade da saída para cada um: D recebe min(taxa de A, 50 Mbps).
+                Até 50 Mbps, chega tudo; com 60, 80 e 100 Mbps, chegam só 50 (83%, 63% e 50% do que A manda).</li>
+            <li><strong>Q5:</strong> (a) 1 + 4 + 0,01 = 5,01 ms. (b) O enlace de 250 kbps transmite um segmento a cada 4 ms: os acks chegam em 5,01,
+                9,01, 13,01, 17,01 e 21,01 ms. (c) Começando com janela 1, os acks chegam em 5,01, 10,02, 14,02, 18,02 e 22,02 ms. Nenhum pacote é
+                marcado: a janela sobe tão devagar (1, 2, 2,5, 2,9…) que nunca há pacote esperando no buffer de R1 quando outro chega.</li>
+            <li><strong>Q6:</strong> pelas mesmas regras, B (sem atraso) recebe o ack do quinto segmento em 12 ms, e A (com 10 ms em cada sentido),
+                em 72 ms. Também aqui nenhum pacote é marcado, e é o atraso de propagação de A que pesa: cada janela custa um tempo de ida e volta
+                de mais de 20 ms.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Só aumenta a fila no roteador|Dobra a vazão|Diminui o tempo de ida e volta" data-answer="0" data-explain="Com o gargalo de 250 kbps cheio, segmentos a mais só esperam na fila de R1 e aumentam o tempo de ida e volta (pág. 110 do PDF)." data-hint="O que limita a vazão é o enlace mais lento.">
+        <p class="fw-semibold mb-2">Na Q5, depois que a janela basta para manter o enlace de 250 kbps ocupado, aumentar a janela…</p>
+    </div>
+</section>
+
+<!-- 7. Discussão -->
+<section id="discussao" class="chapter-section" data-conceito="discussao" data-titulo="Questões de discussão">
+    <span class="kicker">Atividade 7</span>
+    <h2 class="section-title">Questões de discussão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O slot do CSMA/CD está amarrado ao tempo de ida e volta no maior cabo permitido; o ALOHA com slots só começa a transmitir no início de
+        um slot; e um host CSMA que encontra o meio ocupado pode esperar ele ficar livre ou desistir por um tempo aleatório. Veja o
+        <a href="../capitulo-06/index.html#aloha">ALOHA</a> e o <a href="../capitulo-06/index.html#csma-cd">CSMA/CD</a> no Capítulo 6.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <ol class="mb-2">
+        <li data-livro="4.6.3-Q1">Numa rede CSMA/CD já instalada, daria para aumentar ou diminuir o slotTime? Justifique.</li>
+        <li data-livro="4.6.3-Q2">Para uma mesma carga, em bits por segundo, haveria mais, o mesmo número ou menos colisões com quadros curtos do que com quadros longos?</li>
+        <li data-livro="4.6.3-Q3">No ALOHA com slots, como garantir a duração dos slots? E o slot deve caber só o quadro de dados ou o quadro e a confirmação?</li>
+        <li data-livro="4.6.3-Q4">No CSMA, se o host encontra o meio ocupado, ele deve continuar escutando e transmitir assim que o meio ficar livre,
+            ou parar de escutar e esperar um tempo aleatório antes de tentar de novo (pág. 311–312 do PDF)?</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <p>
+        Na Atividade 3, compare o cenário Q6 (que espera o meio ficar livre) com o mesmo cenário sem escutar. Imagine agora dois hosts esperando
+        o mesmo quadro acabar: o que acontece quando ele termina?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Q1:</strong> diminuir não: o slot precisa durar o tempo de ida e volta no maior cabo, senão colisões passam despercebidas (como
+                na Q8). Aumentar funcionaria, mas exigiria quadros mínimos maiores e trocar todas as placas da rede ao mesmo tempo, já que todas têm
+                de usar o mesmo valor.</li>
+            <li><strong>Q2:</strong> mais colisões com quadros curtos: para a mesma carga, há mais quadros, mais começos de transmissão e mais chances
+                de dois hosts começarem na mesma janela de vulnerabilidade, que depende do tempo de propagação e não do tamanho do quadro.</li>
+            <li><strong>Q3:</strong> os hosts precisam de um relógio comum, por exemplo um sinal de sincronismo transmitido por uma estação. O slot
+                deveria caber o quadro e a confirmação, mais o tempo de propagação; senão a confirmação de um slot invade o seguinte.</li>
+            <li><strong>Q4:</strong> continuar escutando (CSMA persistente) aproveita melhor o meio com pouca carga, mas todos os que esperavam
+                transmitem juntos assim que ele fica livre e colidem. Esperar um tempo aleatório (não persistente) espalha as tentativas e reduz
+                as colisões com muita carga, ao custo de deixar o meio ocioso às vezes.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Colidem, porque transmitem no mesmo instante|Um deles sempre vence|Os dois esperam mais um slot" data-answer="0" data-explain="No CSMA persistente, todos os que esperavam transmitem assim que o meio fica livre e, se forem dois ou mais, colidem." data-hint="Os dois estão esperando a mesma coisa.">
+        <p class="fw-semibold mb-2">No CSMA persistente, dois hosts esperam o mesmo quadro acabar. O que acontece?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Mais colisões|Menos colisões|O mesmo número" data-answer="0" data-explain="Para a mesma carga, quadros curtos significam mais quadros e mais começos de transmissão, cada um com a sua chance de colisão." data-hint="Conte quantos quadros há para a mesma carga.">
+        <p class="fw-semibold mb-2">Para a mesma carga, quadros curtos causam…</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap32" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Num cabo de 2 km a 100 Mbps, quanto tempo um quadro de 1500 bytes ocupa o cabo, e quanto o sinal leva de uma ponta à outra?
+            <details><summary>Ver solução</summary><p class="mb-0">1500 × 8 / 100 = 120 µs de transmissão; 2 × 5 = 10 µs de propagação.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Qual é o menor quadro, em bits, para o CSMA/CD funcionar num cabo de 2 km a 1 Gbps?
+            <details><summary>Ver solução</summary><p class="mb-0">O quadro precisa durar o tempo de ida e volta, 20 µs. A 1 Gbps, isso dá 20 000 bits. É por isso que o quadro de 10 000 bits da Q8 não serve.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Na Q4 da justiça max-min, se o Link1 tivesse 100 Mbps, quais seriam as taxas?
+            <details><summary>Ver solução</summary><p class="mb-0">Primeiro lota o Link4: S2, S4, S6, S7 e S8 ficam com 20 Mbps. No Link2 sobram 60 Mbps para S1 e S3, 30 cada; no Link3, 40 Mbps para S5.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Na rede da Q5, troque o enlace de 250 kbps por um de 500 kbps. Quando chega o ack do quinto segmento com janela 1? E com janela 2?
+            <details><summary>Ver solução</summary><p class="mb-0">Com janela 1, a cada 3,01 ms: o último em 15,05 ms. Com janela 2, o enlace de 500 kbps fica ocupado e os acks vêm a cada 2 ms: 3,01, 5,01, 7,01, 9,01 e 11,01 ms.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Colisões do ALOHA num cabo</h3>
+    <pre class="code-block"><code># ALOHA num cabo: quem colide? (Q1 e Q2, pág. 297-299). O sinal anda 5 µs por km.
+def colidem(L_km, mbps, quadros):
+    """quadros: (host, início em µs, bits). A fica em 0, C no meio, B em L."""
+    pos = {"A": 0, "C": L_km / 2, "B": L_km}
+    tx = [(h, t, t + bits / mbps) for h, t, bits in quadros]        # ALOHA: transmite na hora
+    pares = []
+    for i in range(len(tx)):
+        for j in range(i + 1, len(tx)):
+            (h1, a1, b1), (h2, a2, b2) = tx[i], tx[j]
+            for k in range(201):                                      # testa 201 pontos do cabo
+                x = L_km * k / 200
+                d1, d2 = abs(x - pos[h1]) * 5, abs(x - pos[h2]) * 5
+                if a1 + d1 &lt; b2 + d2 - 1e-9 and a2 + d2 &lt; b1 + d1 - 1e-9:
+                    pares.append((f"{h1}{i}", f"{h2}{j}", round(x, 2)))
+                    break
+    return tx, pares
+
+for nome, L, mbps, q in [("Q1", 1, 1, [("A", 0, 1000), ("B", 1000, 1000), ("C", 1500, 1000), ("B", 3500, 1000)]),
+                         ("Q2", 2, 100, [("A", 0, 1000), ("B", 20, 1000), ("C", 60, 1000), ("B", 60, 1000)])]:
+    tx, pares = colidem(L, mbps, q)
+    print(nome, [(h, a, b) for h, a, b in tx])
+    print("   colidem (primeiro ponto do cabo, em km):", pares)</code></pre>
+    <h3 class="h6 mt-4">2. Max-min por enchimento progressivo</h3>
+    <pre class="code-block"><code># Alocação max-min justa por enchimento progressivo (4.6.2 Q1 e Q4).
+def maxmin(capacidade, fluxos):
+    taxa = {f: 0.0 for f in fluxos}
+    livres = set(fluxos)
+    while livres:
+        # quanto cada enlace ainda dá a cada fluxo livre que passa por ele
+        folga = {}
+        for e, c in capacidade.items():
+            usam = [f for f in fluxos if e in fluxos[f]]
+            ativos = [f for f in usam if f in livres]
+            if ativos:
+                folga[e] = (c - sum(taxa[f] for f in usam)) / len(ativos)
+        gargalo = min(folga, key=folga.get)
+        for f in livres:
+            taxa[f] += folga[gargalo]
+        livres -= {f for f in livres if gargalo in fluxos[f]}
+        print(f"  {gargalo} lota: taxas = { {f: round(t, 2) for f, t in taxa.items()} }")
+    return taxa
+
+print("Q1, enlaces full duplex:")
+maxmin({"R1&gt;R2": 10, "R2&gt;R3": 20, "R3&gt;R2": 20, "R2&gt;R1": 10},
+       {"S1": ["R1&gt;R2", "R2&gt;R3"], "S2": ["R1&gt;R2"], "S3": ["R1&gt;R2", "R2&gt;R3"], "S4": ["R3&gt;R2", "R2&gt;R1"], "S5": ["R3&gt;R2"]})
+print("Q4 (Fig. 7):")
+maxmin({"Link1": 34, "Link2": 100, "Link3": 100, "Link4": 100},
+       {"S1": ["Link2"], "S2": ["Link2", "Link4"], "S3": ["Link1", "Link2"], "S4": ["Link1", "Link2", "Link4"],
+        "S5": ["Link3"], "S6": ["Link3", "Link4"], "S7": ["Link3", "Link4"], "S8": ["Link3", "Link4"]})</code></pre>
+    <h3 class="h6 mt-4">3. Janelas, gargalo e a torneira do round-robin</h3>
+    <pre class="code-block"><code># A rede da Q5 (pág. 310): A -1 Mbps- R1 -250 kbps- R2 -100 Mbps- D, sem propagação, segmentos de 1000 bits.
+TX = [1.0, 4.0, 0.01]                  # ms para transmitir um segmento em cada enlace
+
+def transfere(janela, n=5):
+    livre = [0.0, 0.0, 0.0]            # quando cada enlace fica livre
+    ack = []
+    for k in range(n):
+        envio = 0.0 if k &lt; janela else ack[k - janela]   # o segmento k espera o ack do k - janela
+        fim = envio
+        for e in range(3):              # armazena e repassa, enlace por enlace
+            ini = max(fim, livre[e])
+            fim = livre[e] = ini + TX[e]
+        ack.append(round(fim, 2))       # ACK instantâneo
+    return ack
+
+print("janela 1:", transfere(1))
+print("janela 2:", transfere(2))
+print("janela 4:", transfere(4))
+
+# Q3: round-robin como torneira; B manda a 100 Mbps num enlace de saída de 100 Mbps
+for a in (1, 5, 10, 20, 30, 40, 50, 60, 80, 100):
+    recebe = min(a, 50)
+    print(f"A manda {a:3} Mbps -&gt; D recebe {recebe:3} Mbps ({recebe / a:.0%})")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.6 "Sharing resources" (pág. 294–312 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/ALOHAnet" target="_blank" rel="noopener noreferrer">ALOHAnet</a> e <a href="https://en.wikipedia.org/wiki/Carrier-sense_multiple_access_with_collision_detection" target="_blank" rel="noopener noreferrer">Carrier-sense multiple access with collision detection</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Exponential_backoff" target="_blank" rel="noopener noreferrer">Exponential backoff</a> e <a href="https://en.wikipedia.org/wiki/Max-min_fairness" target="_blank" rel="noopener noreferrer">Max-min fairness</a></li>
+        <li>RFC 3168 — <a href="https://www.rfc-editor.org/rfc/rfc3168" target="_blank" rel="noopener noreferrer">The Addition of Explicit Congestion Notification (ECN) to IP</a>, o descendente do DECBIT citado pelo livro</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-31/index.html" class="text-muted text-decoration-none">← Capítulo 31</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 32</span>
+            <a href="../capitulo-33/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 33 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap32.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

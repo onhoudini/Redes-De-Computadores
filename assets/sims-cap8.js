@@ -542,3 +542,80 @@
         render();
     });
 }());
+
+/* Etapa "3. Visualização" do conceito chave-publica: RSA de brinquedo (complemento ao texto da pág. 124 do PDF). */
+(function () {
+    "use strict";
+    var R = window.Redes;
+    var u = R.util, el = u.el;
+    function escolha(rotulo, lista) {
+        return el("select", { class: "form-select form-select-sm", "aria-label": rotulo },
+            el("option", { value: "" }, "escolha…"), lista.map(function (o) { return el("option", { value: o[0] }, o[1]); }));
+    }
+    function potmod(b, e, m) {
+        var r = 1; b %= m;
+        while (e > 0) { if (e & 1) r = (r * b) % m; b = (b * b) % m; e = Math.floor(e / 2); }
+        return r;
+    }
+    // p = 61, q = 53: o exemplo clássico da Wikipédia (artigo RSA). Eve tem o seu próprio par.
+    var CHAVES = {
+        alice: { n: 3233, e: 17, d: 2753 },
+        eve: { n: 3127, e: 3, d: 2011 }
+    };
+    var USOS = {
+        "alice-pub": ["alice", "e", "pública de Alice"], "alice-priv": ["alice", "d", "privada de Alice"],
+        "eve-pub": ["eve", "e", "pública de Eve"], "eve-priv": ["eve", "d", "privada de Eve"]
+    };
+    function aplica(uso, x) { var k = USOS[uso], c = CHAVES[k[0]]; return potmod(x, c[k[1]], c.n); }
+    R.rsaBrinquedo = { potmod: potmod, aplica: aplica, chaves: CHAVES };
+
+    R.registrar("chaves-alice", function (raiz) {
+        var m = el("input", { type: "number", class: "form-control form-control-sm", min: 0, max: 3000, value: 65, "aria-label": "Mensagem M (número)" });
+        var op = el("select", { class: "form-select form-select-sm", "aria-label": "Operação" },
+            el("option", { value: "cifrar" }, "Bob cifra M para Alice"), el("option", { value: "assinar" }, "Alice assina M"));
+        var chave = el("select", { class: "form-select form-select-sm", "aria-label": "Chave usada para abrir o resultado" },
+            Object.keys(USOS).map(function (k) { return el("option", { value: k }, "a chave " + USOS[k][2]); }));
+        chave.value = "alice-priv";
+        var tabela = el("div", { class: "mt-2" });
+        var saida = el("p", { class: "small mt-1 mb-0", "aria-live": "polite" });
+        function mostra() {
+            var M = Math.max(0, Math.min(3000, Math.floor(Number(m.value) || 0)));
+            var cifra = op.value === "cifrar";
+            var primeiro = cifra ? "alice-pub" : "alice-priv";
+            var X = aplica(primeiro, M), Y = aplica(chave.value, X), volta = Y === M;
+            tabela.replaceChildren(el("div", { class: "table-responsive" }, el("table", { class: "table table-sm small mono mb-0" },
+                el("tbody", null,
+                    el("tr", null, el("td", null, "M"), el("td", null, String(M))),
+                    el("tr", null, el("td", null, (cifra ? "C = E(Alice_pub, M)" : "SM = E(Alice_priv, M)")), el("td", null, String(X))),
+                    el("tr", { class: volta ? "table-success" : "table-danger" }, el("td", null, "aplicando a chave " + USOS[chave.value][2]), el("td", null, String(Y) + (volta ? " = M" : " ≠ M")))))));
+            var k = chave.value;
+            saida.textContent = cifra
+                ? (volta ? "Só a chave privada de Alice desfaz o que a pública dela fez: Alice lê a mensagem." : "Com a chave " + USOS[k][2] + " sai lixo. Quem não tem a privada de Alice não lê a mensagem, nem o próprio Bob depois de cifrá-la.")
+                : (volta ? "A chave pública de Alice abre a assinatura: qualquer um confere que só a privada de Alice poderia tê-la gerado." : "Com a chave " + USOS[k][2] + " não sai M: essa chave não confere uma assinatura feita por Alice.");
+        }
+        [m, op, chave].forEach(function (c) { c.addEventListener("input", mostra); c.addEventListener("change", mostra); });
+        var P1 = escolha("Quem decifra E(Alice_pub, M)", [["bob", "Bob, que cifrou"], ["alice", "só Alice"], ["todos", "qualquer um com a chave pública de Alice"]]);
+        var P2 = escolha("Chave que verifica a assinatura de Alice", [["alice-pub", "a pública de Alice"], ["alice-priv", "a privada de Alice"], ["bob", "uma chave de Bob"]]);
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "chaves-alice", 10, "Cifrar e assinar com chave pública");
+        raiz.append(
+            el("p", { class: "small mb-2" }, el("span", { class: "badge text-bg-secondary me-1" }, "Complemento"),
+                "RSA de brinquedo, com p = 61 e q = 53 (n = 3233, e = 17, d = 2753), o exemplo do artigo ",
+                el("a", { href: "https://en.wikipedia.org/wiki/RSA_cryptosystem", target: "_blank", rel: "noopener" }, "RSA da Wikipédia (em inglês)"),
+                ". Números tão pequenos se quebram na hora; o RSA de verdade usa n com milhares de bits. Eve tem o seu próprio par (n = 3127, e = 3, d = 2011)."),
+            el("div", { class: "row g-2" },
+                el("div", { class: "col-sm-3" }, u.campo("Mensagem M (0 a 3000)", m)),
+                el("div", { class: "col-sm-4" }, u.campo("Operação", op)),
+                el("div", { class: "col-sm-5" }, u.campo("Depois, aplicar", chave))),
+            tabela, saida,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts)"),
+            el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-6 small" }, "Bob calculou E(Alice_pub, M). Quem consegue decifrar?"), el("div", { class: "col-sm-6" }, P1)),
+            el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-6 small" }, "Com que chave alguém verifica a assinatura de Alice?"), el("div", { class: "col-sm-6" }, P2)),
+            u.botao("Conferir", "btn-primary mt-1", function () {
+                var ok = P1.value === "alice" && P2.value === "alice-pub";
+                u.marca(fb, ok, ok ? "Isso: cifra-se com a pública de quem vai ler; assina-se com a própria privada, e todos verificam com a pública." : "Ainda não. Experimente as quatro chaves acima nas duas operações.");
+                if (ok) concluir();
+            }), fb);
+        mostra();
+    });
+}());

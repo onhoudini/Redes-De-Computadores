@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 36 — Prática: TLS e ssh | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.10: o que o telnet entrega a quem escuta, o que se vê dos registros de uma sessão TLS 1.2 e 1.3 e o que o ssh deixa em claro.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="36" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 36 · Parte 3: Prática · Seção 4.10</span>
+        <h1 class="display-5 mb-3">Prática: TLS e ssh</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você faz o papel de quem captura pacotes: lê uma senha num telnet, descobre o que um handshake TLS deixa à mostra e acompanha a negociação de algoritmos de uma conexão ssh.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#telnet-claro">1. O telnet em claro</a>
+                    <a class="nav-link" href="#registro-tls">2. Lendo registros TLS</a>
+                    <a class="nav-link" href="#ssh-visivel">3. O que o ssh deixa ver</a>
+                    <a class="nav-link" href="#exercicios-cap36">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre TLS e ssh</h2>
+    <p>
+        A seção 4.10 do livro tem uma introdução sobre telnet, ssh e TLS e remetia a análises de capturas que não estão no PDF (pág. 315). As três
+        atividades deste capítulo cumprem essa proposta com capturas ilustrativas, montadas de acordo com as RFCs, e estão marcadas como
+        complemento. O formato das atividades está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Mostrar, numa captura, por que o <strong>telnet</strong> expõe senhas e o que o <strong>ssh</strong> deixa visível antes de cifrar.</li>
+                <li>Ler cabeçalhos de <strong>registros TLS</strong> e comparar o que fica em claro no TLS 1.2 e no TLS 1.3.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o login remoto do <a href="../capitulo-15/index.html">Capítulo 15</a> e o TLS do <a href="../capitulo-16/index.html">Capítulo 16</a>. O capítulo cobre a seção 4.10 do livro (pág. 315 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Telnet -->
+<section id="telnet-claro" class="chapter-section" data-conceito="telnet-claro" data-titulo="O telnet em claro">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">O que o telnet entrega a quem escuta</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O telnet manda cada caractere digitado, sem nenhuma proteção, por uma conexão TCP com a porta 23; o servidor ecoa o que deve aparecer na
+        tela. O ssh substituiu o telnet cifrando e autenticando tudo. Veja o <a href="../capitulo-15/index.html#telnet">telnet no Capítulo 15</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p data-livro="4.10-intro">
+        Uma das primeiras motivações para as redes de longa distância foi deixar os pesquisadores usarem servidores distantes. Por muitos anos, isso
+        se fez com um protocolo simples como o telnet sobre TCP. Com o telnet, tudo o que o usuário digita vai em claro: quem captura os pacotes vê
+        nomes de usuário e senhas. Hoje o telnet raramente é usado sem TLS, e os administradores preferem protocolos mais seguros, como o ssh. O TLS
+        é usado por muitas aplicações, sendo o HTTPS a mais popular. Nos exercícios, você analisa algumas características do TLS olhando os pacotes
+        trocados numa sessão (pág. 315 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O PDF só traz essa introdução: os exercícios eram análises de capturas no INGInious e não fazem parte do texto. As três atividades deste
+        capítulo são complementos, presos à introdução e aos Capítulos 15 e 16, com capturas ilustrativas montadas de acordo com as RFCs.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="telnet-claro"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Depois de "Password: ", o cliente manda s, e, g, r, e, d, o, um caractere por segmento, e o servidor não ecoa nada (é por isso que a senha
+            não aparece na tela). Quem captura o tráfego lê "segredo" sem esforço. Além disso, cada tecla custa um segmento inteiro: com cabeçalhos
+            IPv4 e TCP de 20 bytes cada, são 41 bytes para levar 1, mais o eco do servidor. No ssh, o observador só veria pacotes cifrados.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Não: só o eco na tela é suprimido; a senha viaja em claro|Sim: o telnet cifra a senha|Sim: o servidor não manda a senha de volta" data-answer="0" data-explain="O servidor não ecoa a senha, mas o cliente a manda letra por letra, sem proteção, pela rede." data-hint="Quem esconde a senha: o cliente, o servidor ou a rede?">
+        <p class="fw-semibold mb-2">A senha não aparece na tela do telnet. Ela está protegida na rede?</p>
+    </div>
+</section>
+
+<!-- 2. TLS -->
+<section id="registro-tls" class="chapter-section" data-conceito="registro-tls" data-titulo="Lendo registros TLS">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">O que se vê de uma sessão TLS</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Tudo o que o TLS manda vai em registros: um cabeçalho de 5 bytes (tipo, versão e tamanho) e o conteúdo. Os tipos são 20 (change_cipher_spec),
+        21 (alert), 22 (handshake) e 23 (application_data). No TLS 1.2, o certificado do servidor passa em claro; no TLS 1.3, tudo depois do
+        ServerHello vai cifrado. Veja o <a href="../capitulo-16/index.html#registro">protocolo de registro</a> e o <a href="../capitulo-16/index.html#tls13">TLS 1.3</a> no Capítulo 16.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        Analisar algumas características do TLS olhando os pacotes de uma sessão (pág. 315 do PDF). Aqui, a pergunta é: o que um observador consegue
+        ler num handshake TLS 1.2 e num TLS 1.3?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="registro-tls"></div>
+    <p class="small text-muted">Capturas ilustrativas: os tipos e as versões seguem as RFCs 5246 e 8446; os tamanhos são exemplos.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Cabeçalho:</strong> 17 03 03 00 45 é um registro de tipo 0x17 = 23 (application_data), versão 0x0303 e 0x45 = 69 bytes de conteúdo.</li>
+            <li><strong>TLS 1.2:</strong> o observador lê ClientHello, ServerHello, Certificate (com o nome e a chave do servidor), ServerKeyExchange e
+                ServerHelloDone. Depois do ChangeCipherSpec, os Finished e os dados vão cifrados.</li>
+            <li><strong>TLS 1.3:</strong> só ClientHello e ServerHello passam em claro. O certificado, a assinatura e o Finished do servidor vão num registro
+                que se disfarça de application_data. Os registros 14 03 03 00 01 01 existem só para que caixas intermediárias antigas não estranhem a
+                conexão (RFC 8446, apêndice D.4). E todos os registros dizem 0x0303, a versão do TLS 1.2: a versão de verdade é negociada numa extensão.</li>
+            <li>Nas duas versões, o nome do servidor costuma passar em claro na extensão SNI do ClientHello, e o tamanho e o momento de cada registro
+                continuam visíveis.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Na extensão SNI do ClientHello|No certificado, cifrado|No cabeçalho IP" data-answer="0" data-explain="O cliente diz o nome do servidor na extensão server_name do ClientHello, que vai em claro (a não ser com Encrypted Client Hello)." data-hint="Que mensagem vai em claro nas duas versões?">
+        <p class="fw-semibold mb-2">No TLS 1.3, onde um observador ainda costuma ver o nome do site?</p>
+    </div>
+</section>
+
+<!-- 3. ssh -->
+<section id="ssh-visivel" class="chapter-section" data-conceito="ssh-visivel" data-titulo="O que o ssh deixa ver">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">O que o ssh deixa em claro</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O ssh começa com uma linha de identificação em texto e uma negociação de algoritmos (KEXINIT) em claro; depois, uma troca de chaves
+        Diffie-Hellman e a mensagem NEWKEYS, a partir da qual tudo vai cifrado e autenticado. Veja a <a href="../capitulo-15/index.html#ssh-negociacao">negociação do ssh</a>
+        e as <a href="../capitulo-15/index.html#ssh-chaves">chaves de sessão</a> no Capítulo 15.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p>
+        Para o ssh, a introdução da seção diz só que os administradores o preferem ao telnet (pág. 315 do PDF). Aqui, a pergunta é: o que um
+        observador vê de uma conexão ssh, e que algoritmos os dois lados escolhem?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="ssh-visivel"></div>
+    <p class="small text-muted">Captura ilustrativa; os nomes dos algoritmos são os usados pelo OpenSSH.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            A RFC 4253 (seção 7.1) manda escolher, em cada categoria, o primeiro algoritmo da lista do cliente que o servidor também aceita. Na troca de
+            chaves, curve25519-sha256 (o primeiro do cliente, e o servidor o tem); na cifra, chacha20-poly1305 não está no servidor, então fica
+            aes128-gcm@openssh.com. Um observador vê as versões dos programas, essas listas e as chaves públicas efêmeras; depois do NEWKEYS (mensagem
+            21), só tamanhos e horários de pacotes. Mesmo assim, o tamanho e o ritmo dos pacotes de uma sessão interativa revelam algo, como quando o
+            usuário digita.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="A do cliente|A do servidor|A que tiver o nome mais curto" data-answer="0" data-explain="O algoritmo escolhido é o primeiro da lista do cliente que também está na do servidor (RFC 4253, seção 7.1)." data-hint="Quem percorre a lista em ordem?">
+        <p class="fw-semibold mb-2">Na negociação do ssh, a preferência de quem prevalece?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap36" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Decodifique o cabeçalho de registro TLS 15 03 03 00 02.
+            <details><summary>Ver solução</summary><p class="mb-0">Tipo 0x15 = 21 (alert), versão 0x0303 e 2 bytes de conteúdo: um alerta tem sempre 2 bytes, o nível e a descrição (quando não está cifrado).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Uma sessão telnet manda 30 teclas, cada uma num segmento IPv6 com TCP sem opções. Quantos bytes passam pelo fio só no sentido do cliente?
+            <details><summary>Ver solução</summary><p class="mb-0">Cada segmento leva 40 bytes de IPv6, 20 de TCP e 1 de dados: 30 × 61 = 1830 bytes, para 30 bytes úteis.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> No ssh, o cliente propõe as cifras aes256-ctr,aes128-gcm@openssh.com e o servidor aceita aes128-gcm@openssh.com,aes256-ctr. Qual é escolhida?
+            <details><summary>Ver solução</summary><p class="mb-0">aes256-ctr: vale o primeiro da lista do cliente que o servidor também aceita, não importa a ordem do servidor.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Por que o TLS 1.3 manda registros de change_cipher_spec que não servem para nada?
+            <details><summary>Ver solução</summary><p class="mb-0">Para parecer uma sessão TLS 1.2 retomada. Algumas caixas intermediárias antigas bloqueavam o que não reconheciam; com esse disfarce (o "modo de compatibilidade" da RFC 8446, apêndice D.4) e a versão 0x0303 nos registros, o TLS 1.3 passa por elas.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Percorrendo registros TLS</h3>
+    <pre class="code-block"><code># Lendo cabeçalhos de registros TLS (RFC 8446, seção 5.1): tipo (1 byte), versão (2) e tamanho (2).
+TIPOS = {20: "change_cipher_spec", 21: "alert", 22: "handshake", 23: "application_data"}
+HANDSHAKE = {1: "ClientHello", 2: "ServerHello", 11: "Certificate", 12: "ServerKeyExchange",
+             14: "ServerHelloDone", 16: "ClientKeyExchange", 20: "Finished"}
+
+def registros(fluxo):
+    """Percorre um fluxo de bytes com vários registros TLS seguidos."""
+    i = 0
+    while i + 5 &lt;= len(fluxo):
+        tipo, versao, tam = fluxo[i], int.from_bytes(fluxo[i + 1:i + 3], "big"), int.from_bytes(fluxo[i + 3:i + 5], "big")
+        conteudo = fluxo[i + 5:i + 5 + tam]
+        extra = f" ({HANDSHAKE.get(conteudo[0], '?')})" if tipo == 22 and conteudo else ""
+        yield TIPOS.get(tipo, "?") + extra, hex(versao), tam
+        i += 5 + tam
+
+# um servidor TLS 1.2: ServerHello (4 bytes de conteúdo de mentira), Certificate e ServerHelloDone
+fluxo = (bytes.fromhex("16 0303 0004") + bytes([2, 0, 0, 0]) +
+         bytes.fromhex("16 0303 0006") + bytes([11, 0, 0, 2, 0, 0]) +
+         bytes.fromhex("16 0303 0004") + bytes([14, 0, 0, 0]))
+for r in registros(fluxo):
+    print(r)</code></pre>
+    <h3 class="h6 mt-4">2. A negociação do ssh</h3>
+    <pre class="code-block"><code>import struct
+
+# O começo de uma conexão ssh (RFC 4253): a identificação em texto e as listas do KEXINIT.
+banner = b"SSH-2.0-OpenSSH_9.6\r\n"
+protocolo, versao_sw = banner.decode().strip().split("-", 2)[1:]
+print("protocolo", protocolo, "| programa", versao_sw)
+
+def name_list(nomes):
+    dados = ",".join(nomes).encode()
+    return struct.pack("!I", len(dados)) + dados     # uint32 com o tamanho e os nomes separados por vírgula
+
+def le_name_list(buf, i):
+    n = struct.unpack("!I", buf[i:i + 4])[0]
+    return buf[i + 4:i + 4 + n].decode().split(","), i + 4 + n
+
+cliente = {"kex": ["curve25519-sha256", "ecdh-sha2-nistp256", "diffie-hellman-group14-sha256"],
+           "cifra": ["chacha20-poly1305@openssh.com", "aes128-gcm@openssh.com", "aes256-ctr"]}
+servidor = {"kex": ["sntrup761x25519-sha512@openssh.com", "curve25519-sha256", "diffie-hellman-group14-sha256"],
+            "cifra": ["aes256-gcm@openssh.com", "aes128-gcm@openssh.com", "aes256-ctr"]}
+
+# KEXINIT do servidor: tipo 20, 16 bytes aleatórios (cookie) e as listas
+kexinit = bytes([20]) + bytes(16) + name_list(servidor["kex"]) + name_list(servidor["cifra"])
+lista_kex, i = le_name_list(kexinit, 17)
+lista_cifra, i = le_name_list(kexinit, i)
+
+def negocia(do_cliente, do_servidor):
+    return next((a for a in do_cliente if a in do_servidor), None)   # RFC 4253, seção 7.1
+
+print("kex:", negocia(cliente["kex"], lista_kex))
+print("cifra:", negocia(cliente["cifra"], lista_cifra))</code></pre>
+    <h3 class="h6 mt-4">3. A senha capturada</h3>
+    <pre class="code-block"><code># Uma sessão telnet capturada (modo caractere): cada tecla num segmento.
+captura = [("S", "login: ")] + [x for c in "aluno" for x in (("C", c), ("S", c))] + \
+          [("C", "\r"), ("S", "\r\nPassword: ")] + [("C", c) for c in "segredo"] + [("C", "\r")]
+
+senha, depois_do_prompt = "", False
+for sentido, dados in captura:
+    if sentido == "S" and "Password:" in dados:
+        depois_do_prompt = True
+    elif sentido == "C" and depois_do_prompt:
+        if dados == "\r":
+            break
+        senha += dados
+print("senha capturada:", senha)
+
+# quanto custa mandar uma tecla por segmento (IPv4 + TCP sem opções = 40 bytes de cabeçalho)
+teclas = sum(1 for s, d in captura if s == "C")
+print(f"{teclas} teclas -&gt; {teclas * 41} bytes no fio, dos quais {teclas} de dados ({teclas / (teclas * 41):.1%})")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.10 "TLS and ssh" (pág. 315 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 854 — <a href="https://www.rfc-editor.org/rfc/rfc854" target="_blank" rel="noopener noreferrer">Telnet Protocol Specification</a> e RFC 4253 — <a href="https://www.rfc-editor.org/rfc/rfc4253" target="_blank" rel="noopener noreferrer">The Secure Shell (SSH) Transport Layer Protocol</a></li>
+        <li>RFC 5246 — <a href="https://www.rfc-editor.org/rfc/rfc5246" target="_blank" rel="noopener noreferrer">The TLS Protocol Version 1.2</a> e RFC 8446 — <a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener noreferrer">The TLS Protocol Version 1.3</a></li>
+        <li>RFC 5656 — <a href="https://www.rfc-editor.org/rfc/rfc5656" target="_blank" rel="noopener noreferrer">Elliptic Curve Algorithm Integration in the SSH Transport Layer</a> (as mensagens KEX_ECDH_INIT e KEX_ECDH_REPLY)</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-35/index.html" class="text-muted text-decoration-none">← Capítulo 35</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 36</span>
+            <a href="../capitulo-37/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 37 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap36.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

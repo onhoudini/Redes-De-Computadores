@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 34 — Prática: os protocolos de e-mail | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.8: protocolos em ASCII testados com telnet, uma sessão SMTP, o código-fonte de uma mensagem, as portas da IANA e as fases do POP3.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="34" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 34 · Parte 3: Prática · Seção 4.8</span>
+        <h1 class="display-5 mb-3">Prática: os protocolos de e-mail</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você conversa com servidores de e-mail como o livro sugere, digitando os comandos de um telnet: manda uma mensagem por SMTP, lê os cabeçalhos que ela ganha no caminho e baixa só as mensagens pequenas por POP3.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#telnet-ascii">1. Protocolos em ASCII</a>
+                    <a class="nav-link" href="#fonte">2. O código-fonte de uma mensagem</a>
+                    <a class="nav-link" href="#portas-iana">3. Portas reservadas</a>
+                    <a class="nav-link" href="#pop-fases">4. As fases do POP3</a>
+                    <a class="nav-link" href="#pop-pequenas">5. Só as mensagens pequenas</a>
+                    <a class="nav-link" href="#exercicios-cap34">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre os protocolos de e-mail</h2>
+    <p>
+        A seção 4.8 do livro mostra como testar protocolos em ASCII com telnet e traz quatro questões sobre e-mail (pág. 313–314 do PDF). Os
+        servidores SMTP e POP3 desta página são simulados no navegador, mas respondem como os de verdade. O formato das atividades está
+        explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Testar um servidor <strong>SMTP</strong> e um <strong>POP3</strong> à mão, lendo os códigos e as respostas +OK e -ERR.</li>
+                <li>Explicar os cabeçalhos que uma mensagem ganha no caminho e achar a <strong>porta</strong> de um serviço no registro da IANA.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o correio eletrônico do <a href="../capitulo-11/index.html">Capítulo 11</a> (formato, SMTP e POP) e as portas do
+                <a href="../capitulo-04/index.html">Capítulo 4</a>. O capítulo cobre a seção 4.8 do livro (pág. 313–314 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. ASCII e telnet -->
+<section id="telnet-ascii" class="chapter-section" data-conceito="telnet-ascii" data-titulo="Protocolos em ASCII">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">Protocolos em ASCII, testados à mão</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        No SMTP, o cliente manda comandos de uma linha (HELO ou EHLO, MAIL FROM, RCPT TO, DATA, QUIT) e o servidor responde com um código
+        de três dígitos e um texto. O corpo da mensagem termina com uma linha que só tem um ponto. Veja o
+        <a href="../capitulo-11/index.html#smtp">SMTP no Capítulo 11</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p>
+        Muitos protocolos da Internet usam ASCII: o cliente manda pedidos de uma linha terminada em CRLF, e o servidor responde com uma ou
+        mais linhas de texto. Isso tem três vantagens: as mensagens se leem a olho; é fácil escrever um protótipo; e dá para testar um servidor
+        à mão com telnet (pág. 313–314 do PDF). O telnet abre uma conexão TCP com a porta 23, mas aceita outra porta (<code>telnet host porta</code>)
+        e, com ela, serve para testar qualquer servidor ASCII sobre TCP. Ctrl-C não interrompe a sessão, porque também é mandado ao servidor;
+        na maioria das implementações, Ctrl-] congela a conexão e devolve o controle ao telnet.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="sessao-smtp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <pre class="log mt-2 mb-2">S: 220 mail.example.org ESMTP
+C: EHLO notebook.example.org
+S: 250 …
+C: MAIL FROM:&lt;eu@example.org&gt;
+S: 250 2.1.0 Ok
+C: RCPT TO:&lt;aluno@example.org&gt;
+S: 250 2.1.5 Ok
+C: DATA
+S: 354 End data with &lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;
+C: Subject: teste
+C:
+C: uma linha só
+C: .
+S: 250 2.0.0 Ok
+C: QUIT
+S: 221 2.0.0 Bye</pre>
+        <p class="mb-0">
+            Os códigos 2xx dizem que deu certo; 354 (um 3xx) pede para continuar; 5xx são erros permanentes. Na simulação, um RCPT para um
+            domínio de fora recebe 554 (relay negado): servidores abertos a qualquer destino foram usados para spam e quase não existem mais.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Uma linha só com um ponto|Uma linha em branco|O comando QUIT" data-answer="0" data-explain="Depois do 354, o cliente manda o texto e termina com &lt;CRLF&gt;.&lt;CRLF&gt;; o servidor responde 250 se aceitou." data-hint="Veja a resposta do servidor ao DATA.">
+        <p class="fw-semibold mb-2">O que marca o fim do texto da mensagem no SMTP?</p>
+    </div>
+</section>
+
+<!-- 2. Código-fonte -->
+<section id="fonte" class="chapter-section" data-conceito="fonte" data-titulo="O código-fonte de uma mensagem">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">O código-fonte de uma mensagem</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma mensagem tem cabeçalhos e corpo. Cada servidor SMTP que a repassa acrescenta, no topo, uma linha Received:; lidas de baixo para
+        cima, elas contam o caminho da mensagem. Veja o <a href="../capitulo-11/index.html#formato-email">formato do e-mail no Capítulo 11</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.8-Q1">
+        Com o seu programa de e-mail, mande para você mesmo uma mensagem de uma linha. Use a função de ver o código-fonte para olhar a mensagem
+        enviada e a recebida. Você consegue explicar todas as linhas acrescentadas à sua mensagem (pág. 314 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="fonte-mensagem"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            A mensagem enviada tem só os cabeçalhos que o seu programa escreveu: From, To, Subject, Date, Message-ID e os de MIME. A recebida
+            ganha uma linha Received por servidor (três na simulação, lidas de baixo para cima), o Return-Path do servidor que entregou e,
+            nos provedores atuais, cabeçalhos de autenticação (Authentication-Results, DKIM-Signature) e de filtro de spam, que dependem do
+            provedor. Compare as horas das linhas Received para ver quanto tempo a mensagem ficou em cada servidor.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Cada servidor que repassa a mensagem acrescenta a sua linha no topo|O remetente escreve uma por destinatário|O destinatário acrescenta ao ler" data-answer="0" data-explain="Cada servidor SMTP põe uma linha Received em cima das anteriores; por isso a de baixo é a mais antiga." data-hint="Por que ler de baixo para cima?">
+        <p class="fw-semibold mb-2">De onde vêm as várias linhas Received:?</p>
+    </div>
+</section>
+
+<!-- 3. Portas -->
+<section id="portas-iana" class="chapter-section" data-conceito="portas-iana" data-titulo="Portas reservadas">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Portas reservadas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        A porta identifica a aplicação dentro do host. Os servidores escutam em portas conhecidas, registradas pela IANA, e os clientes usam
+        portas efêmeras. Veja as <a href="../capitulo-04/index.html#portas">portas no Capítulo 4</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.8-Q2">
+        O TCP tem 65 536 números de porta, e muitos estão reservados para aplicações. O registro oficial é mantido pela IANA. Com ele, qual é a
+        porta padrão do POP3? Ele roda sobre UDP ou TCP (pág. 314 do PDF)?
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O endereço citado pelo livro (iana.org/assignments/port-numbers) hoje redireciona para o registro
+        <a href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml" target="_blank" rel="noopener noreferrer">Service Name and Transport Protocol Port Number Registry</a>.
+        Num sistema Unix, parte dele está em /etc/services.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="portas-iana"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Porta 110. A IANA registra pop3 tanto em TCP quanto em UDP (é comum reservar os dois), mas o protocolo roda sobre TCP: a RFC 1939
+            diz que o servidor escuta na porta TCP 110, e o POP3 precisa de um fluxo de bytes confiável. A versão com TLS (pop3s) usa a 995.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="993|143|995" data-answer="0" data-explain="O IMAP usa a 143 e, com TLS (imaps), a 993; a 995 é do POP3 com TLS." data-hint="A versão segura do IMAP.">
+        <p class="fw-semibold mb-2">Qual é a porta do IMAP sobre TLS?</p>
+    </div>
+</section>
+
+<!-- 4. POP3 -->
+<section id="pop-fases" class="chapter-section" data-conceito="pop-fases" data-titulo="As fases do POP3">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">As três fases do POP3</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O POP3 serve para baixar mensagens da caixa no servidor. As respostas começam com +OK ou -ERR, e as de várias linhas terminam com uma
+        linha só com um ponto. Veja o <a href="../capitulo-11/index.html#pop">POP no Capítulo 11</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.8-Q3">
+        O POP, descrito na RFC 1939, funciona em três fases: autorização, em que o cliente dá usuário e senha; transação, em que o cliente lê as
+        mensagens; e atualização, em que o cliente encerra a transação. Quais são os principais comandos do POP e os seus parâmetros? Quando o
+        servidor responde, como saber facilmente se a resposta é positiva ou negativa (pág. 314 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="sessao-pop" data-desafio="fases"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><strong>Autorização:</strong> <code>USER nome</code> e <code>PASS senha</code> (ou <code>APOP</code>, que evita mandar a senha em claro).</li>
+            <li><strong>Transação:</strong> <code>STAT</code> (quantas mensagens e quantos octetos), <code>LIST [n]</code> (tamanho de cada uma),
+                <code>RETR n</code> (baixa a mensagem n), <code>DELE n</code> (marca para apagar), <code>RSET</code> (desmarca tudo) e <code>NOOP</code>.
+                O <code>TOP n linhas</code> é opcional.</li>
+            <li><strong>Atualização:</strong> só começa com o <code>QUIT</code> dado na transação; aí o servidor apaga de verdade as mensagens marcadas.
+                Se a conexão cair antes, nada é apagado.</li>
+            <li>Toda resposta começa com <strong>+OK</strong> (positiva) ou <strong>-ERR</strong> (negativa): basta olhar o primeiro caractere.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Só depois do QUIT, na fase de atualização|Assim que o servidor responde +OK ao DELE|Quando o cliente baixa a mensagem" data-answer="0" data-explain="DELE só marca; as mensagens marcadas somem na fase de atualização, que começa com o QUIT (RFC 1939)." data-hint="Qual fase apaga?">
+        <p class="fw-semibold mb-2">Quando uma mensagem marcada com DELE é apagada de verdade?</p>
+    </div>
+</section>
+
+<!-- 5. Mensagens pequenas -->
+<section id="pop-pequenas" class="chapter-section" data-conceito="pop-pequenas" data-titulo="Só as mensagens pequenas">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Só as mensagens pequenas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O comando LIST devolve o tamanho de cada mensagem, em octetos, sem baixar nenhuma. Veja o <a href="../capitulo-11/index.html#pop">POP no Capítulo 11</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.8-Q4">
+        Nos celulares, os usuários querem evitar baixar mensagens grandes numa conexão sem fio lenta. Como um cliente POP poderia baixar só as
+        mensagens menores que 5 KB (pág. 314 do PDF)?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="sessao-pop" data-desafio="pequenas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Depois de USER e PASS, o cliente manda <code>LIST</code> e recebe uma linha por mensagem, com o número e o tamanho. Ele só manda
+            <code>RETR</code> para as menores que 5 KB (na simulação, as mensagens 1 e 3, com 1200 e 3400 octetos) e deixa as outras no servidor.
+            Para mostrar ao usuário de quem são as grandes, pode usar <code>TOP n 0</code>, que traz só os cabeçalhos, se o servidor oferecer esse
+            comando opcional.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="TOP n 0|RETR n 0|LIST n" data-answer="0" data-explain="TOP n 0 devolve os cabeçalhos e zero linhas do corpo; LIST só dá o tamanho." data-hint="O comando opcional que traz o começo da mensagem.">
+        <p class="fw-semibold mb-2">Que comando traz só os cabeçalhos de uma mensagem grande?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap34" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Num telnet para a porta 25, você digita RCPT TO:&lt;aluno@example.org&gt; logo depois do EHLO. O que o servidor responde?
+            <details><summary>Ver solução</summary><p class="mb-0">503: falta o MAIL FROM. O SMTP exige a ordem EHLO, MAIL, RCPT e DATA.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Uma mensagem tem quatro linhas Received:. Por quantos servidores SMTP ela passou, e qual linha conta o primeiro salto?
+            <details><summary>Ver solução</summary><p class="mb-0">Por quatro servidores (cada um acrescenta uma linha). O primeiro salto é a linha mais embaixo.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Numa sessão POP3, o cliente manda DELE 1 e DELE 3 e a conexão cai antes do QUIT. O que acontece com as mensagens 1 e 3?
+            <details><summary>Ver solução</summary><p class="mb-0">Nada: sem o QUIT, o servidor não entra na fase de atualização, e as marcas de DELE se perdem (RFC 1939).</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Uma linha do texto de uma mensagem começa com um ponto, como ".net é um TLD". Como o SMTP evita confundi-la com o fim do texto?
+            <details><summary>Ver solução</summary><p class="mb-0">O cliente acrescenta outro ponto no começo da linha ("..net é um TLD"), e o servidor tira um ponto de toda linha que começa com ponto (RFC 5321, seção 4.5.2). Só uma linha com um ponto sozinho termina o texto.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Um servidor SMTP de brinquedo</h3>
+    <pre class="code-block"><code># Um servidor SMTP de brinquedo (RFC 5321): estados e códigos de resposta.
+def servidor(linhas):
+    estado, para, respostas = "inicio", [], ["220 mail.example.org ESMTP"]
+    for l in linhas:
+        if estado == "dados":
+            if l == ".":
+                estado = "saudado"
+                respostas.append("250 Ok: mensagem aceita")
+            continue                                    # linhas do texto não têm resposta
+        cmd = (l.split() or [""])[0].upper()
+        if cmd in ("HELO", "EHLO"):
+            estado = "saudado"; respostas.append("250 mail.example.org")
+        elif cmd == "QUIT":
+            respostas.append("221 Bye"); break
+        elif estado == "inicio":
+            respostas.append("503 send HELO/EHLO first")
+        elif cmd == "MAIL":
+            respostas.append("250 Ok")
+        elif cmd == "RCPT":
+            para.append(l); respostas.append("250 Ok")
+        elif cmd == "DATA":
+            if para:
+                estado = "dados"; respostas.append("354 End data with &lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;")
+            else:
+                respostas.append("503 need RCPT command")
+        else:
+            respostas.append("502 command not recognized")
+    return respostas
+
+sessao = ["EHLO notebook", "MAIL FROM:&lt;eu@example.org&gt;", "RCPT TO:&lt;aluno@example.org&gt;",
+          "DATA", "Subject: teste", "", "uma linha só", ".", "QUIT"]
+for r in servidor(sessao):
+    print(r)</code></pre>
+    <h3 class="h6 mt-4">2. Lendo as linhas Received:</h3>
+    <pre class="code-block"><code>from email import message_from_string
+from email.utils import parsedate_to_datetime
+
+# O código-fonte de uma mensagem recebida (dados ilustrativos, domínios da RFC 2606).
+FONTE = """Return-Path: &lt;aluno@example.org&gt;
+Received: from mx.example.net by caixa.example.net with ESMTPS; Mon, 16 Nov 2026 10:00:07 -0300
+Received: from smtp.example.org by mx.example.net with ESMTPS; Mon, 16 Nov 2026 10:00:05 -0300
+Received: from [2001:db8:1::99] by smtp.example.org with ESMTPSA; Mon, 16 Nov 2026 10:00:03 -0300
+Date: Mon, 16 Nov 2026 10:00:02 -0300
+From: Aluno &lt;aluno@example.org&gt;
+To: aluno@example.net
+Subject: teste
+
+uma linha só
+"""
+
+msg = message_from_string(FONTE)
+saltos = msg.get_all("Received")[::-1]        # de baixo para cima: do primeiro ao último servidor
+anterior = parsedate_to_datetime(msg["Date"])
+for r in saltos:
+    quem = r.split(" by ")[1].split()[0]
+    quando = parsedate_to_datetime(r.rsplit(";", 1)[1].strip())
+    print(f"{quem:22} recebeu {(quando - anterior).total_seconds():.0f} s depois do passo anterior")
+    anterior = quando</code></pre>
+    <h3 class="h6 mt-4">3. Só as mensagens pequenas</h3>
+    <pre class="code-block"><code># Baixar só as mensagens pequenas com POP3 (RFC 1939).
+RESPOSTA_LIST = """+OK 4 mensagens
+1 1200
+2 52000
+3 3400
+4 870000
+."""
+
+def positiva(linha):
+    return linha.startswith("+OK")              # toda resposta começa com +OK ou -ERR
+
+linhas = RESPOSTA_LIST.splitlines()
+assert positiva(linhas[0])
+tamanhos = {}
+for l in linhas[1:]:
+    if l == ".":                                # fim de uma resposta de várias linhas
+        break
+    n, octetos = map(int, l.split())
+    tamanhos[n] = octetos
+
+LIMITE = 5000                                   # 5 KB
+comandos = [f"RETR {n}" for n, t in sorted(tamanhos.items()) if t &lt; LIMITE]
+print("tamanhos:", tamanhos)
+print("comandos:", comandos + ["QUIT"])
+print("deixadas no servidor:", [n for n, t in tamanhos.items() if t &gt;= LIMITE])</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.8 "Internet email protocols" (pág. 313–314 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 5321 — <a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener noreferrer">Simple Mail Transfer Protocol</a> e RFC 1939 — <a href="https://www.rfc-editor.org/rfc/rfc1939" target="_blank" rel="noopener noreferrer">Post Office Protocol - Version 3</a></li>
+        <li>RFC 5322 — <a href="https://www.rfc-editor.org/rfc/rfc5322" target="_blank" rel="noopener noreferrer">Internet Message Format</a> (os cabeçalhos, inclusive Received:)</li>
+        <li>IANA — <a href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml" target="_blank" rel="noopener noreferrer">Service Name and Transport Protocol Port Number Registry</a></li>
+        <li>Documentação do Python — <a href="https://docs.python.org/3/library/email.html" target="_blank" rel="noopener noreferrer">email</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-33/index.html" class="text-muted text-decoration-none">← Capítulo 33</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 34</span>
+            <a href="../capitulo-35/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 35 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap34.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

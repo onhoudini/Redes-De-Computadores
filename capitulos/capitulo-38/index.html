@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 38 — Prática: o básico do TCP | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.12: a abertura em três vias, dados e confirmações, o encerramento com FIN, as opções negociadas e pôr em ordem os segmentos de uma conexão.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="38" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 38 · Parte 3: Prática · Seção 4.12</span>
+        <h1 class="display-5 mb-3">Prática: o básico do TCP</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você treina o cálculo dos números de sequência e de confirmação do TCP, da abertura ao encerramento, e põe em ordem os segmentos embaralhados de uma conexão real.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#abertura">1. A abertura em três vias</a>
+                    <a class="nav-link" href="#dados">2. Dados e confirmações</a>
+                    <a class="nav-link" href="#encerramento">3. O encerramento</a>
+                    <a class="nav-link" href="#opcoes">4. As opções da abertura</a>
+                    <a class="nav-link" href="#ordem">5. Pôr os segmentos em ordem</a>
+                    <a class="nav-link" href="#exercicios-cap38">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Exercícios sobre o básico do TCP</h2>
+    <p>
+        A seção 4.12 do livro tem cinco frases sobre as fases de uma conexão TCP; os exercícios eram interativos e não estão no PDF (pág. 319). Cada frase
+        virou uma atividade de complemento, com números sorteados para treinar e um desafio fixo. O formato das atividades está explicado no
+        <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Calcular os números de sequência e de confirmação na <strong>abertura</strong>, na <strong>transferência</strong> e no <strong>encerramento</strong>.</li>
+                <li>Explicar as <strong>opções</strong> negociadas nos SYN e <strong>pôr em ordem</strong> os segmentos de uma conexão.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o TCP do <a href="../capitulo-20/index.html">Capítulo 20</a> e a captura do <a href="../capitulo-37/index.html">Capítulo 37</a>. O capítulo cobre a seção 4.12 do livro (pág. 319 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Abertura -->
+<section id="abertura" class="chapter-section" data-conceito="abertura" data-titulo="A abertura em três vias">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">A abertura em três vias</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O cliente manda SYN com o seu número inicial x; o servidor responde SYN+ACK com o seu número y e ack x + 1; o cliente confirma com ack y + 1.
+        O SYN consome um número de sequência. Veja a <a href="../capitulo-20/index.html#abertura">abertura no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro diz</h3>
+    <p data-livro="4.12-abertura">
+        O TCP é um dos protocolos centrais da Internet. Uma conexão TCP sempre começa com uma abertura em três vias, e os exercícios devem ajudar a
+        entender melhor essa primeira fase (pág. 319 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        A seção 4.12 tem só cinco frases: os exercícios eram interativos, no INGInious, e não fazem parte do PDF. Cada frase virou aqui uma atividade de
+        complemento, com números sorteados para treinar e um desafio fixo.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="abertura-tcp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Com x = 1000 e y = 5000: o SYN+ACK leva ack 1001, o terceiro segmento leva ack 5001, e o primeiro byte de dados do cliente tem seq 1001. Na captura
+            do livro (Capítulo 37), x = 2681184541 e o SYN+ACK traz ack 2681184542.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Para que segmentos de conexões antigas não sejam aceitos numa nova|Para economizar números|Porque o servidor exige" data-answer="0" data-explain="Números iniciais imprevisíveis e diferentes a cada conexão evitam que segmentos atrasados de uma conexão antiga, ou forjados, caiam dentro da janela da nova." data-hint="Pense em segmentos atrasados.">
+        <p class="fw-semibold mb-2">Por que cada lado escolhe um número inicial diferente a cada conexão, em vez de começar sempre do zero?</p>
+    </div>
+</section>
+
+<!-- 2. Dados -->
+<section id="dados" class="chapter-section" data-conceito="dados" data-titulo="Dados e confirmações">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Dados e confirmações</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O seq de um segmento é a posição do seu primeiro byte; o ack é cumulativo e diz o próximo byte esperado. Veja a
+        <a href="../capitulo-20/index.html#transferencia">transferência de dados no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro diz</h3>
+    <p data-livro="4.12-dados">Depois da abertura, o cliente e o servidor trocam dados e confirmações (pág. 319 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="dados-acks"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Com ISN 1000, os dados começam em 1001. Depois de 100 bytes, o ack é 1101; depois de mais 200, 1301; depois de mais 50, 1351. Se o servidor
+            usasse ACK atrasado, poderia mandar só o último ack (1351), que confirma tudo de uma vez.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Todos os bytes até o 4999|Só o último segmento|O byte 5000" data-answer="0" data-explain="O ack é cumulativo: ack 5000 diz que tudo antes de 5000 chegou e que o próximo esperado é o 5000." data-hint="O ack diz o próximo byte esperado.">
+        <p class="fw-semibold mb-2">O que um segmento com ack 5000 confirma?</p>
+    </div>
+</section>
+
+<!-- 3. FIN -->
+<section id="encerramento" class="chapter-section" data-conceito="encerramento" data-titulo="O encerramento">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">O encerramento com FIN</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Cada sentido é fechado por um FIN, que consome um número de sequência e é confirmado pelo outro lado. Às vezes, o ACK e o FIN do segundo lado vão
+        juntos. Veja a <a href="../capitulo-20/index.html#liberacao">liberação da conexão no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro diz</h3>
+    <p data-livro="4.12-fin">Uma conexão termina com segmentos que levam a flag FIN, que marca o fim da transferência de dados (pág. 319 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="fin-tcp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            O cliente manda FIN com seq 7001. O servidor confirma com ack 7002 (o FIN gastou o 7001). O FIN do servidor usa seq 9301, o número que o cliente
+            espera (o ack 9301 do cliente), e o cliente confirma com ack 9302. Na captura do livro, o servidor juntou o ACK e o FIN num segmento só, e a
+            conexão fechou com três segmentos.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Sim: o outro sentido continua aberto até o FIN dele|Não: o FIN fecha os dois sentidos|Só se o cliente pedir de novo" data-answer="0" data-explain="O FIN fecha só o sentido de quem o mandou; o outro lado ainda pode enviar dados até mandar o seu FIN." data-hint="O TCP fecha cada sentido separadamente.">
+        <p class="fw-semibold mb-2">Depois de receber o FIN do cliente, o servidor ainda pode mandar dados?</p>
+    </div>
+</section>
+
+<!-- 4. Opções -->
+<section id="opcoes" class="chapter-section" data-conceito="opcoes" data-titulo="As opções da abertura">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">As opções negociadas na abertura</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Nos segmentos SYN, cada lado anuncia o seu MSS (o maior segmento que aceita receber) e pode propor escala de janela, SACK e timestamps; essas três
+        só valem se os dois lados as mandarem. Veja o <a href="../capitulo-20/index.html#tcp-cabecalho">cabeçalho e as opções no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro diz</h3>
+    <p data-livro="4.12-opcoes">O TCP pode ser estendido com opções negociadas durante a abertura em três vias (pág. 319 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="opcoes-tcp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            O MSS é anunciado por quem recebe: o cliente manda segmentos de até 1440 bytes (o MSS do servidor), e o servidor, de até 1460 (o do cliente). Como o
+            servidor não mandou wscale, a escala fica desligada nos dois sentidos, e a janela fica limitada a 65 535 bytes; SACK fica ligado (os dois mandaram
+            sackOK) e timestamps, desligados. Na captura do livro, os dois lados mandam MSS 1440, sackOK, timestamps e wscale 7 (RFC 7323 e RFC 2018).
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Nos segmentos SYN|Em qualquer segmento|No primeiro segmento de dados" data-answer="0" data-explain="A escala de janela (e o MSS) só pode ser anunciada nos SYN; depois, não dá para ligá-la (RFC 7323)." data-hint="Por que se fala em opções da abertura?">
+        <p class="fw-semibold mb-2">Em que segmentos a opção de escala de janela pode aparecer?</p>
+    </div>
+</section>
+
+<!-- 5. Ordem -->
+<section id="ordem" class="chapter-section" data-conceito="ordem" data-titulo="Pôr os segmentos em ordem">
+    <span class="kicker">Atividade 5</span>
+    <h2 class="section-title">Pôr todos os segmentos em ordem</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Um segmento só pode confirmar bytes que o outro lado já mandou, e o seq de cada lado só avança com os bytes, o SYN e o FIN que ele envia. Veja o
+        <a href="../capitulo-20/index.html#transferencia">TCP no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro diz</h3>
+    <p data-livro="4.12-ordem">Com o que você sabe de TCP, já deve conseguir pôr em ordem todos os segmentos trocados numa conexão (pág. 319 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="reordena-segmentos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Comece pelo SYN sem ack. A cada passo, um segmento pode vir a seguir se o seq dele for o próximo do seu lado e o ack dele não passar do que o outro já
+            mandou. Quando há dois candidatos do mesmo lado com o mesmo seq, o que não consome números (um ACK puro) vem antes do que leva dados ou FIN. Seguindo
+            essa regra, sai a ordem da captura: SYN, SYN+ACK, ACK, pedido, ACK, resposta, ACK, FIN do cliente, FIN+ACK do servidor e o último ACK. O bloco 3
+            aplica a regra automaticamente.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="O ACK puro, porque o seq dele ainda não contou os dados|Os dados, porque são mais importantes|Tanto faz" data-answer="0" data-explain="Um ACK puro tem o seq do próximo byte; se viesse depois dos dados, o seq dele já teria avançado." data-hint="Compare o seq de um ACK enviado antes e depois dos dados.">
+        <p class="fw-semibold mb-2">Dois segmentos do mesmo lado têm o mesmo seq: um ACK puro e um com dados. Qual veio antes?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap38" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> O cliente escolhe ISN 4 294 967 290, perto do limite de 32 bits. Que ack o servidor manda no SYN+ACK?
+            <details><summary>Ver solução</summary><p class="mb-0">4 294 967 291. E, se o cliente mandar 10 bytes depois, o ack seguinte dá a volta: (4 294 967 291 + 10) mod 2<sup>32</sup> = 5.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> O cliente manda três segmentos de 1460 bytes a partir do seq 1001, e o servidor só confirma no fim (ACK atrasado). Que ack ele manda?
+            <details><summary>Ver solução</summary><p class="mb-0">1001 + 3 × 1460 = 5381: o ack cumulativo confirma os três de uma vez.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> O servidor manda MSS 1400 e o cliente, MSS 1460. Qual é o maior segmento que cada um pode mandar?
+            <details><summary>Ver solução</summary><p class="mb-0">O cliente manda até 1400 bytes (o MSS do servidor) e o servidor, até 1460 (o do cliente).</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Com escala de janela 7 aceita pelos dois lados, qual é a maior janela que um lado pode anunciar?
+            <details><summary>Ver solução</summary><p class="mb-0">65 535 × 2<sup>7</sup> = 8 388 480 bytes, cerca de 8 MB. Sem a escala, o limite é 65 535 bytes.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Gerando uma conexão</h3>
+    <pre class="code-block"><code># Gera os segmentos de uma conexão TCP como o tcpdump os mostraria (números absolutos).
+def conexao(isn_c, isn_s, dados_c, dados_s=()):
+    segs = [("C", "S", isn_c, None, 0), ("S", "S.", isn_s, isn_c + 1, 0), ("C", ".", isn_c + 1, isn_s + 1, 0)]
+    c, s = isn_c + 1, isn_s + 1
+    for tam in dados_c:                         # cada segmento do cliente recebe um ack do servidor
+        segs.append(("C", "P.", c, s, tam)); c += tam
+        segs.append(("S", ".", s, c, 0))
+    for tam in dados_s:
+        segs.append(("S", "P.", s, c, tam)); s += tam
+        segs.append(("C", ".", c, s, 0))
+    segs += [("C", "F.", c, s, 0), ("S", "F.", s, c + 1, 0), ("C", ".", c + 1, s + 1, 0)]
+    return segs
+
+for de, flags, seq, ack, tam in conexao(1000, 5000, [100, 200], [300]):
+    texto = f"{'C &gt; S' if de == 'C' else 'S &gt; C'}: Flags [{flags}], seq {seq}"
+    texto += f":{seq + tam}" if tam else ""
+    texto += f", ack {ack}" if ack is not None else ""
+    print(texto + f", length {tam}")</code></pre>
+    <h3 class="h6 mt-4">2. As opções da abertura</h3>
+    <pre class="code-block"><code># O que vale depois da abertura, conforme as opções que cada lado mandou no SYN.
+def negocia(cliente, servidor):
+    escala = "wscale" in cliente and "wscale" in servidor      # só vale se os dois mandarem (RFC 7323)
+    return {
+        "maior segmento do cliente": servidor["mss"],             # o MSS é anunciado por quem recebe
+        "maior segmento do servidor": cliente["mss"],
+        "escala de janela": (cliente["wscale"], servidor["wscale"]) if escala else "desligada",
+        "SACK": cliente.get("sackOK", False) and servidor.get("sackOK", False),
+        "timestamps": cliente.get("ts", False) and servidor.get("ts", False),
+    }
+
+cliente = {"mss": 1460, "wscale": 7, "sackOK": True, "ts": True}
+servidor = {"mss": 1440, "sackOK": True}
+for chave, valor in negocia(cliente, servidor).items():
+    print(f"{chave}: {valor}")</code></pre>
+    <h3 class="h6 mt-4">3. Pondo os segmentos em ordem</h3>
+    <pre class="code-block"><code>import random
+
+# Pôr em ordem os segmentos de uma conexão (os da captura do livro, pág. 316-317, em números absolutos).
+C, S = 2681184541, 3804204915
+SEGS = [("C", "S", C, None, 0), ("S", "SA", S, C + 1, 0), ("C", "A", C + 1, S + 1, 0), ("C", "PA", C + 1, S + 1, 92),
+        ("S", "A", S + 1, C + 93, 0), ("S", "PA", S + 1, C + 93, 457), ("C", "A", C + 93, S + 458, 0),
+        ("C", "FA", C + 93, S + 458, 0), ("S", "FA", S + 458, C + 94, 0), ("C", "A", C + 94, S + 459, 0)]
+
+def consome(s):
+    return s[4] + ("S" in s[1]) + ("F" in s[1])
+
+def ordena(segs):
+    resto, saida = list(segs), []
+    prox = {"C": None, "S": None}          # próximo número de sequência de cada lado
+    visto = {"C": None, "S": None}         # maior ack que cada lado já pode ter mandado (o que recebeu)
+    while resto:
+        cand = []
+        for s in resto:
+            lado, outro = s[0], ("S" if s[0] == "C" else "C")
+            if prox[lado] is None and "S" not in s[1]:
+                continue
+            if prox[lado] is not None and s[2] != prox[lado]:
+                continue
+            if s[3] is not None and (prox[outro] is None or s[3] &gt; prox[outro]):
+                continue                   # não pode confirmar o que o outro ainda não mandou
+            if s[3] is not None and visto[lado] is not None and s[3] &lt; visto[lado]:
+                continue                   # acks não voltam atrás
+            cand.append(s)
+        # entre os candidatos, primeiro o de menor ack (o que reage ao evento mais antigo), depois o que leva dados
+        s = min(cand, key=lambda x: (consome(x), x[3] or 0))   # quem não consome números vem antes do que consome
+        resto.remove(s); saida.append(s)
+        prox[s[0]] = s[2] + consome(s)
+        if s[3] is not None:
+            visto[s[0]] = s[3]
+    return saida
+
+embaralhados = SEGS[:]
+random.Random(7).shuffle(embaralhados)
+for s in ordena(embaralhados):
+    print(s)
+print("igual à captura:", ordena(embaralhados) == SEGS)</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.12 "TCP basics" (pág. 319 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 9293 — <a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a></li>
+        <li>RFC 7323 — <a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">TCP Extensions for High Performance</a> e RFC 2018 — <a href="https://www.rfc-editor.org/rfc/rfc2018" target="_blank" rel="noopener noreferrer">TCP Selective Acknowledgment Options</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-37/index.html" class="text-muted text-decoration-none">← Capítulo 37</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 38</span>
+            <a href="../capitulo-39/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 39 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap38.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 27 — Prática: os exercícios | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Saber como uma atividade dos capítulos de prática está organizada. Encontrar, para cada capítulo de prática, os capítulos de conceito que ele retoma.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="27" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 27 · Parte 3: Prática · Seção 4.1</span>
+        <h1 class="display-5 mb-3">Prática: os exercícios</h1>
+        <p class="lead mb-4">
+            A Parte 3 do livro é feita de exercícios. Este capítulo explica como eles foram transformados em atividades e mostra, para cada capítulo de prática, quais capítulos de conceito ele retoma.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#por-que-praticar">1. Por que resolver exercícios</a>
+                    <a class="nav-link" href="#formato-atividade">2. Como as atividades estão organizadas</a>
+                    <a class="nav-link" href="#mapa-pratica">3. O mapa da Parte 3</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Da teoria à bancada</h2>
+    <p>
+        A Parte 3 do livro reúne perguntas abertas, cada uma com um pequeno problema para resolver. Os autores avisam
+        que ler o livro da primeira à última página não basta: só resolvendo os exercícios se chega a um conhecimento
+        detalhado de redes (pág. 277 do PDF). O livro não traz as respostas. Nos capítulos de prática, cada atividade tem uma
+        resolução comentada, conferida com código, mas tente resolver antes de abri-la.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Saber como uma <strong>atividade</strong> dos capítulos de prática está organizada.</li>
+                <li>Encontrar, para cada capítulo de prática, os <strong>capítulos de conceito</strong> que ele retoma.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                A seção 4.1 do livro é só a abertura da Parte 3 (pág. 277 do PDF). Os exercícios começam no
+                <a href="../capitulo-28/index.html">Capítulo 28</a>.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Ao concluir tudo de um tópico, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Por que resolver exercícios -->
+<section id="por-que-praticar" class="chapter-section" data-conceito="por-que-praticar" data-titulo="Por que resolver exercícios">
+    <span class="kicker">Tópico 1</span>
+    <h2 class="section-title">Ler não basta</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. O que o livro diz</h3>
+    <p>
+        A seção 4.1 abre a Parte 3 com um parágrafo curto (pág. 277 do PDF). Ela reúne uma série de <strong>perguntas
+        abertas</strong>, pensadas para melhorar a compreensão dos temas do livro. Cada uma costuma trazer um pequeno problema
+        para o estudante resolver, e foi pensada para levar a discussões com os monitores da disciplina.
+    </p>
+    <p>
+        Os autores fecham com um aviso: só se chega a uma boa compreensão dos temas resolvendo os exercícios propostos. Ler
+        o livro da primeira à última página não basta para um conhecimento detalhado de redes de computadores.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro também indica questões de múltipla escolha e exercícios simples na plataforma INGInious (pág. 277 do PDF).
+        Elas não estão no PDF, e a plataforma pede cadastro, por isso não são usadas aqui. As perguntas rápidas de cada
+        capítulo fazem esse papel.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Não: só resolvendo os exercícios se chega a um conhecimento detalhado|Sim, se a leitura for do começo ao fim|Sim, desde que se façam as perguntas de múltipla escolha" data-answer="0" data-explain="Os autores dizem que ler o livro da primeira à última página não basta; é preciso resolver os exercícios (pág. 277 do PDF)." data-hint="Releia a última frase da seção 4.1.">
+        <p class="fw-semibold mb-2">Para os autores, ler o livro inteiro basta para dominar redes de computadores?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="A plataforma pede cadastro, e as questões não estão no PDF|As questões estão erradas|As questões são em francês" data-answer="0" data-explain="O site só usa fontes que abrem sem cadastro. As questões do INGInious ficam na plataforma, que pede login, e não no PDF do livro." data-hint="Pense nas regras de fontes do site.">
+        <p class="fw-semibold mb-2">Por que as questões do INGInious não aparecem neste site?</p>
+    </div>
+</section>
+
+<!-- 2. Como as atividades estão organizadas -->
+<section id="formato-atividade" class="chapter-section" data-conceito="formato-atividade" data-titulo="Como as atividades estão organizadas">
+    <span class="kicker">Tópico 2</span>
+    <h2 class="section-title">Uma atividade em cinco etapas</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. As etapas</h3>
+    <p>
+        Nos capítulos de prática, cada grupo de exercícios do livro vira uma <strong>atividade</strong>, com cinco etapas:
+    </p>
+    <ol>
+        <li><strong>Relembre</strong>: o conceito em poucas frases, com o link para o capítulo onde ele foi explicado;</li>
+        <li><strong>O que o livro pede</strong>: os enunciados, traduzidos, com a página do PDF;</li>
+        <li><strong>Experimente</strong>: uma simulação que faz o papel do laboratório, com um desafio;</li>
+        <li><strong>Resolução comentada</strong>: fechada, para você tentar antes. Ela é marcada como "não está no livro",
+            porque o livro não traz respostas, e cada número dela foi conferido com código;</li>
+        <li><strong>Fixação</strong>: perguntas rápidas.</li>
+    </ol>
+
+    <h3 class="h5 mt-4 mb-3">2. Ferramentas que não rodam no navegador</h3>
+    <p>
+        Vários exercícios usam ferramentas que precisam de Linux e de permissões de administrador: programas em C com
+        sockets, capturas com tcpdump, scripts do packetdrill, redes emuladas com o IPMininet. Neste site:
+    </p>
+    <ul>
+        <li>o código C e os comandos de terminal do livro aparecem como estão, com a página do PDF, sem execução;</li>
+        <li>o mesmo programa aparece em Python, num bloco que roda no navegador;</li>
+        <li>o Python do navegador não abre sockets de verdade, então a rede é simulada em memória, com o mesmo
+            comportamento das chamadas do livro;</li>
+        <li>as saídas que o livro imprime, como capturas de pacotes e tabelas de rotas, viram os dados das simulações.</li>
+    </ul>
+
+    <h3 class="h5 mt-4 mb-3">3. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Na resolução comentada, que vem fechada|No enunciado, logo depois da pergunta|O site não traz respostas" data-answer="0" data-explain="A resolução comentada é a quarta etapa e vem fechada, para você tentar resolver antes de abri-la." data-hint="É a quarta das cinco etapas.">
+        <p class="fw-semibold mb-2">Onde fica a resposta de um exercício numa atividade?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Uma rede simulada em memória, com o mesmo comportamento das chamadas do livro|Uma conexão real com um servidor da universidade|Nada: os exercícios com sockets foram retirados" data-answer="0" data-explain="O Python do navegador não abre sockets, então os blocos simulam a rede em memória e seguem o comportamento das chamadas do livro." data-hint="O Pyodide roda dentro da página.">
+        <p class="fw-semibold mb-2">O que substitui os sockets de verdade nos blocos de código?</p>
+    </div>
+</section>
+
+<!-- 3. O mapa da Parte 3 -->
+<section id="mapa-pratica" class="chapter-section" data-conceito="mapa-pratica" data-titulo="O mapa da Parte 3">
+    <span class="kicker">Tópico 3</span>
+    <h2 class="section-title">Que capítulo retoma o quê</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. A Parte 3, seção por seção</h3>
+    <p>
+        Cada capítulo de prática corresponde a uma seção da Parte 3 do livro e retoma os capítulos de conceito indicados. Os
+        capítulos ainda em preparação aparecem sem link.
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm small align-middle">
+            <thead><tr><th>Capítulo</th><th>Seção do livro</th><th>Págs.</th><th>Retoma</th></tr></thead>
+            <tbody>
+                <tr><td><a href="../capitulo-28/index.html">28</a></td><td>4.2 Reliable transfer</td><td>277–279</td><td>1, 19</td></tr>
+                <tr><td><a href="../capitulo-29/index.html">29</a></td><td>4.3 Using sockets for inter-process communication</td><td>279–286</td><td>4, 19, 22</td></tr>
+                <tr><td><a href="../capitulo-30/index.html">30</a></td><td>4.4 Building a network</td><td>286–292</td><td>2</td></tr>
+                <tr><td><a href="../capitulo-31/index.html">31</a></td><td>4.5 Serving applications</td><td>292–294</td><td>3, 4</td></tr>
+                <tr><td><a href="../capitulo-32/index.html">32</a></td><td>4.6 Sharing resources</td><td>294–312</td><td>6</td></tr>
+                <tr><td><a href="../capitulo-33/index.html">33</a></td><td>4.7 Application layer</td><td>312–313</td><td>9, 10</td></tr>
+                <tr><td><a href="../capitulo-34/index.html">34</a></td><td>4.8 Internet email protocols</td><td>313–314</td><td>11</td></tr>
+                <tr><td><a href="../capitulo-35/index.html">35</a></td><td>4.9 The HyperText Transfer Protocol</td><td>314–315</td><td>12, 13</td></tr>
+                <tr><td><a href="../capitulo-36/index.html">36</a></td><td>4.10 TLS and ssh</td><td>315</td><td>15, 16</td></tr>
+                <tr><td><a href="../capitulo-37/index.html">37</a></td><td>4.11 Analyzing packet traces</td><td>316–319</td><td>12, 20</td></tr>
+                <tr><td><a href="../capitulo-38/index.html">38</a></td><td>4.12 TCP basics</td><td>319</td><td>20</td></tr>
+                <tr><td><a href="../capitulo-39/index.html">39</a></td><td>4.13 A closer look at TCP</td><td>319–336</td><td>20, 21</td></tr>
+                <tr><td><a href="../capitulo-40/index.html">40</a></td><td>4.14 IPv6 Networks</td><td>336–350</td><td>22</td></tr>
+                <tr><td><a href="../capitulo-41/index.html">41</a></td><td>4.15 Inter-domain routing</td><td>350–353</td><td>25</td></tr>
+                <tr><td><a href="../capitulo-42/index.html">42</a></td><td>4.16 Exploring routing protocols</td><td>353–384</td><td>24, 25</td></tr>
+                <tr><td><a href="../capitulo-43/index.html">43</a></td><td>4.17 The Spanning Tree Protocol and Virtual LANs</td><td>384–392</td><td>26</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">2. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="42|40|39" data-answer="0" data-explain="A seção 4.16, Exploring routing protocols, vira o Capítulo 42 e retoma o RIP e o OSPF (Capítulo 24) e o BGP (Capítulo 25)." data-hint="Procure a linha que retoma os Capítulos 24 e 25.">
+        <p class="fw-semibold mb-2">Que capítulo de prática retoma o RIP, o OSPF e o BGP?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Uma seção 4.x do livro|Um capítulo de conceito|Uma figura do livro" data-answer="0" data-explain="Na Parte 3, como nas outras, cada capítulo do site corresponde a uma seção do livro: o capítulo 26 + k é a seção 4.k." data-hint="O Capítulo 28 é a seção 4.2.">
+        <p class="fw-semibold mb-2">A que corresponde cada capítulo de prática?</p>
+    </div>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.1 "Exercises" (pág. 277 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-26/index.html" class="text-muted text-decoration-none">← Capítulo 26</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 27</span>
+            <a href="../capitulo-28/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 28 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

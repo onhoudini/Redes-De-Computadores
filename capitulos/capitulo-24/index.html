@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 24 — Roteamento intradomínio: RIP e OSPF | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Explicar o RIP: mensagens, métrica 16, temporizadores e contagem ao infinito. Explicar o OSPF: áreas, resumos e roteador designado.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="24" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 24 · Parte 2: Protocolos · Seção 3.16</span>
+        <h1 class="display-5 mb-3">Roteamento intradomínio: RIP e OSPF</h1>
+        <p class="lead mb-4">
+            No Capítulo 2 você viu os princípios do vetor de distância e do estado de enlace. Aqui estão os dois protocolos que os aplicam dentro de um domínio: o RIP, simples e lento para convergir, e o OSPF, com áreas e roteadores designados.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#rip">1. RIP</a>
+                    <a class="nav-link" href="#ospf">2. OSPF</a>
+                    <a class="nav-link" href="#exercicios-cap24">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Dentro de um domínio</h2>
+    <p>
+        Dentro de um domínio, o roteamento busca o melhor caminho segundo uma métrica escolhida pelo operador
+        (pág. 237 do PDF). O livro apresenta o RIP, um protocolo de vetor de distância, e o OSPF, um protocolo de estado de
+        enlace.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar o <strong>RIP</strong>: mensagens, métrica 16, temporizadores e contagem ao infinito.</li>
+                <li>Explicar o <strong>OSPF</strong>: áreas, resumos e roteador designado.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o vetor de distância, o estado de enlace, o split horizon e o poison reverse do
+                <a href="../capitulo-02/index.html">Capítulo 2</a> e a divisão entre IGP e EGP do
+                <a href="../capitulo-23/index.html">Capítulo 23</a>. O capítulo cobre a seção 3.16 do livro
+                (pág. 237–243 do PDF), com as topologias das figuras do livro.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. RIP -->
+<section id="rip" class="chapter-section" data-conceito="rip" data-titulo="RIP">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">RIP</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O vetor de distância é o algoritmo de roteamento mais simples. O RIP o transforma em mensagens reais, com temporizadores
+        e um limite para a contagem ao infinito.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Routing Information Protocol</strong> (<a href="https://www.rfc-editor.org/rfc/rfc2453" target="_blank" rel="noopener noreferrer">RFC 2453</a>
+        para IPv4, <a href="https://www.rfc-editor.org/rfc/rfc2080" target="_blank" rel="noopener noreferrer">RFC 2080</a> para IPv6)
+        troca mensagens em datagramas UDP, na porta 521 no IPv6 (Fig. 59). Ao ligar, um roteador pede as tabelas ao grupo
+        multicast <strong>ff02::9</strong>, de todos os roteadores RIP. Depois, cada roteador manda o seu vetor de distância a
+        cada <strong>30 segundos</strong>. Cada entrada tem 20 bytes, com o prefixo, o tamanho do prefixo e a métrica, de um byte
+        (Fig. 60). A maior métrica válida é <strong>15</strong>; 16 significa inalcançável (pág. 237–238 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Temporizadores</strong> (pág. 238 do PDF). Os primeiros RIPs mandavam o vetor exatamente a cada 30 s. Floyd e
+        Jacobson descobriram que os temporizadores se sincronizavam com o tempo, e todos os roteadores mandavam os vetores ao mesmo
+        tempo, sobrecarregando as CPUs. A solução: sortear o intervalo entre 15 e 45 s. Sortear atrasos virou uma prática
+        recomendada no projeto de protocolos.
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A porta 521 que o livro cita é a do RIPng (IPv6); o RIP versão 2, do IPv4, usa a porta 520. Com o limite de 16, a
+        contagem ao infinito sempre termina, mas pode levar minutos. O simulador do Capítulo 2 recalcula as rotas do zero; o deste
+        capítulo mostra a contagem rodada a rodada.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="rip-infinito"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="15 saltos: a métrica 16 significa inalcançável|16 saltos|255 saltos" data-answer="0" data-explain="A métrica máxima do RIP é 15 (pág. 238 do PDF), o que limita o tamanho das redes em que ele pode ser usado." data-hint="Qual valor o RIP usa como infinito?">
+        <p class="fw-semibold mb-2">Qual é o maior caminho, em saltos, que o RIP consegue representar?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Para evitar que os roteadores sincronizem e mandem os vetores todos ao mesmo tempo|Para economizar banda|Para cifrar as mensagens" data-answer="0" data-explain="Intervalos sorteados entre 15 e 45 s quebram a sincronização (pág. 238 do PDF)." data-hint="Releia a nota sobre temporizadores.">
+        <p class="fw-semibold mb-2">Por que o RIP sorteia o intervalo entre os anúncios?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>RIP: vetor de distância em UDP, anúncios a cada 30 s (sorteados entre 15 e 45 s), grupo ff02::9.</li>
+        <li>Métrica máxima 15; 16 = infinito; poison reverse evita a contagem.</li>
+    </ul>
+</section>
+
+<!-- 2. OSPF -->
+<section id="ospf" class="chapter-section" data-conceito="ospf" data-titulo="OSPF">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">OSPF</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No estado de enlace, cada roteador conhece a topologia inteira. Numa rede com milhares de roteadores, inundar e guardar
+        tudo isso em todos custa caro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Open Shortest Path First</strong> (<a href="https://www.rfc-editor.org/rfc/rfc2328" target="_blank" rel="noopener noreferrer">RFC 2328</a>;
+        <a href="https://www.rfc-editor.org/rfc/rfc5340" target="_blank" rel="noopener noreferrer">RFC 5340</a> para IPv6) é o
+        protocolo de estado de enlace da IETF, comum em empresas; muitos provedores usam o IS-IS. O OSPF tem uma forma limitada de
+        <strong>roteamento hierárquico</strong>: a rede é dividida em <strong>áreas</strong> (pág. 238–239 do PDF).
+    </p>
+    <ul>
+        <li>Há roteadores <strong>internos</strong> e <strong>de borda</strong> (ABR), ligados a várias áreas.</li>
+        <li>A <strong>área 0</strong>, o backbone, reúne as bordas, e todo caminho entre duas áreas passa por ela (Fig. 61).</li>
+        <li>Dentro de uma área, os roteadores trocam pacotes de estado de enlace e conhecem a topologia. Entre áreas, as bordas
+            trocam <strong>resumos</strong>, como vetores de distância.</li>
+        <li>O OSPF também aceita <strong>enlaces virtuais</strong>, que ligam roteadores da mesma área sem conexão direta entre
+            eles; o livro não entra nesse detalhe (pág. 238 do PDF).</li>
+    </ul>
+    <p>
+        Na Fig. 62, RB anuncia 2001:db8:1234::/48 a distância 2 e 2001:db8:5678::/48 a distância 3; RC, o contrário. RA escolhe o
+        resumo de RB para o primeiro e o de RC para o segundo, e anuncia na área 1 os dois a distância 3. RA também pode resumir as
+        duas sub-redes da área 1 num só prefixo, 2001:db8:aaaa::/63 a distância 2, o que diminui as rotas fora da área, mas exige
+        configuração manual (pág. 239–241 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que RA anunciaria 2001:db8:aaaa:0000::/64 a distância 1 e 2001:db8:aaaa:0001::/64 a distância 2 (pág. 241 do PDF).
+        Pela Fig. 62, a sub-rede 2001:db8:aaaa:0001::/64 está ligada a R4, vizinho de RA, e a 2001:db8:aaaa:0000::/64 a R5, um salto
+        adiante: as distâncias são 1 para a 0001 e 2 para a 0000. A simulação segue a figura.
+    </p>
+    <p>
+        Numa <strong>LAN</strong> com vários roteadores (Fig. 63), tratá-la como uma malha completa multiplicaria as mensagens e
+        esconderia o fato de que a LAN inteira pode falhar de uma vez. Os roteadores elegem um <strong>roteador designado</strong>
+        (DR), que representa a LAN e com quem os outros trocam HELLOs (pág. 241 do PDF). A eleição está na RFC 2328: cada
+        roteador pode ser configurado com uma <strong>prioridade</strong>, e o de maior prioridade é o preferido.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Como detectar uma falha depressa?</strong> (pág. 241–242 do PDF). A recuperação tem três passos: detectar, inundar e
+        recalcular. HELLOs a cada 10 s demoram; HELLOs a cada milissegundo sobrecarregariam a CPU. Um protocolo dedicado, o
+        <strong>BFD</strong> (<a href="https://www.rfc-editor.org/rfc/rfc5880" target="_blank" rel="noopener noreferrer">RFC 5880</a>),
+        roda direto nas interfaces.
+    </div>
+    <p>
+        Quando há vários caminhos de mesmo custo, o roteador pode usar todos. Distribuir os pacotes em rodízio misturaria a ordem
+        dos segmentos de uma conexão TCP, gerando ACKs duplicados e retransmissões. Por isso os roteadores escolhem o caminho por
+        um <strong>hash</strong> do Next Header, dos endereços e das portas, módulo o número de caminhos: todos os pacotes de um
+        fluxo seguem o mesmo caminho, sem guardar estado (<a href="https://www.rfc-editor.org/rfc/rfc2991" target="_blank" rel="noopener noreferrer">RFC 2991</a>,
+        pág. 242 do PDF). Em algumas redes há dezenas de caminhos de mesmo custo, e há roteadores que, por limitação de
+        hardware, só instalam 8 ou 16 na tabela de encaminhamento: entra só uma parte dos caminhos calculados.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="ospf-areas"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Com o DR: 9 adjacências, contra 45 numa malha completa|45 com o DR, contra 9 sem ele|10 nos dois casos" data-answer="0" data-explain="Malha completa: 10 × 9 / 2 = 45; com o DR, cada um dos outros 9 só fala com ele." data-hint="Quantos pares existem entre 10 roteadores?">
+        <p class="fw-semibold mb-2">Dez roteadores OSPF numa LAN: quantas relações de troca de HELLO há com um roteador designado?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Para que todos os pacotes de uma conexão TCP sigam o mesmo caminho, sem reordenação|Para cifrar os pacotes|Para escolher o caminho mais curto" data-answer="0" data-explain="O hash da quádrupla é o mesmo para todos os pacotes de um fluxo (pág. 242 do PDF)." data-hint="O que acontece com o TCP se os pacotes chegam fora de ordem?">
+        <p class="fw-semibold mb-2">Por que os roteadores distribuem o tráfego entre caminhos iguais por um hash, e não em rodízio?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Áreas: topologia dentro, resumos entre áreas; tudo passa pelo backbone (área 0).</li>
+        <li>Roteador designado numa LAN; BFD para detectar falhas depressa.</li>
+        <li>Caminhos de mesmo custo: hash por fluxo.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap24" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> 12 roteadores OSPF estão na mesma LAN. Quantas adjacências haveria numa malha completa, e quantas com um roteador designado?
+            <details><summary>Ver solução</summary><p class="mb-0">12 × 11 / 2 = 66 na malha completa; 11 com o roteador designado.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> no RIP, a rede A — B — C perde o enlace B–C. Sem poison reverse, quantas rodadas de 30 s até A e B marcarem 16? E com poison reverse?
+            <details><summary>Ver solução</summary><p class="mb-0">No modelo da simulação (B ouve A, depois A ouve B), 8 rodadas, 240 s: a métrica sobe de 2 em 2. Com poison reverse, 1 rodada.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> na Fig. 62, qual é a distância de R4 até 2001:db8:1234::/48, e por qual borda do backbone?
+            <details><summary>Ver solução</summary><p class="mb-0">R4 → RA custa 1, e RA conhece o prefixo a distância 3 (via RB: RA–RB–R7–R9). Total 4, via RB.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Dois trechos em Python que rodam no navegador, sem acessar a rede, com as topologias do livro. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. RIP e a contagem ao infinito</h3>
+    <pre class="code-block"><code>INFINITO = 16                                           # no RIP, 16 significa "inalcançável"
+
+def contagem(poison_reverse, max_rodadas=20):
+    """Rede A — B — C, com o prefixo P em C. O enlace B—C cai. A cada rodada (30 s), B ouve o vetor
+    de A e depois A ouve o de B. Devolve as distâncias de A e B até P depois de cada rodada."""
+    dist_a, dist_b = 2, INFINITO                        # B acabou de perder a rota direta; A ia via B
+    historico = [(dist_a, dist_b)]
+    for _ in range(max_rodadas):
+        # A alcança P via B; com poison reverse, A anuncia 16 para B
+        anuncio_de_a = INFINITO if poison_reverse else dist_a
+        dist_b = min(INFINITO, anuncio_de_a + 1)        # B só conhece P pelo que A diz
+        dist_a = min(INFINITO, dist_b + 1)              # A só conhece P pelo que B diz
+        historico.append((dist_a, dist_b))
+        if dist_a == dist_b == INFINITO:
+            break
+    return historico
+
+for pr in (False, True):
+    h = contagem(pr)
+    print("poison reverse" if pr else "sem poison reverse", f"({len(h) - 1} rodadas, {30 * (len(h) - 1)} s):")
+    print("   (A, B) =", h)</code></pre>
+
+    <h3 class="h6 mt-4">2. OSPF: áreas e resumos na Fig. 62</h3>
+    <pre class="code-block"><code>import heapq
+
+# a rede da Fig. 62 do livro, com custo 1 em todos os enlaces
+enlaces = [("R4", "R5"), ("R4", "RA"), ("RA", "RB"), ("RA", "RC"), ("RB", "RC"),
+           ("RB", "R7"), ("RC", "R8"), ("R7", "R8"), ("R7", "R9"), ("R8", "R10")]
+area = {"R4": 1, "R5": 1, "RA": 0, "RB": 0, "RC": 0, "R7": 2, "R8": 2, "R9": 2, "R10": 2}
+prefixos = {"2001:db8:aaaa:0::/64": "R5", "2001:db8:aaaa:1::/64": "R4",
+            "2001:db8:1234::/48": "R9", "2001:db8:5678::/48": "R10"}
+
+def dijkstra(origem, permitidos):
+    """Menores distâncias a partir de origem, só usando os roteadores permitidos."""
+    viz = {}
+    for a, b in enlaces:
+        if a in permitidos and b in permitidos:
+            viz.setdefault(a, []).append(b)
+            viz.setdefault(b, []).append(a)
+    dist, fila = {origem: 0}, [(0, origem)]
+    while fila:
+        d, r = heapq.heappop(fila)
+        if d > dist[r]:
+            continue
+        for v in viz.get(r, []):
+            if d + 1 &lt; dist.get(v, 99):
+                dist[v] = d + 1
+                heapq.heappush(fila, (d + 1, v))
+    return dist
+
+# dentro da área 2, mais as bordas RB e RC: os resumos que RB e RC anunciam no backbone
+area2 = {r for r in area if area[r] == 2} | {"RB", "RC"}
+for abr in ("RB", "RC"):
+    d = dijkstra(abr, area2)
+    print(abr, "anuncia", {p: d[dono] for p, dono in prefixos.items() if dono in area2})
+
+# RA escolhe, para cada prefixo da área 2, o resumo de menor custo total
+backbone = dijkstra("RA", {"RA", "RB", "RC"})
+for p in ("2001:db8:1234::/48", "2001:db8:5678::/48"):
+    custos = {abr: backbone[abr] + dijkstra(abr, area2)[prefixos[p]] for abr in ("RB", "RC")}
+    melhor = min(custos, key=custos.get)
+    print(f"RA alcança {p} via {melhor}, custo {custos[melhor]}")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.16 "Intradomain routing" (pág. 237–243 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 2453 — <a href="https://www.rfc-editor.org/rfc/rfc2453" target="_blank" rel="noopener noreferrer">RIP Version 2</a> e RFC 2080 — <a href="https://www.rfc-editor.org/rfc/rfc2080" target="_blank" rel="noopener noreferrer">RIPng for IPv6</a></li>
+        <li>RFC 2328 — <a href="https://www.rfc-editor.org/rfc/rfc2328" target="_blank" rel="noopener noreferrer">OSPF Version 2</a> e RFC 5340 — <a href="https://www.rfc-editor.org/rfc/rfc5340" target="_blank" rel="noopener noreferrer">OSPF for IPv6</a></li>
+        <li>RFC 5880 — <a href="https://www.rfc-editor.org/rfc/rfc5880" target="_blank" rel="noopener noreferrer">Bidirectional Forwarding Detection (BFD)</a> e RFC 2991 — <a href="https://www.rfc-editor.org/rfc/rfc2991" target="_blank" rel="noopener noreferrer">Multipath Issues in Unicast and Multicast Next-Hop Selection</a></li>
+        <li>Wikipedia — <a href="https://pt.wikipedia.org/wiki/Routing_Information_Protocol" target="_blank" rel="noopener noreferrer">RIP</a>, <a href="https://pt.wikipedia.org/wiki/Open_Shortest_Path_First" target="_blank" rel="noopener noreferrer">OSPF</a> e <a href="https://en.wikipedia.org/wiki/Equal-cost_multi-path_routing" target="_blank" rel="noopener noreferrer">Equal-cost multi-path routing</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-23/index.html" class="text-muted text-decoration-none">← Capítulo 23</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 24</span>
+            <a href="../capitulo-25/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 25 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap24.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

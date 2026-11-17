@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 37 — Prática: análise de capturas de pacotes | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Exercícios da seção 4.11: a captura do livro lida no tcpdump, números de sequência relativos e absolutos, o Follow TCP stream e o flow graph do Wireshark e os filtros de exibição.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="37" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 37 · Parte 3: Prática · Seção 4.11</span>
+        <h1 class="display-5 mb-3">Prática: análise de capturas de pacotes</h1>
+        <p class="lead mb-4">
+            Neste capítulo, você lê a captura de pacotes impressa no livro como um analista de rede: identifica cada segmento, converte números de sequência, mede tempos e filtra o que interessa.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#tcpdump">1. O tcpdump linha a linha</a>
+                    <a class="nav-link" href="#relativos">2. Números relativos</a>
+                    <a class="nav-link" href="#wireshark">3. Follow stream e flow graph</a>
+                    <a class="nav-link" href="#filtros">4. Filtros de exibição</a>
+                    <a class="nav-link" href="#exercicios-cap37">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Analisando uma captura de pacotes</h2>
+    <p>
+        A seção 4.11 do livro mostra o tcpdump e o Wireshark analisando a captura de um <code>curl -6</code> (pág. 316–319 do PDF). As atividades usam
+        exatamente essa captura, transcrita do livro. O formato das atividades está explicado no <a href="../capitulo-27/index.html">Capítulo 27</a>.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Ler a saída do <strong>tcpdump</strong>: endereços, portas, flags, números de sequência, janela e opções.</li>
+                <li>Usar o <strong>flow graph</strong> e os <strong>filtros de exibição</strong> para medir tempos e isolar segmentos.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o TCP do <a href="../capitulo-20/index.html">Capítulo 20</a> e o HTTP do <a href="../capitulo-12/index.html">Capítulo 12</a>. O capítulo cobre a seção 4.11 do livro (pág. 316–319 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small mt-3 mb-1">Cada atividade tem cinco etapas: <strong>Relembre</strong>, <strong>O que o livro pede</strong>,
+        <strong>Experimente</strong>, <strong>Resolução comentada</strong> (fechada, para você tentar antes) e <strong>Fixação</strong>.</p>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de uma atividade, você ganha a medalha dela.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. tcpdump -->
+<section id="tcpdump" class="chapter-section" data-conceito="tcpdump" data-titulo="O tcpdump linha a linha">
+    <span class="kicker">Atividade 1</span>
+    <h2 class="section-title">O tcpdump linha a linha</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Uma conexão TCP começa com SYN, SYN+ACK e ACK, troca dados e confirmações e termina com FINs. Antes disso, o cliente costuma resolver o nome do
+        servidor no DNS. Veja a <a href="../capitulo-20/index.html#abertura">abertura</a> e a <a href="../capitulo-20/index.html#liberacao">liberação</a> no
+        Capítulo 20 e o <a href="../capitulo-12/index.html#http">HTTP no Capítulo 12</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p>
+        Ferramentas de captura guardam todos os pacotes de um enlace (com privilégios de administrador) e mostram os seus campos. O tcpdump é a mais
+        conhecida, em modo texto. O livro captura o que acontece em <code>curl -6 http://www.computer-networking.info</code>, que recebe uma página
+        mandando usar https, e lê a captura com <code>tcpdump -n -r simple-trace.pcap</code> (a opção -n desliga a resolução reversa dos endereços). A
+        captura começa com a consulta DNS, por IPv4, ao resolvedor local, segue com a abertura em três vias, o pedido de 92 bytes, a resposta de 457
+        bytes e termina com três segmentos de encerramento (pág. 316–317 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="leitor-captura"></div>
+    <p class="small text-muted">As três linhas do encerramento aparecem embaralhadas no PDF, por causa da diagramação; aqui estão na ordem certa.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>Linhas 1 e 2: consulta DNS de id 38133 por um registro AAAA (o curl usou -6), e a resposta com dois CNAME e o AAAA do servidor. O DNS foi
+                por IPv4, o padrão daquele host.</li>
+            <li>Linhas 3 a 5: a abertura. Os SYN levam as opções MSS 1440, SACK permitido, timestamps e escala de janela 7.</li>
+            <li>Linhas 6 a 9: o pedido (92 bytes) e o ack do servidor; a resposta (457 bytes, um 302 Found) e o ack do cliente.</li>
+            <li>Linhas 10 a 12: o cliente manda FIN primeiro; o servidor responde com o seu FIN, que já confirma o do cliente (ack 94); o cliente
+                confirma (ack 459). Três segmentos em vez de quatro, porque o servidor juntou o ack e o FIN.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Desliga a tradução dos endereços em nomes|Mostra os números de sequência absolutos|Lê a captura de um arquivo" data-answer="0" data-explain="Sem -n, o tcpdump faz consultas DNS reversas para mostrar nomes no lugar dos endereços; -S é que mostra números absolutos, e -r lê de um arquivo." data-hint="n de numérico.">
+        <p class="fw-semibold mb-2">O que faz a opção -n do tcpdump?</p>
+    </div>
+</section>
+
+<!-- 2. Relativos -->
+<section id="relativos" class="chapter-section" data-conceito="relativos" data-titulo="Números relativos">
+    <span class="kicker">Atividade 2</span>
+    <h2 class="section-title">Números de sequência absolutos e relativos</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Cada lado escolhe um número inicial (ISN) ao acaso, e o SYN consome um número de sequência: o primeiro byte de dados é ISN + 1. Veja a
+        <a href="../capitulo-20/index.html#abertura">abertura no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p>
+        No primeiro segmento, o tcpdump mostra o número inicial do cliente, 2681184541; no segundo, o do servidor, 3804204915, e o ack 2681184542. A partir
+        do terceiro segmento, ele passa a mostrar números relativos: o ack 1 do terceiro segmento confirma o SYN do servidor, e o primeiro byte do pedido
+        tem número relativo 1 (pág. 316–317 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="seq-relativos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <p class="mt-2 mb-0">
+            Absoluto = ISN de quem mandou os bytes + relativo. O ack 93 do servidor conta bytes do cliente: 2681184541 + 93 = 2681184634. O FIN do servidor,
+            seq 458, conta bytes do servidor: 3804204915 + 458 = 3804205373. Os números relativos facilitam a leitura: "seq 1:93" diz na hora que o pedido tem
+            92 bytes. Com <code>tcpdump -S</code>, a saída mostra os absolutos.
+        </p>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Porque o SYN consome um número de sequência|Porque o tcpdump começa a contar do 1|Porque o byte 0 é reservado" data-answer="0" data-explain="O SYN ocupa o número ISN; o primeiro byte de dados é ISN + 1, que aparece como 1 em números relativos." data-hint="O que ocupou o número ISN?">
+        <p class="fw-semibold mb-2">Por que o primeiro byte de dados tem número relativo 1, e não 0?</p>
+    </div>
+</section>
+
+<!-- 3. Wireshark -->
+<section id="wireshark" class="chapter-section" data-conceito="wireshark" data-titulo="Follow stream e flow graph">
+    <span class="kicker">Atividade 3</span>
+    <h2 class="section-title">Follow TCP stream e o flow graph</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        O tempo entre um segmento e a sua resposta mede o RTT; a janela anunciada no cabeçalho é multiplicada por 2<sup>wscale</sup>, combinado na
+        abertura. Veja as <a href="../capitulo-20/index.html#janelas">janelas</a> e o <a href="../capitulo-20/index.html#rto">RTT e o rto</a> no Capítulo 20.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
+    <p>
+        O Wireshark, derivado do Ethereal, mostra os mesmos campos numa interface gráfica: a lista de pacotes em cima, os campos do pacote escolhido no
+        meio e os bytes em hexadecimal embaixo (Fig. 8). Ele também analisa: o <em>Follow TCP stream</em>, no menu Analyze, junta e mostra tudo o que a
+        conexão carregou, útil para ler os comandos de uma sessão HTTP ou SMTP; o <em>flow graph</em>, no menu Statistics, desenha um diagrama de
+        sequência dos pacotes (Fig. 9).
+    </p>
+    <p data-livro="4.11-wireshark">O livro pede: use o Wireshark para analisar a captura simple-trace.pcap descrita acima (pág. 319 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="fluxo-captura"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li>RTT: 15:50:39.830043 − 15:50:39.829353 = 0,690 ms (o servidor está na mesma rede do campus).</li>
+            <li>Processamento: o pedido chega em .830258 e a resposta sai em .841255, quase 11 ms depois, bem mais que o RTT: o tempo é do servidor web.</li>
+            <li>Janela: 225 × 2<sup>7</sup> = 28 800 bytes, o mesmo valor que o cliente anunciou no SYN (win 28800), onde a escala ainda não vale.</li>
+            <li>O ack do servidor ao pedido chega 0,49 ms depois do pedido: o servidor confirmou antes de ter a resposta pronta.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="Porque a escala de janela só vale depois da abertura|Porque o cliente diminuiu a janela|Porque a janela é medida em segmentos" data-answer="0" data-explain="No SYN, a janela vai sem escala (28800); depois, os 16 bits do campo são multiplicados por 2^7 = 128, e 225 × 128 = 28 800 (RFC 7323)." data-hint="Faça 225 × 128.">
+        <p class="fw-semibold mb-2">O cliente anuncia win 28800 no SYN e win 225 logo depois. Por quê?</p>
+    </div>
+</section>
+
+<!-- 4. Filtros -->
+<section id="filtros" class="chapter-section" data-conceito="filtros" data-titulo="Filtros de exibição">
+    <span class="kicker">Atividade 4</span>
+    <h2 class="section-title">Filtros de exibição</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
+    <p>
+        Numa captura grande, os filtros de exibição do Wireshark mostram só os pacotes que interessam, por protocolo, porta, flags ou tamanho. Veja o
+        <a href="../capitulo-20/index.html#tcp-cabecalho">cabeçalho do TCP no Capítulo 20</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
+    <p data-livro="4.11-filtros">
+        Ao analisar capturas com o Wireshark, é útil usar filtros de exibição, que mostram só os pacotes que satisfazem um critério; a wiki do Wireshark
+        tem uma página sobre eles. Com isso, o livro propõe analisar uma captura de dois minutos (pág. 319 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        A captura de dois minutos não faz parte do PDF (ficava no INGInious). Os filtros desta atividade usam a captura curta do livro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
+    <div class="demo-box" data-sim="filtros-exibicao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Resolução comentada</h3>
+    <details class="mb-3">
+        <summary><span class="extra-tag">Resolução (não está no livro)</span> Abrir a resolução</summary>
+        <ul class="mt-2 mb-0">
+            <li><code>tcp.len &gt; 0</code> mostra os 2 segmentos com dados (6 e 8). <code>tcp.flags.syn == 1</code> mostra a abertura (3 e 4);
+                <code>tcp.flags.fin == 1</code>, os dois FINs (10 e 11); <code>dns</code>, as linhas 1 e 2.</li>
+            <li>Numa captura de dois minutos, comece por <code>tcp.flags.syn == 1 &amp;&amp; tcp.flags.ack == 0</code> para contar as conexões abertas, e por
+                <code>dns</code> para ver que nomes foram resolvidos. No Wireshark de verdade, Statistics &gt; Conversations resume as conexões.</li>
+        </ul>
+    </details>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <div class="demo-box mini-quiz" data-options="tcp.flags.syn == 1 &amp;&amp; tcp.flags.ack == 0|tcp.flags.syn == 1|tcp.flags.ack == 1" data-answer="0" data-explain="Só o primeiro segmento de cada abertura tem SYN sem ACK; o SYN+ACK do servidor também tem SYN ligado." data-hint="O SYN+ACK também tem o SYN ligado.">
+        <p class="fw-semibold mb-2">Que filtro mostra uma linha por conexão aberta, só com o primeiro segmento da abertura?</p>
+    </div>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap37" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Básico:</strong> Na captura do livro, quantos segmentos TCP o cliente manda e quantos o servidor manda?
+            <details><summary>Ver solução</summary><p class="mb-0">O cliente manda 6 (SYN, ACK, pedido, ACK, FIN e o último ACK) e o servidor, 4 (SYN+ACK, ACK, resposta e FIN).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Qual é o número de sequência absoluto do FIN do cliente, e por que o servidor responde com ack 94?
+            <details><summary>Ver solução</summary><p class="mb-0">2681184541 + 93 = 2681184634. O FIN consome um número, como o SYN: o próximo esperado é o relativo 94.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> Quanto tempo vai do primeiro FIN ao último ACK?
+            <details><summary>Ver solução</summary><p class="mb-0">15:50:39.862265 − 15:50:39.843259 = 19,006 ms: o servidor demorou para mandar o seu FIN.</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> Quantos bytes a conexão pôs no fio, contando cabeçalhos IPv6 (40 bytes) e TCP? Os SYNs têm 20 bytes de opções; os outros segmentos, 12 (nop, nop e timestamps).
+            <details><summary>Ver solução</summary><p class="mb-0">SYNs: 2 × (40 + 20 + 20) = 160; os outros 8: 8 × (40 + 32) = 576; dados: 92 + 457 = 549. Total: 1285 bytes, dos quais só 42,7% são dados.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Três trechos em Python que rodam no navegador, todos sobre a captura do livro. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Lendo o tcpdump com expressões regulares</h3>
+    <pre class="code-block"><code>CAPTURA = """
+15:50:39.829353 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [S], seq 2681184541, win 28800, options [mss 1440,sackOK,TS val 609493767 ecr 0,nop,wscale 7], length 0
+15:50:39.830043 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [S.], seq 3804204915, ack 2681184542, win 28560, options [mss 1440,sackOK,TS val 1646122290 ecr 609493767,nop,wscale 7], length 0
+15:50:39.830074 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 1, win 225, options [nop,nop,TS val 609493768 ecr 1646122290], length 0
+15:50:39.830258 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [P.], seq 1:93, ack 1, win 225, options [nop,nop,TS val 609493768 ecr 1646122290], length 92: HTTP: GET / HTTP/1.1
+15:50:39.830750 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [.], ack 93, win 224, options [nop,nop,TS val 1646122290 ecr 609493768], length 0
+15:50:39.841255 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [P.], seq 1:458, ack 93, win 224, options [nop,nop,TS val 1646122301 ecr 609493768], length 457: HTTP: HTTP/1.1 302 Found
+15:50:39.841270 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 458, win 234, options [nop,nop,TS val 609493779 ecr 1646122301], length 0
+15:50:39.843259 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [F.], seq 93, ack 458, win 234, options [nop,nop,TS val 609493781 ecr 1646122301], length 0
+15:50:39.862246 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [F.], seq 458, ack 94, win 224, options [nop,nop,TS val 1646122317 ecr 609493781], length 0
+15:50:39.862265 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 459, win 234, options [nop,nop,TS val 609493800 ecr 1646122317], length 0
+""".strip().splitlines()
+
+import re
+
+# A parte TCP da captura do livro (pág. 316-317), lida com uma expressão regular.
+PADRAO = re.compile(r"^(\S+) IP6 \S+\.(\d+) &gt; \S+\.(\d+): Flags \[([^\]]+)\]"
+                    r"(?:, seq (\d+)(?::\d+)?)?(?:, ack (\d+))?, win (\d+).*length (\d+)")
+
+def le(linha):
+    hora, porta_o, porta_d, flags, seq, ack, win, tam = PADRAO.match(linha).groups()
+    return {"t": float(hora.split(":")[2]), "de": int(porta_o), "flags": flags,
+            "seq": seq and int(seq), "ack": ack and int(ack), "win": int(win), "len": int(tam)}
+
+segs = [le(l) for l in CAPTURA]
+for i, s in enumerate(segs, 3):          # as linhas 1 e 2 da captura são o DNS
+    sentido = "C -&gt; S" if s["de"] == 34598 else "S -&gt; C"
+    print(f"{i:2} {sentido} [{s['flags']:2}] seq={s['seq']} ack={s['ack']} win={s['win']} len={s['len']}")</code></pre>
+    <h3 class="h6 mt-4">2. Números absolutos e bytes</h3>
+    <pre class="code-block"><code>CAPTURA = """
+15:50:39.829353 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [S], seq 2681184541, win 28800, options [mss 1440,sackOK,TS val 609493767 ecr 0,nop,wscale 7], length 0
+15:50:39.830043 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [S.], seq 3804204915, ack 2681184542, win 28560, options [mss 1440,sackOK,TS val 1646122290 ecr 609493767,nop,wscale 7], length 0
+15:50:39.830074 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 1, win 225, options [nop,nop,TS val 609493768 ecr 1646122290], length 0
+15:50:39.830258 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [P.], seq 1:93, ack 1, win 225, options [nop,nop,TS val 609493768 ecr 1646122290], length 92: HTTP: GET / HTTP/1.1
+15:50:39.830750 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [.], ack 93, win 224, options [nop,nop,TS val 1646122290 ecr 609493768], length 0
+15:50:39.841255 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [P.], seq 1:458, ack 93, win 224, options [nop,nop,TS val 1646122301 ecr 609493768], length 457: HTTP: HTTP/1.1 302 Found
+15:50:39.841270 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 458, win 234, options [nop,nop,TS val 609493779 ecr 1646122301], length 0
+15:50:39.843259 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [F.], seq 93, ack 458, win 234, options [nop,nop,TS val 609493781 ecr 1646122301], length 0
+15:50:39.862246 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [F.], seq 458, ack 94, win 224, options [nop,nop,TS val 1646122317 ecr 609493781], length 0
+15:50:39.862265 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 459, win 234, options [nop,nop,TS val 609493800 ecr 1646122317], length 0
+""".strip().splitlines()
+
+import re
+
+# Números absolutos a partir dos relativos, e bytes de dados em cada sentido.
+ISN_CLIENTE, ISN_SERVIDOR = 2681184541, 3804204915
+total = {"cliente": 0, "servidor": 0}
+for l in CAPTURA[2:]:                    # do terceiro segmento em diante, o tcpdump usa números relativos
+    do_cliente = ".34598 &gt;" in l
+    seq = re.search(r"seq (\d+)", l)
+    ack = re.search(r"ack (\d+)", l)
+    total["cliente" if do_cliente else "servidor"] += int(re.search(r"length (\d+)", l).group(1))
+    s = int(seq.group(1)) + (ISN_CLIENTE if do_cliente else ISN_SERVIDOR) if seq else None
+    a = int(ack.group(1)) + (ISN_SERVIDOR if do_cliente else ISN_CLIENTE) if ack else None
+    print("C-&gt;S" if do_cliente else "S-&gt;C", "seq abs =", s, " ack abs =", a)
+print("bytes de dados:", total)</code></pre>
+    <h3 class="h6 mt-4">3. Tempos e filtros</h3>
+    <pre class="code-block"><code>CAPTURA = """
+15:50:39.829353 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [S], seq 2681184541, win 28800, options [mss 1440,sackOK,TS val 609493767 ecr 0,nop,wscale 7], length 0
+15:50:39.830043 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [S.], seq 3804204915, ack 2681184542, win 28560, options [mss 1440,sackOK,TS val 1646122290 ecr 609493767,nop,wscale 7], length 0
+15:50:39.830074 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 1, win 225, options [nop,nop,TS val 609493768 ecr 1646122290], length 0
+15:50:39.830258 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [P.], seq 1:93, ack 1, win 225, options [nop,nop,TS val 609493768 ecr 1646122290], length 92: HTTP: GET / HTTP/1.1
+15:50:39.830750 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [.], ack 93, win 224, options [nop,nop,TS val 1646122290 ecr 609493768], length 0
+15:50:39.841255 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [P.], seq 1:458, ack 93, win 224, options [nop,nop,TS val 1646122301 ecr 609493768], length 457: HTTP: HTTP/1.1 302 Found
+15:50:39.841270 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 458, win 234, options [nop,nop,TS val 609493779 ecr 1646122301], length 0
+15:50:39.843259 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [F.], seq 93, ack 458, win 234, options [nop,nop,TS val 609493781 ecr 1646122301], length 0
+15:50:39.862246 IP6 2001:6a8:308f:8:0:82ff:fe68:e48c.80 &gt; 2001:6a8:308f:9:0:82ff:fe68:e51c.34598: Flags [F.], seq 458, ack 94, win 224, options [nop,nop,TS val 1646122317 ecr 609493781], length 0
+15:50:39.862265 IP6 2001:6a8:308f:9:0:82ff:fe68:e51c.34598 &gt; 2001:6a8:308f:8:0:82ff:fe68:e48c.80: Flags [.], ack 459, win 234, options [nop,nop,TS val 609493800 ecr 1646122317], length 0
+""".strip().splitlines()
+
+# Tempos e filtros: o que o flow graph e os filtros do Wireshark mostram.
+def hora(l):
+    return float(l.split()[0].split(":")[2])
+
+t = [hora(l) for l in CAPTURA]
+print(f"RTT (SYN -&gt; SYN+ACK): {(t[1] - t[0]) * 1000:.3f} ms")
+print(f"pedido -&gt; resposta do servidor: {(t[5] - t[3]) * 1000:.3f} ms")
+print(f"duração da conexão (SYN -&gt; último ACK): {(t[-1] - t[0]) * 1000:.3f} ms")
+
+def filtro(condicao):
+    return [i + 3 for i, l in enumerate(CAPTURA) if condicao(l)]   # numeração da captura completa
+
+print("com dados:", filtro(lambda l: " length 0" not in l))
+print("FIN:", filtro(lambda l: "Flags [F" in l))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 4.11 "Analyzing packet traces" (pág. 316–319 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>Página de manual do <a href="https://www.tcpdump.org/manpages/tcpdump.1.html" target="_blank" rel="noopener noreferrer">tcpdump(1)</a> e a <a href="https://wiki.wireshark.org/DisplayFilters" target="_blank" rel="noopener noreferrer">wiki do Wireshark sobre filtros de exibição</a></li>
+        <li>RFC 9293 — <a href="https://www.rfc-editor.org/rfc/rfc9293" target="_blank" rel="noopener noreferrer">Transmission Control Protocol</a> e RFC 7323 — <a href="https://www.rfc-editor.org/rfc/rfc7323" target="_blank" rel="noopener noreferrer">TCP Extensions for High Performance</a> (escala de janela e timestamps)</li>
+        <li>Documentação do Python — <a href="https://docs.python.org/3/library/re.html" target="_blank" rel="noopener noreferrer">re</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-36/index.html" class="text-muted text-decoration-none">← Capítulo 36</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 37</span>
+            <a href="../capitulo-38/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 38 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap37.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

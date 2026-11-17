@@ -1,16 +1,16 @@
 /* Estilos comuns aos capítulos 3+ (os capítulos 1 e 2 mantêm o <style> próprio). */
 :root {
-    --accent: #0d6efd;
+    --accent: #0a58ca;   /* #0d6efd e #6c757d ficavam abaixo de 4,5:1 sobre #f1f3f5 */
     --text: #212529;
-    --muted: #6c757d;
+    --muted: #565e64;
     --background: #f8f9fa;
     --surface: #ffffff;
     --surface-2: #f1f3f5;
     --line: #dee2e6;
     --code-bg: #1e1e2e;
     --code-fg: #e6e6e6;
-    --ok: #198754;
-    --bad: #dc3545;
+    --ok: #146c43;
+    --bad: #b02a37;
     --warn: #cc8a00;
     --info: #6610f2;
 }
@@ -101,7 +101,7 @@ footer { border-top: 1px solid var(--line); background: var(--surface); }
     background: #e7f1ff; color: #0a58ca; font: 600 .8rem ui-monospace, Consolas, monospace; border: 1px solid transparent;
 }
 .byte-cell small { font-weight: 400; font-size: .68rem; opacity: .8; }
-.byte-cell.ctrl { background: #fff3cd; color: #997404; border-color: #ffda6a; }
+.byte-cell.ctrl { background: #fff3cd; color: #7a5c03; border-color: #ffda6a; }
 .byte-cell.bad { background: #f8d7da; color: #b02a37; }
 .byte-cell.ok { background: #d1e7dd; color: #146c43; }
 .byte-cell.muted { background: var(--surface-2); color: var(--muted); }
@@ -203,3 +203,6 @@ section.chapter-section { overflow-wrap: break-word; }
     .bit-grid .pos { font-size: .45rem; overflow: visible; }
     .chat-msg { max-width: 95%; }
 }
+
+/* Menus de capítulos longos (a Parte 2 tem 18 itens): rolagem dentro do menu */
+.navbar .dropdown-menu { max-height: min(70vh, 34rem); overflow-y: auto; }

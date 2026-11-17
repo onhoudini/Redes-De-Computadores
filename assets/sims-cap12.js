@@ -1,494 +1,360 @@
-/* Simulações do Capítulo 12 — UDP e TCP (seções 3.10 a 3.12 do livro).
- * Cada uma é registrada em Redes.registrar. Os modelos de tempo são simplificados e dizem isso na tela. */
+/* Simulações do Capítulo 12 — O protocolo HTTP (seção 3.4 do livro).
+ * Cada uma é registrada em Redes.registrar. Os exemplos vêm do livro; os demais usam
+ * nomes reservados para documentação (RFC 2606). */
 (function () {
     "use strict";
     var R = window.Redes;
     var u = R.util, el = u.el;
 
-    function hex4(n) { return n.toString(16).padStart(4, "0"); }
     function hex2(n) { return n.toString(16).padStart(2, "0"); }
-    function num(n, casas) { return n.toLocaleString("pt-BR", { minimumFractionDigits: casas || 0, maximumFractionDigits: casas || 0 }); }
     function entrada(valor, rotulo) {
         return el("input", { class: "form-control form-control-sm mono", value: valor || "", "aria-label": rotulo || null, spellcheck: "false", autocomplete: "off" });
+    }
+    function faixa(rotulo, min, max, passo, valor, unidade) {
+        var input = el("input", { type: "range", class: "form-range", min: min, max: max, step: passo, value: valor, id: u.novoId("faixa") });
+        var mostra = el("span", { class: "fw-semibold" });
+        function atualiza() { mostra.textContent = input.value + (unidade || ""); }
+        input.addEventListener("input", atualiza);
+        atualiza();
+        var linha = el("div", { class: "mb-2" }, el("label", { class: "form-label small mb-0 d-flex justify-content-between", for: input.id }, rotulo, mostra), input);
+        return { input: input, mostra: mostra, linha: linha };
     }
     function caixa(rotulo, marcada) {
         var c = el("input", { type: "checkbox", class: "form-check-input", id: u.novoId("cx"), checked: !!marcada });
         return { input: c, linha: el("div", { class: "form-check" }, c, el("label", { class: "form-check-label small", for: c.id }, rotulo)) };
     }
-    function faixa(rotulo, min, max, passo, valor, formata) {
-        var input = el("input", { type: "range", class: "form-range", min: min, max: max, step: passo, value: valor, id: u.novoId("faixa") });
-        var mostra = el("span", { class: "fw-semibold" });
-        function atualiza() { mostra.textContent = formata ? formata(Number(input.value)) : input.value; }
-        input.addEventListener("input", atualiza);
-        atualiza();
-        return { input: input, mostra: mostra, linha: el("div", { class: "mb-2" }, el("label", { class: "form-label small mb-0 d-flex justify-content-between", for: input.id }, rotulo, mostra), input) };
-    }
-    function desafioNumero(raiz, id, pontos, titulo, pergunta, certo, explica, dica) {
-        var resp = el("input", { type: "number", step: "any", class: "form-control form-control-sm", "aria-label": "Resposta" });
-        var fb = u.feedback();
-        var concluir = R.desafio(raiz, id, pontos, titulo);
-        return el("div", null,
-            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (" + pontos + " pts): " + pergunta),
-            el("div", { class: "d-flex gap-2" }, resp, u.botao("Conferir", "btn-primary", function () {
-                var ok = certo(Number(resp.value));
-                u.marca(fb, ok, ok ? explica : dica);
-                if (ok) concluir();
-            })), fb);
-    }
+    function num(n, casas) { return n.toLocaleString("pt-BR", { minimumFractionDigits: casas || 0, maximumFractionDigits: casas || 0 }); }
 
-    /* ---------- checksum da Internet (RFC 1071) ---------- */
-    var ORIGEM = { "2001:db8::1": [0x2001, 0x0db8, 0, 0, 0, 0, 0, 1], "2001:db8::9": [0x2001, 0x0db8, 0, 0, 0, 0, 0, 9] };
-    var DESTINO = [0x2001, 0x0db8, 0, 0, 0, 0, 0, 2];
-    function palavras(bytes) { var p = []; for (var i = 0; i < bytes.length; i += 2) p.push((bytes[i] << 8) | (bytes[i + 1] || 0)); return p; }
-    function somaInternet(ws) { var t = 0; ws.forEach(function (w) { t += w; t = (t & 0xffff) + (t >>> 16); }); return t; }
-    function palavrasUdp(origem, carga, ck) {
-        var tam = 8 + carga.length;
-        var pseudo = ORIGEM[origem].concat(DESTINO, [tam >>> 16, tam & 0xffff, 0, 17]);
-        return { pseudo: pseudo, cabecalho: [1234, 5678, tam, ck], dados: palavras(carga) };
-    }
-    function checksumUdp(origem, carga) {
-        var p = palavrasUdp(origem, carga, 0);
-        return 0xffff - somaInternet(p.pseudo.concat(p.cabecalho, p.dados));
-    }
-    R.checksumUdp = function (texto) { return checksumUdp("2001:db8::1", Array.from(new TextEncoder().encode(texto))); };
-
-    /* ------------------------------------------------------------------
-     * 1. O checksum do UDP (pág. 186–187 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("checksum-udp", function (raiz) {
-        var dadosEnv = entrada("ABCD", "Dados enviados");
-        var grade = el("div", { class: "mt-2" });
-        var resumo = el("p", { class: "mono small mt-2 mb-0" });
-        var dadosRec = entrada("ABCD", "Dados recebidos");
-        var origemRec = el("select", { class: "form-select form-select-sm" }, el("option", { value: "2001:db8::1" }, "2001:db8::1 (a verdadeira)"), el("option", { value: "2001:db8::9" }, "2001:db8::9 (outra)"));
-        var verif = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
-        var fb = u.feedback();
-        var concluir = R.desafio(raiz, "checksum-fraco", 15, "Achar uma alteração que o checksum não detecta");
-        var ck = 0;
-        function bytes(inp) { return Array.from(new TextEncoder().encode(inp.value)); }
-        function linha(rotulo, ws, classe) {
-            return el("div", { class: "d-flex flex-wrap align-items-center" }, el("span", { class: "small text-muted me-2", style: "min-width:7.5rem" }, rotulo),
-                ws.map(function (w) { return el("span", { class: "byte-cell " + (classe || ""), style: "min-width:3.1rem" }, hex4(w)); }));
-        }
-        function calcula() {
-            var c = bytes(dadosEnv);
-            ck = checksumUdp("2001:db8::1", c);
-            var p = palavrasUdp("2001:db8::1", c, ck);
-            var soma = somaInternet(p.pseudo.concat(p.cabecalho.slice(0, 3), [0], p.dados));
-            grade.replaceChildren(
-                linha("pseudo-cabeçalho", p.pseudo, "muted"),
-                linha("cabeçalho UDP", p.cabecalho.slice(0, 3).concat([ck]), "ctrl"),
-                linha("dados", p.dados, "ok"));
-            resumo.textContent = "soma (com o checksum zerado) = 0x" + hex4(soma) + " → checksum = 0xffff − soma = 0x" + hex4(ck);
-            confere();
-        }
-        function confere() {
-            var c = bytes(dadosRec);
-            var p = palavrasUdp(origemRec.value, c, ck);
-            var total = somaInternet(p.pseudo.concat(p.cabecalho, p.dados));
-            var ok = total === 0xffff;
-            verif.replaceChildren("O receptor soma tudo, inclusive o checksum recebido: ", el("strong", { class: "mono" }, "0x" + hex4(total)),
-                ok ? " = 0xffff → segmento aceito." : " ≠ 0xffff → segmento descartado (erro detectado).");
-            var mudou = dadosRec.value !== dadosEnv.value;
-            if (ok && mudou && origemRec.value === "2001:db8::1") { u.marca(fb, true, "Alteração não detectada! A soma não depende da ordem das palavras de 16 bits, e erros que se compensam passam despercebidos. Por isso o checksum só pega erros de transmissão comuns, não ataques."); concluir(); }
-            else if (!ok && origemRec.value !== "2001:db8::1" && !mudou) { fb.className = "small mt-2 mb-0"; fb.textContent = "O pseudo-cabeçalho entra na soma: um segmento entregue com outro endereço de origem é descartado."; }
-            else fb.textContent = "";
-        }
-        dadosEnv.addEventListener("input", function () { dadosRec.value = dadosEnv.value; calcula(); });
-        [dadosRec, origemRec].forEach(function (c) { c.addEventListener("input", confere); c.addEventListener("change", confere); });
-        raiz.append(el("p", { class: "small mb-2" }, "Um segmento UDP de 2001:db8::1, porta 1234, para 2001:db8::2, porta 5678. O checksum soma, em complemento de um, as palavras de 16 bits do pseudo-cabeçalho, do cabeçalho e dos dados."),
-            u.campo("Dados enviados", dadosEnv), grade, resumo,
-            el("div", { class: "row g-2 mt-2" }, el("div", { class: "col-sm-6" }, u.campo("Dados que chegaram (altere à vontade)", dadosRec)), el("div", { class: "col-sm-6" }, u.campo("Endereço de origem no pacote recebido", origemRec))),
-            verif, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): mude os dados recebidos de um jeito que o receptor NÃO perceba."));
-        calcula();
-    });
-
-    /* ------------------------------------------------------------------
-     * 2. Lendo um cabeçalho TCP (pág. 187–194 do PDF)
-     * ------------------------------------------------------------------ */
-    var FLAGS = ["FIN", "SYN", "RST", "PSH", "ACK", "URG"];
-    function leTcp(bytes) {
-        if (bytes.length < 20) return null;
-        var dv = new DataView(new Uint8Array(bytes).buffer);
-        var thl = (bytes[12] >> 4) * 4;
-        var r = { portaO: dv.getUint16(0), portaD: dv.getUint16(2), seq: dv.getUint32(4), ack: dv.getUint32(8), thl: thl,
-            flags: FLAGS.filter(function (f, i) { return bytes[13] & (1 << i); }), janela: dv.getUint16(14), checksum: dv.getUint16(16), opcoes: [] };
-        var i = 20;
-        while (i < thl && i < bytes.length) {
-            var tipo = bytes[i];
-            if (tipo === 0) { r.opcoes.push("fim da lista (0)"); break; }
-            if (tipo === 1) { r.opcoes.push("NOP (1)"); i++; continue; }
-            var tam = bytes[i + 1], v = bytes.slice(i + 2, i + tam);
-            if (tipo === 2) r.opcoes.push("MSS (2) = " + ((v[0] << 8) | v[1]) + " bytes");
-            else if (tipo === 3) r.opcoes.push("escala de janela (3) = " + v[0]);
-            else if (tipo === 4) r.opcoes.push("SACK permitido (4)");
-            else if (tipo === 8) r.opcoes.push("timestamps (8)");
-            else r.opcoes.push("tipo " + tipo + ", " + tam + " bytes");
-            i += Math.max(tam, 2);
+    /* ---------- URI segundo a RFC 3986 (apêndice B) ---------- */
+    var PORTAS = { http: 80, https: 443, ftp: 21, telnet: 23, ssh: 22 };
+    function leURI(texto) {
+        var m = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?$/.exec(String(texto || "").trim());
+        if (!m) return null;
+        var r = { esquema: m[2] || "", autoridade: m[4], caminho: m[5] || "", consulta: m[7], fragmento: m[9], usuario: undefined, host: undefined, porta: undefined };
+        if (r.autoridade !== undefined) {
+            var a = r.autoridade, arroba = a.lastIndexOf("@");
+            if (arroba >= 0) { r.usuario = a.slice(0, arroba); a = a.slice(arroba + 1); }
+            var mm = /^(\[[^\]]*\]|[^:]*)(:(\d*))?$/.exec(a);
+            if (mm) { r.host = mm[1].replace(/^\[|\]$/g, ""); r.porta = mm[3]; }
+            else r.host = a;
         }
         return r;
     }
-    R.leTcp = leTcp;
+    R.leURI = leURI;
 
-    R.registrar("cabecalho-tcp", function (raiz) {
-        var AMOSTRAS = [
-            ["SYN do cliente", "c0 00 01 bb 12 34 56 78 00 00 00 00 80 02 fa f0 00 00 00 00 02 04 05 a0 01 03 03 07 04 02 00 00"],
-            ["SYN+ACK do servidor", "01 bb c0 00 9a bc de f0 12 34 56 79 70 12 fe 88 00 00 00 00 02 04 05 b4 01 03 03 07"],
-            ["FIN+ACK", "c0 00 01 bb 12 34 5a 00 9a bc f0 00 50 11 01 f6 00 00 00 00"]
+    /* ------------------------------------------------------------------
+     * 1. Dissecando uma URI (pág. 149–150 do PDF)
+     * ------------------------------------------------------------------ */
+    R.registrar("dissecar-uri", function (raiz) {
+        var EXEMPLOS = [
+            "http://tools.ietf.org/html/rfc3986.html",
+            "mailto:infobot@example.com?subject=current-issue",
+            "http://docs.python.org/library/basehttpserver.html?highlight=http#BaseHTTPServer.BaseHTTPRequestHandler",
+            "telnet://[2001:db8:3080:3::2]:2323/",
+            "ftp://cnn.example.com&story=breaking_news@10.0.0.1/top_story.htm",
+            "http://alice:segredo@www.example.com:8080/docs/caf%C3%A9.html?x=1#fim"
         ];
-        var campo = el("textarea", { class: "form-control form-control-sm mono", rows: 2, "aria-label": "Cabeçalho TCP em hexadecimal", spellcheck: "false" });
-        campo.value = AMOSTRAS[0][1];
+        var campo = entrada(EXEMPLOS[4], "URI");
         var botoes = el("div", { class: "d-flex flex-wrap gap-2 mb-2" });
-        AMOSTRAS.forEach(function (a) { botoes.append(u.botao(a[0], "btn-outline-secondary", function () { campo.value = a[1]; mostra(); })); });
-        var saida = el("div", { class: "mt-2", "aria-live": "polite" });
+        EXEMPLOS.forEach(function (e, i) {
+            botoes.append(u.botao(i < 5 ? "Exemplo " + (i + 1) + " do livro" : "Com senha e porta", "btn-outline-secondary", function () { campo.value = e; mostra(); }));
+        });
+        var partes = el("div", { class: "d-flex flex-wrap mt-2" });
+        var avisos = el("ul", { class: "small mt-2 mb-0", "aria-live": "polite" });
+
         function mostra() {
-            var h = campo.value.replace(/[^0-9a-fA-F]/g, "");
-            var bytes = []; for (var i = 0; i + 1 < h.length; i += 2) bytes.push(parseInt(h.slice(i, i + 2), 16));
-            var r = leTcp(bytes);
-            if (!r) { saida.textContent = "São necessários pelo menos 20 bytes (o cabeçalho mínimo)."; return; }
-            var linhas = [
-                ["Porta de origem", String(r.portaO)], ["Porta de destino", String(r.portaD)],
-                ["Número de sequência", r.seq + " (0x" + r.seq.toString(16) + ")"], ["Número de confirmação", r.ack + (r.flags.indexOf("ACK") < 0 ? " (ignorado: ACK desligado)" : "")],
-                ["Tamanho do cabeçalho (THL)", (r.thl / 4) + " palavras de 32 bits = " + r.thl + " bytes"], ["Flags", r.flags.join(" + ") || "nenhuma"],
-                ["Janela", r.janela + " bytes"], ["Checksum", "0x" + hex4(r.checksum)], ["Opções", r.opcoes.join(" · ") || "nenhuma"]
-            ];
-            saida.replaceChildren(el("div", { class: "table-responsive" }, el("table", { class: "table table-sm small mb-0" },
-                el("tbody", null, linhas.map(function (l) { return el("tr", null, el("th", { scope: "row", class: "fw-normal text-muted" }, l[0]), el("td", { class: "mono" }, l[1])); })))));
+            var r = leURI(campo.value);
+            partes.replaceChildren(); avisos.replaceChildren();
+            if (!r || !r.esquema) { avisos.append(el("li", null, "Uma URI começa com um esquema seguido de dois-pontos (http:, mailto:, ftp:…).")); return; }
+            function peca(nome, valor, classe) {
+                if (valor === undefined || valor === "") return;
+                partes.append(el("span", { class: "byte-cell " + (classe || "") }, valor, el("small", null, nome)));
+            }
+            peca("esquema", r.esquema, "ctrl");
+            peca("usuário", r.usuario, "bad");
+            peca("host", r.host, "");
+            peca("porta", r.porta, "ok");
+            peca("caminho", r.caminho, "muted");
+            peca("consulta", r.consulta, "ok");
+            peca("fragmento", r.fragmento, "ctrl");
+            if (r.autoridade === undefined) avisos.append(el("li", null, "Sem \"//\": esta URI não tem autoridade (host). Em mailto:, o destinatário está no caminho."));
+            if (r.usuario !== undefined) avisos.append(el("li", null, r.usuario.indexOf(":") >= 0
+                ? "Há uma senha antes do @ (" + r.usuario.split(":")[1] + "): isso é obsoleto e inseguro, porque a URI fica visível em históricos, registros e no Referer."
+                : "Tudo o que vem antes do último @ da autoridade é o usuário, não o host."));
+            if (r.porta) avisos.append(el("li", null, "Porta " + r.porta + (PORTAS[r.esquema] && String(PORTAS[r.esquema]) === r.porta ? ": é a porta padrão do esquema, e poderia ser omitida." : PORTAS[r.esquema] ? " (a padrão de " + r.esquema + " é " + PORTAS[r.esquema] + ")." : ".")));
+            else if (PORTAS[r.esquema] && r.host) avisos.append(el("li", null, "Sem porta: o cliente usa a padrão de " + r.esquema + ", " + PORTAS[r.esquema] + "."));
+            if (/%[0-9a-f]{2}/i.test(campo.value)) {
+                var dec = campo.value;
+                try { dec = decodeURIComponent(r.caminho); } catch (_) {}
+                avisos.append(el("li", null, "Há caracteres codificados com % (pct-encoded). O caminho decodificado é " + dec + "."));
+            }
+            if (r.fragmento) avisos.append(el("li", null, "O fragmento (depois de #) não é enviado ao servidor: o navegador o usa para ir a um trecho do documento."));
         }
         campo.addEventListener("input", mostra);
-        var r1 = el("input", { type: "number", class: "form-control form-control-sm", "aria-label": "Porta de destino" });
-        var r2 = el("input", { type: "number", class: "form-control form-control-sm", "aria-label": "MSS" });
-        var r3 = el("input", { type: "number", class: "form-control form-control-sm", "aria-label": "Tamanho do cabeçalho" });
-        var fb = u.feedback();
-        var concluir = R.desafio(raiz, "tcp-cabecalho", 15, "Ler porta, MSS e tamanho de um cabeçalho TCP");
-        raiz.append(botoes, u.campo("Cabeçalho TCP (hexadecimal)", campo), saida,
-            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (15 pts): leia os bytes do \"SYN do cliente\", sem usar a tabela: 2 bytes de porta de origem, 2 de destino… e as opções no fim."),
-            el("div", { class: "row g-2" },
-                el("div", { class: "col-sm-4" }, u.campo("Porta de destino", r1)),
-                el("div", { class: "col-sm-4" }, u.campo("MSS anunciado (bytes)", r2)),
-                el("div", { class: "col-sm-4" }, u.campo("Tamanho do cabeçalho (bytes)", r3))),
-            u.botao("Conferir", "btn-primary", function () {
-                var ok = Number(r1.value) === 443 && Number(r2.value) === 1440 && Number(r3.value) === 32;
-                u.marca(fb, ok, ok ? "Isso: 0x01bb = 443; a opção 02 04 05 a0 é o MSS 0x05a0 = 1440; o THL 8 (o 8 de 0x80) dá 8 × 4 = 32 bytes." : "Ainda não. Dica: 0x01bb, 0x05a0 e o primeiro dígito do byte 13 (0x80).");
-                if (ok) concluir();
-            }), fb);
+
+        var r1 = entrada("", "Host do exemplo 5"), r2 = entrada("", "Porta do exemplo 4"), r3 = entrada("", "Fragmento do exemplo 3");
+        var fb = u.feedback(), feitas = {};
+        var concluir = R.desafio(raiz, "uri-partes", 15, "Achar o host, a porta e o fragmento de URIs do livro");
+        function confere() {
+            if (r1.value.trim() === "10.0.0.1") feitas.a = true;
+            if (r2.value.trim() === "2323") feitas.b = true;
+            if (r3.value.trim().replace(/^#/, "") === "BaseHTTPServer.BaseHTTPRequestHandler") feitas.c = true;
+            var n = Object.keys(feitas).length;
+            if (n === 3) { u.marca(fb, true, "Os três conferem. No exemplo 5, cnn.example.com&story=breaking_news é o nome de usuário, e o documento vem de 10.0.0.1."); concluir(); }
+            else u.marca(fb, false, n + " de 3 certos. Use os botões de exemplo para ver as partes de cada URI.");
+        }
+        raiz.append(botoes, u.campo("URI", campo), partes, avisos,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (15 pts)"),
+            u.campo("De qual host o exemplo 5 (ftp://cnn.example.com&…) busca o documento?", r1),
+            u.campo("Em qual porta está o servidor do exemplo 4 (telnet)?", r2),
+            u.campo("Qual é o fragmento do exemplo 3?", r3),
+            u.botao("Conferir", "btn-primary", confere), fb);
         mostra();
     });
 
     /* ------------------------------------------------------------------
-     * 3. Abertura: os estados da máquina (pág. 189–192 do PDF)
+     * 2. Um servidor HTTP com dois sites (pág. 151–154 do PDF)
      * ------------------------------------------------------------------ */
-    R.registrar("fsm-abertura", function (raiz) {
-        var cenario = el("select", { class: "form-select form-select-sm" },
-            el("option", { value: "normal" }, "Abertura normal (three-way handshake)"),
-            el("option", { value: "recusa" }, "Abertura recusada pelo servidor"),
-            el("option", { value: "simultanea" }, "Abertura simultânea"));
-        var area = el("div", { class: "mt-2" });
-        var texto = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
-        function desenha() {
-            var ev, t;
-            if (cenario.value === "normal") {
-                ev = [{ nota: 0, rotulo: "SYN SENT", t: 0 }, { de: 0, para: 1, rotulo: "SYN seq=x", t0: 0.6, t1: 2 }, { nota: 1, rotulo: "SYN RCVD", t: 2 },
-                    { de: 1, para: 0, rotulo: "SYN+ACK seq=y ack=x+1", t0: 2.6, t1: 4 }, { nota: 0, rotulo: "ESTABLISHED", t: 4 },
-                    { de: 0, para: 1, rotulo: "ACK seq=x+1 ack=y+1", t0: 4.6, t1: 6 }, { nota: 1, rotulo: "ESTABLISHED", t: 6 }];
-                t = "O SYN e o SYN+ACK consomem um número de sequência cada. O cliente considera a conexão aberta ao receber o SYN+ACK; o servidor, ao receber o ACK. O primeiro byte de dados do cliente terá o número x+1, e o do servidor, y+1.";
-            } else if (cenario.value === "recusa") {
-                ev = [{ nota: 0, rotulo: "SYN SENT", t: 0 }, { de: 0, para: 1, rotulo: "SYN seq=x", t0: 0.6, t1: 2 }, { nota: 1, rotulo: "ninguém escuta a porta", t: 2 },
-                    { de: 1, para: 0, rotulo: "RST+ACK ack=x+1", t0: 2.6, t1: 4, tipo: "erro" }, { nota: 0, rotulo: "conexão recusada", t: 4 }];
-                t = "Sem processo na porta de destino, sem recursos ou por política, o servidor recusa com um segmento RST cujo número de confirmação é o do SYN mais 1 (Fig. 23).";
-            } else {
-                ev = [{ nota: 0, rotulo: "SYN SENT", t: 0 }, { nota: 1, rotulo: "SYN SENT", t: 0 },
-                    { de: 0, para: 1, rotulo: "SYN seq=x", t0: 0.6, t1: 2 }, { de: 1, para: 0, rotulo: "SYN seq=y", t0: 0.6, t1: 2 },
-                    { nota: 0, rotulo: "SYN RCVD", t: 2 }, { nota: 1, rotulo: "SYN RCVD", t: 2 },
-                    { de: 0, para: 1, rotulo: "SYN+ACK seq=x ack=y+1", t0: 2.6, t1: 4 }, { de: 1, para: 0, rotulo: "SYN+ACK seq=y ack=x+1", t0: 2.6, t1: 4 },
-                    { nota: 0, rotulo: "ESTABLISHED", t: 4 }, { nota: 1, rotulo: "ESTABLISHED", t: 4 }];
-                t = "Os dois lados mandam SYN ao mesmo tempo, passam por SYN RCVD ao receber o SYN do outro e chegam a ESTABLISHED com o SYN+ACK (Fig. 25). Só acontece se as portas coincidirem, por exemplo entre pares que não usam portas efêmeras.";
+    R.registrar("servidor-http", function (raiz) {
+        var SITES = {
+            "web.example.com": {
+                "/index.html": { corpo: "<html>Página inicial de web.example.com</html>", lm: Date.UTC(2010, 2, 9, 21, 26, 53) },
+                "/antigo.html": { mover: "http://web.example.com/index.html" }
+            },
+            "www.example.net": {
+                "/index.html": { corpo: "<html>Página inicial de www.example.net</html>", lm: Date.UTC(2010, 2, 15, 8, 0, 0) },
+                "/contato.html": { corpo: "<html>Fale conosco</html>", lm: Date.UTC(2010, 1, 1, 12, 0, 0) }
             }
-            area.replaceChildren(R.diagramaSequencia({ titulo: cenario.options[cenario.selectedIndex].text, colunas: ["Cliente", "Servidor"], eventos: ev, passo: 28, margem: 150, largura: 720 }));
-            texto.textContent = t;
-        }
-        cenario.addEventListener("change", desenha);
-        raiz.append(u.campo("Cenário", cenario), area, texto);
-        desenha();
-    });
+        };
+        var DATAS = [Date.UTC(2010, 2, 1, 0, 0, 0), Date.UTC(2010, 2, 9, 21, 26, 53), Date.UTC(2010, 2, 15, 8, 0, 0)];
+        function httpData(ms) { return new Date(ms).toUTCString(); }
 
-    /* ------------------------------------------------------------------
-     * 4. SYN flood e SYN cookies (pág. 192–193 do PDF)
-     * ------------------------------------------------------------------ */
-    function simulaSynFlood(taxaAtaque, cookies) {
-        var fila = [], ok = 0, falha = 0, accA = 0, accL = 0;
-        for (var passo = 0; passo < 2000; passo++) {           // 20 s em passos de 10 ms
-            fila = fila.filter(function (expira) { return expira > passo; });
-            accA += taxaAtaque * 0.01;
-            while (accA >= 1) { accA -= 1; if (!cookies && fila.length < 100) fila.push(passo + 300); }   // SYN falso: TCB preso por 3 s
-            accL += 20 * 0.01;
-            while (accL >= 1) {
-                accL -= 1;
-                if (cookies) ok++;
-                else if (fila.length < 100) { ok++; fila.push(passo + 5); }   // cliente legítimo responde em 50 ms
-                else falha++;
-            }
-        }
-        return 100 * ok / (ok + falha);
-    }
-    R.simulaSynFlood = simulaSynFlood;
-
-    R.registrar("syn-flood", function (raiz) {
-        var taxa = faixa("SYNs falsos por segundo (com endereços de origem forjados)", 0, 300, 5, 20, function (v) { return v + "/s"; });
-        var cookies = caixa("Servidor usa SYN cookies", false);
-        var saida = el("div", { class: "small mt-2", "aria-live": "polite" });
+        var metodo = el("select", { class: "form-select form-select-sm" }, ["GET", "HEAD", "POST"].map(function (m) { return el("option", { value: m }, m); }));
+        var caminho = entrada("/index.html", "Caminho");
+        var versao = el("select", { class: "form-select form-select-sm" }, el("option", { value: "HTTP/1.1" }, "HTTP/1.1"), el("option", { value: "HTTP/1.0" }, "HTTP/1.0"));
+        var usaHost = caixa("Enviar Host:", true);
+        var host = el("select", { class: "form-select form-select-sm", "aria-label": "Valor do Host" }, Object.keys(SITES).map(function (h) { return el("option", { value: h }, h); }));
+        var usaIms = caixa("Enviar If-Modified-Since:", false);
+        var ims = el("select", { class: "form-select form-select-sm", "aria-label": "Data do If-Modified-Since" }, DATAS.map(function (d, i) { return el("option", { value: i }, httpData(d)); }));
+        var pedido = el("pre", { class: "log mb-2" });
+        var resposta = el("pre", { class: "log mb-0", "aria-live": "polite" });
+        var lista = el("ul", { class: "small mb-2" });
         var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "syn-flood", 15, "Derrubar um servidor com SYN flood e protegê-lo com SYN cookies");
-        function roda() {
-            var r = Number(taxa.input.value), p = simulaSynFlood(r, cookies.input.checked);
-            saida.replaceChildren(el("div", null, "Clientes legítimos atendidos: ", el("strong", null, num(p, 0) + "%"), " (20 por segundo, durante 20 s)."),
-                el("div", { class: "progress mt-1", style: "height:12px", role: "img", "aria-label": num(p, 0) + "% dos clientes atendidos" }, el("div", { class: "progress-bar " + (p < 50 ? "bg-danger" : "bg-success"), style: "width:" + p + "%" })));
-            if (!cookies.input.checked && p < 50) vistos.derrubou = true;
-            if (cookies.input.checked && r >= 50 && p > 99) vistos.protegeu = true;
-            if (vistos.derrubou && vistos.protegeu) { u.marca(fb, true, "Sem cookies, poucos SYNs por segundo lotam os 100 TCBs em SYN RCVD; com cookies, o servidor não guarda estado até receber o ACK, e o ataque perde o efeito."); concluir(); }
-            else { fb.className = "small mt-2 mb-0"; fb.textContent = (vistos.derrubou ? "✔ Servidor derrubado. Agora ligue os SYN cookies (com o ataque em pelo menos 50/s)." : "Aumente o ataque até menos da metade dos clientes ser atendida."); }
+        var METAS = [["200net", "200 OK vindo de www.example.net"], ["304", "304 Not Modified"], ["301", "301 Moved Permanently"], ["404", "404 Not Found"]];
+        var concluir = R.desafio(raiz, "http-codigos", 20, "Obter as respostas 200, 304, 301 e 404 de um servidor HTTP");
+
+        function desenhaMetas() {
+            lista.replaceChildren();
+            METAS.forEach(function (m) { lista.append(el("li", null, (vistos[m[0]] ? "✔ " : "○ ") + m[1])); });
         }
-        [taxa.input, cookies.input].forEach(function (c) { c.addEventListener("input", roda); c.addEventListener("change", roda); });
-        raiz.append(el("p", { class: "small mb-2" }, "O servidor guarda no máximo 100 TCBs em SYN RCVD, e um TCB de SYN falso fica lá 3 s esperando um ACK que nunca vem."),
-            taxa.linha, cookies.linha, saida, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): derrube o servidor e depois proteja-o com SYN cookies."));
-        roda();
+        function textoPedido() {
+            var linhas = [metodo.value + " " + (caminho.value.trim() || "/") + " " + versao.value];
+            if (usaHost.input.checked) linhas.push("Host: " + host.value);
+            linhas.push("User-Agent: curl/7.19.4");
+            if (usaIms.input.checked) linhas.push("If-Modified-Since: " + httpData(DATAS[Number(ims.value)]));
+            if (metodo.value === "POST") linhas.push("Content-Type: application/x-www-form-urlencoded", "Content-Length: 13", "", "nome=Alice&x=1");
+            else linhas.push("");
+            return linhas.join("\n");
+        }
+        function envia() {
+            pedido.textContent = textoPedido();
+            var cab = ["Date: Mon, 15 Mar 2010 13:40:38 GMT", "Server: Apache/2.2.4"], status, corpo = "", nota = "";
+            var site;
+            if (!usaHost.input.checked && versao.value === "HTTP/1.1") {
+                status = "400 Bad Request"; nota = "No HTTP/1.1, o Host: é obrigatório (complemento: RFC 9112).";
+            } else {
+                if (usaHost.input.checked) site = host.value;
+                else { site = "web.example.com"; nota = "Sem Host:, o servidor não sabe qual dos dois sites você quer e devolve o padrão, web.example.com."; }
+                var doc = SITES[site][caminho.value.trim() || "/"];
+                if (!doc) { status = "404 Not Found"; corpo = "<html>Documento não encontrado</html>"; }
+                else if (doc.mover) { status = "301 Moved Permanently"; cab.push("Location: " + doc.mover); corpo = "<html>Mudou para " + doc.mover + "</html>"; }
+                else if (metodo.value === "POST") { status = "200 OK"; corpo = "<html>Formulário recebido</html>"; }
+                else if (usaIms.input.checked && DATAS[Number(ims.value)] >= doc.lm) {
+                    status = "304 Not Modified"; nota = "O documento não mudou desde a data enviada: use a cópia do cache.";
+                } else { status = "200 OK"; cab.push("Last-Modified: " + httpData(doc.lm)); corpo = doc.corpo; }
+            }
+            if (corpo) cab.push("Content-Length: " + new TextEncoder().encode(corpo).length, "Content-Type: text/html");
+            var semCorpo = metodo.value === "HEAD" || /^304/.test(status);
+            resposta.textContent = versao.value + " " + status + "\n" + cab.join("\n") + "\n\n" + (semCorpo ? (metodo.value === "HEAD" && corpo ? "(HEAD: só o cabeçalho, sem o documento)" : "") : corpo) + (nota ? "\n\n# " + nota : "");
+            var codigo = status.slice(0, 3);
+            if (codigo === "200" && site === "www.example.net" && metodo.value !== "POST") vistos["200net"] = true;
+            if (codigo === "304" || codigo === "301" || codigo === "404") vistos[codigo] = true;
+            desenhaMetas();
+            if (METAS.every(function (m) { return vistos[m[0]]; })) { u.marca(fb, true, "As quatro respostas apareceram. Repare que o 304 não traz o documento, e o 301 traz o novo endereço em Location:."); concluir(); }
+        }
+
+        raiz.append(
+            el("div", { class: "row g-2" },
+                el("div", { class: "col-4 col-md-2" }, u.campo("Método", metodo)),
+                el("div", { class: "col-8 col-md-6" }, u.campo("Caminho", caminho)),
+                el("div", { class: "col-12 col-md-4" }, u.campo("Versão", versao))),
+            el("div", { class: "row g-2 align-items-end" },
+                el("div", { class: "col-md-6" }, usaHost.linha, host),
+                el("div", { class: "col-md-6" }, usaIms.linha, ims)),
+            u.botao("Enviar o pedido", "btn-primary my-2", envia),
+            el("div", { class: "row g-2" },
+                el("div", { class: "col-md-6" }, el("div", { class: "small text-muted" }, "Pedido do cliente"), pedido),
+                el("div", { class: "col-md-6" }, el("div", { class: "small text-muted" }, "Resposta do servidor"), resposta)),
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (20 pts): o servidor hospeda web.example.com (com /index.html e /antigo.html) e www.example.net (com /index.html e /contato.html). Obtenha:"),
+            lista, fb);
+        desenhaMetas();
+        envia();
     });
 
     /* ------------------------------------------------------------------
-     * 5. O algoritmo de Nagle (pág. 195–196 do PDF)
+     * 3. HTTP/1.0 contra conexão persistente (pág. 154–156 do PDF)
      * ------------------------------------------------------------------ */
-    var TEXTO_NAGLE = "ls -la /home/alice\n";
-    function simulaNagle(texto, intervalo, rtt, nagle) {
-        var chegadas = texto.split("").map(function (c, i) { return [i * intervalo, c]; });
-        var segs = [], buffer = "", ackEm = null, i = 0, t;
-        while (i < chegadas.length || buffer) {
-            var prox = i < chegadas.length ? chegadas[i][0] : null;
-            if (ackEm !== null && (prox === null || ackEm <= prox)) { t = ackEm; ackEm = null; }
-            else { t = chegadas[i][0]; buffer += chegadas[i][1]; i++; }
-            if (buffer && (!nagle || ackEm === null)) { segs.push([t, buffer]); buffer = ""; ackEm = t + rtt; }
-        }
-        return segs;
-    }
-    R.simulaNagle = function (rtt, nagle) { return simulaNagle(TEXTO_NAGLE, 100, rtt, nagle); };
-
-    R.registrar("nagle", function (raiz) {
-        var rtt = faixa("RTT", 20, 1000, 10, 300, function (v) { return v + " ms"; });
-        var nagle = caixa("Algoritmo de Nagle ligado", true);
-        var segs = el("div", { class: "d-flex flex-wrap mt-2" });
+    R.registrar("conexoes-http", function (raiz) {
+        var n = faixa("Objetos na página (HTML + imagens)", 1, 4, 1, 3, "");
+        var rtt = faixa("RTT", 20, 200, 10, 100, " ms");
+        var modo = el("select", { class: "form-select form-select-sm" }, el("option", { value: "10" }, "HTTP/1.0: uma conexão por objeto"), el("option", { value: "11" }, "HTTP/1.1: conexão persistente"));
+        var area = el("div", { class: "mt-2" });
         var resumo = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
-        var fb = u.feedback();
-        var concluir = R.desafio(raiz, "nagle", 10, "Ver o Nagle agrupar caracteres");
-        function roda() {
-            var s = simulaNagle(TEXTO_NAGLE, 100, Number(rtt.input.value), nagle.input.checked);
-            segs.replaceChildren();
-            s.forEach(function (x) { segs.append(el("span", { class: "byte-cell" }, JSON.stringify(x[1]).slice(1, -1), el("small", null, x[0] + " ms"))); });
-            resumo.textContent = s.length + " segmentos para " + TEXTO_NAGLE.length + " bytes de dados: " + 40 * s.length + " bytes de cabeçalho TCP e IPv4 (20 + 20 por segmento).";
-            if (nagle.input.checked && s.length <= 5) { u.marca(fb, true, "Com RTT longo, o Nagle junta o que foi digitado enquanto espera o ACK: um segmento parcial por RTT."); concluir(); }
-            else fb.textContent = "";
-        }
-        [rtt.input, nagle.input].forEach(function (c) { c.addEventListener("input", roda); c.addEventListener("change", roda); });
-        raiz.append(el("p", { class: "small mb-2" }, "Alice digita \"ls -la /home/alice\" e Enter numa sessão ssh, um caractere a cada 100 ms."),
-            rtt.linha, nagle.linha, segs, resumo, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (10 pts): com o Nagle ligado, ache um RTT em que os 19 caracteres viajem em no máximo 5 segmentos."));
-        roda();
-    });
 
-    /* ------------------------------------------------------------------
-     * 6. A janela de 16 bits e a escala de janela (pág. 196–197 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("escala-janela", function (raiz) {
-        var rtt = faixa("RTT", 1, 500, 1, 100, function (v) { return v + " ms"; });
-        var banda = faixa("Vazão desejada", 1, 10000, 1, 1000, function (v) { return num(v) + " Mbit/s"; });
-        var saida = el("div", { class: "small mt-2", "aria-live": "polite" });
         function desenha() {
-            var T = Number(rtt.input.value) / 1000, B = Number(banda.input.value) * 1e6;
-            var janela = B * T / 8, max16 = 65535 * 8 / T / 1e6;
-            var S = 0; while (65535 * Math.pow(2, S) < janela && S < 14) S++;
-            var cabe = 65535 * Math.pow(2, S) >= janela;
-            saida.replaceChildren(
-                el("div", null, "Janela necessária = vazão × RTT = ", el("strong", null, num(janela) + " bytes")),
-                el("div", null, "Sem escala (janela de até 65 535 bytes), a vazão máxima é ", el("strong", null, num(max16, 2) + " Mbit/s")),
-                el("div", null, cabe ? "Menor fator de escala que basta: " : "Nem com o fator máximo (14) dá: ", el("strong", null, "S = " + S),
-                    " → janela anunciada até 65 535 × 2^" + S + " = " + num(65535 * Math.pow(2, S)) + " bytes"));
-        }
-        [rtt.input, banda.input].forEach(function (c) { c.addEventListener("input", desenha); });
-        raiz.append(rtt.linha, banda.linha, saida,
-            desafioNumero(raiz, "escala-janela", 10, "Calcular o fator de escala da janela",
-                "qual é o menor fator de escala S que permite 1 Gbit/s com RTT de 100 ms?",
-                function (v) { return v === 8; }, "Isso: são 12,5 MB de janela; 65 535 × 2^7 ≈ 8,4 MB não basta, e 65 535 × 2^8 ≈ 16,8 MB basta.", "Ainda não. Calcule a janela (vazão × RTT / 8) e compare com 65 535 × 2^S."));
-        desenha();
-    });
-
-    /* ------------------------------------------------------------------
-     * 7. O cálculo do rto (pág. 197–199 do PDF)
-     * ------------------------------------------------------------------ */
-    function jacobson(medidas) {
-        var out = [], srtt = null, var_ = null;
-        medidas.forEach(function (rtt) {
-            if (srtt === null) { srtt = rtt; var_ = rtt / 2; }
-            else { var_ = 0.75 * var_ + 0.25 * Math.abs(srtt - rtt); srtt = 0.875 * srtt + 0.125 * rtt; }
-            out.push({ rtt: rtt, srtt: srtt, rttvar: var_, rto: srtt + 4 * var_ });
-        });
-        return out;
-    }
-    function rfc793(medidas) {
-        var out = [], srtt = null;
-        medidas.forEach(function (rtt) { srtt = srtt === null ? rtt : 0.875 * srtt + 0.125 * rtt; out.push(Math.min(60000, Math.max(1000, 2 * srtt))); });
-        return out;
-    }
-    R.jacobson = jacobson;
-
-    R.registrar("calculo-rto", function (raiz) {
-        var campo = entrada("500, 550, 450, 500, 2000, 2100, 1900, 500, 500", "Medidas de RTT em ms");
-        var grafico = el("div", { class: "mt-2" });
-        var tabela = el("div", { class: "mt-2" });
-        function desenha() {
-            var m = campo.value.split(",").map(function (x) { return Number(x.trim()); }).filter(function (x) { return x > 0 && isFinite(x); }).slice(0, 30);
-            if (!m.length) { tabela.textContent = "Digite medidas positivas separadas por vírgula."; grafico.replaceChildren(); return; }
-            var j = jacobson(m), v = rfc793(m);
-            var maxY = Math.max.apply(null, j.map(function (x) { return x.rto; }).concat(v, m)) * 1.1;
-            var W = 640, H = 220, ml = 50, mb = 26, sx = (W - ml - 10) / Math.max(1, m.length - 1), sy = (H - mb - 10) / maxY;
-            function P(i, y) { return (ml + i * sx).toFixed(1) + "," + (H - mb - y * sy).toFixed(1); }
-            var svg = u.svg("svg", { viewBox: "0 0 " + W + " " + H, class: "sim-svg w-100", role: "img", "aria-label": "RTT medido, rto de Jacobson e rto do RFC 793 a cada medida" });
-            svg.append(u.svg("title", { text: "RTT medido e rto calculado" }), u.svg("text", { x: 4, y: 12, "font-size": 11 }, "ms"));
-            [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
-                var y = maxY * f;
-                svg.append(u.svg("line", { x1: ml, x2: W - 10, y1: H - mb - y * sy, y2: H - mb - y * sy, stroke: "currentColor", "stroke-opacity": 0.15 }),
-                    u.svg("text", { x: ml - 6, y: H - mb - y * sy + 4, "text-anchor": "end", "font-size": 11 }, num(y)));
-            });
-            function linha(pontos, cor, tracejado) { svg.append(u.svg("polyline", { points: pontos.map(function (y, i) { return P(i, y); }).join(" "), fill: "none", stroke: cor, "stroke-width": 2.5, "stroke-dasharray": tracejado ? "6 4" : null })); }
-            linha(m, "#adb5bd"); linha(j.map(function (x) { return x.rto; }), "#0d6efd"); linha(v, "#d63384", true);
-            m.forEach(function (y, i) { svg.append(u.svg("circle", { cx: ml + i * sx, cy: H - mb - y * sy, r: 3.5, fill: "#6c757d" })); });
-            grafico.replaceChildren(svg, el("p", { class: "small mb-0" }, el("span", { style: "color:#6c757d", "aria-hidden": "true" }, "● "), "RTT medido  ",
-                el("span", { style: "color:#0d6efd", "aria-hidden": "true" }, "━ "), "rto de Jacobson  ", el("span", { style: "color:#d63384", "aria-hidden": "true" }, "╍ "), "rto do RFC 793 (2 × srtt, mínimo 1 s)"));
-            tabela.replaceChildren(el("div", { class: "table-responsive" }, el("table", { class: "table table-sm small mono mb-0" },
-                el("thead", null, el("tr", null, ["rtt", "srtt", "rttvar", "rto (Jacobson)", "rto (RFC 793)"].map(function (h) { return el("th", null, h); }))),
-                el("tbody", null, j.map(function (x, i) {
-                    return el("tr", { class: v[i] < x.rtt ? "table-danger" : null }, el("td", null, num(x.rtt)), el("td", null, num(x.srtt, 1)), el("td", null, num(x.rttvar, 1)), el("td", null, num(x.rto, 1)), el("td", null, num(v[i], 1) + (v[i] < x.rtt ? " < rtt!" : "")));
-                })))));
-        }
-        campo.addEventListener("input", desenha);
-        raiz.append(u.campo("Medidas de RTT (ms), separadas por vírgula", campo), grafico, tabela,
-            el("p", { class: "small text-muted mt-1 mb-0" }, "Linhas destacadas: o rto do RFC 793 ficou menor que o RTT real, e o emissor retransmitiria sem necessidade."),
-            desafioNumero(raiz, "rto-jacobson", 15, "Calcular o rto de Jacobson",
-                "para as medidas 100, 100, 100 e 300 ms, qual é o rto de Jacobson depois da quarta medida (em ms, uma casa decimal)?",
-                function (v) { return Math.abs(v - 409.4) < 0.15; }, "Isso: srtt = 125, rttvar ≈ 71,1 e rto = 125 + 4 × 71,1 ≈ 409,4 ms. O salto pesou mais no rttvar do que no srtt.", "Ainda não. Use a ferramenta acima com essas quatro medidas, ou faça as contas com α = 1/8 e β = 1/4 (o rttvar usa o srtt antigo)."));
-        desenha();
-    });
-
-    /* ------------------------------------------------------------------
-     * 8. Retransmissão rápida e SACK (pág. 197–199 do PDF)
-     * ------------------------------------------------------------------ */
-    function recepcao(n, perdidos) {
-        var recebidos = {}, acks = [];
-        for (var seg = 1; seg <= n; seg++) {
-            if (perdidos[seg]) continue;
-            recebidos[seg] = true;
-            var prox = 1; while (recebidos[prox]) prox++;
-            var blocos = [], s = prox + 1;
-            while (s <= n) {
-                if (recebidos[s]) { var ini = s; while (recebidos[s + 1]) s++; blocos.push([ini, s]); }
-                s++;
-            }
-            blocos.sort(function (a, b) {          // primeiro o bloco que acabou de mudar, depois os mais altos
-                var ca = a[0] <= seg && seg <= a[1] ? 0 : 1, cb = b[0] <= seg && seg <= b[1] ? 0 : 1;
-                return ca - cb || b[0] - a[0];
-            });
-            acks.push({ chegou: seg, ack: prox, sack: blocos.slice(0, 3) });
-        }
-        return acks;
-    }
-    function rapida(acks) {
-        var dup = 0, ultimo = null;
-        for (var i = 0; i < acks.length; i++) {
-            dup = acks[i].ack === ultimo ? dup + 1 : 0;
-            ultimo = acks[i].ack;
-            if (dup === 3) return { seg: acks[i].ack, depois: acks[i].chegou };
-        }
-        return null;
-    }
-    R.recepcaoTcp = recepcao; R.retransmissaoRapida = rapida;
-
-    R.registrar("fast-retransmit", function (raiz) {
-        var N = 10, caixas = [];
-        var linhaCx = el("div", { class: "d-flex flex-wrap gap-2" });
-        for (var i = 1; i <= N; i++) {
-            var c = caixa(String(i), i === 4);
-            caixas.push(c.input);
-            linhaCx.append(c.linha);
-        }
-        var log = el("ul", { class: "log mt-2" });
-        var fb = u.feedback(), vistos = {};
-        var concluir = R.desafio(raiz, "fast-retransmit", 15, "Ver a retransmissão rápida funcionar e falhar");
-        function roda() {
-            var perdidos = {};
-            caixas.forEach(function (c, i) { if (c.checked) perdidos[i + 1] = true; });
-            var acks = recepcao(N, perdidos), r = rapida(acks);
-            log.replaceChildren();
-            if (!Object.keys(perdidos).length) { log.append(el("li", null, "Nada se perdeu: os ACKs avançam 2, 3, … 11.")); fb.textContent = ""; return; }
-            var anterior = null;
-            acks.forEach(function (a) {
-                var dup = a.ack === anterior;
-                log.append(el("li", { class: dup ? "text-danger" : null }, "chegou " + a.chegou + " → ACK " + a.ack + (dup ? " (duplicado)" : "") + (a.sack.length ? "  SACK " + a.sack.map(function (b) { return b[0] === b[1] ? b[0] : b[0] + "–" + b[1]; }).join(", ") : "")));
-                anterior = a.ack;
-            });
-            if (r) { vistos.rapida = true; u.marca(fb, true, "Três ACKs duplicados depois do segmento " + r.depois + ": o emissor retransmite o " + r.seg + " sem esperar o rto."); }
-            else { vistos.rto = true; u.marca(fb, false, "Menos de três ACKs duplicados: o emissor só percebe a perda quando o rto expira."); }
-            if (vistos.rapida && vistos.rto) { concluir(); fb.textContent += " Você viu os dois casos."; }
-        }
-        caixas.forEach(function (c) { c.addEventListener("change", roda); });
-        raiz.append(el("p", { class: "small mb-2" }, "O emissor manda os segmentos 1 a 10 de uma vez. Marque os que se perdem (os números são de segmentos, não de bytes)."),
-            linhaCx, log, fb,
-            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): ache uma perda que a retransmissão rápida resolve e outra que obriga o emissor a esperar o rto."));
-        roda();
-    });
-
-    /* ------------------------------------------------------------------
-     * 9. Liberação da conexão (pág. 199–201 do PDF)
-     * ------------------------------------------------------------------ */
-    R.registrar("fsm-fechamento", function (raiz) {
-        var cenario = el("select", { class: "form-select form-select-sm" },
-            el("option", { value: "normal" }, "O cliente fecha primeiro"),
-            el("option", { value: "simultaneo" }, "Fechamento simultâneo"),
-            el("option", { value: "perdido" }, "O último ACK se perde"),
-            el("option", { value: "rst" }, "Liberação abrupta (RST)"));
-        var area = el("div", { class: "mt-2" });
-        var texto = el("p", { class: "small mt-2 mb-0", "aria-live": "polite" });
-        function desenha() {
-            var ev, t, v = cenario.value;
-            if (v === "normal") {
-                ev = [{ nota: 0, rotulo: "FIN_WAIT1", t: 0 }, { de: 0, para: 1, rotulo: "FIN seq=z+1", t0: 0.6, t1: 2 }, { nota: 1, rotulo: "CLOSE_WAIT", t: 2 },
-                    { de: 1, para: 0, rotulo: "ACK z+2", t0: 2.6, t1: 4 }, { nota: 0, rotulo: "FIN_WAIT2", t: 4 }, { nota: 1, rotulo: "(ainda pode enviar dados)", t: 3.3 },
-                    { nota: 1, rotulo: "LAST_ACK", t: 5 }, { de: 1, para: 0, rotulo: "FIN", t0: 5.6, t1: 7 }, { nota: 0, rotulo: "TIME_WAIT (2 MSL)", t: 7 },
-                    { de: 0, para: 1, rotulo: "ACK", t0: 7.6, t1: 9 }, { nota: 1, rotulo: "CLOSED", t: 9 }, { nota: 0, rotulo: "CLOSED, depois de 2 MSL", t: 10.5 }];
-                t = "Cada lado fecha o seu sentido com um FIN, que consome um número de sequência e é confirmado. Quem fecha primeiro passa por FIN_WAIT1 e FIN_WAIT2; quem recebe o FIN, por CLOSE_WAIT e LAST_ACK. Quem manda o último ACK fica em TIME_WAIT por 2 MSL.";
-            } else if (v === "simultaneo") {
-                ev = [{ nota: 0, rotulo: "FIN_WAIT1", t: 0 }, { nota: 1, rotulo: "FIN_WAIT1", t: 0 },
-                    { de: 0, para: 1, rotulo: "FIN", t0: 0.6, t1: 2 }, { de: 1, para: 0, rotulo: "FIN", t0: 0.6, t1: 2 },
-                    { nota: 0, rotulo: "CLOSING", t: 2 }, { nota: 1, rotulo: "CLOSING", t: 2 },
-                    { de: 0, para: 1, rotulo: "ACK", t0: 2.6, t1: 4 }, { de: 1, para: 0, rotulo: "ACK", t0: 2.6, t1: 4 },
-                    { nota: 0, rotulo: "TIME_WAIT", t: 4 }, { nota: 1, rotulo: "TIME_WAIT", t: 4 }];
-                t = "Se os dois mandam FIN ao mesmo tempo, cada um recebe o FIN do outro em FIN_WAIT1 e vai para CLOSING; com o ACK do seu FIN, vai para TIME_WAIT.";
-            } else if (v === "perdido") {
-                ev = [{ nota: 0, rotulo: "FIN_WAIT2", t: 0 }, { nota: 1, rotulo: "LAST_ACK", t: 0 }, { de: 1, para: 0, rotulo: "FIN", t0: 0.6, t1: 2 }, { nota: 0, rotulo: "TIME_WAIT", t: 2 },
-                    { de: 0, para: 1, rotulo: "ACK", t0: 2.6, t1: 4, tipo: "perda" }, { nota: 1, rotulo: "temporizador expira", t: 4.6 },
-                    { de: 1, para: 0, rotulo: "FIN (retransmitido)", t0: 5.2, t1: 6.6 }, { de: 0, para: 1, rotulo: "ACK", t0: 7.2, t1: 8.6 }, { nota: 1, rotulo: "CLOSED", t: 8.6 }];
-                t = "O último ACK se perdeu, e o servidor retransmite o FIN. Como o cliente ainda está em TIME_WAIT, com o TCB guardado, ele repete o ACK. Sem o TIME_WAIT, responderia com RST, e a liberação não seria ordenada.";
+            var N = Number(n.input.value), T = Number(rtt.input.value), ev = [];
+            var objs = ["/", "/img1.gif", "/img2.gif", "/img3.gif"];
+            if (modo.value === "10") {
+                for (var i = 0; i < N; i++) {
+                    ev.push({ de: 0, para: 1, rotulo: "SYN (abre)", tipo: "ctrl" }, { de: 1, para: 0, rotulo: "SYN+ACK", tipo: "ctrl" },
+                        { de: 0, para: 1, rotulo: "GET " + objs[i] + " HTTP/1.0" }, { de: 1, para: 0, rotulo: "200 OK + documento" }, { nota: 1, rotulo: "fecha a conexão" });
+                }
             } else {
-                ev = [{ nota: 0, rotulo: "ESTABLISHED", t: 0 }, { nota: 1, rotulo: "ESTABLISHED", t: 0 }, { de: 0, para: 1, rotulo: "RST seq=atual", t0: 0.6, t1: 2, tipo: "erro" },
-                    { nota: 0, rotulo: "CLOSED (TCB descartado)", t: 2.4 }, { nota: 1, rotulo: "CLOSED", t: 2.4 }];
-                t = "Um único segmento RST fecha os dois sentidos na hora, e dados ainda não entregues podem se perder. Ninguém responde a um RST com outro RST, para evitar \"guerras de RST\".";
+                ev.push({ de: 0, para: 1, rotulo: "SYN (abre)", tipo: "ctrl" }, { de: 1, para: 0, rotulo: "SYN+ACK", tipo: "ctrl" });
+                for (var j = 0; j < N; j++) {
+                    ev.push({ de: 0, para: 1, rotulo: "GET " + objs[j] + " (Connection: Keep-Alive)" }, { de: 1, para: 0, rotulo: "200 OK (Keep-Alive: timeout=15, max=" + (100 - j) + ")" });
+                }
             }
-            area.replaceChildren(R.diagramaSequencia({ titulo: cenario.options[cenario.selectedIndex].text, colunas: ["Cliente", "Servidor"], eventos: ev, passo: 28, margem: 160, largura: 720 }));
-            texto.textContent = t;
+            area.replaceChildren(R.diagramaSequencia({ titulo: "Cliente busca " + N + " objetos de um servidor web.", colunas: ["Cliente", "Servidor"], eventos: ev, passo: 26, margem: 150 }));
+            var t10 = N * 2 * T, t11 = T + N * T;
+            resumo.replaceChildren("Tempo até o último objeto (sem contar transmissão): HTTP/1.0 = ", el("strong", null, N + " × 2 RTT = " + t10 + " ms"),
+                "; persistente = ", el("strong", null, "1 RTT + " + N + " RTT = " + t11 + " ms"), ". Diferença: " + (t10 - t11) + " ms.");
         }
-        cenario.addEventListener("change", desenha);
-        raiz.append(u.campo("Cenário", cenario), area, texto,
-            desafioNumero(raiz, "time-wait", 10, "Calcular os TCBs em TIME_WAIT",
-                "um servidor fecha 5 000 conexões por segundo, e o MSL é de 60 s. Quantos TCBs ele mantém em TIME_WAIT ao mesmo tempo?",
-                function (v) { return v === 600000; }, "Isso: cada conexão fica 2 × 60 = 120 s em TIME_WAIT; 5 000 × 120 = 600 000 TCBs.", "Ainda não. Quanto tempo dura o TIME_WAIT, e quantas conexões entram nele nesse intervalo?"));
+        [n.input, rtt.input, modo].forEach(function (c) { c.addEventListener("input", desenha); c.addEventListener("change", desenha); });
+
+        var resp = el("input", { type: "number", class: "form-control form-control-sm", "aria-label": "Diferença em milissegundos" });
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "http-persistente", 10, "Calcular o ganho da conexão persistente");
+        raiz.append(el("div", { class: "row g-2" },
+            el("div", { class: "col-md-4" }, n.linha), el("div", { class: "col-md-4" }, rtt.linha), el("div", { class: "col-md-4" }, u.campo("Modo", modo))),
+            area, resumo,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts): uma página tem 20 objetos e o RTT é 50 ms. Quantos milissegundos o HTTP/1.0 gasta a mais do que a conexão persistente (no mesmo modelo, sem transmissão)?"),
+            el("div", { class: "d-flex gap-2" }, resp, u.botao("Conferir", "btn-primary", function () {
+                var ok = Number(resp.value) === 950;
+                u.marca(fb, ok, ok ? "Isso: 20 × 2 × 50 = 2000 ms contra 50 + 20 × 50 = 1050 ms." : "Ainda não. HTTP/1.0: N × 2 RTT; persistente: 1 RTT + N RTT.");
+                if (ok) concluir();
+            })), fb);
         desenha();
+    });
+
+    /* ------------------------------------------------------------------
+     * 4. Cookies e rastreamento (pág. 157–158 do PDF)
+     * ------------------------------------------------------------------ */
+    R.registrar("cookies", function (raiz) {
+        var SITES = ["noticias.example", "loja.example", "blog.example"];
+        var bloqueia = caixa("Bloquear cookies de terceiros no navegador", false);
+        var pote = {}, registroAnuncios = {}, contador = 0, vistos = {};
+        var jarra = el("ul", { class: "small mb-2" });
+        var log = el("ul", { class: "log mt-2" });
+        var anuncios = el("div", { class: "small mt-2", "aria-live": "polite" });
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "cookies-rastreio", 15, "Ver um anunciante rastrear visitas e o bloqueio de cookies de terceiros");
+
+        function desenha() {
+            jarra.replaceChildren();
+            var chaves = Object.keys(pote);
+            if (!chaves.length) jarra.append(el("li", { class: "text-muted" }, "nenhum cookie guardado"));
+            chaves.forEach(function (d) { jarra.append(el("li", { class: "mono" }, d + " → " + pote[d])); });
+            var ids = Object.keys(registroAnuncios);
+            anuncios.replaceChildren(el("strong", null, "O que anuncios.example sabe: "),
+                ids.length ? el("ul", { class: "mb-0" }, ids.map(function (id) { return el("li", { class: "mono" }, id + " visitou " + registroAnuncios[id].join(", ")); })) : "nada ainda.");
+        }
+        function linha(t, classe) { log.append(el("li", { class: classe || null }, t)); log.scrollTop = log.scrollHeight; }
+        function visita(site) {
+            linha("GET / HTTP/1.1  Host: " + site + (pote[site] ? "  Cookie: " + pote[site] : ""));
+            if (!pote[site]) { pote[site] = "sessao=" + site.split(".")[0]; linha("  ← 200 OK  Set-Cookie: " + pote[site] + " (cookie do próprio site)"); }
+            else linha("  ← 200 OK (página com o anúncio de anuncios.example)");
+            var terceiro = bloqueia.input.checked;
+            var enviado = !terceiro && pote["anuncios.example"];
+            linha("GET /banner.gif  Host: anuncios.example  Referer: http://" + site + "/" + (enviado ? "  Cookie: " + pote["anuncios.example"] : ""), "text-muted");
+            if (terceiro) {
+                linha("  ← 200 OK  Set-Cookie: id=… (o navegador descarta: cookie de terceiro bloqueado)", "text-muted");
+                vistos.bloqueio = true;
+            } else {
+                if (!pote["anuncios.example"]) { contador++; pote["anuncios.example"] = "id=7f3a" + contador; linha("  ← 200 OK  Set-Cookie: " + pote["anuncios.example"], "text-muted"); }
+                var id = pote["anuncios.example"];
+                registroAnuncios[id] = registroAnuncios[id] || [];
+                if (registroAnuncios[id].indexOf(site) < 0) registroAnuncios[id].push(site);
+                if (registroAnuncios[id].length >= 3) vistos.rastreio = true;
+            }
+            desenha();
+            if (vistos.rastreio && vistos.bloqueio) { u.marca(fb, true, "Com o mesmo cookie, anuncios.example ligou as visitas aos três sites. Bloqueando os cookies de terceiros, ele deixa de receber o identificador (mas ainda vê o Referer)."); concluir(); }
+            else if (vistos.rastreio) { fb.className = "small mt-2 mb-0"; fb.textContent = "anuncios.example já liga três sites a você. Agora ligue o bloqueio e visite um site."; }
+        }
+        var botoes = el("div", { class: "d-flex flex-wrap gap-2" });
+        SITES.forEach(function (s) { botoes.append(u.botao("Visitar " + s, "btn-outline-primary", function () { visita(s); })); });
+        botoes.append(u.botao("Apagar cookies", "btn-outline-secondary", function () { pote = {}; log.replaceChildren(); desenha(); }));
+        raiz.append(el("p", { class: "small mb-2" }, "Os três sites mostram anúncios de anuncios.example: cada página inclui uma imagem desse servidor."),
+            botoes, bloqueia.linha,
+            el("div", { class: "row g-2 mt-1" },
+                el("div", { class: "col-md-5" }, el("div", { class: "small text-muted" }, "Cookies guardados pelo navegador"), jarra, anuncios),
+                el("div", { class: "col-md-7" }, el("div", { class: "small text-muted" }, "Pedidos e respostas"), log)),
+            fb,
+            el("p", { class: "small text-muted mt-2 mb-0" }, "Desafio (15 pts): faça anuncios.example ligar as suas visitas aos três sites; depois, ligue o bloqueio e visite um site de novo."));
+        desenha();
+    });
+}());
+
+/* Etapa "3. Visualização" do conceito web: URI, HTML e HTTP num clique (pág. 148–149 do PDF). */
+(function () {
+    "use strict";
+    var R = window.Redes;
+    var u = R.util, el = u.el;
+    function escolha(rotulo, lista) {
+        return el("select", { class: "form-select form-select-sm", "aria-label": rotulo },
+            el("option", { value: "" }, "escolha…"), lista.map(function (o) { return el("option", { value: o[0] }, o[1]); }));
+    }
+    var LINKS = [
+        { texto: "a lista de protocolos", uri: "http://docs.example.org/protocolos.html", titulo: "Protocolos", corpo: "Os protocolos da web: o HTTP e os que ele usa." },
+        { texto: "o histórico do projeto", uri: "http://www.example.com/historia.html", titulo: "Histórico", corpo: "De mesh a world wide web." }
+    ];
+    function decompoe(uri) {
+        var m = /^([a-z][a-z0-9+.-]*):\/\/([^/:]+)(?::(\d+))?(\/[^?#]*)?/i.exec(uri);
+        return m ? { esquema: m[1], host: m[2], porta: m[3] || (m[1] === "http" ? "80" : ""), caminho: m[4] || "/" } : null;
+    }
+    R.decompoeUri = decompoe;
+
+    R.registrar("tres-pecas", function (raiz) {
+        var etapas = el("ol", { class: "small mt-2 mb-0 ps-3" });
+        var pre = function (t) { return el("pre", { class: "log mt-1 mb-2", style: "white-space: pre-wrap" }, t); };
+        function segue(l) {
+            var d = decompoe(l.uri);
+            var html = "<html>\n  <head><title>" + l.titulo + "</title></head>\n  <body>\n    <h1>" + l.titulo + "</h1>\n    <p>" + l.corpo + "</p>\n  </body>\n</html>";
+            etapas.replaceChildren(
+                el("li", null, el("strong", null, "URI: "), "o link aponta para ", el("code", null, l.uri), ". Esquema ", el("code", null, d.esquema), ", host ", el("code", null, d.host), " (porta " + d.porta + "), caminho ", el("code", null, d.caminho), "." +
+                    (d.host === "www.example.com" ? " É o mesmo host da página atual." : " É outro host: a novidade da web foi deixar um link apontar para outra máquina.")),
+                el("li", null, el("strong", null, "HTTP: "), "o navegador abre uma conexão com " + d.host + " e pede o documento:", pre("GET " + d.caminho + " HTTP/1.1\nHost: " + d.host + "\n\n")),
+                el("li", null, el("strong", null, "HTML: "), "o servidor responde com o documento, que o navegador desenha:", pre("HTTP/1.1 200 OK\nContent-Type: text/html\n\n" + html)));
+        }
+        var pagina = el("div", { class: "border rounded p-2", style: "background: var(--surface)" },
+            el("div", { class: "small text-muted mono mb-1" }, "http://www.example.com/index.html"),
+            el("div", { class: "fw-semibold" }, "Projeto de documentação"),
+            el("p", { class: "small mb-0" }, "Veja ", LINKS.map(function (l, i) {
+                return [i ? " e " : "", el("a", { href: "#", onclick: function (ev) { ev.preventDefault(); segue(l); } }, l.texto)];
+            }), "."));
+        var PAPEIS = [["identifica cada documento sem ambiguidade", "uri"], ["descreve o documento e os seus links", "html"], ["busca o documento no servidor", "http"]];
+        var selects = PAPEIS.map(function (p) { return escolha(p[0], [["uri", "URI"], ["html", "HTML"], ["http", "HTTP"]]); });
+        var fb = u.feedback();
+        var concluir = R.desafio(raiz, "tres-pecas", 10, "As três peças da web");
+        raiz.append(el("p", { class: "small mb-2" }, "Uma página no host www.example.com. Clique num dos links e veja as três peças trabalhando (os nomes de host são do bloco reservado para exemplos, RFC 2606)."),
+            pagina, etapas,
+            el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts): que peça faz cada coisa?"),
+            el("div", null, PAPEIS.map(function (p, i) { return el("div", { class: "row g-2 align-items-center mb-1" }, el("div", { class: "col-sm-7 small" }, p[0]), el("div", { class: "col-sm-5" }, selects[i])); })),
+            u.botao("Conferir", "btn-primary mt-1", function () {
+                var certas = PAPEIS.filter(function (p, i) { return selects[i].value === p[1]; }).length;
+                u.marca(fb, certas === 3, certas === 3 ? "Isso: endereço (URI), formato (HTML) e protocolo (HTTP)." : certas + " de 3. Clique num link e veja o papel de cada peça.");
+                if (certas === 3) concluir();
+            }), fb);
+        segue(LINKS[0]);
     });
 }());

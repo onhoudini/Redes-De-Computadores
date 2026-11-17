@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 23 — Roteamento em redes IP | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Distinguir o roteamento intradomínio (IGP) do interdomínio (EGP) e o papel das políticas.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="23" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 23 · Parte 2: Protocolos · Seção 3.15</span>
+        <h1 class="display-5 mb-3">Roteamento em redes IP</h1>
+        <p class="lead mb-4">
+            A Internet é uma rede de redes, cada uma sob uma administração diferente. Antes de ver os protocolos, o livro separa os dois problemas de roteamento: dentro de cada domínio e entre os domínios.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#rede-dominios">1. Uma rede de domínios</a>
+                    <a class="nav-link" href="#dominios">2. Domínios</a>
+                    <a class="nav-link" href="#criterios">3. Critérios técnicos ou econômicos</a>
+                    <a class="nav-link" href="#exercicios-cap23">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Uma rede de redes</h2>
+    <p>
+        A Internet é uma interligação de redes, chamadas <strong>domínios</strong>, sob responsabilidades diferentes: de uma
+        pequena empresa com poucos roteadores a grandes provedores com milhares. Quando o livro foi escrito, eram mais de
+        40 mil domínios (pág. 236 do PDF). Duas classes de protocolos trocam as informações de roteamento.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Distinguir o roteamento <strong>intradomínio</strong> (IGP) do <strong>interdomínio</strong> (EGP) e o papel das <strong>políticas</strong>.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o vetor de distância e o estado de enlace do <a href="../capitulo-02/index.html">Capítulo 2</a> e o maior
+                prefixo do <a href="../capitulo-22/index.html">Capítulo 22</a>. O capítulo cobre a seção 3.15 do livro
+                (pág. 236–237 do PDF). O RIP e o OSPF são o assunto do <a href="../capitulo-24/index.html">Capítulo 24</a>, e o
+                BGP, do <a href="../capitulo-25/index.html">Capítulo 25</a>.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Uma rede de domínios -->
+<section id="rede-dominios" class="chapter-section" data-conceito="rede-dominios" data-titulo="Uma rede de domínios">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">A Internet como uma rede de domínios</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Ninguém administra a Internet inteira. A rede da sua universidade, a do seu provedor e a de um grande serviço de
+        vídeo têm donos diferentes, e cada dono decide como a sua rede funciona por dentro. Mesmo assim, um pacote atravessa
+        várias delas.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Numa rede IP grande como a Internet, os roteadores precisam trocar informações de roteamento. A Internet é uma
+        interligação de redes, muitas vezes chamadas de <strong>domínios</strong>, que estão sob responsabilidades
+        diferentes (pág. 236 do PDF). Um domínio pode ser:
+    </p>
+    <ul>
+        <li>uma pequena empresa, com poucos roteadores num único prédio;</li>
+        <li>uma empresa maior, com uma centena de roteadores em vários lugares;</li>
+        <li>um grande provedor de acesso, com milhares de roteadores.</li>
+    </ul>
+    <p>
+        Quando o livro foi escrito, a Internet tinha mais de 40 mil domínios, e o número continuava crescendo. A nota de
+        rodapé do livro aponta os
+        <a href="http://bgp.potaroo.net/index-as.html" target="_blank" rel="noopener noreferrer">relatórios do bgp.potaroo.net</a>,
+        que acompanham a evolução do número de sistemas autônomos ao longo do tempo. A Fig. 58 mostra uma Internet pequena,
+        com quatro domínios ligados por cinco enlaces.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Na Fig. 58, só os enlaces entre domínios estão desenhados. Na simulação abaixo, os enlaces dentro de cada domínio são
+        ilustrativos, para mostrar o caminho completo de um pacote.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="dominios-fig58"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Uma rede sob a responsabilidade de uma organização|Um nome registrado no DNS|Um enlace entre dois provedores" data-answer="0" data-explain="Neste contexto, domínio é uma rede administrada por uma organização: de uma pequena empresa a um grande provedor (pág. 236 do PDF). Não confunda com os domínios do DNS." data-hint="A Fig. 58 desenha cada domínio como uma nuvem de roteadores.">
+        <p class="fw-semibold mb-2">No roteamento, o que o livro chama de domínio?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Um protocolo interdomínio (o BGP)|O protocolo intradomínio do Domínio 2|O protocolo intradomínio do Domínio 4" data-answer="0" data-explain="O enlace liga roteadores de dois domínios diferentes; as rotas que passam por ele são trocadas pelo protocolo interdomínio, o BGP (pág. 237 do PDF)." data-hint="Os dois roteadores pertencem a administrações diferentes.">
+        <p class="fw-semibold mb-2">Na Fig. 58, um enlace liga um roteador do Domínio 2 a um do Domínio 4. Que protocolo troca rotas por ele?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>A Internet é uma interligação de domínios, cada um sob uma responsabilidade.</li>
+        <li>Domínios vão de poucos roteadores num prédio a milhares num grande provedor; eram mais de 40 mil.</li>
+        <li>Um pacote atravessa vários domínios: entre eles, o BGP; dentro de cada um, o IGP do dono.</li>
+    </ul>
+</section>
+
+<!-- 2. Domínios -->
+<section id="dominios" class="chapter-section" data-conceito="dominios" data-titulo="Domínios">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Roteamento dentro e entre domínios</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Dentro de uma empresa, todos os roteadores obedecem ao mesmo administrador. Entre empresas diferentes, cada uma quer
+        pagar o mínimo e proteger os seus interesses. O mesmo protocolo não serve para os dois casos.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <ul>
+        <li><strong>Intradomínio</strong> (IGP, <em>interior gateway protocols</em>): usado por todos os roteadores de um domínio
+            para os destinos internos. RIP (vetor de distância), OSPF e IS-IS (estado de enlace), rotas estáticas ou protocolos
+            proprietários. Objetivos: o caminho mais curto e a recuperação rápida de falhas (pág. 236–237 do PDF).</li>
+        <li><strong>Interdomínio</strong> (EGP): distribui rotas entre domínios, agregadas, tratando cada domínio como uma caixa
+            preta. Há um só: o <strong>BGP</strong>.</li>
+    </ul>
+    <p>
+        Dentro de um domínio, todos os roteadores são iguais, e o melhor caminho é escolhido por critérios técnicos (atraso,
+        saltos, banda). Entre domínios, cada um tem a sua <strong>política</strong>: um <strong>filtro de importação</strong>
+        (que rotas aceita), um <strong>filtro de exportação</strong> (que rotas anuncia) e um <strong>algoritmo de
+        classificação</strong> (qual rota prefere), e o objetivo é a rota mais barata (pág. 237 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="igp-egp"></div>
+    <p class="small text-muted">Ilustra a divisão entre IGP e EGP e a política de cada domínio (págs. 236–237 do PDF).</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="BGP|OSPF|RIP" data-answer="0" data-explain="O BGP é o único protocolo interdomínio da Internet (pág. 237 do PDF)." data-hint="Qual protocolo funciona entre domínios?">
+        <p class="fw-semibold mb-2">Qual protocolo dois provedores diferentes usam para trocar rotas?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Filtro de importação, filtro de exportação e algoritmo de classificação|Métrica, temporizador e área|Prefixo, nexthop e TTL" data-answer="0" data-explain="A política de um domínio tem essas três partes (pág. 237 do PDF)." data-hint="O que aceitar, o que anunciar e o que preferir.">
+        <p class="fw-semibold mb-2">Quais são as três partes de uma política de roteamento interdomínio?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>IGP dentro do domínio (critérios técnicos); BGP entre domínios (políticas e custo).</li>
+        <li>Política = importação + exportação + classificação.</li>
+    </ul>
+</section>
+
+<!-- 3. Critérios técnicos ou econômicos -->
+<section id="criterios" class="chapter-section" data-conceito="criterios" data-titulo="Critérios técnicos ou econômicos">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">O melhor caminho depende de quem escolhe</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Três caminhos levam ao mesmo prefixo: um rápido e caro, um com poucos saltos e muita banda, um lento e de graça.
+        Qual é o melhor? Depende de quem está escolhendo.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Os protocolos intradomínio costumam ter dois objetivos: distribuir as rotas que correspondem ao caminho mais curto
+        entre dois roteadores do domínio e permitir que os roteadores se recuperem depressa de falhas de enlaces e de
+        roteadores (pág. 237 do PDF). Dentro de um domínio, todos os roteadores são considerados iguais, e o melhor caminho
+        é escolhido por um <strong>critério técnico</strong>: o de menor atraso, o de menos saltos ou o de maior banda.
+    </p>
+    <p>
+        Entre domínios administrados por organizações diferentes, isso deixa de valer. Cada domínio aplica a sua
+        <strong>política</strong>, e o objetivo do protocolo interdomínio é achar a rota mais <strong>barata</strong> para
+        cada destino (pág. 237 do PDF). Por escala, ele distribui rotas <strong>agregadas</strong> e trata cada domínio como
+        uma caixa preta: não sabe quantos roteadores há lá dentro nem como estão ligados.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="criterio-rota"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Achar caminhos curtos e se recuperar depressa de falhas|Achar a rota mais barata para cada destino|Esconder a topologia interna dos vizinhos" data-answer="0" data-explain="Esses são os dois objetivos dos protocolos intradomínio (pág. 237 do PDF). A rota mais barata e a caixa preta são do roteamento interdomínio." data-hint="Pense no que importa dentro de uma só administração.">
+        <p class="fw-semibold mb-2">Quais são os dois objetivos usuais de um protocolo intradomínio?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Para escalar: com milhares de domínios, anunciar cada roteador interno seria inviável|Para economizar banda nos enlaces internos|Porque o BGP não conhece endereços IP" data-answer="0" data-explain="Por razões de escala, o protocolo interdomínio distribui informação agregada e considera cada domínio uma caixa preta (pág. 237 do PDF)." data-hint="Quantos domínios e roteadores existem?">
+        <p class="fw-semibold mb-2">Por que o protocolo interdomínio trata cada domínio como uma caixa preta?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Dentro do domínio: caminho mais curto por um critério técnico e recuperação rápida de falhas.</li>
+        <li>Entre domínios: a política de cada um e a rota mais barata.</li>
+        <li>O protocolo interdomínio agrega as rotas e não enxerga o interior dos domínios.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap23" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> na Fig. 58, quantos enlaces ligam domínios diferentes? Quais domínios têm mais vizinhos?
+            <details><summary>Ver solução</summary><p class="mb-0">5 enlaces. Os domínios 2 e 3 têm 3 vizinhos cada; o 1 e o 4 têm 2.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> por que um protocolo interdomínio distribui rotas agregadas e trata cada domínio como uma caixa preta?
+            <details><summary>Ver solução</summary><p class="mb-0">Por escala: com dezenas de milhares de domínios, alguns com milhares de roteadores, anunciar cada roteador e cada enlace interno seria impossível. Cada domínio anuncia só os prefixos que alcança (pág. 237 do PDF).</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> dentro de um domínio, há dois caminhos até um prefixo: 3 saltos a 100 Mbit/s ou 5 saltos a 10 Gbit/s. Qual o IGP escolhe?
+            <details><summary>Ver solução</summary><p class="mb-0">Depende do critério técnico que o operador configurou (pág. 237 do PDF): pelo número de saltos, o primeiro; pela banda, o segundo. Dentro do domínio, a escolha é técnica, e todos os roteadores seguem o mesmo critério.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Dois trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. A Fig. 58: domínios e enlaces</h3>
+    <pre class="code-block"><code>from collections import deque
+
+# A Fig. 58 do livro como dados (pág. 236 do PDF). Os enlaces internos não aparecem na
+# figura: os daqui são ilustrativos. O número depois do R é o domínio.
+roteadores = ["R1a", "R1b", "R1c", "R1d", "R2a", "R2b", "R2c", "R2d", "R2e",
+              "R3a", "R3b", "R3c", "R3d", "R4a", "R4b", "R4c", "R4d"]
+dominio = {r: int(r[1]) for r in roteadores}
+enlaces = [("R1a", "R2b"), ("R2d", "R4a"), ("R2e", "R3b"), ("R1d", "R3a"), ("R4c", "R3c"),  # os da figura
+           ("R1a", "R1b"), ("R1b", "R1c"), ("R1c", "R1d"), ("R1a", "R1d"),
+           ("R2a", "R2b"), ("R2a", "R2d"), ("R2b", "R2c"), ("R2c", "R2d"), ("R2d", "R2e"),
+           ("R3a", "R3b"), ("R3b", "R3c"), ("R3c", "R3d"), ("R3a", "R3d"),
+           ("R4a", "R4b"), ("R4b", "R4d"), ("R4d", "R4c"), ("R4a", "R4c")]
+
+inter = [(a, b) for a, b in enlaces if dominio[a] != dominio[b]]
+print("enlaces interdomínio:", len(inter), "  internos:", len(enlaces) - len(inter))
+
+# o que o protocolo interdomínio enxerga: cada domínio é uma caixa preta
+vizinhos = {}
+for a, b in inter:
+    vizinhos.setdefault(dominio[a], set()).add(dominio[b])
+    vizinhos.setdefault(dominio[b], set()).add(dominio[a])
+print({d: sorted(v) for d, v in sorted(vizinhos.items())})
+
+def caminho_dominios(origem, destino):
+    """Busca em largura no grafo de domínios: o caminho com menos domínios."""
+    anterior, fila = {origem: None}, deque([origem])
+    while fila:
+        d = fila.popleft()
+        for v in sorted(vizinhos[d]):
+            if v not in anterior:
+                anterior[v] = d
+                fila.append(v)
+    rota, passo = [], destino
+    while passo is not None:
+        rota.append(passo)
+        passo = anterior[passo]
+    return rota[::-1]
+
+print("de R1c a R4b, pelos domínios:", caminho_dominios(dominio["R1c"], dominio["R4b"]))</code></pre>
+
+    <h3 class="h6 mt-4">2. Critério técnico ou política</h3>
+    <pre class="code-block"><code># As mesmas rotas para um prefixo, escolhidas por critérios diferentes (pág. 237 do PDF)
+rotas = [
+    {"nome": "R1", "atraso_ms": 12, "saltos": 4, "banda_mbps": 1000, "custo": 800},
+    {"nome": "R2", "atraso_ms": 25, "saltos": 2, "banda_mbps": 10000, "custo": 300},
+    {"nome": "R3", "atraso_ms": 40, "saltos": 6, "banda_mbps": 100, "custo": 0},
+]
+# dentro de um domínio: um critério técnico
+print("menor atraso:", min(rotas, key=lambda r: r["atraso_ms"])["nome"])
+print("menos saltos:", min(rotas, key=lambda r: r["saltos"])["nome"])
+print("maior banda: ", max(rotas, key=lambda r: r["banda_mbps"])["nome"])
+
+# entre domínios: uma política = filtro de importação + classificação + filtro de exportação
+def importa(rota):
+    return rota["banda_mbps"] &gt;= 100            # exemplo: recusa rotas lentas demais
+
+def classifica(aceitas):
+    return min(aceitas, key=lambda r: r["custo"])  # a mais barata
+
+def exporta(rota, vizinho):
+    return vizinho == "cliente"                 # exemplo: só anuncia a quem é cliente
+
+melhor = classifica([r for r in rotas if importa(r)])
+print("a política escolhe:", melhor["nome"])
+print("anuncia ao cliente?", exporta(melhor, "cliente"), "| ao provedor?", exporta(melhor, "provedor"))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.15 "Routing in IP networks" (pág. 236–237 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>bgp.potaroo.net — <a href="http://bgp.potaroo.net/index-as.html" target="_blank" rel="noopener noreferrer">relatórios sobre o número de sistemas autônomos</a>, citados na nota de rodapé do livro (pág. 236 do PDF)</li>
+        <li>RFC 1930 — <a href="https://www.rfc-editor.org/rfc/rfc1930" target="_blank" rel="noopener noreferrer">Guidelines for creation, selection, and registration of an Autonomous System (AS)</a> (complemento)</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Autonomous_system_(Internet)" target="_blank" rel="noopener noreferrer">Autonomous system (Internet)</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-22/index.html" class="text-muted text-decoration-none">← Capítulo 22</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 23</span>
+            <a href="../capitulo-24/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 24 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap23.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 21 — Controle de congestionamento no TCP | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: a janela de congestionamento, slow start e congestion avoidance, as reações a perdas, ECN, RED, o modelo da raiz de p e as variantes do controle de congestionamento do TCP.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="21" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 21 · Parte 2: Protocolos · Seção 3.13</span>
+        <h1 class="display-5 mb-3">Controle de congestionamento no TCP</h1>
+        <p class="lead mb-4">
+            No Capítulo 6 você viu por que uma rede congestiona e como o AIMD divide a banda entre os fluxos. Aqui está
+            como o TCP faz isso de verdade: uma janela de congestionamento que dobra, cresce devagar e cai pela metade,
+            roteadores que marcam pacotes em vez de descartá-los e uma fórmula simples que prevê a vazão.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#cwnd">1. A janela de congestionamento</a>
+                    <a class="nav-link" href="#slow-start">2. Slow start</a>
+                    <a class="nav-link" href="#perdas">3. Congestionamento leve e severo</a>
+                    <a class="nav-link" href="#ecn">4. ECN</a>
+                    <a class="nav-link" href="#red">5. RED</a>
+                    <a class="nav-link" href="#modelo">6. O modelo da raiz de p</a>
+                    <a class="nav-link" href="#zoo">7. O zoológico</a>
+                    <a class="nav-link" href="#exercicios-cap21">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Uma janela para não afogar a rede</h2>
+    <p>
+        Numa rede feita de redes diferentes, como a Internet, o controle de congestionamento podia ficar na camada de rede
+        ou na de transporte. Quando o problema ficou claro, no fim dos anos 1980, os pesquisadores escolheram o transporte:
+        ele já cuida da entrega confiável, evitar congestionamento faz parte disso, e o TCP já lida com redes heterogêneas
+        graças ao seu ritmo próprio, marcado pelas confirmações (pág. 205 do PDF).
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar como a <strong>janela de congestionamento</strong> (cwnd) limita a taxa do TCP e qual janela vale de fato.</li>
+                <li>Acompanhar o <strong>slow start</strong>, o <strong>congestion avoidance</strong> e o papel do <strong>ssthresh</strong>.</li>
+                <li>Comparar as reações a <strong>três ACKs duplicados</strong> e à <strong>expiração do temporizador</strong>.</li>
+                <li>Explicar o <strong>ECN</strong> (bits ECT, CE, ECE e CWR) e a marcação do <strong>RED</strong>.</li>
+                <li>Usar o <strong>modelo da raiz de p</strong> para estimar a vazão e explicar a injustiça entre fluxos.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o AIMD e o congestionamento do <a href="../capitulo-06/index.html">Capítulo 6</a> e a janela, os ACKs
+                duplicados e a retransmissão rápida do <a href="../capitulo-20/index.html">Capítulo 20</a>. O capítulo cobre a
+                seção 3.13 do livro (pág. 205–213 do PDF). Nas simulações, a janela é contada em segmentos e o tempo em RTTs,
+                como nas figuras do livro.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 15 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. cwnd -->
+<section id="cwnd" class="chapter-section" data-conceito="cwnd" data-titulo="A janela de congestionamento">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">A janela de congestionamento</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O AIMD precisa controlar a taxa de envio. Com temporizadores ajustados conforme o AIMD, seria difícil manter milhares
+        de conexões. Van Jacobson percebeu um atalho: a taxa já é limitada pela janela.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O controle de congestionamento do TCP foi proposto por Van Jacobson em 1988 e hoje está na
+        <a href="https://www.rfc-editor.org/rfc/rfc5681" target="_blank" rel="noopener noreferrer">RFC 5681</a>. Uma conexão TCP
+        não manda mais rápido que <strong>janela / rtt</strong>. Basta, então, controlar a janela. Cada TCB guarda uma
+        <strong>janela de congestionamento</strong>, a <strong>cwnd</strong>, e a janela usada pelo emissor é
+        (pág. 205–206 do PDF):
+    </p>
+    <p class="text-center fs-5 mono">janela = min(cwnd, rwin, swin)</p>
+    <p>
+        em que rwin é a última janela anunciada pelo receptor e swin, a janela de envio. O <strong>aumento aditivo</strong> soma
+        um MSS à cwnd a cada RTT: é a fase de <strong>congestion avoidance</strong>. A <strong>diminuição multiplicativa</strong>
+        divide a cwnd quando o congestionamento é detectado.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que a janela é o <em>máximo</em> entre a janela de envio e a anunciada pelo receptor (pág. 205 do PDF).
+        É o <strong>mínimo</strong>: o emissor não pode passar de nenhum dos limites, como o próprio livro escreve na página
+        seguinte, com min(cwnd, rwin, swin).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="janela-efetiva"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O receptor: a janela usada é o mínimo das três|A rede, porque a cwnd é maior|Nenhuma: as janelas se somam" data-answer="0" data-explain="min(40, 16, 64) = 16 segmentos: quem limita é o receptor." data-hint="A janela usada é o mínimo ou o máximo?">
+        <p class="fw-semibold mb-2">cwnd = 40 segmentos, rwin = 16 segmentos e swin = 64 segmentos. Quem limita o emissor?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque controlar a janela já limita a taxa, sem um temporizador por conexão|Porque a camada de rede não conhece as conexões|Porque o UDP já faz isso" data-answer="0" data-explain="A taxa máxima é janela / rtt; mexer na janela é mais simples que manter temporizadores (pág. 205 do PDF)." data-hint="Releia a ideia de Van Jacobson.">
+        <p class="fw-semibold mb-2">Por que o TCP controla o congestionamento pela janela?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Taxa ≤ janela / rtt; janela = min(cwnd, rwin, swin).</li>
+        <li>Aumento aditivo: +1 MSS por RTT (congestion avoidance). Diminuição multiplicativa ao detectar congestionamento.</li>
+    </ul>
+</section>
+
+<!-- 2. Slow start -->
+<section id="slow-start" class="chapter-section" data-conceito="slow-start" data-titulo="Slow start">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Slow start e congestion avoidance</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No começo da conexão, o emissor não sabe se o caminho está congestionado. Começar com uma janela pequena é prudente;
+        crescer só 1 MSS por RTT a partir daí levaria uma eternidade num enlace rápido e distante.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Jacobson recomendou começar com cwnd = 1 MSS. Para chegar logo a uma janela útil, o TCP usa o <strong>slow start</strong>,
+        que, apesar do nome, é rápido: a cwnd <strong>dobra a cada RTT</strong> (pág. 206 do PDF). Uma variável a mais no TCB, o
+        <strong>ssthresh</strong> (limiar do slow start), estima o último valor da cwnd que não causou congestionamento. Ele
+        começa igual à janela de envio e é atualizado a cada congestionamento:
+    </p>
+    <ul>
+        <li>cwnd &lt; ssthresh: slow start, a janela dobra a cada RTT (+1 MSS por ACK);</li>
+        <li>cwnd ≥ ssthresh: congestion avoidance, a janela cresce 1 MSS por RTT.</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Janela inicial</strong> (pág. 208 do PDF). Começar com 1 MSS prejudica as conexões curtas, como as da web. Em 2002, a
+        <a href="https://www.rfc-editor.org/rfc/rfc3390" target="_blank" rel="noopener noreferrer">RFC 3390</a> permitiu cerca de
+        4 KB (3 segmentos). Pesquisadores do Google propuseram cerca de 15 KB, o tamanho médio de uma resposta HTTP de um
+        buscador, e mostraram que isso não aumentava o congestionamento mas reduzia a latência. A proposta virou a
+        <a href="https://www.rfc-editor.org/rfc/rfc6928" target="_blank" rel="noopener noreferrer">RFC 6928</a> (10 segmentos).
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="slow-start"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="4 RTTs|16 RTTs|8 RTTs" data-answer="0" data-explain="1, 2, 4, 8, 16: a janela dobra a cada RTT." data-hint="A janela dobra a cada RTT.">
+        <p class="fw-semibold mb-2">Começando em cwnd = 1, quantos RTTs o slow start leva para chegar a 16 segmentos?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="O último valor da cwnd que não causou congestionamento|O tamanho máximo do buffer do receptor|O número de ACKs duplicados" data-answer="0" data-explain="Abaixo dele, slow start; acima, congestion avoidance (pág. 206 do PDF)." data-hint="É um limiar entre as duas fases.">
+        <p class="fw-semibold mb-2">O que o ssthresh estima?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Slow start: a cwnd dobra a cada RTT até o ssthresh.</li>
+        <li>Congestion avoidance: +1 MSS por RTT.</li>
+        <li>Janela inicial: 1 MSS (Jacobson), cerca de 3 segmentos (RFC 3390), 10 segmentos (RFC 6928).</li>
+    </ul>
+</section>
+
+<!-- 3. Perdas -->
+<section id="perdas" class="chapter-section" data-conceito="perdas" data-titulo="Congestionamento leve e severo">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">Congestionamento leve e severo</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Como o TCP percebe o congestionamento? As primeiras implementações escolheram o sinal mais simples: se um pacote se
+        perdeu, é porque um buffer encheu.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Em redes com fio, as perdas vêm quase sempre de congestionamento; em redes sem fio, também de erros de transmissão. O
+        TCP já detecta perdas para a entrega confiável, e distingue dois casos (pág. 206 do PDF):
+    </p>
+    <ul>
+        <li><strong>Congestionamento leve</strong>: três ACKs duplicados e uma retransmissão rápida bem-sucedida indicam que só um
+            segmento se perdeu. A cwnd é dividida por 2, e o ssthresh fica com esse novo valor. O emissor segue em congestion
+            avoidance (Fig. 35).</li>
+        <li><strong>Congestionamento severo</strong>: o temporizador expirou. O TCP retransmite o primeiro segmento, põe o
+            ssthresh na metade da cwnd, volta a cwnd ao valor inicial e recomeça o slow start (Fig. 34).</li>
+    </ul>
+    <p>A maioria das implementações atualiza a cwnd a cada ACK. O pseudo-código do livro, simplificado (pág. 208 do PDF):</p>
+    <pre class="log mb-3">ACK novo:      se não está se recuperando de perda:
+                   cwnd &lt; ssthresh → cwnd += MSS              (slow start)
+                   senão           → cwnd += MSS · MSS / cwnd  (congestion avoidance)
+               se está se recuperando → cwnd = ssthresh       (desinfla, RFC 5681)
+ACK duplicado: 1º e 2º → envia um segmento novo                (RFC 3042)
+               3º      → retransmite; ssthresh = max(cwnd/2, 2·MSS); cwnd = ssthresh
+               4º, 5º… → cwnd += MSS                          (infla, RFC 5681)
+temporizador:  retransmite; ssthresh = max(cwnd/2, 2·MSS); cwnd = MSS</pre>
+    <p>
+        A <a href="https://www.rfc-editor.org/rfc/rfc3042" target="_blank" rel="noopener noreferrer">RFC 3042</a> permite mandar dados
+        novos no primeiro e no segundo ACK duplicados, porque cada um indica que um segmento saiu da rede. E uma conexão parada
+        por mais tempo que o seu rto deve voltar à janela inicial, porque já não conhece o estado da rede.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="cwnd-eventos"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="ssthresh = 20 e cwnd = 20|ssthresh = 20 e cwnd = 1|ssthresh = 40 e cwnd = 20" data-answer="0" data-explain="Congestionamento leve: metade da janela, e segue em congestion avoidance." data-hint="Três ACKs duplicados são congestionamento leve.">
+        <p class="fw-semibold mb-2">Com cwnd = 40 segmentos, chegam três ACKs duplicados. Como ficam ssthresh e cwnd?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="O temporizador expirou: os ACKs pararam de chegar|Chegaram três ACKs duplicados|O receptor anunciou janela zero" data-answer="0" data-explain="Sem ACKs nem duplicados, o emissor supõe muitas perdas e recomeça com cwnd = 1 (pág. 206 do PDF)." data-hint="Qual evento mostra que nem os ACKs estão passando?">
+        <p class="fw-semibold mb-2">O que leva o TCP a voltar a cwnd a 1 segmento?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Três ACKs duplicados: cwnd e ssthresh = cwnd/2; segue em congestion avoidance.</li>
+        <li>Temporizador: ssthresh = cwnd/2, cwnd = 1 MSS; recomeça o slow start.</li>
+        <li>Conexão ociosa por mais que o rto volta à janela inicial.</li>
+    </ul>
+</section>
+
+<!-- 4. ECN -->
+<section id="ecn" class="chapter-section" data-conceito="ecn" data-titulo="ECN">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">ECN: congestionamento sem perder dados</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Hoje, o TCP descobre o congestionamento enchendo os buffers até os pacotes serem descartados e depois retransmite os
+        mesmos dados, gastando recursos antes do roteador congestionado. Não seria melhor o roteador avisar antes?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A ideia de os roteadores marcarem os pacotes é do fim dos anos 1980, mas levou quase uma década para a Internet a
+        considerar. A <strong>notificação explícita de congestionamento</strong> (ECN,
+        <a href="https://www.rfc-editor.org/rfc/rfc3168" target="_blank" rel="noopener noreferrer">RFC 3168</a>) teve de vencer
+        quatro dificuldades (pág. 209–211 do PDF):
+    </p>
+    <ol>
+        <li><strong>Bits no cabeçalho IP.</strong> O bit <strong>CE</strong> (<em>Congestion Experienced</em>) é ligado pelo
+            roteador congestionado. Um bit só seria injusto: quem implementa ECN reduziria a taxa, quem não implementa não, e
+            os primeiros sairiam perdendo. Por isso há um segundo bit, <strong>ECT</strong> (<em>ECN-capable transport</em>):
+            o roteador só marca pacotes com ECT ligado; os outros, descarta. Isso só funciona se todos cooperarem: uma
+            origem que liga o ECT sem reagir às marcas leva vantagem injusta sobre as que reagem. Há propostas contra isso
+            (RFC 3540, o <em>ECN nonce</em>), fora do escopo do livro (pág. 209 do PDF). Essa proposta experimental foi
+            depois reclassificada como histórica pela <a href="https://www.rfc-editor.org/rfc/rfc8311" target="_blank" rel="noopener noreferrer">RFC 8311</a>.</li>
+        <li><strong>Avisar o emissor.</strong> O receptor liga o bit <strong>ECE</strong> (<em>ECN-Echo</em>) do TCP nas
+            confirmações (Fig. 36).</li>
+        <li><strong>Negociar o uso.</strong> Os bits ECE e CWR são usados no próprio handshake, sem gastar espaço de opções.</li>
+        <li><strong>Confiabilidade.</strong> Os ACKs não são confiáveis: se o ACK com ECE se perde, o seguinte confirma os
+            dados mas não leva o ECE. Por isso o receptor liga o ECE em <strong>todos</strong> os segmentos até receber um
+            com o bit <strong>CWR</strong> (<em>Congestion Window Reduced</em>), que o emissor liga depois de reduzir a janela.
+            O emissor reage uma vez por RTT.</li>
+    </ol>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Em redes de empresas e datacenters, em que uma só organização controla todos os hosts e roteadores, ligar o ECN é mais
+        fácil, como observa o livro. O ECN da RFC 3168 reage a uma marcação como a uma perda; propostas mais recentes, como o L4S
+        (<a href="https://www.rfc-editor.org/rfc/rfc9330" target="_blank" rel="noopener noreferrer">RFC 9330</a>), usam a
+        quantidade de marcas para reagir de forma mais fina.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="ecn-bits"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Para o roteador marcar só os pacotes de quem vai reagir; os outros são descartados|Para cifrar a marcação|Para o receptor confirmar o CWR" data-answer="0" data-explain="Sem o ECT, quem implementa ECN seria prejudicado por quem não implementa (pág. 209 do PDF)." data-hint="Pense na injustiça entre um emissor com ECN e outro sem.">
+        <p class="fw-semibold mb-2">Para que serve o bit ECT?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Até receber um segmento com CWR|Só uma vez|Até o fim da conexão" data-answer="0" data-explain="O CWR funciona como uma confirmação do ECE (pág. 211 do PDF)." data-hint="Como o receptor sabe que o emissor recebeu o aviso?">
+        <p class="fw-semibold mb-2">Por quanto tempo o receptor liga o ECE depois de ver um pacote com CE?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>IP: ECT (o transporte entende ECN) e CE (congestionamento visto). TCP: ECE (eco) e CWR (janela reduzida).</li>
+        <li>O receptor repete o ECE até ver o CWR; o emissor reage uma vez por RTT.</li>
+    </ul>
+</section>
+
+<!-- 5. RED -->
+<section id="red" class="chapter-section" data-conceito="red" data-titulo="RED">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Detectar congestionamento nos roteadores: RED</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Para marcar pacotes, o roteador precisa decidir quando está congestionado. Olhar a fila neste instante parece óbvio,
+        mas a fila sobe e desce o tempo todo.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Num roteador com uma única fila, a ocupação é medida em bytes (ou em pacotes, se os espaços do buffer têm tamanho fixo).
+        Considerar o roteador congestionado quando a ocupação <strong>instantânea</strong> passa de um limiar (40% do buffer,
+        por exemplo) é simples, mas instável. Melhor é usar a ocupação <strong>média</strong>. O
+        <strong>Random Early Detection</strong> (RED), de Floyd e Jacobson (1993), faz isso e marca os pacotes com uma
+        probabilidade que cresce com a média (pág. 211 do PDF).
+    </p>
+    <p>
+        A marcação probabilística é proporcional ao uso: se o roteador marca 10% dos pacotes, um fluxo de 100 pacotes por
+        segundo recebe 10 marcas por segundo, e um de 1 pacote por segundo quase nenhuma. Em roteadores com várias filas e
+        escalonamento em rodízio (Capítulo 6), o escalonador já favorece o fluxo pequeno; ali, basta um limiar por fila.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A média usada pelo RED é exponencial, média = (1 − w)·média + w·fila, e a probabilidade sobe linearmente entre dois
+        limiares (<a href="https://en.wikipedia.org/wiki/Random_early_detection" target="_blank" rel="noopener noreferrer">Wikipedia: Random early detection</a>).
+        A <a href="https://www.rfc-editor.org/rfc/rfc7567" target="_blank" rel="noopener noreferrer">RFC 7567</a> recomenda que os
+        roteadores usem alguma gestão ativa de filas, como o RED ou sucessores dele.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="red-marcacao"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque ela muda o tempo todo; a média ignora rajadas curtas|Porque é difícil de medir|Porque o RED não tem contador" data-answer="0" data-explain="A ocupação instantânea é frágil do ponto de vista de controle (pág. 211 do PDF)." data-hint="Compare as duas curvas da simulação.">
+        <p class="fw-semibold mb-2">Por que o RED usa a ocupação média, e não a instantânea?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>RED: média da fila e marcação com probabilidade crescente.</li>
+        <li>Marcação proporcional ao tráfego de cada fluxo.</li>
+        <li>Com várias filas, um limiar por fila.</li>
+    </ul>
+</section>
+
+<!-- 6. Modelo -->
+<section id="modelo" class="chapter-section" data-conceito="modelo" data-titulo="O modelo da raiz de p">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">Modelando o TCP: a lei da raiz de p</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Intuitivamente, quanto mais perdas, menor a taxa do TCP. Dá para dizer quanto menor?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O livro usa um modelo simples, de suposições pouco realistas mas boa intuição (pág. 212 do PDF). As perdas são
+        regularmente espaçadas: com taxa de perda p, a conexão transfere 1/p − 1 segmentos e perde o seguinte. Ignorando o slow
+        start, ela fica sempre em congestion avoidance: a cwnd sobe de W/2 até W, um segmento por RTT, e cai à metade (Fig. 37).
+        Num ciclo de W/2 RTTs, os segmentos enviados são a área do trapézio:
+    </p>
+    <p class="text-center mono">área = (W/2)² + ½·(W/2)² = 3W²/8 = 1/p &nbsp;⇒&nbsp; W = √(8 / 3p)</p>
+    <p class="text-center mono">vazão = área · MSS / tempo = √(3/2) · MSS / (rtt · √p)</p>
+    <p>
+        Modelos mais detalhados confirmam a forma: <strong>vazão ≈ k · MSS / (rtt · √p)</strong>. Duas consequências (pág. 212 do PDF):
+    </p>
+    <ul>
+        <li>fluxos com <strong>RTT menor</strong> conseguem mais vazão quando há perdas: o controle não é totalmente justo;</li>
+        <li>fluxos com <strong>MSS maior</strong> também, embora quase todos usem MSS de cerca de 1460 bytes.</li>
+    </ul>
+    <p>Juntando com o limite da janela (pág. 213 do PDF):</p>
+    <p class="text-center mono">vazão &lt; min( janela / rtt , k · MSS / (rtt · √p) )</p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="vazao-tcp"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Dividir a taxa de perda por 4|Dividir a taxa de perda por 2|Dobrar o MSS e a taxa de perda" data-answer="0" data-explain="A vazão é proporcional a 1/√p; para dobrar, √p precisa cair à metade, ou seja, p cai a um quarto." data-hint="Como p aparece na fórmula?">
+        <p class="fw-semibold mb-2">Mantendo RTT e MSS, o que é preciso para dobrar a vazão prevista pelo modelo?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Dente de serra entre W/2 e W; W = √(8/3p).</li>
+        <li>Vazão ≈ k · MSS / (rtt · √p): favorece RTTs curtos e MSS grandes.</li>
+        <li>Sem perdas, quem limita é a janela: janela / rtt.</li>
+    </ul>
+</section>
+
+<!-- 7. Zoológico -->
+<section id="zoo" class="chapter-section" data-conceito="zoo" data-titulo="O zoológico">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">O zoológico do controle de congestionamento</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O esquema deste capítulo é o ponto de partida. Desde 1988, pesquisadores propuseram, simularam e implantaram dezenas de
+        variantes.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Jacobson implementou o slow start e o congestion avoidance no BSD 4.3 <strong>Tahoe</strong> e acrescentou a
+        retransmissão rápida e a recuperação rápida no <strong>Reno</strong>. Algumas variantes ainda em uso (pág. 213 do PDF):
+    </p>
+    <ul>
+        <li><strong>NewReno</strong>: melhora a recuperação rápida do Reno quando há várias perdas;</li>
+        <li><strong>Vegas</strong>: usa o aumento do RTT para perceber o congestionamento antes das perdas. Sozinho funciona bem,
+            mas perde espaço para variantes mais agressivas, que só reagem a perdas;</li>
+        <li><strong>CUBIC</strong>: feito para enlaces de alta capacidade; depois de uma perda, a janela cresce por uma função
+            cúbica, mais depressa que no aumento aditivo. É o padrão do Linux desde o núcleo 2.6.19;</li>
+        <li><strong>BBR</strong>, do Google: estima periodicamente a banda e o RTT e tenta mandar 1,25 vez a banda estimada. Isso
+            pode causar muitas perdas, e estudos mostram que ele é injusto com outras variantes em certas condições.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O NewReno citado pelo livro (RFC 3782) está hoje na <a href="https://www.rfc-editor.org/rfc/rfc6582" target="_blank" rel="noopener noreferrer">RFC 6582</a>,
+        e o CUBIC (RFC 8312) virou padrão da IETF na <a href="https://www.rfc-editor.org/rfc/rfc9438" target="_blank" rel="noopener noreferrer">RFC 9438</a>,
+        de 2023. O BBR continua em discussão na IETF.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="reno-cubic"></div>
+    <p class="small text-muted">O livro descreve as variantes só em palavras (pág. 213 do PDF); o gráfico é complemento.</p>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Vegas, que usa o aumento do RTT|Reno, que usa ACKs duplicados|CUBIC, que usa uma função cúbica" data-answer="0" data-explain="O Vegas desacelera quando o RTT aumenta, antes de haver perdas (pág. 213 do PDF)." data-hint="Qual variante é baseada em atraso?">
+        <p class="fw-semibold mb-2">Qual variante tenta perceber o congestionamento antes das perdas?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Tahoe|Reno|BBR" data-answer="0" data-explain="A retransmissão rápida e a recuperação rápida vieram depois, no Reno (pág. 213 do PDF)." data-hint="Qual foi a primeira versão do BSD com o controle de Jacobson?">
+        <p class="fw-semibold mb-2">Em qual versão do BSD apareceram o slow start e o congestion avoidance, ainda sem recuperação rápida?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Tahoe → Reno → NewReno; Vegas (atraso); CUBIC (padrão do Linux); BBR (banda e RTT estimados).</li>
+        <li>Variantes diferentes competindo podem ser injustas umas com as outras.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap21" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> cwnd = 20 MSS, rwin = 16 MSS, swin = 64 MSS e RTT de 80 ms, com MSS de 1460 bytes. Qual é a taxa máxima?
+            <details><summary>Ver solução</summary><p class="mb-0">A janela é min(20, 16, 64) = 16 MSS = 23 360 bytes; 23 360 × 8 / 0,08 ≈ 2,34 Mbit/s.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> com ssthresh = 16 e cwnd inicial = 1, escreva a cwnd nos RTTs 0 a 8.
+            <details><summary>Ver solução</summary><p class="mb-0">1, 2, 4, 8, 16, 17, 18, 19, 20.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> com cwnd = 40, o que acontece com cwnd e ssthresh se chegarem três ACKs duplicados? E se, em vez disso, o temporizador expirar?
+            <details><summary>Ver solução</summary><p class="mb-0">ACKs duplicados: ssthresh = cwnd = 20, e segue em congestion avoidance. Temporizador: ssthresh = 20 e cwnd = 1, e recomeça o slow start, que vai até 20 antes de voltar a crescer devagar.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> pelo modelo, qual é a vazão de uma conexão com p = 0,0001, RTT de 50 ms e MSS de 1460 bytes?
+            <details><summary>Ver solução</summary><p class="mb-0">√1,5 × 1460 / (0,05 × 0,01) ≈ 3,58 MB/s ≈ 28,6 Mbit/s.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> com janela inicial de 10 segmentos de 1460 bytes, quantos RTTs de slow start leva para entregar uma resposta de 50 kB? E com janela inicial de 1?
+            <details><summary>Ver solução</summary><p class="mb-0">Com 10: 14 600 bytes no 1º RTT e 43 800 acumulados no 2º, então 3 RTTs (102 200 acumulados). Com 1: 1, 3, 7, 15, 31, 63 segmentos acumulados, então 6 RTTs (63 × 1460 ≈ 92 kB).</p></details></li>
+        <li><strong>Desafio:</strong> por que o ECN da RFC 3168 precisou de dois bits no cabeçalho IP, e não de um só?
+            <details><summary>Ver solução</summary><p class="mb-0">Com só o CE, o roteador marcaria pacotes de emissores com e sem ECN. Os que entendem ECN reduziriam a taxa; os outros continuariam ou até aumentariam, causando mais marcas e mais reduções nos primeiros. Implementar ECN seria desvantajoso. Com o ECT, o roteador só marca quem vai reagir e descarta os pacotes dos outros, que então reagem à perda.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Cinco trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Reno contra Tahoe, RTT a RTT</h3>
+    <pre class="code-block"><code>def evolucao(rtts, eventos, ssthresh=64, reage_a_dupacks="reno"):
+    """cwnd em segmentos, RTT a RTT. eventos: {rtt: "dupack" ou "timeout"} no fim daquele RTT."""
+    cwnd, linha = 1, []
+    for t in range(rtts):
+        linha.append(cwnd)
+        ev = eventos.get(t)
+        if ev == "timeout" or (ev == "dupack" and reage_a_dupacks == "tahoe"):
+            ssthresh, cwnd = max(cwnd // 2, 2), 1          # congestionamento severo: recomeça o slow start
+        elif ev == "dupack":
+            ssthresh = max(cwnd // 2, 2)                    # congestionamento leve: metade
+            cwnd = ssthresh
+        elif cwnd &lt; ssthresh:
+            cwnd = min(2 * cwnd, ssthresh)                  # slow start: dobra a cada RTT
+        else:
+            cwnd += 1                                       # congestion avoidance: +1 MSS por RTT
+    return linha
+
+eventos = {6: "dupack", 14: "dupack"}
+for nome in ("reno", "tahoe"):
+    cw = evolucao(20, eventos, reage_a_dupacks=nome)
+    print(f"{nome:5}", cw)
+    print(f"      total enviado em 20 RTTs: {sum(cw)} segmentos")</code></pre>
+
+    <h3 class="h6 mt-4">2. O pseudo-código do livro, ACK por ACK</h3>
+    <pre class="code-block"><code>MSS = 1000
+
+class Emissor:
+    """O pseudo-código do livro (pág. 208), ACK por ACK. cwnd e ssthresh em bytes."""
+    def __init__(self, swin=64000):
+        self.cwnd, self.ssthresh = MSS, swin
+        self.snd_una, self.dupacks = 0, 0
+        self.log = []
+
+    def ack(self, numero):
+        if numero > self.snd_una:                       # ACK novo: nenhum congestionamento
+            if self.dupacks == 0:
+                if self.cwnd &lt; self.ssthresh:
+                    self.cwnd += MSS                    # slow start
+                else:
+                    self.cwnd += MSS * MSS // self.cwnd # congestion avoidance
+            else:
+                self.cwnd = self.ssthresh               # fim da recuperação: desinfla a janela
+                self.dupacks = 0
+            self.snd_una = numero
+            evento = "novo"
+        elif numero == self.snd_una:                    # ACK duplicado
+            self.dupacks += 1
+            evento = f"dup {self.dupacks}"
+            if self.dupacks == 3:
+                self.ssthresh = max(self.cwnd // 2, 2 * MSS)
+                self.cwnd = self.ssthresh
+                evento += " -> retransmissão rápida"
+            elif self.dupacks > 3:
+                self.cwnd += MSS                        # infla a janela (RFC 5681)
+        self.log.append((numero, evento, self.cwnd, self.ssthresh))
+
+    def expira(self):
+        self.ssthresh = max(self.cwnd // 2, 2 * MSS)
+        self.cwnd = MSS
+        self.log.append(("--", "temporizador expirou", self.cwnd, self.ssthresh))
+
+e = Emissor(swin=8000)
+for n in range(1000, 13000, 1000):                      # 12 ACKs novos
+    e.ack(n)
+for _ in range(5):                                      # um segmento se perdeu: 5 duplicados
+    e.ack(12000)
+e.ack(20000)                                            # a retransmissão chega: ACK novo
+for numero, evento, cwnd, ss in e.log:
+    print(f"ack {numero!s:>6}  {evento:30} cwnd={cwnd:6}  ssthresh={ss}")</code></pre>
+
+    <h3 class="h6 mt-4">3. A média e a marcação do RED</h3>
+    <pre class="code-block"><code>import random
+
+def media_movel(ocupacoes, peso=0.2):
+    """Média exponencial da fila, como no RED: media = (1 - peso) * media + peso * ocupacao."""
+    media, saida = 0.0, []
+    for q in ocupacoes:
+        media = (1 - peso) * media + peso * q
+        saida.append(media)
+    return saida
+
+def probabilidade(media, minimo=20, maximo=60, p_max=0.1):
+    """Probabilidade de marcar: 0 abaixo do mínimo, sobe até p_max entre os limiares, 1 acima do máximo."""
+    if media &lt; minimo:
+        return 0.0
+    if media >= maximo:
+        return 1.0
+    return p_max * (media - minimo) / (maximo - minimo)
+
+fila = [0, 5, 80, 80, 10, 5, 70, 75, 80, 85, 90, 40, 30, 20]   # uma rajada curta e uma longa (pacotes)
+for q, m in zip(fila, media_movel(fila)):
+    print(f"fila={q:3}  média={m:5.1f}  marca com p={probabilidade(m):.3f}")
+
+# marcação proporcional ao tráfego (o exemplo do livro: 10% dos pacotes)
+rnd = random.Random(3)
+for nome, pacotes_por_s in (("fluxo grande", 100), ("fluxo pequeno", 1)):
+    marcados = sum(rnd.random() &lt; 0.10 for _ in range(pacotes_por_s * 10))   # 10 segundos
+    print(f"{nome}: {marcados / 10:.1f} marcas por segundo")</code></pre>
+
+    <h3 class="h6 mt-4">4. O modelo da raiz de p contra a simulação</h3>
+    <pre class="code-block"><code>from math import sqrt
+
+def vazao_modelo(mss, rtt, p):
+    """O modelo do livro (pág. 212): vazão = sqrt(3/2) * MSS / (rtt * sqrt(p)), em bytes/s."""
+    return sqrt(3 / 2) * mss / (rtt * sqrt(p))
+
+def vazao_simulada(mss, rtt, p, ciclos=50):
+    """Dente de serra: a cwnd sobe 1 segmento por RTT e cai à metade a cada 1/p segmentos."""
+    W = sqrt(8 / (3 * p))                       # janela máxima (em segmentos) prevista pelo modelo
+    cwnd, enviados, tempo, desde_perda = W / 2, 0.0, 0.0, 0.0
+    while tempo &lt; ciclos * (W / 2) * rtt:
+        enviados += cwnd
+        desde_perda += cwnd
+        tempo += rtt
+        if desde_perda >= 1 / p:                # chegou a hora da perda periódica
+            cwnd, desde_perda = cwnd / 2, 0.0
+        else:
+            cwnd += 1
+    return enviados * mss / tempo
+
+for p in (0.01, 0.001, 0.0001):
+    m = vazao_modelo(1460, 0.1, p) * 8 / 1e6
+    s = vazao_simulada(1460, 0.1, p) * 8 / 1e6
+    print(f"p={p:&lt;7} W={sqrt(8 / (3 * p)):6.1f} segmentos  modelo={m:7.2f} Mbit/s  simulação={s:7.2f} Mbit/s")</code></pre>
+
+    <h3 class="h6 mt-4">5. A janela inicial e as respostas curtas</h3>
+    <pre class="code-block"><code>def rtts_para_enviar(tamanho, janela_inicial, mss=1460):
+    """Quantos RTTs o slow start leva para entregar `tamanho` bytes (sem perdas, sem contar o handshake)."""
+    cwnd, enviados, rtts = janela_inicial, 0, 0
+    while enviados &lt; tamanho:
+        enviados += cwnd * mss                  # uma janela inteira por RTT
+        cwnd *= 2                               # slow start
+        rtts += 1
+    return rtts
+
+for nome, iw in (("Jacobson, 1 segmento", 1), ("RFC 3390, 3 segmentos", 3), ("RFC 6928, 10 segmentos", 10)):
+    linha = [rtts_para_enviar(t, iw) for t in (10_000, 15_000, 100_000, 1_000_000)]
+    print(f"{nome:24} 10 kB: {linha[0]}  15 kB: {linha[1]}  100 kB: {linha[2]}  1 MB: {linha[3]} RTTs")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.13 "Congestion control" (pág. 205–213 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 5681 — <a href="https://www.rfc-editor.org/rfc/rfc5681" target="_blank" rel="noopener noreferrer">TCP Congestion Control</a> e RFC 3042 — <a href="https://www.rfc-editor.org/rfc/rfc3042" target="_blank" rel="noopener noreferrer">Enhancing TCP's Loss Recovery Using Limited Transmit</a></li>
+        <li>RFC 3390 — <a href="https://www.rfc-editor.org/rfc/rfc3390" target="_blank" rel="noopener noreferrer">Increasing TCP's Initial Window</a> e RFC 6928 — <a href="https://www.rfc-editor.org/rfc/rfc6928" target="_blank" rel="noopener noreferrer">Increasing TCP's Initial Window</a></li>
+        <li>RFC 3168 — <a href="https://www.rfc-editor.org/rfc/rfc3168" target="_blank" rel="noopener noreferrer">The Addition of Explicit Congestion Notification (ECN) to IP</a> e RFC 9330 — <a href="https://www.rfc-editor.org/rfc/rfc9330" target="_blank" rel="noopener noreferrer">L4S Architecture</a> (complemento)</li>
+        <li>RFC 7567 — <a href="https://www.rfc-editor.org/rfc/rfc7567" target="_blank" rel="noopener noreferrer">IETF Recommendations Regarding Active Queue Management</a> (complemento)</li>
+        <li>RFC 3782 e RFC 6582 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc6582" target="_blank" rel="noopener noreferrer">The NewReno Modification to TCP's Fast Recovery Algorithm</a></li>
+        <li>RFC 8312 e RFC 9438 (versão atual) — <a href="https://www.rfc-editor.org/rfc/rfc9438" target="_blank" rel="noopener noreferrer">CUBIC for Fast and Long-Distance Networks</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/TCP_congestion_control" target="_blank" rel="noopener noreferrer">TCP congestion control</a>, <a href="https://en.wikipedia.org/wiki/Random_early_detection" target="_blank" rel="noopener noreferrer">Random early detection</a>, <a href="https://en.wikipedia.org/wiki/Explicit_Congestion_Notification" target="_blank" rel="noopener noreferrer">Explicit Congestion Notification</a>, <a href="https://en.wikipedia.org/wiki/CUBIC_TCP" target="_blank" rel="noopener noreferrer">CUBIC TCP</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-20/index.html" class="text-muted text-decoration-none">← Capítulo 20</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 21</span>
+            <a href="../capitulo-22/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 22 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap21.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

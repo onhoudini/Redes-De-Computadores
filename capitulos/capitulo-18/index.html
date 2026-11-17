@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 18 — Os protocolos de transporte da Internet | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Descrever o serviço da camada de rede: sem conexão, pacotes de até 64 KB, sem garantia de entrega, de integridade ou de ordem. Situar o UDP, o TCP, o SCTP e o RTP e dizer o que cada um acrescenta ao IP.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="18" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 18 · Parte 2: Protocolos · Seção 3.10</span>
+        <h1 class="display-5 mb-3">Os protocolos de transporte da Internet</h1>
+        <p class="lead mb-4">
+            Antes de abrir o UDP e o TCP, o livro para por meia página para dizer o que a camada de rede oferece e quais protocolos de transporte foram construídos sobre ela. É o mapa dos próximos capítulos.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#servico-ip">1. O serviço da camada de rede</a>
+                    <a class="nav-link" href="#protocolos-transporte">2. UDP, TCP, SCTP e RTP</a>
+                    <a class="nav-link" href="#exercicios-cap18">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">O que o IP oferece e o que falta</h2>
+    <p>
+        A seção 3.10 é curta (pág. 185 do PDF). Ela descreve o serviço da camada de rede da Internet e apresenta os
+        protocolos de transporte: os dois mais usados, UDP e TCP, e outros dois que o livro só cita, o SCTP e o RTP.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Descrever o <strong>serviço da camada de rede</strong>: sem conexão, pacotes de até 64 KB, sem garantia de entrega, de integridade ou de ordem.</li>
+                <li>Situar o <strong>UDP</strong>, o <strong>TCP</strong>, o <strong>SCTP</strong> e o <strong>RTP</strong> e dizer o que cada um acrescenta ao IP.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise os serviços de transporte do <a href="../capitulo-04/index.html">Capítulo 4</a>. O capítulo cobre a seção 3.10
+                do livro (pág. 185 do PDF). O UDP é o assunto do <a href="../capitulo-19/index.html">Capítulo 19</a>, e o TCP,
+                do <a href="../capitulo-20/index.html">Capítulo 20</a>.
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. O serviço da camada de rede -->
+<section id="servico-ip" class="chapter-section" data-conceito="servico-ip" data-titulo="O serviço da camada de rede">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">O que o IP oferece</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Um protocolo de transporte não fala com o enlace nem com os roteadores: ele entrega os seus segmentos à camada de
+        rede e recebe dela o que chegou. Antes de projetar o transporte, é preciso saber o que essa camada garante.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Os protocolos de transporte se apoiam no serviço da camada de rede. Na Internet, esse serviço é <strong>sem
+        conexão</strong> (pág. 185 do PDF):
+    </p>
+    <ul>
+        <li>cada interface de um host é identificada por um <strong>endereço IP</strong>;</li>
+        <li>um host pode enviar pacotes com até <strong>64 KB</strong> de dados a qualquer destino alcançável pela rede;</li>
+        <li>a camada de rede <strong>não garante a entrega</strong>: um pacote pode se perder sem que ninguém avise;</li>
+        <li><strong>não detecta erros de transmissão</strong>: um pacote alterado no caminho chega como se estivesse certo;</li>
+        <li><strong>não preserva a ordem</strong>: os pacotes podem chegar numa ordem diferente da de envio.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O cabeçalho do IPv4 tem um checksum, mas ele cobre só o cabeçalho, e não os dados; o IPv6 nem tem checksum
+        (<a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">RFC 8200</a>). Por isso
+        a afirmação do livro vale para os dados que o transporte entrega: quem quiser detectar erros neles precisa de um
+        checksum próprio, como os do UDP e do TCP.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="servico-ip"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Até 64 KB de dados|Até 1500 bytes, sempre|Qualquer tamanho, sem limite" data-answer="0" data-explain="O livro diz que a camada de rede transporta pacotes com até 64 KB de dados (pág. 185 do PDF). Os 1500 bytes são a MTU típica de um enlace Ethernet, outro limite." data-hint="O campo de tamanho do IP tem 16 bits.">
+        <p class="fw-semibold mb-2">Quantos dados um pacote IP pode carregar, segundo o livro?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Cada interface de um host|Cada aplicação de um host|Cada usuário da rede" data-answer="0" data-explain="O endereço IP identifica uma interface de um host; as aplicações são separadas pelas portas, que o transporte acrescenta (pág. 185 do PDF)." data-hint="Um host com duas placas de rede tem dois endereços.">
+        <p class="fw-semibold mb-2">O que um endereço IP identifica?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>IP: sem conexão, endereço por interface, pacotes de até 64 KB.</li>
+        <li>Sem garantia de entrega, sem detecção de erros nos dados e sem preservar a ordem.</li>
+        <li>O que faltar, o transporte (ou a aplicação) tem de acrescentar.</li>
+    </ul>
+</section>
+
+<!-- 2. UDP, TCP, SCTP e RTP -->
+<section id="protocolos-transporte" class="chapter-section" data-conceito="protocolos-transporte" data-titulo="UDP, TCP, SCTP e RTP">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Os protocolos de transporte da Internet</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Uma consulta DNS, uma página web e uma videoconferência precisam de coisas diferentes: uma quer rapidez, outra quer
+        tudo certo e na ordem, a terceira prefere perder um pedaço a esperar. Um só protocolo de transporte não serve a todas.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Vários protocolos de transporte foram projetados para oferecer às aplicações um serviço mais rico que o do IP
+        (pág. 185 do PDF):
+    </p>
+    <ul>
+        <li>O <strong>UDP</strong> (<em>User Datagram Protocol</em>) e o <strong>TCP</strong> (<em>Transmission Control
+            Protocol</em>) são os dois mais usados na Internet. São o assunto dos
+            <a href="../capitulo-19/index.html">Capítulos 19</a> e <a href="../capitulo-20/index.html">20</a>.</li>
+        <li>O <strong>SCTP</strong> (<em>Stream Control Transmission Protocol</em>,
+            <a href="https://www.rfc-editor.org/rfc/rfc4960" target="_blank" rel="noopener noreferrer">RFC 4960</a>) apareceu
+            no começo dos anos 2000. É usado por algumas aplicações específicas, como a sinalização em redes de voz sobre IP.
+            O livro diz que ele foi descrito na segunda edição e não o detalha.</li>
+        <li>O <strong>RTP</strong> (<em>Real Time Transport Protocol</em>,
+            <a href="https://www.rfc-editor.org/rfc/rfc3550" target="_blank" rel="noopener noreferrer">RFC 3550</a>) é usado
+            por muitas aplicações multimídia. Ele tem funções da camada de transporte, mas também funções ligadas à
+            codificação da informação. Por falta de espaço, o livro não o discute.</li>
+    </ul>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O que cada um acrescenta ao IP, em resumo: o UDP acrescenta portas e um checksum; o TCP acrescenta um fluxo de bytes
+        confiável, na ordem, com controle de fluxo e de congestionamento; o SCTP entrega mensagens de forma confiável, com
+        vários fluxos numa mesma associação e mais de um endereço por ponta; o RTP põe em cada pacote um número de sequência
+        e um carimbo de tempo, para o receptor reordenar e tocar a mídia no ritmo certo, e costuma rodar sobre o UDP. A
+        versão atual do SCTP é a <a href="https://www.rfc-editor.org/rfc/rfc9260" target="_blank" rel="noopener noreferrer">RFC 9260</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="escolhe-transporte"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="SCTP|RTP|UDP" data-answer="0" data-explain="O livro cita a sinalização em redes de voz sobre IP como um uso atual do SCTP (pág. 185 do PDF)." data-hint="É o terceiro protocolo importante, do começo dos anos 2000.">
+        <p class="fw-semibold mb-2">Qual protocolo o livro cita como usado na sinalização de redes de voz sobre IP?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Porque também tem funções ligadas à codificação da informação|Porque roda dentro do TCP|Porque não usa portas" data-answer="0" data-explain="O RTP inclui funções da camada de transporte e funções relacionadas à codificação da informação (pág. 185 do PDF)." data-hint="Pense em áudio e vídeo.">
+        <p class="fw-semibold mb-2">Por que, segundo o livro, o RTP não é só um protocolo de transporte?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>UDP e TCP: os dois transportes mais usados da Internet.</li>
+        <li>SCTP (RFC 4960): sinalização de voz sobre IP e outras aplicações específicas.</li>
+        <li>RTP (RFC 3550): multimídia, com funções de transporte e de codificação.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap18" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> que três garantias a camada de rede da Internet não dá, segundo o livro?
+            <details><summary>Ver solução</summary><p class="mb-0">Não garante a entrega, não detecta erros de transmissão e não preserva a ordem dos pacotes (pág. 185 do PDF).</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> uma videoconferência prefere perder um pedaço do áudio a esperar a retransmissão dele. Que protocolos o livro associa a esse tipo de aplicação?
+            <details><summary>Ver solução</summary><p class="mb-0">O RTP, usado pelas aplicações multimídia (pág. 185 do PDF). Ele costuma rodar sobre o UDP, que não retransmite (complemento).</p></details></li>
+        <li class="mb-2"><strong>Desafio:</strong> o IP leva no máximo 64 KB por pacote. Uma aplicação quer mandar 1 MB. O que acontece sobre o UDP e sobre o TCP?
+            <details><summary>Ver solução</summary><p class="mb-0">O UDP não divide SDUs: a aplicação precisa cortar os dados em pedaços menores e cuidar das perdas e da ordem. O TCP divide o fluxo de bytes em segmentos e entrega tudo, na ordem, do outro lado.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Dois trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. O serviço do IP: sem garantias</h3>
+    <pre class="code-block"><code>import random
+
+def rede(pacotes, semente, p_perda=0.2, p_atraso=0.3, p_erro=0.15):
+    """O serviço do IP: entrega sem garantia, sem detectar erros e sem preservar a ordem (pág. 185 do PDF)."""
+    sorte = random.Random(semente)
+    em_transito = []
+    for i, dados in enumerate(pacotes):
+        if sorte.random() &lt; p_perda:
+            continue                                  # perdido, e ninguém avisa
+        if sorte.random() &lt; p_erro:
+            dados = dados[:-1] + "#"                  # um erro de transmissão troca o último caractere
+        chegada = i + (2.5 if sorte.random() &lt; p_atraso else 0)
+        em_transito.append((chegada, dados))
+    return [d for _, d in sorted(em_transito)]
+
+enviados = ["pac0", "pac1", "pac2", "pac3", "pac4", "pac5", "pac6", "pac7"]
+recebidos = rede(enviados, semente=4)
+print("enviados: ", enviados)
+print("recebidos:", recebidos)
+print("não reconhecidos no destino:", [p for p in enviados if p not in recebidos])</code></pre>
+
+    <h3 class="h6 mt-4">2. O que cada protocolo acrescenta</h3>
+    <pre class="code-block"><code># O que cada protocolo acrescenta ao serviço do IP (pág. 185 do PDF e capítulos seguintes)
+SERVICOS = {
+    "IP":   {"portas": False, "detecta erros": False, "entrega garantida": False, "ordem": False, "mensagens": True},
+    "UDP":  {"portas": True,  "detecta erros": True,  "entrega garantida": False, "ordem": False, "mensagens": True},
+    "TCP":  {"portas": True,  "detecta erros": True,  "entrega garantida": True,  "ordem": True,  "mensagens": False},
+    "SCTP": {"portas": True,  "detecta erros": True,  "entrega garantida": True,  "ordem": True,  "mensagens": True},
+}
+
+def candidatos(**exige):
+    """Protocolos que atendem a todas as exigências (nos nomes, _ faz o papel do espaço)."""
+    return [p for p, s in SERVICOS.items()
+            if all(s[k.replace("_", " ")] == v for k, v in exige.items())]
+
+print("entrega garantida:   ", candidatos(entrega_garantida=True))
+print("mensagens e portas:  ", candidatos(mensagens=True, portas=True))
+print("portas, sem esperar retransmissões:", candidatos(portas=True, entrega_garantida=False))</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.10 "Internet transport protocols" (pág. 185 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 8200 — <a href="https://www.rfc-editor.org/rfc/rfc8200" target="_blank" rel="noopener noreferrer">IPv6 Specification</a>, RFC 4960 — <a href="https://www.rfc-editor.org/rfc/rfc4960" target="_blank" rel="noopener noreferrer">SCTP</a> e RFC 3550 — <a href="https://www.rfc-editor.org/rfc/rfc3550" target="_blank" rel="noopener noreferrer">RTP</a></li>
+        <li>RFC 9260 — <a href="https://www.rfc-editor.org/rfc/rfc9260" target="_blank" rel="noopener noreferrer">Stream Control Transmission Protocol</a> (versão atual do SCTP, que substitui a RFC 4960; complemento)</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/Stream_Control_Transmission_Protocol" target="_blank" rel="noopener noreferrer">Stream Control Transmission Protocol</a> e <a href="https://pt.wikipedia.org/wiki/Real-time_Transport_Protocol" target="_blank" rel="noopener noreferrer">Real-time Transport Protocol</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-17/index.html" class="text-muted text-decoration-none">← Capítulo 17</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 18</span>
+            <a href="../capitulo-19/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 19 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap18.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

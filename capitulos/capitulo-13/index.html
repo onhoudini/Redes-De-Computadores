@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 13 — Deixando o HTTP mais rápido | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: Explicar como caches, proxies e CDNs reduzem o tempo de carga e o tráfego. Calcular o ganho do pipelining sobre os pedidos um por um. Explicar o bloqueio do primeiro da fila e como os quadros do HTTP/2 o reduzem.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="13" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 13 · Parte 2: Protocolos · Seção 3.5</span>
+        <h1 class="display-5 mb-3">Deixando o HTTP mais rápido</h1>
+        <p class="lead mb-4">
+            As páginas ficaram grandes, cheias de imagens e scripts, e buscar os objetos um por um passou a custar caro. Este capítulo mostra o que foi feito para acelerar a web: caches, proxies e CDNs, o pipelining do HTTP/1.1 e os quadros do HTTP/2.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#caches">1. Caches e proxies</a>
+                    <a class="nav-link" href="#http2">2. Pipelining e HTTP/2</a>
+                    <a class="nav-link" href="#exercicios-cap13">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">Menos espera por página</h2>
+    <p>
+        Uma página típica tem dezenas de objetos (pág. 160 do PDF). O livro mostra duas frentes para buscá-los mais
+        depressa: não buscar de novo o que já foi buscado, com caches nos navegadores, em proxies e em CDNs; e pedir vários
+        objetos ao mesmo tempo na mesma conexão, com o pipelining e, depois, com os quadros do HTTP/2.
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Explicar como <strong>caches</strong>, <strong>proxies</strong> e <strong>CDNs</strong> reduzem o tempo de carga e o tráfego.</li>
+                <li>Calcular o ganho do <strong>pipelining</strong> sobre os pedidos um por um.</li>
+                <li>Explicar o <strong>bloqueio do primeiro da fila</strong> e como os <strong>quadros do HTTP/2</strong> o reduzem.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Este capítulo continua o <a href="../capitulo-12/index.html">Capítulo 12</a> (pedidos, respostas e conexões
+                persistentes). Ele cobre a seção 3.5 do livro (pág. 158–165 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 20 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. Caches e proxies -->
+<section id="caches" class="chapter-section" data-conceito="caches" data-titulo="Caches e proxies">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">Caches, proxies e CDNs</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        A web passou a entregar música, vídeo, jogos e aplicações, que exigem mais desempenho do que documentos estáticos
+        (pág. 158 do PDF). A forma mais simples de acelerar é não transmitir de novo o que já foi transmitido.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Com o método HEAD e o If-Modified-Since:, o navegador confere se a cópia no seu cache ainda vale. Caches também
+        podem ficar <strong>dentro da rede</strong> (Fig. 14, pág. 159 do PDF):
+    </p>
+    <ul>
+        <li><strong>Proxy web:</strong> numa pequena empresa, ligada à Internet por um enlace lento, Alice e Bob leem o
+            mesmo jornal, e a mesma informação passa duas vezes pelo enlace. Com um proxy, todos os navegadores mandam os
+            pedidos a ele; se o conteúdo já está no cache do proxy, ele responde direto, senão busca no servidor e guarda
+            uma cópia. Algumas empresas também usam o proxy para controlar e bloquear sites.</li>
+        <li><strong>Proxy reverso:</strong> fica na frente dos servidores. Um servidor que monta páginas consultando
+            bancos de dados e gasta 10 ms por pedido, em sequência, não atende mais de 100 pedidos por segundo. Um proxy
+            reverso com cache responde os pedidos repetidos sem incomodar o servidor e pode dividir a carga entre vários
+            servidores.</li>
+    </ul>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Servindo conteúdo de vários servidores</strong> (pág. 159–160 do PDF). Quem acessa www.service.net tem a
+        impressão de falar com um servidor só. Uma forma de distribuir a carga é guardar todos os arquivos em todos os
+        servidores e deixar o DNS escolher: por rodízio (<em>round-robin</em>), pelo menos carregado ou pelo mais próximo
+        do cliente. Outra é usar k proxies reversos perto dos clientes e N−k servidores com o conteúdo. As empresas que
+        espalham proxies reversos pelo mundo são as <strong>redes de distribuição de conteúdo</strong> (CDNs).
+    </div>
+    <p>
+        As páginas cresceram muito. Quando o livro foi escrito, uma página média tinha quase 2 MB: 27 kB de HTML,
+        120 kB de fontes, 60 kB de CSS, quase 1 MB de imagens e mais de 400 kB de JavaScript, e exigia cerca de
+        <strong>70 pedidos HTTP</strong> (Fig. 15, pág. 160 do PDF). Os números atuais estão no
+        <a href="https://httparchive.org/reports/page-weight" target="_blank" rel="noopener noreferrer">HTTP Archive</a>,
+        a fonte do livro.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="proxy-cache"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="100|10|1000" data-answer="0" data-explain="1 s / 10 ms = 100 pedidos por segundo (pág. 159 do PDF)." data-hint="Quantos intervalos de 10 ms cabem em um segundo?">
+        <p class="fw-semibold mb-2">Um servidor gasta 10 ms por pedido e atende um de cada vez. Quantos pedidos por segundo ele aguenta, no máximo?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Um proxy reverso, perto do servidor|Um proxy na rede do cliente|Um cookie" data-answer="0" data-explain="O proxy reverso fica na frente dos servidores, e o DNS aponta para ele (pág. 159 do PDF)." data-hint="Quem quer aliviar a carga é o dono do site.">
+        <p class="fw-semibold mb-2">Um site popular quer aliviar o servidor que monta as páginas a partir do banco de dados. O que ele instala?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Cache no navegador (If-Modified-Since:), proxy na rede do cliente, proxy reverso na frente do servidor.</li>
+        <li>DNS e proxies reversos espalhados pelo mundo (CDNs) dividem a carga e aproximam o conteúdo.</li>
+    </ul>
+</section>
+
+<!-- 2. Pipelining e HTTP/2 -->
+<section id="http2" class="chapter-section" data-conceito="http2" data-titulo="Pipelining e HTTP/2">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Pipelining e HTTP/2</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Setenta pedidos por página, cada um esperando o anterior. Mesmo com a conexão persistente, o tempo de ida e volta
+        se soma setenta vezes. Dá para pedir tudo de uma vez?
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Com o <strong>pipelining</strong>, o navegador manda vários pedidos sem esperar as respostas. No exemplo do livro,
+        cinco objetos de 100 bytes, com 1 Gbit/s e 100 ms de atraso em cada sentido: um de cada vez, são 5 × 200 ms =
+        1 s; com pipelining, as cinco respostas chegam depois de cerca de 200 ms (pág. 161 do PDF). Mas o pipelining só
+        serve para pedidos <strong>idempotentes</strong>, que não dependem dos anteriores. Foi difícil para os navegadores
+        respeitar essa regra, e poucos o implementaram.
+    </p>
+    <div class="demo-box" data-sim="pipelining"></div>
+    <p>
+        O HTTP/1.1 também tem outro problema: tudo é texto ASCII. Fica fácil escrever clientes e depurar, mas os
+        servidores precisam de analisadores complexos, e essa flexibilidade abriu brechas para ataques. O
+        <strong>HTTP/2.0</strong> (<a href="https://www.rfc-editor.org/rfc/rfc7540" target="_blank" rel="noopener noreferrer">RFC 7540</a>)
+        muda duas coisas: usa codificação <strong>binária</strong> e permite vários <strong>streams</strong> na mesma
+        conexão. Ele também comprime os cabeçalhos
+        (<a href="https://www.rfc-editor.org/rfc/rfc7541" target="_blank" rel="noopener noreferrer">RFC 7541</a>). A sessão é
+        dividida em <strong>quadros</strong>, cada um com um cabeçalho de 9 bytes (Fig. 16, pág. 162 do PDF):
+    </p>
+    <pre class="log mb-3">+-----------------------------------------------+
+|                 Length (24)                   |
++---------------+---------------+---------------+
+|   Type (8)    |   Flags (8)   |
++-+-------------+---------------+-------------------------------+
+|R|                 Stream Identifier (31)                      |
++-+-------------------------------------------------------------+
+|                   Frame Payload (0...)                      ...
++---------------------------------------------------------------+</pre>
+    <ul>
+        <li><strong>Length</strong>: 24 bits, então um quadro tem no máximo 2<sup>24</sup> − 1 bytes de dados; o padrão é
+            2<sup>14</sup> = 16 384 bytes, salvo se um quadro Settings negociar outro limite.</li>
+        <li><strong>Type</strong>: <strong>Data</strong> (dados de um objeto), <strong>Headers</strong> (os cabeçalhos HTTP,
+            comprimidos), Settings, Priority, Window_Update, Ping, GoAway…</li>
+        <li><strong>Stream Identifier</strong>: o stream a que o quadro pertence. Os ímpares são do cliente, e os pares,
+            do servidor. É isso que permite <strong>multiplexar</strong> vários objetos na mesma conexão.</li>
+    </ul>
+    <p>
+        A multiplexação ataca o <strong>bloqueio do primeiro da fila</strong> (<em>Head of Line blocking</em>). A 1 Mbit/s,
+        um objeto de 12 500 bytes ocupa a conexão por 100 ms; se ele vem primeiro, um objeto de 125 bytes, talvez um script
+        importante, espera esses 100 ms. Com quadros, o servidor manda 1 250 bytes do longo (10 ms), depois o curto inteiro
+        (1 ms) e depois o resto do longo (pág. 163 do PDF). Quadros longos gastam pouco com cabeçalhos, mas bloqueiam os
+        objetos curtos; quadros curtos fazem o contrário.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que, assim, o cliente recebe o objeto curto depois de 10 ms (pág. 163 do PDF). Pela conta do próprio
+        exemplo, são cerca de 11 ms: 10 ms do primeiro quadro do objeto longo mais 1 ms do objeto curto, sem contar os
+        9 bytes de cabeçalho de cada quadro.
+    </p>
+    <p>
+        Outros recursos (pág. 164–165 do PDF): o quadro <strong>Settings</strong>, o primeiro que o cliente envia, com
+        SETTINGS_MAX_FRAME_SIZE (de 2<sup>14</sup> a 2<sup>24</sup> − 1) e SETTINGS_MAX_CONCURRENT_STREAMS (a RFC recomenda
+        pelo menos 100); o <strong>push</strong>, em que o servidor manda um objeto antes de o cliente pedir, se o cliente
+        permitir (poucos servidores o adotaram); <strong>prioridades</strong> entre streams; e <strong>controle de
+        fluxo</strong> próprio, com janela inicial de 65 535 bytes, ampliada por quadros Window_Update. Para não confundir
+        servidores antigos, uma sessão HTTP/2.0 na porta 80 começa como HTTP/1.1, com os cabeçalhos
+        <code>Connection: Upgrade, HTTP2-Settings</code> e <code>Upgrade: h2c</code>, e o servidor responde
+        <code>101 Switching Protocols</code>.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O nome oficial é HTTP/2, hoje na <a href="https://www.rfc-editor.org/rfc/rfc9113" target="_blank" rel="noopener noreferrer">RFC 9113</a>,
+        que substituiu a 7540 em 2022 e deixou de recomendar o esquema de prioridades e o Upgrade h2c. Na prática, os
+        navegadores só usam HTTP/2 sobre TLS, e o push foi abandonado por eles. O livro promete discutir mudanças na pilha
+        inteira mais adiante: é o caminho do <strong>HTTP/3</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc9114" target="_blank" rel="noopener noreferrer">RFC 9114</a>), que roda
+        sobre o QUIC (<a href="https://www.rfc-editor.org/rfc/rfc9000" target="_blank" rel="noopener noreferrer">RFC 9000</a>)
+        em vez do TCP, para que a perda de um pacote não bloqueie todos os streams.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="hol-http2"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Só para pedidos idempotentes, que não dependem dos anteriores|Só para pedidos POST|Para qualquer pedido, sem restrição" data-answer="0" data-explain="Pela RFC 7230, citada pelo livro, o pipelining só serve para pedidos idempotentes (pág. 162 do PDF)." data-hint="Releia a limitação do pipelining.">
+        <p class="fw-semibold mb-2">Para quais pedidos o pipelining pode ser usado?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Ímpar|Par|Zero" data-answer="0" data-explain="Os identificadores ímpares são do cliente, e os pares, do servidor (pág. 163 do PDF)." data-hint="Quem abre o stream é o cliente.">
+        <p class="fw-semibold mb-2">Um navegador abre um stream novo no HTTP/2 para pedir uma imagem. O identificador do stream é…</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Pipelining: vários pedidos sem esperar; só para pedidos idempotentes.</li>
+        <li>HTTP/2: binário, quadros com cabeçalho de 9 bytes, streams multiplexados, cabeçalhos comprimidos.</li>
+        <li>Quadros menores reduzem o bloqueio do primeiro da fila, mas aumentam o custo dos cabeçalhos.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap13" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Intermediário:</strong> a 1 Mbit/s, com quadros de no máximo 2500 bytes de dados, em quanto tempo chega o objeto de 125 bytes que vem atrás do de 12 500 bytes (ignore os cabeçalhos)?
+            <details><summary>Ver solução</summary><p class="mb-0">O primeiro quadro do objeto longo leva 2500 × 8 / 10<sup>6</sup> = 20 ms, e o curto, 1 ms: 21 ms, contra 101 ms sem quadros.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> um proxy recebe 1000 pedidos por segundo, e 40% deles encontram o objeto no cache. Quantos pedidos por segundo saem para os servidores?
+            <details><summary>Ver solução</summary><p class="mb-0">600: só os 60% que não estão no cache saem do proxy.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> por que o pipelining só serve para pedidos idempotentes?
+            <details><summary>Ver solução</summary><p class="mb-0">Se a conexão cair no meio, o cliente não sabe quais pedidos o servidor já executou e precisa reenviá-los. Repetir um pedido idempotente não causa dano; repetir uma compra, sim.</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Dois trechos em Python que rodam no navegador, sem acessar a rede. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. Pipelining e os quadros do HTTP/2</h3>
+    <pre class="code-block"><code>def transmissao(nbytes, banda_bps):
+    return nbytes * 8 / banda_bps                     # segundos para pôr os bits no enlace
+
+def sequencial(n, rtt, tam, banda):
+    """Conexão persistente já aberta, um pedido de cada vez."""
+    return n * (rtt + transmissao(tam, banda))
+
+def pipelining(n, rtt, tam, banda):
+    """Conexão persistente já aberta, todos os pedidos de uma vez."""
+    return rtt + n * transmissao(tam, banda)
+
+# o exemplo do livro: 5 objetos de 100 bytes, 1 Gbit/s, 100 ms em cada sentido (pág. 161 do PDF)
+n, rtt, tam, banda = 5, 0.200, 100, 1e9
+for nome, f in [("sequencial", sequencial), ("pipelining", pipelining)]:
+    print(f"{nome:11} {f(n, rtt, tam, banda) * 1000:7.1f} ms")
+
+# bloqueio do primeiro da fila e os quadros do HTTP/2 (pág. 163 do PDF): 1 Mbit/s
+longo, curto, banda = 12500, 125, 1e6
+print("objeto longo inteiro antes:", (transmissao(longo, banda) + transmissao(curto, banda)) * 1000, "ms")
+print("quadro de 1250 bytes antes:", (transmissao(1250, banda) + transmissao(curto, banda)) * 1000, "ms")</code></pre>
+
+    <h3 class="h6 mt-4">2. Um proxy com cache e um proxy reverso</h3>
+    <pre class="code-block"><code># Um proxy com cache numa empresa ligada por um enlace lento (Fig. 14, pág. 159 do PDF)
+tamanho = {"/jornal": 200_000, "/esportes": 150_000, "/clima": 20_000}   # bytes
+pedidos = [("Alice", "/jornal"), ("Bob", "/jornal"), ("Alice", "/clima"),
+           ("Carol", "/esportes"), ("Bob", "/clima"), ("Carol", "/jornal")]
+
+cache, pelo_enlace, acertos = set(), 0, 0
+for quem, url in pedidos:
+    if url in cache:
+        acertos += 1
+        print(f"{quem:6}{url:10} veio do cache do proxy")
+    else:
+        cache.add(url)
+        pelo_enlace += tamanho[url]
+        print(f"{quem:6}{url:10} buscado no servidor")
+sem_proxy = sum(tamanho[u] for _, u in pedidos)
+print(f"acertos: {acertos}/{len(pedidos)}; pelo enlace: {pelo_enlace} bytes, contra {sem_proxy} sem proxy")
+
+# Proxy reverso: o servidor gasta 10 ms por pedido, um de cada vez (pág. 159 do PDF)
+def capacidade(ms_por_pedido, taxa_acerto):
+    servidor = 1000 / ms_por_pedido          # pedidos por segundo que o servidor aguenta
+    return servidor / (1 - taxa_acerto)      # os acertos não chegam ao servidor
+
+for h in (0, 0.5, 0.9):
+    print(f"acerto de {h:.0%}: até {capacidade(10, h):.0f} pedidos/s")</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.5 "Making HTTP faster" (pág. 158–165 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 9110 — <a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noopener noreferrer">HTTP Semantics</a>, RFC 9111 — <a href="https://www.rfc-editor.org/rfc/rfc9111" target="_blank" rel="noopener noreferrer">HTTP Caching</a> e RFC 9112 — <a href="https://www.rfc-editor.org/rfc/rfc9112" target="_blank" rel="noopener noreferrer">HTTP/1.1</a> (versões atuais, complemento)</li>
+        <li>RFC 7540 — <a href="https://www.rfc-editor.org/rfc/rfc7540" target="_blank" rel="noopener noreferrer">HTTP/2</a>, RFC 7541 — <a href="https://www.rfc-editor.org/rfc/rfc7541" target="_blank" rel="noopener noreferrer">HPACK</a> e RFC 9113 — <a href="https://www.rfc-editor.org/rfc/rfc9113" target="_blank" rel="noopener noreferrer">HTTP/2</a> (versão atual, complemento)</li>
+        <li>RFC 9114 — <a href="https://www.rfc-editor.org/rfc/rfc9114" target="_blank" rel="noopener noreferrer">HTTP/3</a> e RFC 9000 — <a href="https://www.rfc-editor.org/rfc/rfc9000" target="_blank" rel="noopener noreferrer">QUIC</a> (complemento)</li>
+        <li>HTTP Archive — <a href="https://httparchive.org/reports/page-weight" target="_blank" rel="noopener noreferrer">Page Weight</a>, fonte da Fig. 15 do livro</li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/HTTP_pipelining" target="_blank" rel="noopener noreferrer">HTTP pipelining</a> (citada pelo livro) e <a href="https://pt.wikipedia.org/wiki/Rede_de_fornecimento_de_conte%C3%BAdo" target="_blank" rel="noopener noreferrer">Rede de fornecimento de conteúdo</a></li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-12/index.html" class="text-muted text-decoration-none">← Capítulo 12</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 13</span>
+            <a href="../capitulo-14/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 14 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap13.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Capítulo 26 — Tecnologias de enlace: PPP, Ethernet e Wi-Fi | Redes de Computadores</title>
+    <meta name="description" content="Material didático complementar: PPP e a inserção de bytes, endereços e quadros Ethernet, hubs e switches, Spanning Tree, VLANs e as redes 802.11.">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/playground.css">
+    <link rel="stylesheet" href="../../assets/capitulo.css">
+    <link rel="stylesheet" href="../../assets/livro.css">
+</head>
+<body data-capitulo="26" data-bs-spy="scroll" data-bs-target="#toc-nav" data-bs-offset="100" tabindex="0">
+
+<!-- Navegação -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="../../index.html">Redes de Computadores</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="../../index.html#capitulos">← Todos os capítulos</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 1: Princípios</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-01/index.html">1. Conectando dois hosts</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-02/index.html">2. Construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-03/index.html">3. Aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-04/index.html">4. A camada de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-05/index.html">5. Nomes e endereços</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-06/index.html">6. Compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-07/index.html">7. Modelos de referência</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-08/index.html">8. Segurança de redes</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 2: Protocolos</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-09/index.html">9. A camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-10/index.html">10. DNS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-11/index.html">11. Correio eletrônico</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-12/index.html">12. HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-13/index.html">13. HTTP mais rápido</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-14/index.html">14. Chamadas remotas (RPC)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-15/index.html">15. Login remoto (ssh)</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-16/index.html">16. TLS</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-17/index.html">17. DNSSEC</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-18/index.html">18. Protocolos de transporte</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-19/index.html">19. UDP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-20/index.html">20. TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-21/index.html">21. Controle de congestionamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-22/index.html">22. IPv6 e ICMPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-23/index.html">23. Roteamento em redes IP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-24/index.html">24. RIP e OSPF</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-25/index.html">25. BGP</a></li>
+                        <li><a class="dropdown-item active" aria-current="page" href="../capitulo-26/index.html">26. Tecnologias de enlace</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Parte 3: Prática</a>
+                    <ul class="dropdown-menu dropdown-menu-lg-end">
+                        <li><a class="dropdown-item" href="../capitulo-27/index.html">27. Prática: os exercícios</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-28/index.html">28. Prática: transferência confiável</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-29/index.html">29. Prática: sockets</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-30/index.html">30. Prática: construindo uma rede</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-31/index.html">31. Prática: servindo aplicações</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-32/index.html">32. Prática: compartilhamento de recursos</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-33/index.html">33. Prática: a camada de aplicação</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-34/index.html">34. Prática: os protocolos de e-mail</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-35/index.html">35. Prática: HTTP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-36/index.html">36. Prática: TLS e ssh</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-37/index.html">37. Prática: análise de capturas de pacotes</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-38/index.html">38. Prática: o básico do TCP</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-39/index.html">39. Prática: o TCP de perto</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-40/index.html">40. Prática: redes IPv6</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-41/index.html">41. Prática: roteamento interdomínio</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-42/index.html">42. Prática: explorando os protocolos de roteamento</a></li>
+                        <li><a class="dropdown-item" href="../capitulo-43/index.html">43. Prática: Spanning Tree e VLANs</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="../glossario/index.html">Glossário</a></li>
+                <li class="nav-item ms-lg-3"><button type="button" class="btn btn-outline-secondary btn-sm theme-toggle" aria-label="Alternar tema claro e escuro" aria-pressed="false">🌙 Tema escuro</button></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <span class="badge text-bg-primary mb-3">Capítulo 26 · Parte 2: Protocolos · Seção 3.18</span>
+        <h1 class="display-5 mb-3">Tecnologias de enlace: PPP, Ethernet e Wi-Fi</h1>
+        <p class="lead mb-4">
+            No Capítulo 1 você viu como enquadrar bits e detectar erros, e no Capítulo 6, como compartilhar o meio. Aqui estão as
+            tecnologias que fazem isso na prática: o PPP nos enlaces ponto a ponto, a Ethernet com seus switches e VLANs e o Wi-Fi.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="#apresentacao" class="btn btn-primary">Começar</a>
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" class="btn btn-outline-secondary"
+               target="_blank" rel="noopener noreferrer">Livro de referência</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="row">
+        <!-- TOC lateral -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="toc py-5">
+                <p class="text-uppercase small text-muted fw-semibold mb-1">Neste capítulo</p>
+                <p class="gami-toc-resumo mb-2" data-gami-toc></p>
+                <nav id="toc-nav" class="nav flex-column">
+                    <a class="nav-link" href="#apresentacao">Apresentação</a>
+                    <a class="nav-link" href="#ppp">1. PPP</a>
+                    <a class="nav-link" href="#mac">2. Endereços Ethernet</a>
+                    <a class="nav-link" href="#quadro">3. O quadro Ethernet</a>
+                    <a class="nav-link" href="#switches">4. Hubs e switches</a>
+                    <a class="nav-link" href="#stp">5. Spanning Tree</a>
+                    <a class="nav-link" href="#vlan">6. VLANs</a>
+                    <a class="nav-link" href="#wifi">7. Redes 802.11</a>
+                    <a class="nav-link" href="#exercicios-cap26">Exercícios</a>
+                    <a class="nav-link" href="#exemplos">Exemplos de código</a>
+                    <a class="nav-link" href="#referencias">Referências</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="col-lg-9">
+
+<!-- Apresentação -->
+<section id="apresentacao" class="chapter-section">
+    <span class="kicker">Apresentação</span>
+    <h2 class="section-title">A camada que toca o fio (e o ar)</h2>
+    <p>
+        Todo pacote IP viaja, em cada salto, dentro de um quadro de alguma tecnologia de enlace. O livro não tenta descrever todas
+        (pág. 257 do PDF): concentra-se nas mais usadas, o PPP, a Ethernet e o Wi-Fi (IEEE 802.11).
+    </p>
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <h3 class="h6">Objetivos de aprendizagem</h3>
+            <ul class="small">
+                <li>Montar um quadro <strong>PPP</strong> com a inserção de bytes e citar os três protocolos da família.</li>
+                <li>Ler um <strong>endereço MAC</strong> (OUI, bits I/G e U/L) e montar um <strong>quadro Ethernet</strong>, com enchimento e CRC.</li>
+                <li>Explicar como um <strong>switch</strong> aprende endereços e por que laços exigem a <strong>Spanning Tree</strong>.</li>
+                <li>Calcular a árvore do <strong>STP</strong> com BPDUs e montar a tag <strong>802.1Q</strong> de uma VLAN.</li>
+                <li>Descrever as redes <strong>802.11</strong>: arquitetura, os três endereços do quadro e os quadros de gerência.</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3 class="h6">Antes de começar</h3>
+            <p class="small mb-0">
+                Revise o enquadramento e o CRC do <a href="../capitulo-01/index.html">Capítulo 1</a>, o CSMA/CD e o CSMA/CA do
+                <a href="../capitulo-06/index.html">Capítulo 6</a> e o bit U/L do <a href="../capitulo-22/index.html">Capítulo 22</a>.
+                O capítulo cobre a seção 3.18 do livro (pág. 257–275 do PDF).
+            </p>
+        </div>
+    </div>
+    <p class="small text-muted mt-3 mb-0">
+        Cada pergunta vale 10 pontos se acertada na primeira tentativa (5 depois). Os desafios das
+        simulações valem de 10 a 15 pontos. Ao concluir tudo de um conceito, você ganha a medalha dele.
+    </p>
+    <div id="painel-progresso" class="mt-4"></div>
+</section>
+
+<!-- 1. PPP -->
+<section id="ppp" class="chapter-section" data-conceito="ppp" data-titulo="PPP">
+    <span class="kicker">Conceito 1</span>
+    <h2 class="section-title">O Point-to-Point Protocol</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Dois roteadores ligados por um cabo dedicado, uma linha alugada ou um modem discado não precisam de endereços nem de controle
+        de acesso ao meio. Só precisam saber onde começa e onde termina cada pacote, e qual protocolo vai dentro dele.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Muitos protocolos de enlace ponto a ponto foram criados desde os anos 1960; o LAPB e o HDLC foram muito usados. O livro
+        se concentra nos que transportam IP entre hosts ou roteadores ligados diretamente (pág. 257 do PDF).
+    </p>
+    <p>
+        A primeira solução foi o <strong>SLIP</strong> (<a href="https://www.rfc-editor.org/rfc/rfc1055" target="_blank" rel="noopener noreferrer">RFC 1055</a>),
+        com dois caracteres especiais, END (192) e ESC (219). Ele só transportava IP e exigia configurar os endereços à mão. Em
+        enlaces de menos de 20 kbit/s, os 40 bytes de cabeçalho IP e TCP pesavam, e surgiu a <strong>compressão de cabeçalhos</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc1144" target="_blank" rel="noopener noreferrer">RFC 1144</a>), que aproveita
+        a redundância entre segmentos seguidos de uma mesma conexão. Essas técnicas continuam evoluindo, como na
+        <a href="https://www.rfc-editor.org/rfc/rfc5795" target="_blank" rel="noopener noreferrer">RFC 5795</a> (pág. 257 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que o SLIP acrescenta ESC antes de cada END dentro do pacote (pág. 257 do PDF). Pela RFC 1055, o END dentro do
+        pacote é <em>substituído</em> por ESC seguido de 220 (0xdc), e o próprio ESC por ESC seguido de 221 (0xdd). Se o ESC fosse
+        apenas acrescentado, o END continuaria lá, e o receptor acharia que o pacote terminou.
+    </p>
+    <p>O <strong>PPP</strong> é, na verdade, uma família de três protocolos (pág. 257–258 do PDF):</p>
+    <ol>
+        <li>o <strong>Point-to-Point Protocol</strong>, que define o enquadramento;</li>
+        <li>o <strong>Link Control Protocol</strong> (LCP), que negocia opções e autentica a sessão;</li>
+        <li>um <strong>Network Control Protocol</strong> (NCP) para cada protocolo de rede, que negocia, por exemplo, o endereço IPv4
+            e o do resolvedor DNS; o do IPv6 está na <a href="https://www.rfc-editor.org/rfc/rfc5072" target="_blank" rel="noopener noreferrer">RFC 5072</a>.</li>
+    </ol>
+    <p>
+        O quadro (Fig. 79, <a href="https://www.rfc-editor.org/rfc/rfc1662" target="_blank" rel="noopener noreferrer">RFC 1662</a>)
+        começa e termina com a flag <span class="mono">01111110</span> (0x7e). Os campos de endereço (0xff) e controle (0x03) existem
+        por compatibilidade. O campo <strong>Protocol</strong>, de 16 bits, identifica o que vai dentro: 0x0057 para IPv6, 0xc021 para
+        o LCP e 0xc023 para o PAP. O quadro termina com um <strong>FCS</strong>, um CRC de 16 bits por padrão (32 bits, se negociado).
+        O PPP pode usar inserção de bits ou de caracteres, conforme o meio (pág. 258 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que 0x002f é usado para um pacote IPv4 sem compressão (pág. 258 do PDF). No
+        <a href="https://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml" target="_blank" rel="noopener noreferrer">registro da IANA</a>,
+        o IPv4 comum usa <strong>0x0021</strong>; 0x002d e 0x002f são os pacotes "comprimido" e "não comprimido" da compressão de
+        Van Jacobson (RFC 1144), e o "não comprimido" ainda leva o número da conexão no lugar de um campo do cabeçalho. O livro
+        também cita a RFC 1548 para o PPP e para o NCP do IPv4: o PPP está hoje na
+        <a href="https://www.rfc-editor.org/rfc/rfc1661" target="_blank" rel="noopener noreferrer">RFC 1661</a>, e o NCP do IPv4, o IPCP,
+        na <a href="https://www.rfc-editor.org/rfc/rfc1332" target="_blank" rel="noopener noreferrer">RFC 1332</a>.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A inserção de caracteres do PPP (RFC 1662) usa o byte de escape 0x7d: cada 0x7e ou 0x7d dentro do quadro vira 0x7d seguido do
+        byte original com o bit 0x20 invertido (0x7e vira 7d 5e; 0x7d vira 7d 5d). Até o LCP negociar o contrário, os bytes de 0x00 a
+        0x1f também são escapados; a simulação e o código supõem que essa lista foi negociada vazia.
+    </p>
+    <p>
+        O PPP foi essencial para o acesso discado dos provedores no fim dos anos 1990, com a autenticação pelo <strong>EAP</strong>
+        (<a href="https://www.rfc-editor.org/rfc/rfc3748" target="_blank" rel="noopener noreferrer">RFC 3748</a>). Para reaproveitar
+        esses sistemas de autenticação e cobrança no ADSL, o PPP passou a ser transportado sobre ATM
+        (<a href="https://www.rfc-editor.org/rfc/rfc2364" target="_blank" rel="noopener noreferrer">RFC 2364</a>) ou sobre Ethernet,
+        o PPPoE (<a href="https://www.rfc-editor.org/rfc/rfc2516" target="_blank" rel="noopener noreferrer">RFC 2516</a>, pág. 258 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="ppp-quadro"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O NCP (Network Control Protocol) do IPv4|O LCP|O campo de controle do quadro" data-answer="0" data-explain="Cada protocolo de rede tem o seu NCP, que negocia opções como o endereço IPv4 (pág. 258 do PDF)." data-hint="Qual dos três protocolos é específico de cada protocolo de rede?">
+        <p class="fw-semibold mb-2">Num acesso PPP, que protocolo negocia o endereço IPv4 do cliente?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Para que um 0x7e dentro dos dados não seja confundido com a flag que fecha o quadro|Para cifrar o pacote|Para alinhar o quadro em 32 bits" data-answer="0" data-explain="A flag 0x7e delimita o quadro; dentro dele, 0x7e e 0x7d são escapados." data-hint="O que marca o fim de um quadro PPP?">
+        <p class="fw-semibold mb-2">Por que o PPP escapa o byte 0x7e dentro do quadro?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>PPP = enquadramento + LCP + um NCP por protocolo de rede.</li>
+        <li>Flag 7e, endereço ff, controle 03, protocolo, pacote, FCS-16, flag 7e; 7e → 7d 5e, 7d → 7d 5d.</li>
+        <li>EAP para autenticar; PPPoE e PPP sobre ATM no ADSL.</li>
+    </ul>
+</section>
+
+<!-- 2. Endereços Ethernet -->
+<section id="mac" class="chapter-section" data-conceito="mac" data-titulo="Endereços Ethernet">
+    <span class="kicker">Conceito 2</span>
+    <h2 class="section-title">Endereços Ethernet</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Antes da Ethernet, os endereços de enlace eram configurados à mão em cada host. Mudar um computador de rede podia exigir
+        trocar o seu número, e alguém tinha de anotar tudo "num papel pregado na parede", como lembra o livro (pág. 259 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        A Ethernet nasceu no Xerox PARC nos anos 1970, com 3 Mbit/s num cabo coaxial. A especificação DIX (Digital, Intel e Xerox)
+        fixou 10 Mbit/s, um <em>slot time</em> de 51,2 µs (o que dá um quadro mínimo de 64 bytes) e trouxe três novidades: um
+        <strong>endereço único no mundo</strong> para cada host, endereços de <strong>48 bits</strong> e endereços de
+        <strong>broadcast e multicast</strong> (pág. 258–259 do PDF).
+    </p>
+    <p>
+        Na Fig. 80, um bit indica se o endereço é de uma placa (unicast) ou de um grupo (multicast). Os 24 bits altos são o
+        <strong>OUI</strong> (<em>Organization Unique Identifier</em>), um bloco entregue a um fabricante, que pode vender produtos
+        com os 16 milhões de endereços dele; os 24 bits restantes identificam a placa (pág. 259 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O "primeiro bit" da Fig. 80 é o bit <strong>I/G</strong>, o menos significativo do primeiro byte: ele é o primeiro a sair no
+        fio, porque a Ethernet transmite cada byte começando pelo bit mais baixo. O bit seguinte, <strong>U/L</strong>, indica um endereço
+        atribuído localmente (o mesmo que o EUI-64 inverte, no Capítulo 22). O broadcast é ff:ff:ff:ff:ff:ff. O registro de OUIs é
+        mantido pelo IEEE; como o livro aponta para páginas do IEEE que podem exigir cadastro, veja a
+        <a href="https://en.wikipedia.org/wiki/MAC_address" target="_blank" rel="noopener noreferrer">Wikipedia</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="mac-bits"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Unicast: a origem de um quadro nunca é um endereço de grupo|Multicast|Broadcast" data-answer="0" data-explain="O destino pode ser unicast, multicast ou broadcast; a origem tem de ser unicast (pág. 259 do PDF)." data-hint="Um quadro sai de uma placa só.">
+        <p class="fw-semibold mb-2">Que tipo de endereço pode aparecer como origem de um quadro Ethernet?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="2^24, cerca de 16 milhões|2^20, cerca de 1 milhão|2^48" data-answer="0" data-explain="O OUI ocupa 24 dos 48 bits; sobram 24 bits por fabricante (pág. 259 do PDF)." data-hint="Quantos bits sobram depois do OUI?">
+        <p class="fw-semibold mb-2">Quantos endereços um fabricante pode usar com um OUI?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>48 bits: OUI (24) + placa (24).</li>
+        <li>Bit I/G: grupo; bit U/L: local; ff:ff:ff:ff:ff:ff: broadcast.</li>
+    </ul>
+</section>
+
+<!-- 3. O quadro Ethernet -->
+<section id="quadro" class="chapter-section" data-conceito="quadro" data-titulo="O quadro Ethernet">
+    <span class="kicker">Conceito 3</span>
+    <h2 class="section-title">O quadro Ethernet</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Um quadro precisa dizer para quem vai, de quem vem, o que leva e se chegou inteiro. A Ethernet faz isso com cinco campos, e a
+        ordem deles não é por acaso.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>O quadro DIX (Fig. 82) vem depois de um <strong>preâmbulo</strong>, que sincroniza o relógio do receptor (pág. 259–260 do PDF):</p>
+    <ol>
+        <li><strong>destino</strong> (6 bytes), primeiro, para que a placa descarte logo os quadros que não são para ela;</li>
+        <li><strong>origem</strong> (6 bytes), sempre unicast;</li>
+        <li><strong>EtherType</strong> (2 bytes): 0x0800 para IPv4, 0x86dd para IPv6 e 0x0806 para o ARP;</li>
+        <li><strong>dados</strong>, de 46 a 1500 bytes; com menos de 46, o emissor completa com enchimento, para o quadro ter pelo menos
+            64 bytes (512 bits);</li>
+        <li><strong>CRC de 32 bits</strong>, que pega muito mais erros que o checksum da Internet usado pelo IP, UDP e TCP.</li>
+    </ol>
+    <p>
+        Os 1500 bytes bastavam para os 554 bytes da Ethernet experimental da Xerox e os 572 que a RFC 1122 exigia para o IPv4, sem
+        exigir muita memória das placas. Medições mostraram que o CSMA/CD alcança uma utilização muito alta com quadros grandes (Fig. 81).
+        O IPv6 tem um EtherType próprio porque alguns equipamentos não conferiam o campo de versão e tratariam pacotes IPv6 como IPv4
+        (pág. 259–260 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Onde pôr o CRC?</strong> (pág. 261 do PDF). Os protocolos de transporte põem o checksum no cabeçalho; os de enlace,
+        em geral, num trailer no fim do quadro. Assim, a placa calcula o CRC enquanto transmite e o acrescenta no fim. Com o checksum no
+        cabeçalho, como no TCP, isso é impossível, e o cálculo em hardware fica mais complexo.
+    </div>
+    <p>
+        O IEEE, ao padronizar o <strong>802.3</strong>, queria transportar quadros curtos sem perder o tamanho real dos dados. Como o DIX
+        não tem campo de tamanho, o IEEE trocou o EtherType por um campo <strong>Length</strong> (Fig. 83). Para identificar o protocolo
+        de rede, criou uma subcamada, o <strong>LLC</strong> (802.2), que na prática nunca é usada para o IP em redes Ethernet. Os dois
+        formatos convivem porque os EtherTypes são todos maiores que 1500 (pág. 261 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        Na nota de rodapé da pág. 261 do PDF, o livro diz que um valor "menor que 1501" é um tamanho e um valor "maior que 1501" só pode
+        ser um tipo, o que deixaria o próprio 1501 sem dono. O padrão define: até 1500 (0x05dc), é um tamanho; a partir de 1536 (0x0600),
+        é um EtherType; os valores de 1501 a 1535 não são usados.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Qual é o serviço da Ethernet?</strong> (pág. 261–262 do PDF). Um serviço sem conexão e não confiável, com unicast,
+        multicast e broadcast. Mas uma boa rede Ethernet entrega os quadros com probabilidade muito alta e <strong>não os
+        reordena</strong>. Todas as versões da Ethernet preservaram essas duas propriedades.
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="quadro-ethernet"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="802.3: 0x0040 = 64 é um tamanho, não um EtherType|DIX, com EtherType 64|Um quadro inválido" data-answer="0" data-explain="Valores até 1500 são tamanhos (802.3); a partir de 0x0600, EtherTypes (DIX)." data-hint="Compare o valor com 1500.">
+        <p class="fw-semibold mb-2">Um quadro chega com 0x0040 no campo depois dos endereços. Que formato é?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Para que a placa saiba logo se o quadro é para ela e possa descartá-lo cedo|Porque o destino é mais importante que a origem|Por causa do CRC" data-answer="0" data-explain="Com o destino no começo, a placa decide nos primeiros bytes se continua o processamento (pág. 259 do PDF)." data-hint="O que a placa precisa saber primeiro?">
+        <p class="fw-semibold mb-2">Por que o endereço de destino é o primeiro campo do quadro Ethernet?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Destino, origem, EtherType, 46 a 1500 bytes de dados, CRC-32: de 64 a 1518 bytes.</li>
+        <li>Até 1500: tamanho (802.3); a partir de 0x0600: EtherType (DIX).</li>
+        <li>Serviço sem conexão, não confiável, mas que quase não perde nem reordena.</li>
+    </ul>
+</section>
+
+<!-- 4. Hubs e switches -->
+<section id="switches" class="chapter-section" data-conceito="switches" data-titulo="Hubs e switches">
+    <span class="kicker">Conceito 4</span>
+    <h2 class="section-title">Hubs e switches</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        No cabo coaxial, um dano em qualquer ponto derrubava a rede inteira, e era preciso percorrer o cabo para achar o defeito. O
+        par trançado trouxe a topologia em estrela, e com ela os equipamentos no centro da estrela.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        As camadas físicas foram do 10Base5 (coaxial grosso, segmentos de 500 m) e do 10Base2 (coaxial fino, 185 m) ao
+        <strong>10BaseT</strong>, em par trançado. No 10BaseT, todos os cabos chegam a um <strong>hub</strong>, um relay da camada física
+        que regenera o sinal e o repete em todas as outras interfaces (Fig. 84). Uma rede de hubs tem de ser uma <strong>árvore</strong>
+        (um laço seria um curto-circuito), e as colisões continuam: o atraso entre dois hosts quaisquer não pode passar do slot time de
+        51,2 µs (Fig. 85, pág. 262–263 do PDF).
+    </p>
+    <p>
+        A <strong>Fast Ethernet</strong>, de 100 Mbit/s, manteve o formato do quadro e o mínimo de 512 bits; por isso, o slot time caiu
+        para 5,12 µs. Vieram depois a Gigabit Ethernet (1998) e a de 10 Gbit/s (2002) (pág. 263 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro fala em trabalhos em andamento para 40 e 100 Gbit/s; esses padrões saíram em 2010 (IEEE 802.3ba), e depois vieram os de
+        200 e 400 Gbit/s. A lista atualizada está na <a href="https://en.wikipedia.org/wiki/Ethernet_physical_layer" target="_blank" rel="noopener noreferrer">Wikipedia</a>, que o próprio livro recomenda.
+    </p>
+    <p>
+        Um <strong>switch</strong> é um relay da <strong>camada de enlace</strong> (Fig. 86): lê o destino de cada quadro e o encaminha só
+        pela porta certa, consultando a sua <strong>tabela de endereços MAC</strong>. Para manter a Ethernet <em>plug and play</em>, a tabela
+        se preenche sozinha pelo <strong>aprendizado</strong>: o switch anota a porta por onde chegou cada endereço de <em>origem</em>
+        (Fig. 87). Destinos desconhecidos, multicast e broadcast são <strong>inundados</strong> por todas as portas, menos a de chegada. As
+        entradas têm um carimbo de tempo e expiram depois de alguns minutos sem uso, o que limita a tabela e deixa os hosts mudarem de
+        porta (pág. 264–265 do PDF). Os primeiros relays desse tipo, em software, se chamavam <em>bridges</em>.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        No pseudo-código da pág. 265 do PDF, um destino conhecido é sempre encaminhado pela porta da tabela, mesmo quando é a porta por
+        onde o quadro chegou. Na Fig. 87, um quadro de C para B, que estão no mesmo barramento, voltaria ao barramento: B o receberia
+        em dobro, e C receberia o próprio quadro. Um switch real <strong>descarta</strong> o quadro nesse caso. A simulação mostra os dois comportamentos.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>Segurança de hubs e switches</strong> (pág. 265–266 do PDF). Num hub, qualquer host captura os quadros de todos. Um switch
+        é melhor, mas a sua tabela tem tamanho fixo: um atacante que mande milhares de quadros com origens aleatórias a enche, e o switch
+        passa a inundar tudo, inclusive os quadros unicast dos outros. Há defesas, mas elas precisam ser configuradas.
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="switch-aprende"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="O endereço de origem e a porta por onde o quadro chegou|O endereço de destino|O EtherType" data-answer="0" data-explain="O switch anota que a origem está atrás da porta de chegada (pág. 264 do PDF)." data-hint="De onde o switch tira o que aprende?">
+        <p class="fw-semibold mb-2">O que um switch registra na tabela quando recebe um quadro?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="5,12 µs: o quadro mínimo continuou com 512 bits, transmitidos 10 vezes mais depressa|51,2 µs, como antes|512 µs" data-answer="0" data-explain="512 bits a 100 Mbit/s levam 5,12 µs (pág. 263 do PDF)." data-hint="Quanto tempo leva enviar 512 bits a 100 Mbit/s?">
+        <p class="fw-semibold mb-2">Qual é o slot time da Fast Ethernet, e por quê?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Hub: camada física, repete tudo; rede em árvore; colisões.</li>
+        <li>Switch: camada de enlace; aprende pela origem; inunda destinos desconhecidos.</li>
+        <li>Entradas expiram; a tabela cheia vira alvo de ataque.</li>
+    </ul>
+</section>
+
+<!-- 5. STP -->
+<section id="stp" class="chapter-section" data-conceito="stp" data-titulo="Spanning Tree">
+    <span class="kicker">Conceito 5</span>
+    <h2 class="section-title">Laços e a Spanning Tree</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Para resistir a falhas, os administradores ligam os switches com enlaces redundantes. Na Fig. 88, três switches em triângulo e
+        tabelas vazias bastam para um único quadro de A ser copiado sem parar: a Ethernet não tem TTL nem Hop Limit, e o laço nunca
+        termina (pág. 266 do PDF).
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        O <strong>Spanning Tree Protocol</strong> (STP, 802.1d), proposto por Radia Perlman, desliga portas para reduzir a topologia a uma
+        árvore. Os switches trocam <strong>BPDUs</strong>, enviadas ao endereço multicast ALL_BRIDGES. Cada switch tem um identificador de
+        64 bits: os 16 bits altos são uma prioridade configurável (32768 por padrão), e os 48 baixos, o seu endereço MAC. O switch de
+        <strong>menor identificador</strong> vira a <strong>raiz</strong>, e os ramos são os caminhos mais curtos até ela (pág. 267 do PDF).
+    </p>
+    <p>
+        Uma BPDU &lt;R, c, T, p&gt; leva a raiz R, o custo c até ela, o identificador T de quem a enviou e a porta p. A função
+        <span class="mono">better()</span> do livro compara BPDUs nessa ordem. O custo de cada porta depende da velocidade (o 802.1d
+        recomenda 2 000 000 para 10 Mbit/s, 200 000 para 100 Mbit/s, 20 000 para 1 Gbit/s). Ao receber uma BPDU na porta q, o switch soma
+        cost[q] e guarda o vetor &lt;R, c + cost[q], T, p, q&gt;. A porta com o melhor vetor é a <strong>porta raiz</strong>. Nas outras, o
+        switch compara a sua BPDU com a recebida: se a sua for melhor, a porta é <strong>designada</strong>; senão, <strong>bloqueada</strong>
+        (pág. 268 do PDF).
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm small">
+            <thead><tr><th>Estado</th><th>Recebe BPDUs</th><th>Envia BPDUs</th><th>Encaminha dados</th></tr></thead>
+            <tbody>
+                <tr><td>Bloqueada</td><td>sim</td><td>não</td><td>não</td></tr>
+                <tr><td>Raiz</td><td>sim</td><td>não</td><td>sim</td></tr>
+                <tr><td>Designada</td><td>sim</td><td>sim</td><td>sim</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        Na Fig. 90, Sw4 primeiro chega à raiz Sw1 pela porta 1 (custo 3), com BPDU &lt;1,3,4,p&gt;. Quando Sw9 anuncia &lt;1,1,9,2&gt; na
+        LAN B, Sw4 calcula V[2] = &lt;1,2,9,2,2&gt;, melhor que V[1] = &lt;1,3,1,1,1&gt;: a porta 2 vira a raiz, e a porta 1 é bloqueada,
+        porque a BPDU &lt;1,0,1,1&gt; de Sw1 é melhor que a sua &lt;1,2,4,1&gt;. Enquanto a árvore é calculada, os switches descartam os
+        quadros de dados. Para detectar falhas, as BPDUs têm uma <strong>idade</strong>: quando ela chega à idade máxima, a BPDU expira e
+        a árvore é recalculada (pág. 269–270 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O STP original pode levar dezenas de segundos para convergir. O <strong>Rapid Spanning Tree</strong> (802.1w, depois incorporado ao
+        802.1D-2004) converge em poucos segundos e é o usado hoje. O endereço ALL_BRIDGES é 01:80:c2:00:00:00. Veja a
+        <a href="https://en.wikipedia.org/wiki/Spanning_Tree_Protocol" target="_blank" rel="noopener noreferrer">Wikipedia</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="spanning-tree"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque a Ethernet não tem TTL: um quadro num laço é copiado para sempre|Porque os switches não sabem calcular rotas|Para economizar energia" data-answer="0" data-explain="Sem TTL nem Hop Limit, nada interrompe um quadro que circula num laço (pág. 266 do PDF)." data-hint="O que, no IP, mata um pacote que circula num laço?">
+        <p class="fw-semibold mb-2">Por que uma rede de switches com laços precisa da Spanning Tree?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="&lt;1,2,9,1&gt;: tem custo menor|&lt;1,3,4,1&gt;: chegou primeiro|&lt;1,3,4,1&gt;: tem a porta menor" data-answer="0" data-explain="Com a mesma raiz, decide o custo, antes do identificador e da porta." data-hint="Compare campo a campo: R, depois c.">
+        <p class="fw-semibold mb-2">Qual BPDU é melhor: &lt;1,3,4,1&gt; ou &lt;1,2,9,1&gt;?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Raiz: o menor identificador (prioridade + MAC).</li>
+        <li>BPDU &lt;R, c, T, p&gt;, comparada campo a campo.</li>
+        <li>Uma porta raiz por switch; designada se a sua BPDU é melhor; senão, bloqueada.</li>
+    </ul>
+</section>
+
+<!-- 6. VLANs -->
+<section id="vlan" class="chapter-section" data-conceito="vlan" data-titulo="VLANs">
+    <span class="kicker">Conceito 6</span>
+    <h2 class="section-title">VLANs e o 802.1Q</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        Separar os departamentos de uma empresa em redes diferentes não deveria exigir um switch para cada um. Os switches podem criar
+        redes locais virtuais sobre o mesmo equipamento.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Uma <strong>VLAN</strong> é um conjunto de portas de um ou mais switches. O switch roda um aprendizado de endereços para cada VLAN e
+        só inunda um quadro pelas portas da mesma VLAN. Na Fig. 91, as VLANs 2 e 3 só exigem configurar o switch S1; a VLAN 1 tem portas em
+        vários switches, e por isso os quadros trocados <em>entre switches</em> precisam levar o número da VLAN (pág. 270 do PDF).
+    </p>
+    <p>
+        O padrão 802.1Q define uma tag de 32 bits (Fig. 92), inserida logo depois do endereço de origem, que aumenta o quadro em 4 bytes:
+        o <strong>TPID</strong> 0x8100, que avisa a presença da tag; o <strong>PCP</strong>, de 3 bits, com a prioridade (0 a mais baixa,
+        7 a mais alta); o bit <strong>C</strong>; e o <strong>identificador da VLAN</strong>, de 12 bits. O valor 0 indica que o quadro
+        não pertence a nenhuma VLAN, e 0xfff é reservado: sobram <strong>4094</strong> VLANs (pág. 270 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        O livro diz que o bit C serve à compatibilidade com o Token Ring. Nas versões atuais do 802.1Q, ele virou o <strong>DEI</strong>
+        (<em>Drop Eligible Indicator</em>), que marca os quadros que podem ser descartados primeiro num congestionamento. As portas que
+        levam quadros com tag entre switches são chamadas de <em>tronco</em>, e as que ligam hosts, sem tag, de <em>acesso</em>. Veja a
+        <a href="https://en.wikipedia.org/wiki/IEEE_802.1Q" target="_blank" rel="noopener noreferrer">Wikipedia</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="tag-8021q"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="4094: 12 bits dão 4096 valores, menos o 0 e o 0xfff|4096|1024" data-answer="0" data-explain="2^12 = 4096; 0 e 0xfff são reservados (pág. 270 do PDF)." data-hint="Quantos valores cabem em 12 bits, e quantos são reservados?">
+        <p class="fw-semibold mb-2">Quantas VLANs diferentes uma rede 802.1Q pode ter?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Só E, F e X, da VLAN 1|Todos os hosts da Fig. 91|Só os hosts ligados a S3" data-answer="0" data-explain="O broadcast só é inundado pelas portas da mesma VLAN (pág. 270 do PDF)." data-hint="Qual é a VLAN de B?">
+        <p class="fw-semibold mb-2">Na Fig. 91, quem recebe um broadcast enviado por B?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>VLAN: conjunto de portas; um aprendizado por VLAN.</li>
+        <li>Tag 802.1Q: TPID 0x8100, PCP (3), C/DEI (1), VID (12); +4 bytes; 4094 VLANs.</li>
+    </ul>
+</section>
+
+<!-- 7. 802.11 -->
+<section id="wifi" class="chapter-section" data-conceito="wifi" data-titulo="Redes 802.11">
+    <span class="kicker">Conceito 7</span>
+    <h2 class="section-title">Redes 802.11</h2>
+
+    <h3 class="h5 mt-4 mb-3">1. Contextualização</h3>
+    <p>
+        O espectro de rádio é regulado, e usar uma faixa costuma exigir uma licença paga. Algumas faixas, porém, são livres, e foi numa
+        delas que nasceram as redes sem fio dos computadores.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">2. Explicação</h3>
+    <p>
+        Nos anos 1970, depois das experiências com o ALOHANet, o interesse por redes sem fio cresceu. Uma das experiências foi o
+        primeiro telefone celular, testado em 1973, ponto de partida dos celulares analógicos. Como a tecnologia analógica não
+        comportava muitos usuários, vários países pesquisaram a telefonia digital, e em 1987 países europeus decidiram criar um
+        padrão comum, o <strong>GSM</strong> (<em>Global System for Mobile Communications</em>), que, segundo o livro, já passa de
+        três bilhões de usuários (pág. 271 do PDF).
+    </p>
+    <p>
+        As faixas <strong>ISM</strong> (industriais, científicas e médicas) dispensam licença: alguns modelos de controle remoto usam a de
+        27 MHz, e alguns telefones sem fio, a de 915 MHz. Em 1985, a de 2,400–2,500 GHz, a mesma dos fornos de micro-ondas, entrou na lista.
+        Apesar do risco de interferência, essa faixa permitiu redes de computadores sem cabos: o <strong>Wi-Fi</strong> (IEEE 802.11) e
+        também o Bluetooth e o HiperLAN. O Wi-Fi começou no fim dos anos 1980 com o WaveLAN, proprietário, de 2 Mbit/s; no início dos
+        anos 1990, o IEEE criou o grupo 802.11, que produziu vários padrões, todos com o CSMA/CA do
+        <a href="../capitulo-06/index.html">Capítulo 6</a>, a mesma arquitetura e o mesmo formato de quadro (pág. 271 do PDF):
+    </p>
+    <div class="table-responsive">
+        <table class="table table-sm small">
+            <caption class="small">Os principais padrões 802.11, pela tabela do livro (pág. 271 do PDF).</caption>
+            <thead><tr><th>Padrão</th><th>Frequência</th><th>Vazão típica</th><th>Taxa máxima</th><th>Alcance (m), interno/externo</th></tr></thead>
+            <tbody>
+                <tr><td>802.11</td><td>2,4 GHz</td><td>0,9 Mbit/s</td><td>2 Mbit/s</td><td>20/100</td></tr>
+                <tr><td>802.11a</td><td>5 GHz</td><td>23 Mbit/s</td><td>54 Mbit/s</td><td>35/120</td></tr>
+                <tr><td>802.11b</td><td>2,4 GHz</td><td>4,3 Mbit/s</td><td>11 Mbit/s</td><td>38/140</td></tr>
+                <tr><td>802.11g</td><td>2,4 GHz</td><td>19 Mbit/s</td><td>54 Mbit/s</td><td>38/140</td></tr>
+                <tr><td>802.11n</td><td>2,4/5 GHz</td><td>74 Mbit/s</td><td>150 Mbit/s</td><td>70/250</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        Há redes <strong>ad hoc</strong> (independentes), em que os dispositivos falam entre si (Fig. 93), e redes de
+        <strong>infraestrutura</strong>, com <strong>pontos de acesso</strong> (AP) ligados a uma LAN fixa (Fig. 94). Cada dispositivo se
+        associa a um AP, que é um relay da camada de enlace, como um switch (Fig. 95, pág. 271–272 do PDF). O padrão chama de
+        <strong>BSS</strong> (<em>basic service set</em>) um grupo de dispositivos que se comunicam; o livro diz simplesmente "rede".
+    </p>
+    <p>
+        O quadro de dados (Fig. 96) tem um <strong>Frame Control</strong> de 16 bits (tipo do quadro e flags), um <strong>Duration</strong>
+        que reserva o canal (em geral, o tempo de um SIFS e de um ACK; zero em multicast e broadcast), <strong>três endereços</strong>, um
+        <strong>Sequence control</strong> (12 bits de sequência e 4 de fragmento), até 2324 bytes de dados (1500, na prática) e um CRC de
+        32 bits. O terceiro endereço existe por causa das redes de infraestrutura (pág. 272–274 do PDF):
+    </p>
+    <ul>
+        <li>de um dispositivo para um servidor na LAN: endereço 1 = AP, endereço 2 = o dispositivo, endereço 3 = o servidor;</li>
+        <li>do servidor para o dispositivo, depois da conversão no AP: endereço 1 = o dispositivo, endereço 2 = o AP, endereço 3 = o servidor.</li>
+    </ul>
+    <p>
+        Os quadros de controle são menores. O <strong>ACK</strong> e o <strong>CTS</strong> só têm o endereço do destinatário (Fig. 97); o
+        <strong>RTS</strong> leva o transmissor, o receptor e a duração da reserva inteira (Fig. 98). Para descartar duplicatas, o receptor
+        guarda o último número de sequência de cada origem e confere os quadros com o bit <strong>Retry</strong> ligado (pág. 274 do PDF).
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        Os bits do Frame Control que definem o papel dos endereços se chamam <strong>To DS</strong> e <strong>From DS</strong> (DS é o
+        sistema de distribuição, a LAN fixa): To DS = 1 na ida para a LAN, From DS = 1 na volta. Um quarto endereço, citado pelo livro numa
+        nota, só aparece quando os dois bits estão ligados, numa ponte sem fio entre duas LANs.
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>O serviço 802.11</strong> (pág. 274–275 do PDF). Apesar dos ACKs, o serviço é sem conexão e não confiável, como o da Ethernet:
+        os ACKs diminuem as perdas, mas não as eliminam. Multicast e broadcast não são confirmados e por isso sofrem mais com erros.
+    </div>
+    <p>
+        Os <strong>quadros de gerência</strong> incluem os <strong>beacons</strong>, difundidos pelos APs com as suas capacidades e um
+        <strong>SSID</strong> (até 32 caracteres); se o AP não anuncia beacons, a estação manda um <em>Probe request</em>. Para usar um AP,
+        a estação se <strong>associa</strong> a ele com um <em>Association request</em>, em geral ao de sinal mais forte (pág. 275 do PDF).
+    </p>
+    <div class="nota-livro small mb-3">
+        <span class="extra-tag">Nota do livro</span><br>
+        <strong>IP sobre 802.11</strong> (pág. 275 do PDF). A Ethernet tem dois encapsulamentos para o IP, o do DIX
+        (<a href="https://www.rfc-editor.org/rfc/rfc894" target="_blank" rel="noopener noreferrer">RFC 894</a>) e o do LLC/SNAP
+        (<a href="https://www.rfc-editor.org/rfc/rfc1042" target="_blank" rel="noopener noreferrer">RFC 1042</a>). No 802.11, só o segundo
+        é usado, com o EtherType 0x0800 para o IP e 0x0806 para o ARP (Fig. 99).
+    </div>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        O livro diz que esse encapsulamento acrescenta 6 bytes, 4 de LLC/SNAP e 2 de EtherType, e a Fig. 99 mostra um só byte 0x00 para
+        o código da organização (pág. 275 do PDF). Pela RFC 1042, são <strong>8 bytes</strong>: aa aa 03 (LLC), 00 00 00 (o código de
+        organização do SNAP, com 3 bytes) e o EtherType, por exemplo 08 00.
+    </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Complemento</span><br>
+        A tabela do livro para no 802.11n e mostra uma configuração comum dele: com quatro fluxos espaciais, o 802.11n chega a
+        600 Mbit/s. Depois vieram o 802.11ac (Wi-Fi 5), o 802.11ax (Wi-Fi 6 e, na faixa de 6 GHz, Wi-Fi 6E) e o
+        802.11be (Wi-Fi 7). As redes atuais também cifram o enlace com o WPA2 ou o WPA3. Veja a
+        <a href="https://pt.wikipedia.org/wiki/IEEE_802.11" target="_blank" rel="noopener noreferrer">Wikipedia</a>.
+    </p>
+
+    <h3 class="h5 mt-4 mb-3">3. Visualização</h3>
+    <div class="demo-box" data-sim="enderecos-80211"></div>
+
+    <h3 class="h5 mt-4 mb-3">4. Prática</h3>
+    <div class="demo-box mini-quiz" data-options="Porque o quadro é confirmado logo depois de chegar, no canal reservado pelo Duration|Porque o ACK é enviado em broadcast|Porque o 802.11 não tem endereços de origem" data-answer="0" data-explain="O ACK ocupa o canal reservado logo após o quadro de dados e só pode se referir a ele (pág. 274 do PDF)." data-hint="Quando o ACK é enviado?">
+        <p class="fw-semibold mb-2">Por que o ACK do 802.11 dispensa endereço de origem e número de sequência?</p>
+    </div>
+    <div class="demo-box mini-quiz" data-options="Não: os ACKs reduzem as perdas, mas o serviço continua não confiável|Sim: todo quadro é confirmado|Sim, mas só para multicast" data-answer="0" data-explain="O serviço 802.11 é sem conexão e não confiável, como o da Ethernet (pág. 274–275 do PDF)." data-hint="Releia a nota sobre o serviço 802.11.">
+        <p class="fw-semibold mb-2">Os ACKs tornam o 802.11 um serviço confiável?</p>
+    </div>
+
+    <h3 class="h5 mt-4 mb-3">5. Fixação</h3>
+    <ul class="mb-0">
+        <li>Faixas ISM; ad hoc ou infraestrutura; AP = relay de enlace.</li>
+        <li>Três endereços: quem recebe no ar, quem transmite e o destino ou a origem na LAN.</li>
+        <li>ACK, RTS e CTS; beacons, SSID e associação; serviço não confiável.</li>
+    </ul>
+</section>
+
+<!-- Exercícios -->
+<section id="exercicios-cap26" class="chapter-section">
+    <span class="kicker">Pratique</span>
+    <h2 class="section-title">Exercícios graduados</h2>
+    <ol>
+        <li class="mb-2"><strong>Aquecimento:</strong> um quadro DIX leva 10 bytes de dados. Quanto de enchimento ele precisa, e qual é o seu tamanho?
+            <details><summary>Ver solução</summary><p class="mb-0">36 bytes de enchimento (46 − 10) e 14 + 46 + 4 = 64 bytes.</p></details></li>
+        <li class="mb-2"><strong>Aquecimento:</strong> o pacote PPP 01 7e 02 tem quantos bytes depois da inserção de bytes?
+            <details><summary>Ver solução</summary><p class="mb-0">4: 01 7d 5e 02.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> que formato tem um quadro com 0x05dc no campo depois dos endereços? E com 0x0800?
+            <details><summary>Ver solução</summary><p class="mb-0">0x05dc = 1500: um quadro 802.3 com 1500 bytes úteis. 0x0800 = 2048, maior que 0x0600: um quadro DIX com IPv4.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> na Fig. 87, com as tabelas vazias, D manda um quadro para A e A responde. Quem vê cada quadro?
+            <details><summary>Ver solução</summary><p class="mb-0">O primeiro é inundado pelos dois switches: E, A, B e C o veem. Na resposta, SW2 já sabe que D está ao norte, e SW1, que D está a leste: só D a vê.</p></details></li>
+        <li class="mb-2"><strong>Intermediário:</strong> na Fig. 90, se a porta 1 de Sw4 tivesse custo 1, e não 3, que portas mudariam?
+            <details><summary>Ver solução</summary><p class="mb-0">Sw4 chegaria à raiz pela porta 1 com custo 1 (V[1] = &lt;1,1,1,1,1&gt; vence &lt;1,2,9,2,2&gt;). Na LAN B, &lt;1,1,4,2&gt; vence &lt;1,1,9,2&gt; pelo identificador: a porta 2 de Sw4 vira designada, e a porta 2 de Sw9 é bloqueada.</p></details></li>
+        <li><strong>Desafio:</strong> por que a Fast Ethernet com hubs cobre uma área cerca de 10 vezes menor que a Ethernet de 10 Mbit/s?
+            <details><summary>Ver solução</summary><p class="mb-0">O quadro mínimo continuou com 512 bits, que a 100 Mbit/s são transmitidos em 5,12 µs. Para o CSMA/CD detectar colisões, o emissor precisa ainda estar transmitindo quando o sinal vai e volta pela rede, e esse tempo ficou 10 vezes menor: a distância máxima também (pág. 263 do PDF).</p></details></li>
+    </ol>
+</section>
+
+<!-- Exemplos de código -->
+<section id="exemplos" class="chapter-section">
+    <span class="kicker">Mão na massa</span>
+    <h2 class="section-title">Exemplos de código</h2>
+    <p>Cinco trechos em Python que rodam no navegador, sem acessar a rede, com os quadros e as topologias do livro. Edite, execute e resolva os desafios de cada bloco.</p>
+
+    <h3 class="h6 mt-4">1. O quadro PPP e a inserção de bytes</h3>
+    <pre class="code-block"><code>FLAG, ESC = 0x7E, 0x7D
+
+def fcs16(dados):
+    """FCS de 16 bits do PPP (RFC 1662): CRC refletido com o polinômio 0x8408."""
+    fcs = 0xFFFF
+    for b in dados:
+        fcs ^= b
+        for _ in range(8):
+            fcs = (fcs &gt;&gt; 1) ^ 0x8408 if fcs &amp; 1 else fcs &gt;&gt; 1
+    return fcs ^ 0xFFFF
+
+def enquadra(protocolo, pacote):
+    """Endereço 0xFF, controle 0x03, protocolo, pacote e FCS; depois, a inserção de bytes."""
+    corpo = bytes([0xFF, 0x03]) + protocolo.to_bytes(2, "big") + pacote
+    corpo += fcs16(corpo).to_bytes(2, "little")       # o FCS vai com o byte menos significativo primeiro
+    saida = bytearray([FLAG])
+    for b in corpo:
+        if b in (FLAG, ESC):
+            saida += bytes([ESC, b ^ 0x20])            # 7E vira 7D 5E; 7D vira 7D 5D
+        else:
+            saida.append(b)
+    return bytes(saida + bytes([FLAG]))
+
+def desenquadra(quadro):
+    """Tira as flags, desfaz os escapes e confere o FCS."""
+    corpo, i = bytearray(), 1
+    while i &lt; len(quadro) - 1:
+        if quadro[i] == ESC:
+            corpo.append(quadro[i + 1] ^ 0x20)
+            i += 2
+        else:
+            corpo.append(quadro[i])
+            i += 1
+    ok = fcs16(corpo[:-2]) == int.from_bytes(corpo[-2:], "little")
+    return hex(int.from_bytes(corpo[2:4], "big")), bytes(corpo[4:-2]).hex(" "), ok
+
+print("FCS de b'123456789':", hex(fcs16(b"123456789")))     # valor de teste conhecido: 0x906e
+pacote = bytes.fromhex("60 7e 00 7d 01")                     # 5 bytes de exemplo, com 7E e 7D no meio
+q = enquadra(0x0057, pacote)                                 # 0x0057: IPv6
+print("quadro:", q.hex(" "))
+print("de volta (protocolo, pacote, FCS ok):", desenquadra(q))</code></pre>
+
+    <h3 class="h6 mt-4">2. Os bits de um endereço MAC</h3>
+    <pre class="code-block"><code>def analisa(mac):
+    """Lê os bits I/G e U/L do primeiro byte e separa o OUI (os 24 bits altos)."""
+    b = bytes.fromhex(mac.replace(":", "").replace("-", ""))
+    if b == b"\xff" * 6:
+        destino = "broadcast"
+    elif b[0] &amp; 0x01:                                  # bit I/G: o menos significativo do 1º byte
+        destino = "grupo (multicast)"
+    else:
+        destino = "individual (unicast)"
+    origem = "local" if b[0] &amp; 0x02 else "universal"   # bit U/L: o segundo menos significativo
+    return destino, origem, b[:3].hex(":")
+
+exemplos = ["00:1b:21:3a:4f:10", "ff:ff:ff:ff:ff:ff", "01:80:c2:00:00:00",
+            "33:33:00:00:00:01", "02:00:5e:10:00:01"]
+for m in exemplos:
+    destino, origem, oui = analisa(m)
+    print(f"{m}  {destino:22} {origem:10} OUI {oui}")
+print("endereços por OUI:", f"{2 ** 24:,}".replace(",", "."))</code></pre>
+
+    <h3 class="h6 mt-4">3. Um quadro Ethernet com enchimento e CRC-32</h3>
+    <pre class="code-block"><code>import struct
+import zlib
+
+def mac(texto):
+    return bytes.fromhex(texto.replace(":", ""))
+
+def quadro_dix(dst, src, ethertype, dados):
+    """Destino, origem, EtherType, dados com enchimento até 46 bytes e CRC-32 no fim."""
+    if len(dados) &gt; 1500:
+        raise ValueError("mais de 1500 bytes de dados")
+    enchimento = max(0, 46 - len(dados))
+    corpo = mac(dst) + mac(src) + struct.pack("!H", ethertype) + dados + bytes(enchimento)
+    return corpo + struct.pack("&lt;I", zlib.crc32(corpo)), enchimento   # o CRC vai em ordem little-endian
+
+def formato(valor):
+    """O campo depois dos endereços: tamanho (802.3) ou EtherType (DIX)?"""
+    if valor &lt;= 1500:
+        return f"802.3, {valor} bytes úteis"
+    if valor &gt;= 0x0600:
+        return f"DIX, EtherType 0x{valor:04x}"
+    return "valor indefinido"
+
+q, enchimento = quadro_dix("ff:ff:ff:ff:ff:ff", "00:1b:21:3a:4f:10", 0x0806, bytes(28))  # um pedido ARP: 28 bytes
+print(f"{len(q)} bytes, {enchimento} de enchimento; formato:", formato(struct.unpack("!H", q[12:14])[0]))
+print("CRC-32 do quadro inteiro, com o CRC:", hex(zlib.crc32(q)))   # sem erros, dá sempre 0x2144df1c
+ruim = bytearray(q)
+ruim[20] ^= 0x04                                                   # um bit trocado no caminho
+print("com um bit trocado:", hex(zlib.crc32(bytes(ruim))))
+for n in (1, 46, 500, 1500):
+    total = 14 + max(n, 46) + 4
+    print(f"{n:5} bytes de dados -&gt; quadro de {total:5} bytes, {100 * n / total:5.1f}% úteis")</code></pre>
+
+    <h3 class="h6 mt-4">4. Switches que aprendem na Fig. 87</h3>
+    <pre class="code-block"><code># a Fig. 87 do livro: SW2 tem A a oeste, um barramento com B e C ao sul e SW1 ao norte; SW1 liga E e D
+segmentos = {
+    "oeste de SW2": ["A", ("SW2", "Oeste")],
+    "barramento":   ["B", "C", ("SW2", "Sul")],
+    "SW1-SW2":      [("SW2", "Norte"), ("SW1", "Sul")],
+    "oeste de SW1": ["E", ("SW1", "Oeste")],
+    "leste de SW1": ["D", ("SW1", "Leste")],
+}
+portas = {}
+for seg, membros in segmentos.items():
+    for m in membros:
+        if isinstance(m, tuple):
+            portas.setdefault(m[0], {})[m[1]] = seg
+tabela = {sw: {} for sw in portas}
+
+def envia(src, dst, filtra=True):
+    """Entrega um quadro e devolve os hosts que o viram. filtra=False segue o pseudo-código do livro à risca."""
+    vistos = []
+    pendentes = [(next(s for s, m in segmentos.items() if src in m), src)]
+    while pendentes:
+        seg, de = pendentes.pop(0)
+        for m in segmentos[seg]:
+            if m == de:
+                continue
+            if not isinstance(m, tuple):
+                vistos.append(m)                          # num barramento, todos os hosts veem o quadro
+                continue
+            sw, p = m
+            tabela[sw][src] = p                           # aprende: src está atrás da porta p
+            if dst in tabela[sw]:
+                saidas = [tabela[sw][dst]]
+                if filtra and saidas == [p]:
+                    saidas = []                           # o destino está do mesmo lado: descarta
+            else:
+                saidas = [o for o in portas[sw] if o != p]   # destino desconhecido: inunda
+            pendentes += [(portas[sw][o], (sw, o)) for o in saidas]
+    return vistos
+
+for src, dst in [("A", "B"), ("B", "A"), ("C", "B"), ("D", "C")]:
+    print(f"{src} -&gt; {dst}: viram o quadro {envia(src, dst)}")
+for sw in sorted(tabela):
+    print(sw, tabela[sw])</code></pre>
+
+    <h3 class="h6 mt-4">5. Spanning Tree com a função better()</h3>
+    <pre class="code-block"><code>from collections import namedtuple
+
+BPDU = namedtuple("BPDU", "R c T p")
+
+def better(b1, b2):
+    """A função do livro (pág. 268 do PDF): True se b1 é melhor que b2."""
+    return ((b1.R &lt; b2.R) or
+            ((b1.R == b2.R) and (b1.c &lt; b2.c)) or
+            ((b1.R == b2.R) and (b1.c == b2.c) and (b1.T &lt; b2.T)) or
+            ((b1.R == b2.R) and (b1.c == b2.c) and (b1.T == b2.T) and (b1.p &lt; b2.p)))
+
+# tuplas são comparadas campo a campo: better(b1, b2) é o mesmo que b1 &lt; b2
+assert better(BPDU(1, 0, 1, 1), BPDU(1, 1, 9, 1)) and BPDU(1, 0, 1, 1) &lt; BPDU(1, 1, 9, 1)
+
+def stp(lans, falhas=()):
+    """lans: {lan: {switch: (porta, custo)}}. Devolve a BPDU de cada switch e o papel de cada porta."""
+    lans = {l: m for l, m in lans.items() if l not in falhas}
+    sws = {s for m in lans.values() for s in m}
+    bpdu = {s: BPDU(s, 0, s, 0) for s in sws}           # no começo, cada um se acha a raiz
+    while True:
+        novo, porta_raiz = {}, {}
+        for s in sws:
+            melhor = (s, 0, s, 0, 0)                        # vetor de prioridade &lt;R, c, T, p, q&gt;
+            for m in lans.values():
+                if s in m:
+                    q, custo = m[s]
+                    for v in m:
+                        if v != s:
+                            b = bpdu[v]
+                            melhor = min(melhor, (b.R, b.c + custo, b.T, m[v][0], q))
+            novo[s] = BPDU(melhor[0], melhor[1], s, 0)
+            porta_raiz[s] = melhor[4]
+        if novo == bpdu:
+            break
+        bpdu = novo
+    papeis = {}
+    for l, m in lans.items():
+        for s, (q, _) in m.items():
+            if bpdu[s].R != s and q == porta_raiz[s]:
+                papeis[(s, l)] = "raiz"
+                continue
+            meu = bpdu[s]._replace(p=q)
+            outros = [bpdu[v]._replace(p=m[v][0]) for v in m if v != s]
+            papeis[(s, l)] = "designada" if all(better(meu, o) for o in outros) else "bloqueada"
+    return bpdu, papeis
+
+# a Fig. 90: a LAN A liga Sw1, Sw9 (custo 1) e Sw4 (custo 3); a LAN B liga Sw9 e Sw4
+fig90 = {"A": {1: (1, 1), 9: (1, 1), 4: (1, 3)}, "B": {9: (2, 1), 4: (2, 1)}}
+bpdu, papeis = stp(fig90)
+print("BPDU de Sw4:", tuple(bpdu[4]))
+for (s, l), p in sorted(papeis.items()):
+    print(f"   Sw{s}, porta {fig90[l][s][0]} (LAN {l}): {p}")
+
+# a Fig. 89: cada LAN liga dois switches; custo 1 em todas as portas
+pares = {"A": (9, 2), "B": (9, 7), "C": (1, 7), "D": (1, 22), "E": (1, 44), "F": (2, 44), "G": (44, 22), "H": (7, 22)}
+fig89 = {}
+for l, (a, b) in sorted(pares.items()):
+    for s in (a, b):
+        n = sum(1 for m in fig89.values() if s in m) + 1   # portas numeradas na ordem das LANs
+        fig89.setdefault(l, {})[s] = (n, 1)
+for falhas in ((), ("E",)):
+    _, papeis = stp(fig89, falhas)
+    bloqueadas = sorted(f"Sw{s} na LAN {l}" for (s, l), p in papeis.items() if p == "bloqueada")
+    print("LANs fora do ar:", falhas or "nenhuma", "-&gt; portas bloqueadas:", bloqueadas)</code></pre>
+</section>
+
+<!-- Referências -->
+<section id="referencias" class="chapter-section">
+    <span class="kicker">Fontes</span>
+    <h2 class="section-title">Referências</h2>
+    <ul>
+        <li>Bonaventure, O. et al. <em>Computer Networking: Principles, Protocols and Practice</em>, seção 3.18 "Datalink layer technologies" (pág. 257–275 do PDF).
+            <a href="https://beta.computer-networking.info/syllabus/default/index.html" target="_blank" rel="noopener noreferrer">beta.computer-networking.info</a></li>
+        <li>RFC 1055 — <a href="https://www.rfc-editor.org/rfc/rfc1055" target="_blank" rel="noopener noreferrer">SLIP</a> e RFC 1144 — <a href="https://www.rfc-editor.org/rfc/rfc1144" target="_blank" rel="noopener noreferrer">Compressing TCP/IP Headers</a></li>
+        <li>RFC 1661 — <a href="https://www.rfc-editor.org/rfc/rfc1661" target="_blank" rel="noopener noreferrer">The Point-to-Point Protocol (PPP)</a> e RFC 1662 — <a href="https://www.rfc-editor.org/rfc/rfc1662" target="_blank" rel="noopener noreferrer">PPP in HDLC-like Framing</a></li>
+        <li>RFC 1332 — <a href="https://www.rfc-editor.org/rfc/rfc1332" target="_blank" rel="noopener noreferrer">IPCP</a>, RFC 5072 — <a href="https://www.rfc-editor.org/rfc/rfc5072" target="_blank" rel="noopener noreferrer">IPv6 over PPP</a> e RFC 3748 — <a href="https://www.rfc-editor.org/rfc/rfc3748" target="_blank" rel="noopener noreferrer">EAP</a></li>
+        <li>RFC 2364 — <a href="https://www.rfc-editor.org/rfc/rfc2364" target="_blank" rel="noopener noreferrer">PPP over AAL5</a> e RFC 2516 — <a href="https://www.rfc-editor.org/rfc/rfc2516" target="_blank" rel="noopener noreferrer">PPP over Ethernet (PPPoE)</a></li>
+        <li>RFC 894 — <a href="https://www.rfc-editor.org/rfc/rfc894" target="_blank" rel="noopener noreferrer">IP over Ethernet</a> e RFC 1042 — <a href="https://www.rfc-editor.org/rfc/rfc1042" target="_blank" rel="noopener noreferrer">IP over IEEE 802 Networks</a></li>
+        <li>IANA — <a href="https://www.iana.org/assignments/ppp-numbers/ppp-numbers.xhtml" target="_blank" rel="noopener noreferrer">PPP DLL Protocol Numbers</a></li>
+        <li>Wikipedia — <a href="https://en.wikipedia.org/wiki/MAC_address" target="_blank" rel="noopener noreferrer">MAC address</a>, <a href="https://en.wikipedia.org/wiki/Ethernet_frame" target="_blank" rel="noopener noreferrer">Ethernet frame</a>, <a href="https://en.wikipedia.org/wiki/Ethernet_physical_layer" target="_blank" rel="noopener noreferrer">Ethernet physical layer</a>, <a href="https://en.wikipedia.org/wiki/Spanning_Tree_Protocol" target="_blank" rel="noopener noreferrer">Spanning Tree Protocol</a>, <a href="https://en.wikipedia.org/wiki/IEEE_802.1Q" target="_blank" rel="noopener noreferrer">IEEE 802.1Q</a>, <a href="https://pt.wikipedia.org/wiki/IEEE_802.11" target="_blank" rel="noopener noreferrer">IEEE 802.11</a> (no lugar das páginas do IEEE citadas pelo livro, que podem exigir cadastro)</li>
+    </ul>
+    <blockquote class="quote mt-4">
+        Conteúdo produzido individualmente como material didático complementar da disciplina de
+        Redes de Computadores, com base no livro-texto de referência da disciplina. A formulação e a
+        formatação do conteúdo foi realizada em conjunto com ferramentas de IA.
+    </blockquote>
+</section>
+
+        </div><!-- /col conteúdo -->
+    </div><!-- /row -->
+</div><!-- /container -->
+
+<footer class="py-4 mt-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="../capitulo-25/index.html" class="text-muted text-decoration-none">← Capítulo 25</a>
+            <span class="text-muted">Redes de Computadores — Capítulo 26</span>
+            <a href="../capitulo-27/index.html" class="text-muted text-decoration-none">Próximo: Capítulo 27 →</a>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/registro.js"></script>
+<script src="../../assets/gamificacao.js"></script>
+<script src="../../assets/sims-cap26.js"></script>
+<script src="../../assets/playground.js"></script>
+<script src="../../assets/livro.js"></script>
+</body>
+</html>
