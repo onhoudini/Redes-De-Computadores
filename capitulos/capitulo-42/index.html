@@ -259,7 +259,7 @@ INP  0.0.0.3        0.0.0.4        1033 8000001e          2001:db8:1341:23::/64
 
     <h3 class="h5 mt-4 mb-3">2. O que o livro mostra</h3>
     <p data-livro="4.16.1-capturas">
-        As capturas do tcpdump em cada roteador mostram os pacotes do OSPFv3 (pág. 353–358 do PDF). O primeiro que r1 recebe é um Hello de r2: a origem é o endereço
+        As capturas do tcpdump em cada roteador mostram os pacotes do OSPFv3 (págs. 357–364 do PDF). O primeiro que r1 recebe é um Hello de r2: a origem é o endereço
         link-local de r2 (fe80::68bc:b4ff:fe19:42b7), o destino é ff02::5, o endereço multicast reservado ao OSPFv3, o Hop Limit é 1 e o Next Header é 89. O Hello
         traz o Hello Interval, de 1 s, e o Router Dead Interval, de 3 s: sem Hello por 3 s, o roteador considera o enlace fora do ar. Depois vêm os Database
         Description, que anunciam o conteúdo da base de dados; r2 pede o que não conhece com um LS Request, recebe um LS Update e confirma com um LS Acknowledge.
@@ -311,7 +311,7 @@ INP  0.0.0.3        0.0.0.4        1033 8000001e          2001:db8:1341:23::/64
         vão em UDP, na porta 521. Com as rotas distribuídas, <code>ping6all</code> funciona, e os traceroute6 seguem r1 → r3 nos dois sentidos. A RFC 2080 define dois
         tipos de mensagem: os pedidos (Request) e as respostas (Response), com a tabela do roteador. Ao iniciar, o roteador manda um pedido do seu link-local para
         ff02::9, o endereço multicast reservado ao RIPng; quem recebe um pedido responde ao link-local de quem pediu. Depois, cada roteador manda o seu vetor de
-        distância, sem ser pedido, para ff02::9, periodicamente (pág. 358–362 do PDF).
+        distância, sem ser pedido, para ff02::9, periodicamente (págs. 362–369 do PDF).
     </p>
     <p class="nota-livro small">
         <span class="extra-tag">Nota</span><br>
@@ -358,12 +358,12 @@ INP  0.0.0.3        0.0.0.4        1033 8000001e          2001:db8:1341:23::/64
         Na Fig. 13, AS1 é cliente de AS2, AS2 é cliente de AS3, e AS1 e AS3 são pares. Cada AS tem um roteador e um host: AS<em>n</em> anuncia 2001:cafe:<em>n</em>::/48,
         e o host h<em>n</em> tem o endereço 2001:cafe:<em>n</em>:1::1<em>n</em>. O IPMininet monta as sessões eBGP com <code>ebgp_session(…, link_type=CLIENT_PROVIDER)</code>
         e <code>SHARE</code>, que configuram as políticas. Logo depois de iniciar, <code>ping6all</code> falha, porque o BGP ainda não trocou as mensagens; depois de um
-        tempo, tudo funciona (pág. 362–368 do PDF).
+        tempo, tudo funciona (págs. 369–372 do PDF).
     </p>
     <p data-livro="4.16.3-traceroute">
         O livro pede: antes de rodar o traceroute6, pense nas políticas e tente prever a saída. Os caminhos impressos são assimétricos: h1 vai a h3 direto, mas h3 volta a
         h1 por AS2; h1 vai a h2 passando por AS3, e h2 volta direto. Na Loc-RIB de as1 (<code>show bgp ipv6</code>), a rota para 2001:cafe:2::/48 aprendida de as3, com
-        AS-path 3 2 e local-pref 150, vence a aprendida direto de as2, com local-pref 100 (pág. 368–373 do PDF).
+        AS-path 3 2 e local-pref 150, vence a aprendida direto de as2, com local-pref 100 (págs. 371–377 do PDF).
     </p>
 
     <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
@@ -406,7 +406,7 @@ INP  0.0.0.3        0.0.0.4        1033 8000001e          2001:db8:1341:23::/64
         AS, o seu identificador (32 bits, no formato de um endereço IPv4) e o Hold Time, o maior intervalo permitido entre duas mensagens; um roteador deve mandar
         KEEPALIVE a cada um terço do Hold Time. Um UPDATE de AS2 anuncia 2001:cafe:2::/48 a AS1. Em seguida, o livro entra no bgpd de as2, no modo privilegiado
         (<code>enable</code>), e desliga a sessão com AS3 (<code>configure terminal</code>, <code>router bgp 2</code>, <code>neighbor 2001:cafe:2:23::3 shutdown</code>): a
-        sessão fica <code>Idle (Admin)</code>, e h2 e h3 deixam de se alcançar. Com <code>no neighbor 2001:cafe:2:23::3 shutdown</code>, tudo volta (pág. 369–377 do PDF).
+        sessão fica <code>Idle (Admin)</code>, e h2 e h3 deixam de se alcançar. Com <code>no neighbor 2001:cafe:2:23::3 shutdown</code>, tudo volta (págs. 377–381 do PDF).
     </p>
     <p class="nota-livro small">
         <span class="extra-tag">Nota</span><br>
@@ -460,7 +460,7 @@ INP  0.0.0.3        0.0.0.4        1033 8000001e          2001:db8:1341:23::/64
             melhor rota.</li>
         <li data-livro="4.16.4-Q4">Na rede da Fig. 15, AS1 anuncia p1 e AS2 anuncia p2. Qual é a Loc-RIB de (a) AS6 para p1 e (b) AS8 para p2? Indique a melhor rota.</li>
         <li data-livro="4.16.4-Q5">Na rede da Fig. 16 (ebgp-bug-3.py), (a) os hosts de AS5 não alcançam os de AS8. Que caminho seguem os pacotes (b) de AS1 até AS8, (c) de
-            AS8 até AS1, (d) de AS8 até AS2 e (e) de AS2 até AS7? (f) Desligado o enlace AS3–AS4, que hosts AS1, AS5 e AS6 ainda alcançam (pág. 377–380 do PDF)?</li>
+            AS8 até AS1, (d) de AS8 até AS2 e (e) de AS2 até AS7? (f) Desligado o enlace AS3–AS4, que hosts AS1, AS5 e AS6 ainda alcançam (págs. 381–384 do PDF)?</li>
     </ol>
 
     <h3 class="h5 mt-4 mb-3">3. Experimente</h3>

@@ -409,6 +409,13 @@
         escreve <code>brtcl(8)</code> para o comando <code>brctl</code>. A captura <code>stp-s3-trace.pcap</code> está no repositório
         <a href="https://github.com/cnp3/ebook/tree/master/exercises/traces" target="_blank" rel="noopener noreferrer">cnp3/ebook</a>.
     </p>
+    <p class="nota-livro small">
+        <span class="extra-tag">Nota</span><br>
+        A Fig. 22 (pág. 387 do PDF) não bate com o script: o desenho liga s6 a s3, mas o <code>stp.py</code> cria o enlace com
+        <code>addLink(s6, s9)</code>, e a saída do comando <code>links</code> mostra <code>s6-eth1&lt;-&gt;s9-eth3</code> (pág. 388 do PDF).
+        Não há enlace entre s6 e s3. A simulação e o exemplo de código seguem o script, que é a rede cujas saídas do
+        <code>brctl</code> o livro imprime.
+    </p>
 
     <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
     <div class="demo-box" data-sim="stp-ipmininet"></div>

@@ -151,7 +151,7 @@
         var P1 = campo("Bytes por vizinho no Hello"), P2 = campo("Cabeçalhos de LSA no pacote 20"), P3 = campo("Segundos sem Hello");
         var fb = u.feedback();
         var concluir = R.desafio(raiz, "ospf-pacotes", 15, "Os pacotes do OSPFv3");
-        raiz.append(el("p", { class: "small mb-1" }, "A captura de r1 (pág. 354–360 do PDF); clique no número para ver os campos:"),
+        raiz.append(el("p", { class: "small mb-1" }, "A captura de r1 (págs. 358–364 do PDF); clique no número para ver os campos:"),
             tabela(["No.", "Tempo (s)", "Origem", "Destino", "Bytes", "Info"], linhas, "mono"), det,
             el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (15 pts)"),
             linhaPergunta("Os primeiros Hello têm 90 bytes; depois, 94. Quantos bytes ocupa cada vizinho listado num Hello?", P1),
@@ -190,7 +190,7 @@
         var P3 = escolha("O que pede o Request", [["tudo", "a tabela inteira do vizinho"], ["padrao", "só a rota padrão"], ["nada", "a remoção da rota padrão"]]);
         var fb = u.feedback();
         var concluir = R.desafio(raiz, "ripng-captura", 15, "As mensagens do RIPng");
-        raiz.append(el("p", { class: "small mb-1" }, "A captura ripng-r2-trace.pcap (pág. 363–364 do PDF); clique no número:"),
+        raiz.append(el("p", { class: "small mb-1" }, "A captura ripng-r2-trace.pcap (págs. 367–369 do PDF); clique no número:"),
             tabela(["No.", "Tempo (s)", "Origem", "Destino", "Bytes", "Info"], linhas, "mono"), det,
             el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (15 pts)"),
             linhaPergunta("Quantas entradas de rota leva uma Response de 166 bytes?", P1),
@@ -382,7 +382,7 @@
         var P1 = campo("Tamanho do UPDATE"), P2 = campo("Intervalo de KEEPALIVE"), P3 = escolha("Hosts sem comunicação", [["23", "h2 e h3"], ["12", "h1 e h2"], ["13", "h1 e h3"]]);
         var fb = u.feedback();
         var concluir = R.desafio(raiz, "bgp-dinamica", 15, "A dinâmica do BGP");
-        raiz.append(el("p", { class: "small fw-semibold mb-1" }, "O UPDATE de AS2 para AS1 (pág. 374 do livro, PDF 378), campo a campo:"),
+        raiz.append(el("p", { class: "small fw-semibold mb-1" }, "O UPDATE de AS2 para AS1 (pág. 378 do PDF), campo a campo:"),
             tabela(["Campo", "Bytes", "Valor"], UPD.map(function (x) { return el("tr", null, el("td", null, x[0]), el("td", null, String(x[1])), el("td", { class: "mono" }, x[2])); })),
             el("p", { class: "small" }, "Total: " + R.updBytes42 + " bytes, o valor do campo Length."),
             u.campo("Hold Time negociado no OPEN (s)", hold), ka,
@@ -405,19 +405,19 @@
 
     /* ================= Atividade 6: os exercícios 4.16.4 ================= */
     var EX = {
-        q1: { id: "q1", nome: "Q1: ebgp-bug.py (pág. 377–378)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5"],
+        q1: { id: "q1", nome: "Q1: ebgp-bug.py (pág. 381–382)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5"],
             cp: [["AS2", "AS1"], ["AS3", "AS1"], ["AS5", "AS1"], ["AS3", "AS4"]], pares: [["AS2", "AS3"], ["AS2", "AS4"], ["AS4", "AS5"]],
             pos: { AS1: [260, 30], AS2: [110, 100], AS3: [260, 100], AS5: [410, 100], AS4: [260, 165] }, arcos: {} },
-        q2: { id: "q2", nome: "Q2: a variante com AS2–AS5 (pág. 378–379)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5"],
+        q2: { id: "q2", nome: "Q2: a variante com AS2–AS5 (pág. 382–383)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5"],
             cp: [["AS2", "AS1"], ["AS3", "AS1"], ["AS5", "AS1"], ["AS4", "AS3"]], pares: [["AS2", "AS3"], ["AS2", "AS4"], ["AS4", "AS5"], ["AS2", "AS5"]],
             pos: { AS1: [260, 30], AS2: [110, 100], AS3: [260, 100], AS5: [410, 100], AS4: [260, 165] }, arcos: { "AS2-AS5": [260, 290] } },
-        f14: { id: "f14", nome: "Q3: Fig. 14 (pág. 379)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5", "AS6", "AS7", "AS8", "AS9"],
+        f14: { id: "f14", nome: "Q3: Fig. 14 (pág. 383)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5", "AS6", "AS7", "AS8", "AS9"],
             cp: [["AS4", "AS5"], ["AS5", "AS7"], ["AS9", "AS7"], ["AS3", "AS4"], ["AS5", "AS6"], ["AS9", "AS1"], ["AS2", "AS3"], ["AS1", "AS8"]], pares: [["AS3", "AS6"], ["AS6", "AS8"], ["AS6", "AS7"]],
             pos: { AS2: [37, 130], AS3: [148, 130], AS4: [148, 40], AS5: [260, 40], AS6: [260, 130], AS7: [371, 40], AS8: [371, 130], AS9: [483, 40], AS1: [483, 130] }, arcos: {} },
-        f15: { id: "f15", nome: "Q4: Fig. 15 (pág. 379)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5", "AS6", "AS7", "AS8"],
+        f15: { id: "f15", nome: "Q4: Fig. 15 (pág. 383)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5", "AS6", "AS7", "AS8"],
             cp: [["AS4", "AS5"], ["AS7", "AS5"], ["AS3", "AS4"], ["AS5", "AS6"], ["AS2", "AS3"], ["AS1", "AS8"]], pares: [["AS3", "AS6"], ["AS6", "AS8"], ["AS7", "AS8"]],
             pos: { AS4: [148, 40], AS5: [260, 40], AS7: [371, 40], AS2: [37, 130], AS3: [148, 130], AS6: [260, 130], AS8: [371, 130], AS1: [483, 130] }, arcos: {} },
-        f16: { id: "f16", nome: "Q5: Fig. 16, ebgp-bug-3.py (pág. 379–380)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5", "AS6", "AS7", "AS8"],
+        f16: { id: "f16", nome: "Q5: Fig. 16, ebgp-bug-3.py (pág. 383–384)", ases: ["AS1", "AS2", "AS3", "AS4", "AS5", "AS6", "AS7", "AS8"],
             cp: [["AS1", "AS3"], ["AS3", "AS4"], ["AS4", "AS7"], ["AS7", "AS8"], ["AS2", "AS1"], ["AS2", "AS5"], ["AS7", "AS6"]], pares: [["AS3", "AS2"], ["AS4", "AS5"], ["AS5", "AS6"], ["AS6", "AS8"]],
             pos: { AS3: [148, 40], AS4: [260, 40], AS7: [371, 40], AS8: [483, 40], AS1: [37, 130], AS2: [148, 130], AS5: [260, 130], AS6: [371, 130] }, arcos: {} }
     };
