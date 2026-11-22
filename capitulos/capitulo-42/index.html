@@ -520,7 +520,7 @@ INP  0.0.0.3        0.0.0.4        1033 8000001e          2001:db8:1341:23::/64
     <h3 class="h6 mt-4">1. Dijkstra na rede da Fig. 12</h3>
     <pre class="code-block"><code>import heapq
 
-# Dijkstra na rede da Fig. 12 (pág. 350): custos de cada enlace entre roteadores.
+# Dijkstra na rede da Fig. 12 (pág. 354): custos de cada enlace entre roteadores.
 def spf(custos, origem):
     viz = {}
     for (x, y), c in custos.items():
@@ -548,7 +548,7 @@ for nome, custos in [("script (1, 5, 3)", {("r1", "r2"): 1, ("r1", "r3"): 5, ("r
     dist, ant = spf(custos, "r1")
     print(nome, "-&gt;", caminho(ant, "r1", "r3"), "custo", dist["r3"])</code></pre>
     <h3 class="h6 mt-4">2. A Loc-RIB de as1</h3>
-    <pre class="code-block"><code># A Loc-RIB de as1 na Fig. 13 (pág. 365), com as políticas do IPMininet:
+    <pre class="code-block"><code># A Loc-RIB de as1 na Fig. 13 (pág. 369), com as políticas do IPMininet:
 # local-pref 200 para rotas de clientes, 150 de pares e 100 de provedores.
 LOCAL_PREF = {"cliente": 200, "par": 150, "provedor": 100}
 
@@ -570,7 +570,7 @@ for prefixo, rotas in RECEBIDAS.items():
     <h3 class="h6 mt-4">3. Montando o UPDATE byte a byte</h3>
     <pre class="code-block"><code>import ipaddress, struct
 
-# O UPDATE de AS2 para AS1 (pág. 374 do livro): anuncia 2001:cafe:2::/48.
+# O UPDATE de AS2 para AS1 (pág. 378 do livro): anuncia 2001:cafe:2::/48.
 prefixo = ipaddress.IPv6Network("2001:cafe:2::/48")
 nh = ipaddress.IPv6Address("2001:cafe:1:12::2").packed + ipaddress.IPv6Address("fe80::1").packed
 

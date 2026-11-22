@@ -298,7 +298,7 @@
 
     <h3 class="h5 mt-4 mb-3">1. Relembre</h3>
     <p>
-        No slow start, a janela de congestionamento cresce rápido, até o limiar ssthresh; depois de uma perda, ela cai, e o TCP recupera. Veja a
+        No slow start, a janela de congestionamento cresce rápido, até o limiar ssthresh; depois de uma perda, ela cai, e o TCP recupera. Veja o
         <a href="../capitulo-21/index.html#slow-start">slow start</a> e as <a href="../capitulo-21/index.html#perdas">reações a perdas</a> no Capítulo 21.
     </p>
 
@@ -344,7 +344,7 @@
 
     <h3 class="h5 mt-4 mb-3">2. O que o livro pede</h3>
     <p>
-        Hipóteses das questões (pág. 326–327 do PDF): o emissor faz um único send de x bytes; o RTT é fixo, de 100 ms, e o temporizador, de 200 ms; transmitir
+        Hipóteses das questões (pág. 330 do PDF): o emissor faz um único send de x bytes; o RTT é fixo, de 100 ms, e o temporizador, de 200 ms; transmitir
         um segmento de MSS bytes leva 1 ms, seja qual for o MSS; o ACK não tem tempo de transmissão; a janela inicial é de um segmento; o limiar de ACKs
         duplicados é 3; e o TCP confirma cada segmento recebido.
     </p>
@@ -359,7 +359,7 @@
         <li data-livro="4.13.2-Q6">Com cwnd de 4000 bytes e rwin de 64 000, o emissor manda 10 KB. Refaça o diagrama supondo que (a) o segundo segmento passou
             por congestionamento e veio marcado (ECN), com a marca devolvida no ACK; (b) o quarto segmento foi marcado, sem ser descartado.</li>
         <li data-livro="4.13.2-Q7">Uma conexão chegou a cwnd de 4000 bytes (com ssthresh de 4000). Quatro segmentos são enviados, e o segundo chega corrompido.
-            Complete o diagrama (pág. 327–336 do PDF).</li>
+            Complete o diagrama (págs. 330–335 do PDF).</li>
     </ol>
 
     <h3 class="h5 mt-4 mb-3">3. Experimente</h3>
@@ -464,7 +464,7 @@ print("slow-start-delayed.pkt:", slow_start(atrasado), "(o livro imprime 2, 4, 6
     <h3 class="h6 mt-4">3. A fórmula da Q4</h3>
     <pre class="code-block"><code>import math
 
-# Q4 (pág. 329): tempo mínimo para entregar x bytes com slow start, sem perdas, rwin e ssthresh grandes.
+# Q4 (pág. 333): tempo mínimo para entregar x bytes com slow start, sem perdas, rwin e ssthresh grandes.
 RTT, D = 100, 1            # ms; D = tempo de transmitir um segmento
 
 def formula(x, mss=1000):

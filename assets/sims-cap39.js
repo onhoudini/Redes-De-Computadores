@@ -1,5 +1,5 @@
 /* Simulações do Capítulo 39 — Prática: o TCP de perto (seção 4.13 do livro, pág. 319–336 do PDF).
- * Os scripts packetdrill e os valores impressos são os do livro (pág. 320–330). */
+ * Os scripts packetdrill e os valores impressos são os do livro (pág. 319–330). */
 (function () {
     "use strict";
     var R = window.Redes;
@@ -116,7 +116,7 @@
         var P1 = campo("Próximo RTO em microssegundos"), P2 = campo("Bytes retransmitidos no frr-rto2");
         var fb = u.feedback();
         var concluir = R.desafio(raiz, "rto-frr", 10, "O rto e a retransmissão rápida");
-        raiz.append(el("p", { class: "small mb-1" }, "Valores de tcpi_rto impressos pelo rto.pkt (pág. 320 do PDF), em microssegundos:"), g, tabela,
+        raiz.append(el("p", { class: "small mb-1" }, "Valores de tcpi_rto impressos pelo rto.pkt (pág. 324 do PDF), em microssegundos:"), g, tabela,
             el("p", { class: "small fw-semibold mt-3 mb-1" }, "Desafio (10 pts)"),
             linhaPergunta("Se a 4ª retransmissão também se perdesse, que valor o RTO @6 imprimiria?", P1),
             linhaPergunta("No frr-rto2.pkt, três segmentos de 1000 bytes se perdem. Quantos bytes o último tcpi_bytes_retrans mostra?", P2),

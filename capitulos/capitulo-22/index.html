@@ -854,7 +854,7 @@ def solicited_node(addr):
     a = ipaddress.IPv6Address(addr).packed
     return ipaddress.IPv6Address(bytes.fromhex("ff0200000000000000000001ff") + a[13:])
 
-for nome, mac in [("A", "00:23:45:67:89:ab"), ("B", "00:34:56:78:9a:bc")]:   # os hosts do livro (pág. 227)
+for nome, mac in [("A", "00:23:45:67:89:ab"), ("B", "00:34:56:78:9a:bc")]:   # os hosts do livro (pág. 231–232)
     ll = endereco("fe80::/64", mac)
     glob = endereco("2001:db8:1234:5678::/64", mac)
     print(f"{nome}: link-local {ll}  global {glob}")
