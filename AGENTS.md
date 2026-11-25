@@ -79,16 +79,16 @@ A música do `index.html` (cartão `#musica`, em "Sobre o projeto") é `assets/a
 O vídeo do `index.html` (seção `#apresentacao`) fica em `assets/video/` (`apresentacao.mp4`, `.vtt` e `.jpg`). A fonte está em `midia/apresentacao/`:
 
 - `roteiro.json`: falas e legendas. `legenda` é o texto mostrado; `fala` (opcional) é a grafia fonética que a voz lê.
-- `narracao.py`: gera a narração com o Kokoro (`kokoro-onnx` 0.6.1, voz `pf_dora`, modelo `kokoro-v1.0.onnx`).
+- `narracao.py`: gera a narração com o Chatterbox em português (código do Space `ResembleAI/Chatterbox-Multilingual-TTS-pt-br`, modelo `ResembleAI/Chatterbox-Multilingual-pt-br`, mais `ve.pt` e `conds.pt` de `ResembleAI/chatterbox`; Python 3.11). A voz imita `pt_BR/cadu/0000000001.mp3` do `OHF-Voice/voice-datasets` (CC0), convertido para WAV mono de 24 kHz, sem o silêncio inicial e nivelado em -20 LUFS.
 - `legendas.py`: gera o `.vtt` a partir do roteiro e dos WAVs.
 - `apresentacao.html`: a animação, para o GiveMotion 0.1.6 (Node 20+, ffmpeg).
 
 As ferramentas e os WAVs não ficam no repositório. Para regerar, usando uma pasta de trabalho fora dele:
 
-1. `python narracao.py PASTA_DO_MODELO PASTA_DOS_WAVS` e `python legendas.py PASTA_DOS_WAVS assets/video/apresentacao.vtt`.
+1. `python narracao.py PASTA_DO_CODIGO PASTA_DO_MODELO VOZ.wav PASTA_DOS_WAVS` e `python legendas.py PASTA_DOS_WAVS assets/video/apresentacao.vtt`.
 2. Se os tempos mudarem (`tempos.json`), atualize em `apresentacao.html` a lista do cabeçalho e os `data-start`/`data-duration` das cenas.
 3. Copie `apresentacao.html` e `narracao.wav` para a pasta de trabalho e rode `givemotion check apresentacao.html` e `givemotion render apresentacao.html -o out/apresentacao.mp4 --motion-blur auto`.
-4. `ffmpeg -i out/apresentacao.mp4 -c copy -movflags +faststart -map_metadata -1 assets/video/apresentacao.mp4`; o pôster é o quadro de 4,2 s.
+4. `ffmpeg -i out/apresentacao.mp4 -c copy -movflags +faststart -map_metadata -1 assets/video/apresentacao.mp4`; o pôster é o quadro de 5,4 s.
 5. Se a fala mudar, atualize a transcrição no `index.html`.
 
 ## Regras
