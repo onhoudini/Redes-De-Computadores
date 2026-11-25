@@ -46,6 +46,18 @@
         });
     });
     // Questões rápidas: <div class="mini-quiz" data-options="a|b|c" data-answer="1" data-explain="..." data-hint="..."><p>Pergunta</p></div>
+    // As alternativas aparecem em ordem sorteada a cada carregamento; data-answer continua valendo para a ordem do HTML.
+    function embaralhar(lista) {
+        var copia = lista.slice();
+        for (var i = copia.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var troca = copia[i];
+            copia[i] = copia[j];
+            copia[j] = troca;
+        }
+        return copia;
+    }
+
     function iniciarQuestoes() {
         document.querySelectorAll(".mini-quiz").forEach(function (quiz, n) {
             var opcoes = (quiz.getAttribute("data-options") || "").split("|");
@@ -86,9 +98,9 @@
                         avisa(false);
                     }
                 });
-                grupo.appendChild(botao);
                 return botao;
             });
+            embaralhar(botoes).forEach(function (botao) { grupo.appendChild(botao); });
             quiz.appendChild(grupo);
             quiz.appendChild(feedback);
         });

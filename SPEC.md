@@ -97,7 +97,7 @@ As perguntas de prática e fixação usam o componente de múltipla escolha de `
 </div>
 ```
 
-`data-answer` é o índice (a partir de 0) da opção correta.
+`data-answer` é o índice (a partir de 0) da opção correta, na ordem de `data-options`. Na página, as opções aparecem embaralhadas a cada carregamento; por isso, as opções, a dica e a explicação não devem citar posição ("a primeira", "a alternativa anterior").
 
 ## 4. Fontes do conteúdo
 
