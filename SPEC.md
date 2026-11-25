@@ -160,7 +160,7 @@ Em animações feitas em JavaScript, use `Redes.reduzMovimento()` para mostrar d
 - O vídeo não começa sozinho (sem `autoplay`) e não é carregado antes de ser pedido (`preload="none"`, com `poster`).
 - A narração só afirma o que está no site ou no livro. Voz sintética é identificada como tal.
 
-Hoje há um vídeo, o de apresentação, na página inicial.
+Hoje há um vídeo, o de apresentação, na página inicial. As mesmas regras valem para áudio: a música da página inicial tem a letra na página, não toca sozinha e cita a fonte.
 
 ### Tema visual
 

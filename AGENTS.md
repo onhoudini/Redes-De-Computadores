@@ -70,6 +70,10 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
   - `desafios-cap1.js` e `desafios-cap2.js`: desafios pontuáveis ligados às simulações aprovadas dos caps. 1 e 2.
   - `simulacoes.js`: simulações antigas do cap. 2.
 
+### Música do projeto
+
+A música do `index.html` (cartão `#musica`, em "Sobre o projeto") é `assets/audio/gabriel-rocha-redes.mp3`, tirada de <https://unipampa4all.github.io/disciplinas/liaa/20262/projetos_html/gabriel-rocha-redes.html>. A letra na página é a da fonte.
+
 ### Vídeo de apresentação
 
 O vídeo do `index.html` (seção `#apresentacao`) fica em `assets/video/` (`apresentacao.mp4`, `.vtt` e `.jpg`). A fonte está em `midia/apresentacao/`:
