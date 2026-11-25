@@ -93,7 +93,7 @@
     <g fill="none" stroke="#3a4654" stroke-width="5" id="arestas">
       <path d="M520 480L760 440"/><path d="M520 480L640 720"/><path d="M640 720L920 640"/><path d="M760 440L920 640"/><path d="M760 440L1120 430"/><path d="M1120 430L1360 600"/><path d="M920 640L1120 430"/><path d="M640 720L1060 800"/><path d="M1060 800L1360 600"/><path d="M1060 800L920 640"/>
     </g>
-    <path id="rota" fill="none" stroke="#6ea8fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" d="M300 600L520 480L760 440L920 640L1120 430L1360 600L1640 600"/>
+    <path id="rota" fill="none" stroke="#6ea8fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" d="M300 600L520 480L760 440L1120 430L1360 600L1640 600"/>
     <g fill="#1b232d" stroke="#6ea8fe" stroke-width="5" id="nos">
       <circle cx="520" cy="480" r="26"/><circle cx="760" cy="440" r="26"/><circle cx="640" cy="720" r="26"/><circle cx="920" cy="640" r="26"/><circle cx="1120" cy="430" r="26"/><circle cx="1060" cy="800" r="26"/><circle cx="1360" cy="600" r="26"/>
     </g>
@@ -135,7 +135,7 @@
 
 <section class="scene" id="s6" data-start="33.09" data-duration="6.1">
   <div class="etapa" style="top:290px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Relembre o conceito</div>
-  <div class="etapa" style="top:404px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Veja o que o livro pede</div>
+  <div class="etapa" style="top:404px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Veja o que o livro traz</div>
   <div class="etapa" style="top:518px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Experimente na simulação</div>
   <div class="etapa" style="top:632px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Confira a resolução comentada</div>
   <div class="etapa" style="top:746px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Fixe com perguntas rápidas</div>
@@ -242,11 +242,11 @@
     .from('#fio', { scaleY: 0, duration: 0.9, ease: 'power2.out' }, 0.7)
     .from('.camada', { x: 140, opacity: 0, duration: 0.6, stagger: 0.12, ease: 'expo.out' }, 0.9)
     .from('#quadro', { scale: 0, duration: 0.5, ease: 'back.out(1.8)' }, 1.4)
-    .from('.pr', { scale: 0.4, opacity: 0, duration: 0.5, ease: 'back.out(1.7)', stagger: (i) => [0, 0.55, 1.25, 2.2, 3.1][i] }, 2.95)
-    .to('#quadro', { y: 144, duration: 0.5, ease: 'power2.inOut' }, 4.0)
-    .to('#quadro', { y: 288, duration: 0.5, ease: 'power2.inOut' }, 4.95)
-    .to('#quadro', { y: 432, duration: 0.5, ease: 'power2.inOut' }, 5.85)
-    .to('.camada', { borderColor: '#6ea8fe', duration: 0.3, stagger: (i) => [0, 1.2, 2.15, 3.05][i] }, 3.0)
+    .from('.pr', { scale: 0.4, opacity: 0, duration: 0.5, ease: 'back.out(1.7)', stagger: (i) => [0, 0.55, 1.1, 1.75, 2.6][i] }, 2.5)
+    .to('#quadro', { y: 144, duration: 0.5, ease: 'power2.inOut' }, 3.4)
+    .to('#quadro', { y: 288, duration: 0.5, ease: 'power2.inOut' }, 4.05)
+    .to('#quadro', { y: 432, duration: 0.5, ease: 'power2.inOut' }, 4.9)
+    .to('.camada', { borderColor: '#6ea8fe', duration: 0.3, stagger: (i) => [0, 1.1, 1.75, 2.6][i] }, 2.5)
     .to('#s5', { x: -1920, ...mov }, 7.42 - T);
 
   // 6. Prática

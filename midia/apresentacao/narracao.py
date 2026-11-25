@@ -40,14 +40,19 @@ def volume(arquivo):
 original = volume(bruto)
 ganho = roteiro["loudness"] - original
 nivelados, inicio, tempos = [], 0.0, []
-for n, a in enumerate(audios, 1):
+for n, (a, cena) in enumerate(zip(audios, roteiro["cenas"]), 1):
     cru, final = saida / f"cru{n}.wav", saida / f"cena{n}.wav"
     sf.write(cru, a, taxa, subtype="FLOAT")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(cru), "-af",
                     f"volume={ganho:.2f}dB,alimiter=limit=0.891:attack=5:release=80:level=false:latency=true",
                     "-ar", str(taxa), "-c:a", "pcm_s16le", str(final)], check=True)
     cru.unlink()
-    nivelados.append(sf.read(final, dtype="float32")[0])
+    nivelado = sf.read(final, dtype="float32")[0]
+    falta = round(cena.get("duracao", 0) * taxa) - len(nivelado)   # silêncio até "duracao", para não mudar os tempos do vídeo
+    if falta > 0:
+        nivelado = np.concatenate([nivelado, np.zeros(falta, dtype=np.float32)])
+        sf.write(final, nivelado, taxa)
+    nivelados.append(nivelado)
     dur = len(nivelados[-1]) / taxa
     tempos.append({"cena": n, "inicio": round(inicio, 3), "fala": round(dur, 3)})
     inicio += dur + roteiro["pausa"]
