@@ -1,0 +1,293 @@
+<!doctype html>
+<!-- Vídeo de apresentação do site (GiveMotion 0.1.6). Como gerar: ver AGENTS.md, "Vídeo de apresentação".
+  DIREÇÃO
+  Visual: fundo escuro, azul do site como único destaque; verde só para acerto, amarelo só para medalha.
+  Tipo: Inter 800 em 96 a 150 px, 600 em 44 a 56 px, 36 px no resto. A faixa abaixo de y = 900 fica livre para a legenda.
+  Movimento: entradas expo.out, saídas power2.in; avança sempre da direita para a esquerda.
+  Ideia: o pulso da primeira cena abre o site; as três partes nascem como cartões e viram as abas das cenas seguintes.
+  TEMPOS (início da fala na linha do vídeo = 0,4 s + "inicio" de tempos.json; cada cena entra 0,45 s antes)
+  1: 0,40 | 2: 5,06 | 3: 13,64 | 4: 19,26 | 5: 26,72 | 6: 33,54 | 7: 39,04 | 8: 47,66 | 9: 55,83 | fim da fala: 58,83
+-->
+<html lang="pt-BR" data-width="1920" data-height="1080" data-fps="30" data-duration="61">
+<head>
+<meta charset="utf-8">
+<title>Apresentação do site Redes de Computadores</title>
+<style>
+  :root { --bg: #10151c; --painel: #1b232d; --linha: #3a4654; --texto: #f1f4f8; --suave: #aeb9c6; --azul: #6ea8fe; --forte: #0d6efd; --ok: #75b798; --ouro: #ffda6a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--texto); font-family: Inter, sans-serif; }
+  h1, h2, p { margin: 0; }
+  .abs { position: absolute; }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  #grade { position: absolute; inset: -120px; background: radial-gradient(circle, #ffffff14 2.5px, transparent 3px) 0 0 / 64px 64px; }
+  #luz { position: absolute; left: 460px; top: 40px; width: 1000px; height: 1000px; border-radius: 50%; background: radial-gradient(circle, #0d6efd3d, transparent 65%); }
+  svg { overflow: visible; }
+
+  /* 1 */
+  #s1 h1 { position: absolute; left: 150px; top: 84px; width: 1620px; font-size: 100px; line-height: 1.06; font-weight: 800; letter-spacing: -.03em; }
+  #s1 h1 b { color: var(--azul); font-weight: 800; }
+  .rotulo { position: absolute; font-size: 40px; font-weight: 600; color: var(--suave); white-space: nowrap; }
+
+  /* 2 */
+  #s2 { background: linear-gradient(120deg, #0a3f94, #0d5fdc); }
+  #s2 .kicker { position: absolute; left: 150px; top: 170px; font-size: 44px; font-weight: 600; letter-spacing: .04em; color: #d4e4ff; }
+  #s2 h1 { position: absolute; left: 150px; top: 250px; font-size: 144px; line-height: 1.04; font-weight: 800; letter-spacing: -.035em; }
+  #s2 .sub { position: absolute; left: 154px; top: 752px; font-size: 52px; font-weight: 500; color: #d4e4ff; }
+  #livro { position: absolute; left: 1270px; top: 180px; width: 480px; height: 640px; border-radius: 18px; background: #212529; padding: 52px 46px; display: flex; flex-direction: column; box-shadow: 0 40px 90px #0007; }
+  #livro small { font-size: 30px; letter-spacing: .06em; color: #b9c3ce; }
+  #livro strong { font-size: 54px; line-height: 1.14; font-weight: 700; margin-top: 34px; }
+  #livro span { margin-top: auto; font-size: 36px; line-height: 1.25; color: #d9e0e7; }
+
+  /* 3 a 6: cartões que viram abas */
+  .parte { position: absolute; top: 90px; width: 520px; height: 120px; border-radius: 20px; background: var(--painel); border: 3px solid var(--linha); display: flex; align-items: center; justify-content: space-between; padding: 0 34px; font-size: 46px; font-weight: 700; }
+  .parte small { font-size: 36px; font-weight: 600; color: #d2d9e0; }
+  #p1 { left: 150px; } #p2 { left: 700px; } #p3 { left: 1250px; }
+  .corpo { position: absolute; top: 600px; width: 520px; height: 230px; text-align: center; }
+  .corpo strong { display: block; font-size: 130px; line-height: 1; font-weight: 800; color: var(--azul); }
+  .corpo span { font-size: 40px; color: var(--suave); }
+  #total { position: absolute; left: 150px; top: 100px; width: 1620px; display: flex; align-items: baseline; justify-content: center; gap: 36px; }
+  #total strong { font-size: 260px; line-height: 1; font-weight: 800; letter-spacing: -.04em; }
+  #total span { font-size: 96px; font-weight: 700; color: var(--azul); }
+  .cap { position: absolute; top: 300px; width: 382px; height: 520px; border-radius: 22px; background: var(--painel); border: 3px solid var(--linha); padding: 40px 34px; }
+  .cap svg { width: 310px; height: 220px; display: block; }
+  .cap small { display: block; margin-top: 26px; font-size: 36px; font-weight: 600; color: var(--azul); }
+  .cap strong { display: block; margin-top: 10px; font-size: 44px; line-height: 1.14; font-weight: 700; }
+  .camada { position: absolute; left: 330px; width: 1440px; height: 128px; border-radius: 18px; background: var(--painel); border: 3px solid var(--linha); display: flex; align-items: center; padding: 0 44px; gap: 40px; }
+  .camada span { width: 330px; font-size: 42px; color: var(--suave); font-weight: 600; }
+  .camada b { font-size: 60px; font-weight: 800; }
+  #fio { position: absolute; left: 226px; top: 300px; width: 8px; height: 560px; border-radius: 4px; background: var(--linha); transform-origin: 50% 0; }
+  #quadro { position: absolute; left: 202px; top: 332px; width: 56px; height: 56px; border-radius: 14px; background: var(--forte); box-shadow: 0 0 40px #0d6efdaa; }
+  .etapa { position: absolute; left: 410px; width: 1100px; height: 96px; display: flex; align-items: center; gap: 40px; font-size: 54px; font-weight: 700; }
+  .etapa svg { width: 72px; height: 72px; flex: none; }
+
+  /* 7 */
+  .janela { position: absolute; top: 170px; width: 520px; height: 640px; border-radius: 22px; background: var(--painel); border: 3px solid var(--linha); padding: 38px 36px; }
+  .janela h2 { font-size: 48px; font-weight: 700; }
+  .codigo { margin-top: 34px; border-radius: 14px; background: #0b0f14; padding: 30px 26px; height: 300px; font-size: 33px; line-height: 1.6; white-space: pre; }
+  .saida { margin-top: 24px; font-size: 36px; color: var(--ok); }
+  .opcao { height: 92px; margin-top: 24px; border-radius: 14px; border: 3px solid var(--linha); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; font-size: 42px; font-weight: 600; }
+
+  /* 8 */
+  #pontos { position: absolute; left: 150px; top: 150px; width: 800px; }
+  #pontos strong { font-size: 230px; line-height: 1; font-weight: 800; letter-spacing: -.04em; }
+  #pontos span { font-size: 80px; font-weight: 700; color: var(--azul); margin-left: 24px; }
+  .nivel { position: absolute; top: 640px; width: 300px; text-align: center; font-size: 44px; font-weight: 700; color: var(--suave); }
+  .nivel i { display: block; margin: 0 auto 24px; width: 48px; height: 48px; border-radius: 50%; background: var(--painel); border: 5px solid var(--linha); }
+  #trilho { position: absolute; left: 300px; top: 660px; width: 1320px; height: 10px; border-radius: 5px; background: var(--linha); }
+  #cheio { position: absolute; left: 300px; top: 660px; width: 1320px; height: 10px; border-radius: 5px; background: var(--azul); transform-origin: 0 50%; }
+  #salvo { position: absolute; left: 520px; top: 800px; width: 880px; height: 88px; border-radius: 44px; background: #16332a; color: #a6e0c4; font-size: 40px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 22px; }
+
+  /* 9 */
+  #s9 .kicker { position: absolute; left: 0; top: 170px; width: 1920px; text-align: center; font-size: 48px; font-weight: 600; color: var(--azul); }
+  #s9 h1 { position: absolute; left: 0; top: 250px; width: 1920px; text-align: center; font-size: 150px; line-height: 1.05; font-weight: 800; letter-spacing: -.035em; }
+  #botao { position: absolute; left: 660px; top: 680px; width: 600px; height: 130px; border-radius: 24px; background: var(--forte); display: grid; place-items: center; font-size: 56px; font-weight: 700; }
+</style>
+</head>
+<body>
+<audio src="narracao.wav" data-start="0.4"></audio>
+<div id="grade"></div><div id="luz"></div>
+
+<section class="scene" id="s1" data-start="0" data-duration="5.4">
+  <h1>Como uma mensagem chega<br>ao <b>outro lado do mundo</b>?</h1>
+  <svg class="abs" style="left:0;top:0" width="1920" height="1080" viewBox="0 0 1920 1080">
+    <g fill="none" stroke="#3a4654" stroke-width="5" id="arestas">
+      <path d="M520 480L760 440"/><path d="M520 480L640 720"/><path d="M640 720L920 640"/><path d="M760 440L920 640"/><path d="M760 440L1120 430"/><path d="M1120 430L1360 600"/><path d="M920 640L1120 430"/><path d="M640 720L1060 800"/><path d="M1060 800L1360 600"/><path d="M1060 800L920 640"/>
+    </g>
+    <path id="rota" fill="none" stroke="#6ea8fe" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" d="M300 600L520 480L760 440L920 640L1120 430L1360 600L1640 600"/>
+    <g fill="#1b232d" stroke="#6ea8fe" stroke-width="5" id="nos">
+      <circle cx="520" cy="480" r="26"/><circle cx="760" cy="440" r="26"/><circle cx="640" cy="720" r="26"/><circle cx="920" cy="640" r="26"/><circle cx="1120" cy="430" r="26"/><circle cx="1060" cy="800" r="26"/><circle cx="1360" cy="600" r="26"/>
+    </g>
+    <g id="pc" fill="#1b232d" stroke="#f1f4f8" stroke-width="6" stroke-linejoin="round"><rect x="190" y="530" width="220" height="140" rx="12"/><path d="M160 700H440" stroke-linecap="round" stroke-width="10"/></g>
+    <g id="mundo" fill="#1b232d" stroke="#f1f4f8" stroke-width="6"><circle cx="1640" cy="600" r="100"/><ellipse cx="1640" cy="600" rx="44" ry="100" fill="none"/><path d="M1540 600H1740M1554 550H1726M1554 650H1726" fill="none"/></g>
+    <circle id="pulso" cx="300" cy="600" r="22" fill="#ffffff" style="filter:drop-shadow(0 0 18px #6ea8fe)"/>
+  </svg>
+</section>
+
+<section class="scene" id="s2" data-start="4.61" data-duration="9.18">
+  <p class="kicker">Redes de Computadores</p>
+  <h1><span class="lt">Princípios,</span><br><span class="lt">protocolos</span><br><span class="lt">e prática</span></h1>
+  <p class="sub">Material didático complementar</p>
+  <div id="livro"><small>LIVRO DE REFERÊNCIA</small><strong>Computer Networking: Principles, Protocols and Practice</strong><span>Olivier Bonaventure e colaboradores</span></div>
+</section>
+
+<section class="scene" id="s3" data-start="13.19" data-duration="6.4">
+  <div id="total"><strong id="n43">0</strong><span>capítulos</span></div>
+  <div class="corpo" style="left:150px"><strong>8</strong><span>capítulos</span></div>
+  <div class="corpo" style="left:700px"><strong>18</strong><span>capítulos</span></div>
+  <div class="corpo" style="left:1250px"><strong>17</strong><span>capítulos</span></div>
+</section>
+
+<section class="scene" id="s4" data-start="18.81" data-duration="8.06">
+  <div class="cap" style="left:150px"><svg viewBox="0 0 310 220"><g fill="none" stroke="#6ea8fe" stroke-width="7"><rect x="4" y="70" width="84" height="64" rx="8"/><rect x="222" y="70" width="84" height="64" rx="8"/><path class="traco" d="M88 102H222" stroke="#f1f4f8"/></g></svg><small>Capítulo 1</small><strong>Conectando dois hosts</strong></div>
+  <div class="cap" style="left:562px"><svg viewBox="0 0 310 220"><g fill="none" stroke="#f1f4f8" stroke-width="7"><path class="traco" d="M50 50L155 110L260 50M50 180L155 110L260 180M50 50V180"/></g><g fill="#1b232d" stroke="#6ea8fe" stroke-width="7"><circle cx="50" cy="50" r="24"/><circle cx="260" cy="50" r="24"/><circle cx="155" cy="110" r="28"/><circle cx="50" cy="180" r="24"/><circle cx="260" cy="180" r="24"/></g></svg><small>Capítulo 2</small><strong>Construindo uma rede</strong></div>
+  <div class="cap" style="left:974px"><svg viewBox="0 0 310 220"><g fill="none" stroke="#f1f4f8" stroke-width="7"><path d="M40 20V200M270 20V200" stroke="#3a4654"/><path class="traco" d="M40 40L270 80"/><path class="traco" d="M270 95L40 135"/><path class="traco" d="M40 150L270 190"/></g><g fill="#6ea8fe"><circle cx="270" cy="80" r="11"/><circle cx="40" cy="135" r="11"/><circle cx="270" cy="190" r="11"/></g></svg><small>Capítulo 4</small><strong>A camada de transporte</strong></div>
+  <div class="cap" style="left:1386px"><svg viewBox="0 0 310 220"><g fill="none" stroke="#6ea8fe" stroke-width="7"><rect x="85" y="100" width="140" height="106" rx="14"/><path class="traco" d="M110 100V70a45 45 0 0 1 90 0V100" stroke="#f1f4f8"/><path d="M155 140V170" stroke-linecap="round" stroke="#f1f4f8"/></g></svg><small>Capítulo 8</small><strong>Segurança de redes</strong></div>
+</section>
+
+<section class="scene" id="s5" data-start="26.27" data-duration="7.42">
+  <div id="fio"></div>
+  <div class="camada" style="top:300px"><span>Aplicação</span><b class="pr">HTTP</b><b class="pr">SMTP</b></div>
+  <div class="camada" style="top:444px"><span>Transporte</span><b class="pr">TCP</b></div>
+  <div class="camada" style="top:588px"><span>Rede</span><b class="pr">IPv6</b></div>
+  <div class="camada" style="top:732px"><span>Enlace</span><b class="pr">Wi-Fi</b></div>
+  <div id="quadro"></div>
+</section>
+
+<section class="scene" id="s6" data-start="33.09" data-duration="6.1">
+  <div class="etapa" style="top:290px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Relembre o conceito</div>
+  <div class="etapa" style="top:404px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Veja o que o livro pede</div>
+  <div class="etapa" style="top:518px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Experimente na simulação</div>
+  <div class="etapa" style="top:632px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Confira a resolução comentada</div>
+  <div class="etapa" style="top:746px"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="32" fill="#1b232d" stroke="#3a4654" stroke-width="5"/><path class="visto" d="M20 37L32 49L53 25" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Fixe com perguntas rápidas</div>
+</section>
+
+<section class="scene" id="abas" data-start="13.19" data-duration="26">
+  <div class="parte" id="p1">Princípios<small>1–8</small></div>
+  <div class="parte" id="p2">Protocolos<small>9–26</small></div>
+  <div class="parte" id="p3">Prática<small>27–43</small></div>
+</section>
+
+<section class="scene" id="s7" data-start="38.59" data-duration="9.22">
+  <div class="janela" id="j1" style="left:150px"><h2>Simulações</h2>
+    <svg width="448" height="460" viewBox="0 0 448 460" style="margin-top:40px">
+      <g stroke="#3a4654" stroke-width="6"><path d="M50 60V440M398 60V440"/></g>
+      <g fill="#f1f4f8" font-family="Inter" font-size="38" font-weight="700" text-anchor="middle"><text x="50" y="36">A</text><text x="398" y="36">B</text></g>
+      <g fill="none" stroke-width="7" stroke-linecap="round"><path class="msg" d="M50 100L398 160" stroke="#6ea8fe"/><path class="msg" d="M398 200L50 260" stroke="#75b798"/><path class="msg" d="M50 300L398 360" stroke="#6ea8fe"/></g>
+      <g font-family="JetBrains Mono" font-size="34" font-weight="700" text-anchor="middle" fill="#f1f4f8"><text class="mt" x="224" y="106">D(0)</text><text class="mt" x="224" y="206">C(OK0)</text><text class="mt" x="224" y="306">D(1)</text></g>
+    </svg></div>
+  <div class="janela" id="j2" style="left:700px"><h2>Código Python</h2>
+    <div class="codigo mono"><span class="lin">letra = <span style="color:#75b798">"A"</span></span>
+<span class="lin">n = <span style="color:#6ea8fe">ord</span>(letra)</span>
+<span class="lin">b = <span style="color:#6ea8fe">format</span>(n, <span style="color:#75b798">"08b"</span>)</span>
+<span class="lin"><span style="color:#6ea8fe">print</span>(b)</span></div>
+    <p class="saida mono" id="saida">01000001</p></div>
+  <div class="janela" id="j3" style="left:1250px"><h2>Perguntas</h2>
+    <p style="margin-top:34px;font-size:38px;line-height:1.28;color:#d9e0e7">Qual deles retransmite segmentos perdidos?</p>
+    <div class="opcao">UDP</div><div class="opcao" id="certa">TCP<svg width="52" height="52" viewBox="0 0 52 52"><path id="vt" d="M10 28L22 40L43 14" fill="none" stroke="#75b798" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="opcao">IPv6</div></div>
+</section>
+
+<section class="scene" id="s8" data-start="47.21" data-duration="8.77">
+  <div id="pontos"><strong id="np">0</strong><span>pontos</span></div>
+  <svg id="medalha" class="abs" style="left:1230px;top:120px" width="400" height="440" viewBox="0 0 400 440">
+    <path d="M130 10L200 170L270 10" fill="none" stroke="#0d6efd" stroke-width="56"/>
+    <circle cx="200" cy="280" r="130" fill="#ffda6a"/><circle cx="200" cy="280" r="98" fill="none" stroke="#b98900" stroke-width="8"/>
+    <path d="M150 284L188 322L256 246" fill="none" stroke="#6b4e00" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div id="trilho"></div><div id="cheio"></div>
+  <div class="nivel" style="left:150px"><i></i>Bit</div><div class="nivel" style="left:480px"><i></i>Quadro</div><div class="nivel" style="left:810px"><i></i>Pacote</div><div class="nivel" style="left:1140px"><i></i>Segmento</div><div class="nivel" style="left:1470px"><i></i>Mensagem</div>
+  <div id="salvo"><svg width="44" height="44" viewBox="0 0 52 52"><path d="M8 28L22 42L45 12" fill="none" stroke="#75b798" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>Progresso salvo neste navegador</div>
+</section>
+
+<section class="scene" id="s9" data-start="55.38" data-duration="5.62">
+  <p class="kicker">Redes de Computadores</p>
+  <h1><span class="lt">Princípios, protocolos</span><br><span class="lt">e prática</span></h1>
+  <div id="botao">Ver capítulos</div>
+</section>
+
+<script>
+  // Fundo: nunca parado.
+  gm.timeline().to('#grade', { x: -110, y: -60, duration: 61, ease: 'none' }, 0)
+    .to('#luz', { x: 260, y: 60, duration: 30, ease: 'sine.inOut' }, 0).to('#luz', { x: -220, y: 0, duration: 31, ease: 'sine.inOut' }, 30);
+
+  const T = 0.6, mov = { duration: T, ease: 'power2.inOut' };
+  const entra = (tl, s) => tl.fromTo(s, { x: 1920 }, { x: 0, ...mov }, 0);
+  const sai = (tl, s, dur) => tl.to(s, { x: -1920, ...mov }, dur - T);
+
+  // 1. Rede e pulso
+  gm.timeline('#s1')
+    .from('#s1 h1', { y: 24, duration: 0.6, ease: 'expo.out' }, 0)
+    .from('#pc', { scale: 0.7, opacity: 0, duration: 0.5, ease: 'back.out(1.6)' }, 0.1)
+    .fromTo('#arestas path', { draw: 0 }, { draw: 1, duration: 0.7, stagger: 0.06, ease: 'power2.out' }, 0.2)
+    .from('#nos circle', { scale: 0, duration: 0.45, stagger: 0.07, ease: 'back.out(1.8)' }, 0.3)
+    .from('#mundo', { scale: 0.7, opacity: 0, duration: 0.6, ease: 'back.out(1.6)' }, 1.2)
+    .fromTo('#rota', { draw: 0 }, { draw: 1, duration: 2.7, ease: 'sine.inOut' }, 1.6)
+    .to('#mundo', { scale: 1.1, duration: 0.25, ease: 'power2.out' }, 4.25);
+  gm.path.travel('#pulso', '#rota', { stops: [[1.6, 0], [4.3, 1]], ease: 'sine.inOut' });
+
+  // 2. O pulso abre o site
+  gm.timeline('#s2')
+    .fromTo('#s2', { clipPath: 'circle(0px at 1640px 600px)' }, { clipPath: 'circle(2300px at 1640px 600px)', duration: 0.75, ease: 'in-cubic' }, 0)
+    .from('#s2 .kicker', { y: 40, opacity: 0, duration: 0.6, ease: 'expo.out' }, 0.6)
+    .from('#s2 .lt', { y: 80, opacity: 0, duration: 0.8, stagger: 0.14, ease: 'expo.out' }, 0.75)
+    .from('#s2 .sub', { y: 40, opacity: 0, duration: 0.7, ease: 'expo.out' }, 3.1)
+    .from('#livro', { x: 160, y: 60, rotate: 8, opacity: 0, duration: 0.9, ease: 'expo.out' }, 6.4)
+    .to('#s2 h1', { x: 24, duration: 7, ease: 'sine.inOut' }, 1.6)
+    .to('#s2', { x: -1920, ...mov }, 9.18 - T);
+
+  // 3. Contador e cartões
+  const t3 = gm.timeline('#s3'); entra(t3, '#s3');
+  t3.to('#n43', { textContent: 43, duration: 1.3, ease: 'power3.out' }, 0.5)
+    .from('.corpo', { y: 50, opacity: 0, duration: 0.6, stagger: 0.75, ease: 'expo.out' }, 3.25)
+    .to('#total', { y: -60, opacity: 0, duration: 0.35, ease: 'power2.in' }, 5.2)
+    .to('.corpo', { y: 50, opacity: 0, duration: 0.35, ease: 'power2.in' }, 5.6);
+  gm.timeline('#abas')
+    .fromTo('.parte', { y: 450, opacity: 0, scale: 0.85 }, { y: 350, opacity: 1, scale: 1, duration: 0.6, stagger: 0.75, ease: 'back.out(1.4)' }, 3.0)
+    .to('.parte', { y: 0, duration: 0.7, stagger: 0.06, ease: 'power2.inOut' }, 5.55)
+    .to('#p1', { backgroundColor: '#0d6efd', borderColor: '#6ea8fe', duration: 0.4 }, 6.1)
+    .to(['#p2', '#p3'], { opacity: 0.65, duration: 0.4 }, 6.1)
+    .to('#p1', { backgroundColor: '#1b232d', borderColor: '#3a4654', opacity: 0.65, duration: 0.4 }, 13.2)
+    .to('#p2', { backgroundColor: '#0d6efd', borderColor: '#6ea8fe', opacity: 1, duration: 0.4 }, 13.2)
+    .to('#p2', { backgroundColor: '#1b232d', borderColor: '#3a4654', opacity: 0.65, duration: 0.4 }, 20.0)
+    .to('#p3', { backgroundColor: '#0d6efd', borderColor: '#6ea8fe', opacity: 1, duration: 0.4 }, 20.0)
+    .to('#abas', { x: -1920, ...mov }, 26 - T);
+
+  // 4. Princípios
+  gm.timeline('#s4')
+    .from('.cap', { y: 120, opacity: 0, duration: 0.7, stagger: 1.2, ease: 'expo.out' }, 2.1)
+    .fromTo('.traco', { draw: 0 }, { draw: 1, duration: 0.8, stagger: 0.6, ease: 'power2.inOut' }, 2.4)
+    .to('.cap', { x: -1920, ...mov }, 8.06 - T);
+
+  // 5. Protocolos, camada por camada
+  gm.timeline('#s5')
+    .from('#fio', { scaleY: 0, duration: 0.9, ease: 'power2.out' }, 0.7)
+    .from('.camada', { x: 140, opacity: 0, duration: 0.6, stagger: 0.12, ease: 'expo.out' }, 0.9)
+    .from('#quadro', { scale: 0, duration: 0.5, ease: 'back.out(1.8)' }, 1.4)
+    .from('.pr', { scale: 0.4, opacity: 0, duration: 0.5, ease: 'back.out(1.7)', stagger: (i) => [0, 0.55, 1.25, 2.2, 3.1][i] }, 2.95)
+    .to('#quadro', { y: 144, duration: 0.5, ease: 'power2.inOut' }, 4.0)
+    .to('#quadro', { y: 288, duration: 0.5, ease: 'power2.inOut' }, 4.95)
+    .to('#quadro', { y: 432, duration: 0.5, ease: 'power2.inOut' }, 5.85)
+    .to('.camada', { borderColor: '#6ea8fe', duration: 0.3, stagger: (i) => [0, 1.2, 2.15, 3.05][i] }, 3.0)
+    .to('#s5', { x: -1920, ...mov }, 7.42 - T);
+
+  // 6. Prática
+  gm.timeline('#s6')
+    .from('.etapa', { x: 120, opacity: 0, duration: 0.6, stagger: 0.14, ease: 'expo.out' }, 0.7)
+    .fromTo('.visto', { draw: 0, opacity: 0 }, { draw: 1, opacity: 1, duration: 0.35, stagger: 0.55, ease: 'power2.out' }, 2.1)
+    .to('#s6', { x: -1920, ...mov }, 6.1 - T);
+
+  // 7. Recursos
+  const t7 = gm.timeline('#s7'); entra(t7, '#s7');
+  t7.from('#j1', { y: 100, opacity: 0, duration: 0.7, ease: 'expo.out' }, 0.5)
+    .fromTo('.msg', { draw: 0 }, { draw: 1, duration: 0.6, stagger: 0.55, ease: 'power1.inOut' }, 1.6)
+    .from('.mt', { opacity: 0, duration: 0.3, stagger: 0.55 }, 1.75)
+    .from('#j2', { y: 100, opacity: 0, duration: 0.7, ease: 'expo.out' }, 3.3)
+    .from('.lin', { opacity: 0, x: -16, duration: 0.3, stagger: 0.28, ease: 'power2.out' }, 3.7)
+    .from('#saida', { opacity: 0, y: 16, duration: 0.4, ease: 'expo.out' }, 5.0)
+    .from('#j3', { y: 100, opacity: 0, duration: 0.7, ease: 'expo.out' }, 5.4)
+    .to('#certa', { borderColor: '#75b798', backgroundColor: '#16332a', duration: 0.3 }, 7.1)
+    .fromTo('#vt', { draw: 0, opacity: 0 }, { draw: 1, opacity: 1, duration: 0.4, ease: 'power2.out' }, 7.15);
+  sai(t7, '#s7', 9.22);
+
+  // 8. Pontos, medalha e progresso
+  const t8 = gm.timeline('#s8'); entra(t8, '#s8');
+  for (let i = 1; i <= 10; i++) t8.set('#np', { textContent: String(i * 10) }, 0.8 + (i - 1) * 0.5);
+  t8.from('#pontos strong', { scale: 0.8, duration: 0.5, ease: 'back.out(1.7)' }, 0.8)
+    .from('#medalha', { y: -160, rotate: -14, opacity: 0, duration: 0.9, ease: 'back.out(1.6)' }, 4.2)
+    .to('#medalha', { rotate: 3, duration: 1.6, ease: 'sine.inOut' }, 5.2)
+    .from('#trilho', { scaleX: 0, duration: 0.6, ease: 'power2.out' }, 1.2)
+    .from('.nivel', { y: 30, opacity: 0, duration: 0.5, stagger: 0.12, ease: 'expo.out' }, 1.4)
+    .fromTo('#cheio', { scaleX: 0 }, { scaleX: 1, duration: 3.6, ease: 'sine.inOut' }, 2.2)
+    .to('.nivel i', { backgroundColor: '#0d6efd', borderColor: '#6ea8fe', duration: 0.25, stagger: 0.9 }, 2.1)
+    .to('.nivel', { color: '#f1f4f8', duration: 0.25, stagger: 0.9 }, 2.1)
+    .from('#salvo', { y: 50, opacity: 0, duration: 0.6, ease: 'expo.out' }, 5.9);
+  sai(t8, '#s8', 8.77);
+
+  // 9. Convite
+  const t9 = gm.timeline('#s9'); entra(t9, '#s9');
+  t9.from('#s9 .lt', { y: 70, opacity: 0, duration: 0.8, stagger: 0.12, ease: 'expo.out' }, 0.4)
+    .from('#botao', { scale: 0.7, opacity: 0, duration: 0.6, ease: 'back.out(1.7)' }, 1.7)
+    .to('#botao', { keyframes: [{ scale: 1.06, duration: 0.5, ease: 'sine.inOut' }, { scale: 1, duration: 0.5, ease: 'sine.inOut' }] }, 3.2)
+    .to('#s9 h1', { scale: 1.03, duration: 4.5, ease: 'sine.inOut' }, 1.1);
+</script>
+</body>
+</html>

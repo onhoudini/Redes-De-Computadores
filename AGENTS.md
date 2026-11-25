@@ -70,6 +70,23 @@ O repositório transforma o livro *Computer Networking: Principles, Protocols an
   - `desafios-cap1.js` e `desafios-cap2.js`: desafios pontuáveis ligados às simulações aprovadas dos caps. 1 e 2.
   - `simulacoes.js`: simulações antigas do cap. 2.
 
+### Vídeo de apresentação
+
+O vídeo do `index.html` (seção `#apresentacao`) fica em `assets/video/` (`apresentacao.mp4`, `.vtt` e `.jpg`). A fonte está em `midia/apresentacao/`:
+
+- `roteiro.json`: falas e legendas. `legenda` é o texto mostrado; `fala` (opcional) é a grafia fonética que a voz lê.
+- `narracao.py`: gera a narração com o Kokoro (`kokoro-onnx` 0.6.1, voz `pf_dora`, modelo `kokoro-v1.0.onnx`).
+- `legendas.py`: gera o `.vtt` a partir do roteiro e dos WAVs.
+- `apresentacao.html`: a animação, para o GiveMotion 0.1.6 (Node 20+, ffmpeg).
+
+As ferramentas e os WAVs não ficam no repositório. Para regerar, usando uma pasta de trabalho fora dele:
+
+1. `python narracao.py PASTA_DO_MODELO PASTA_DOS_WAVS` e `python legendas.py PASTA_DOS_WAVS assets/video/apresentacao.vtt`.
+2. Se os tempos mudarem (`tempos.json`), atualize em `apresentacao.html` a lista do cabeçalho e os `data-start`/`data-duration` das cenas.
+3. Copie `apresentacao.html` e `narracao.wav` para a pasta de trabalho e rode `givemotion check apresentacao.html` e `givemotion render apresentacao.html -o out/apresentacao.mp4 --motion-blur auto`.
+4. `ffmpeg -i out/apresentacao.mp4 -c copy -movflags +faststart -map_metadata -1 assets/video/apresentacao.mp4`; o pôster é o quadro de 4,2 s.
+5. Se a fala mudar, atualize a transcrição no `index.html`.
+
 ## Regras
 
 1. **O conteúdo vem do `livro.pdf`.** Antes de escrever, extraia o texto da seção (`pdftotext -layout livro.pdf saida.txt`) e trabalhe a partir dele. Ao citar o livro, indique a página do PDF. O que não estiver no livro precisa ser correto e aparecer como complemento.

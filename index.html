@@ -70,6 +70,15 @@
             opacity: 0.7;
         }
 
+        .video-apresentacao {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            background: #10151c;
+        }
+
         footer {
             border-top: 1px solid #dee2e6;
             background: white;
@@ -159,6 +168,57 @@
 
     </div>
 </header>
+
+
+<!-- Vídeo de apresentação -->
+<section id="apresentacao" class="section pb-0">
+    <div class="container">
+
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+
+                <h2 class="mb-3">Conheça o site</h2>
+
+                <video
+                    class="video-apresentacao"
+                    controls
+                    preload="none"
+                    playsinline
+                    width="1920"
+                    height="1080"
+                    poster="assets/video/apresentacao.jpg"
+                    aria-label="Vídeo de apresentação do site, com narração em português"
+                >
+                    <source src="assets/video/apresentacao.mp4" type="video/mp4">
+                    <track kind="captions" src="assets/video/apresentacao.vtt" srclang="pt-BR" label="Português" default>
+                    Seu navegador não reproduz vídeo. <a href="assets/video/apresentacao.mp4">Baixe o arquivo</a> ou leia a transcrição abaixo.
+                </video>
+
+                <details class="mt-3">
+                    <summary>Transcrição do vídeo</summary>
+                    <div class="mt-3">
+                        <p>Como uma mensagem sai do seu computador e chega ao outro lado do mundo?</p>
+                        <p>Este site ajuda você a responder. É um material complementar para a disciplina de Redes de Computadores, baseado em um livro aberto.</p>
+                        <p>São 43 capítulos, em três partes: princípios, protocolos e prática.</p>
+                        <p>Na parte 1, os princípios: ligar dois hosts, construir uma rede, transportar dados e proteger a comunicação.</p>
+                        <p>Na parte 2, os protocolos da Internet: da Web e do e-mail ao TCP, ao IPv6 e ao Wi-Fi.</p>
+                        <p>Na parte 3, a prática: exercícios e laboratórios inspirados nos do livro.</p>
+                        <p>Ao longo dos capítulos, você explora simulações, executa código Python no navegador e responde a perguntas para testar o que aprendeu.</p>
+                        <p>Cada acerto soma pontos. Ao completar tudo de um conceito, você ganha uma medalha, e o progresso fica salvo no seu navegador.</p>
+                        <p>Agora é com você: escolha um capítulo e comece.</p>
+                    </div>
+                </details>
+
+                <p class="small text-muted mt-3 mb-0">
+                    Vídeo de 1 minuto, com voz sintética (Kokoro) e animação feita com GiveMotion.
+                    Baseado no livro de referência, sob a licença CC BY 3.0.
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+</section>
 
 
 <!-- Sobre o projeto -->

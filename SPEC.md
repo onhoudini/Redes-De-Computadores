@@ -154,6 +154,14 @@ Evite scripts isolados e inicializações espalhadas pelo código. Cada simulaç
 
 Em animações feitas em JavaScript, use `Redes.reduzMovimento()` para mostrar direto o estado final. Como rede de segurança, `assets/livro.js` acrescenta `aria-label`, `role` e `<title>` onde estiverem faltando.
 
+### Vídeo
+
+- Todo vídeo precisa de legendas em português (`<track kind="captions">`) e de transcrição na própria página.
+- O vídeo não começa sozinho (sem `autoplay`) e não é carregado antes de ser pedido (`preload="none"`, com `poster`).
+- A narração só afirma o que está no site ou no livro. Voz sintética é identificada como tal.
+
+Hoje há um vídeo, o de apresentação, na página inicial.
+
 ### Tema visual
 
 - Implemente um tema escuro.
